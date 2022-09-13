@@ -4,6 +4,8 @@ from optics import laser
 
 INCH = 25.4
 
+# Add an element to the active baseplate with position and angle
+# Draw class is the type of object, usually defined in another module
 def place_element(obj_name, draw_class, x, y, angle):
     obj = App.ActiveDocument.addObject('Mesh::FeaturePython', obj_name)
     draw_class(obj)
@@ -12,6 +14,7 @@ def place_element(obj_name, draw_class, x, y, angle):
     App.ActiveDocument.recompute()
     return obj
 
+### Should remove, * operator can be used to unpack list into arguments
 def place_element_pos(obj_name, draw_class, pos, angle):
     x = pos[0]
     y = pos[1]
@@ -22,6 +25,7 @@ def place_element_pos(obj_name, draw_class, pos, angle):
     App.ActiveDocument.recompute()
     return obj
 
+# Creates a new active baseplate
 def create_baseplate(dx, dy, dz):
     obj = App.ActiveDocument.addObject('Part::FeaturePython', "Baseplate")
     baseplate(obj, dx, dy, dz)
@@ -29,6 +33,8 @@ def create_baseplate(dx, dy, dz):
     App.ActiveDocument.recompute()
     return obj
 
+# Create a new dynamic beam path
+# Should be called before placing optical elements
 def add_beam_path(x, y, angle):
     obj = App.ActiveDocument.addObject('Part::FeaturePython', "Beam_Path")
     laser.beam_path(obj, x, y, angle)
@@ -37,6 +43,7 @@ def add_beam_path(x, y, angle):
     App.ActiveDocument.recompute()
     return obj
 
+# Update function for dynamicly updated elements
 def redraw():
     App.ActiveDocument.Baseplate.touch()
     App.ActiveDocument.Beam_Path.touch()
@@ -44,17 +51,18 @@ def redraw():
 class baseplate:
 
     def __init__(self, obj, dx, dy, dz):
-
         obj.Proxy = self
-        obj.addProperty('App::PropertyLength', 'dx').dx = dx
+
+        obj.addProperty('App::PropertyLength', 'dx').dx = dx #define and set baseplate dimentions
         obj.addProperty('App::PropertyLength', 'dy').dy = dy
         obj.addProperty('App::PropertyLength', 'dz').dz = dz
 
-        self.Tags = ("baseplate")
+        self.Tags = ("baseplate") #set tags for classification
 
     def execute(self, obj):
-        part = Part.makeBox(obj.dx, obj.dy, obj.dz, App.Vector(0, 0, -(obj.dz.Value+INCH/2)))
-        for i in App.ActiveDocument.Objects:
+        part = Part.makeBox(obj.dx, obj.dy, obj.dz, App.Vector(0, 0, -(obj.dz.Value+INCH/2))) #recompute geometry on part update
+
+        for i in App.ActiveDocument.Objects: #add drill holes for all necessary elements
             element = i.Proxy
             if "drill" in element.Tags:
                 part = part.cut(element.DrillPart)

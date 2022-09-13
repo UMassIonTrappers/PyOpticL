@@ -7,8 +7,9 @@ from optics import layout
 from pathlib import Path
 
 STL_PATH = str(Path(__file__).parent.resolve()) + "\\stl\\thorlabs\\"
-INCH = 25.4
 
+# Set all static dimentions
+INCH = 25.4
 
 TAP_DIA_6_32 = 0.1065*INCH
 TAP_DIA_8_32 = 0.1360*INCH
@@ -23,12 +24,14 @@ HEAD_DIA_14_20 = 9.8
 HEAD_DZ_8_32 = 4.4
 HEAD_DZ_14_20 = 10.0
 
-washer_dia_14_20 = 9/16 * INCH; # #12 washer
+washer_dia_14_20 = 9/16 * INCH; #12 washer
 
 
 drill_depth = 26
 default_mirror_thickness = 6
 
+# Used to tranform an STL such that it's placement matches the optical center
+### Should remove mountOff and integrate directly into each translation
 def _orient_stl(stl, rotate, translate, scale=1, mountOff=(0,0,0)):
     mesh = Mesh.read(STL_PATH+stl)
     mat = App.Matrix()
@@ -39,6 +42,7 @@ def _orient_stl(stl, rotate, translate, scale=1, mountOff=(0,0,0)):
     mesh.translate(*mountOff)
     return mesh
 
+# Drill geometry for most mirror mounts
 def _mirror_drill(mountOff):
     part = Part.makeCylinder(TAP_DIA_8_32/2, drill_depth, App.Vector(*mountOff), App.Vector(0, 0, -1))
     tempPart = Part.makeCylinder(TAP_DIA_8_32/2, drill_depth, App.Vector(*mountOff), App.Vector(0, 0, -1))
