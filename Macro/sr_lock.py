@@ -1,5 +1,5 @@
 import sys
-sys.path.append("%USERPROFILE%/Dropbox/UMass Ions/FreeCAD/Macro/optics")
+sys.path.append("%USERPROFILE%/Documents/FreeCAD/Macro")
 
 import FreeCAD as App
 from optics import laser, layout, optomech
