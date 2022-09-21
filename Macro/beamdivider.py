@@ -9,7 +9,7 @@ reload(laser)
 
 ## Delete old components
 try:
-    for ShapeNameObj in FreeCAD.ActiveDocument.Objects:
+    for ShapeNameObj in App.ActiveDocument.Objects:
             App.ActiveDocument.removeObject(ShapeNameObj.Name)        # remove objects not selecteds
 except Exception:
     None
