@@ -2,9 +2,12 @@ import FreeCAD as App
 import Mesh
 import Part
 from math import *
-from optics import layout
+from . import layout
 
 from pathlib import Path
+
+__package__ = "optics"
+__name__ = "optomech"
 
 STL_PATH = str(Path(__file__).parent.resolve()) + "\\stl\\thorlabs\\"
 

@@ -1,14 +1,45 @@
 class MyWorkbench (Workbench):
 
-    MenuText = "My Workbench"
-    ToolTip = "A description of my workbench"
-    Icon = """paste here the contents of a 16x16 xpm icon"""
+    MenuText = "Optics"
+    ToolTip = "A workbench for designing baseplates for optical layouts"
+    Icon =  """
+            /* XPM */
+            static char *_0ddddfe6a2d42f3d616a62ec3bb0f7c8Jp52mHVQRFtBmFY[] = {
+            /* columns rows colors chars-per-pixel */
+            "16 16 6 1 ",
+            "  c #ED1C24",
+            ". c #ED5C5E",
+            "X c #ED9092",
+            "o c #EDBDBD",
+            "O c #EDDFDF",
+            "+ c white",
+            /* pixels */
+            "+++++++++..XooOO",
+            "++++++..+..XXooO",
+            "++++++++++. XXoo",
+            "+++++++.++  .XXo",
+            "++++++.++  .  XX",
+            "++++++++  .  ..X",
+            "+++++++  .  ++..",
+            "++++++  .  +++++",
+            "+++++  .  ++.+.+",
+            "++++  .  ++.++.+",
+            "+++  .  ++++++++",
+            "++  .  +++++++++",
+            "+  .  ++++++++++",
+            "  .  +++++++++++",
+            " .  ++++++++++++",
+            ".  +++++++++++++"
+            };
+            """
 
     def Initialize(self):
         """This function is executed when the workbench is first activated.
         It is executed once in a FreeCAD session followed by the Activated function.
         """
-        import MyModuleA, MyModuleB # import here all the needed files that create your FreeCAD commands
+        from pathlib import Path
+        print(Path().absolute())
+        from freecadOptics import optomech # import here all the needed files that create your FreeCAD commands
         self.list = ["MyCommand1", "MyCommand2"] # A list of command names created in the line above
         self.appendToolbar("My Commands",self.list) # creates a new toolbar with your commands
         self.appendMenu("My New Menu",self.list) # creates a new menu

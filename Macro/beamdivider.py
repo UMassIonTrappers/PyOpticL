@@ -1,9 +1,5 @@
-import sys
-sys.path.append("%USERPROFILE%/Dropbox/UMass Ions/FreeCAD/Macro/optics")
-
 import FreeCAD as App
-
-from optics import laser, layout, optomech
+from freecadOptics import laser, layout, optomech
 
 from importlib import reload
 import math
@@ -32,13 +28,13 @@ ddy = 1.5*INCH
 layout.create_baseplate(base_dx, base_dy, base_dz)
 
 # Offsets from table grid and positions for mounting holes
-xoff = INCH/2;
-yoff = INCH/2;
+xoff = INCH/2
+yoff = INCH/2
 
 mount_holes = [[0*INCH, 0*INCH],
                [base_dx-INCH, 0*INCH],
                [base_dx-INCH, base_dy-INCH],
-               [0*INCH, base_dy-INCH]];
+               [0*INCH, base_dy-INCH]]
 
 for xy in mount_holes:
 	layout.place_element("Screw_hole_baseplate", optomech.baseplate_mount, xoff+xy[0], yoff+xy[1], 0)

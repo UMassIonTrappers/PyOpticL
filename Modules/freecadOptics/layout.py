@@ -1,6 +1,6 @@
 import FreeCAD as App
 import Part
-from optics import laser
+from . import laser
 
 INCH = 25.4
 

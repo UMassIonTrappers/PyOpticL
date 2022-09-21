@@ -1,8 +1,6 @@
-import sys
-sys.path.append("%USERPROFILE%/Documents/FreeCAD/Macro")
-
 import FreeCAD as App
-from optics import laser, layout, optomech
+from freecadOptics import laser, layout, optomech
+
 from importlib import reload
 import math
 reload(optomech)
