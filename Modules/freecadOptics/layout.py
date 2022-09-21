@@ -14,17 +14,6 @@ def place_element(obj_name, draw_class, x, y, angle):
     App.ActiveDocument.recompute()
     return obj
 
-### Should remove, * operator can be used to unpack list into arguments
-def place_element_pos(obj_name, draw_class, pos, angle):
-    x = pos[0]
-    y = pos[1]
-    obj = App.ActiveDocument.addObject('Mesh::FeaturePython', obj_name)
-    draw_class(obj)
-    obj.Placement = App.Placement(App.Vector(x, y, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
-    obj.Proxy.ViewProvider(obj.ViewObject)
-    App.ActiveDocument.recompute()
-    return obj
-
 # Creates a new active baseplate
 def create_baseplate(dx, dy, dz):
     obj = App.ActiveDocument.addObject('Part::FeaturePython', "Baseplate")
