@@ -1,3 +1,4 @@
 .env
 *.cfg
 webdata/
+Modules/freecadOptics/__pycache__/
