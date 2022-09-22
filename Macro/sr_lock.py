@@ -51,3 +51,5 @@ layout.place_element("Pump_Mirror_2", optomech.mirror_mount_k05s2, pm_axis_x, pr
 layout.place_element("Pump_Rotation_Stage", optomech.rotation_stage_rsp05, 50, pm_axis_y, 0)
 
 layout.place_element("Probe_Mirror_2", optomech.mirror_mount_c05g, 80, pm_axis_y-10, 45+pm_ang_off)
+
+layout.place_element("Mount_Hole_1", optomech.baseplate_mount, 50, 50, 0)
