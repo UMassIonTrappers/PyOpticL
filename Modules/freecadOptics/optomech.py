@@ -163,10 +163,10 @@ class fiberport_holder:
 
 
     def execute(self, obj):
-        
-        mesh = _orient_stl("HCA3-Solidworks.stl", (-pi/2, pi, -pi/2), (-6.35, -38.1/2, -26.9), 1)
-        mesh.Placement = obj.Mesh.Placement
-        obj.Mesh = mesh
+
+            mesh = _orient_stl("HCA3-Solidworks.stl", (-pi/2, pi, -pi/2), (-6.35, -38.1/2, -26.9), 1)
+            mesh.Placement = obj.Mesh.Placement
+            obj.Mesh = mesh
 
         temp = Part.makeCylinder(TAP_DIA_8_32/2, INCH, App.Vector(0, 0, -20.7), App.Vector(1, 0, 0))
         part = temp.copy()
@@ -289,13 +289,16 @@ class baseplate_mount:
 
     def execute(self, obj):
         
-        mesh = Mesh.createCylinder(CLR_DIA_14_20/2, INCH, True, 1, 50)
-        mesh.Placement = obj.Mesh.Placement
+        mesh = Mesh.createCylinder((CLR_DIA_14_20-1)/2, INCH, True, 1, 50)
+        temp = Mesh.createCylinder((WASHER_DIA_14_20-2)/2, 10, True, 1, 50)
+        mesh.addMesh(temp)
         mesh.rotate(0, pi/2, 0)
+        mesh.translate(0, 0, -INCH/2)
+        mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
         part = Part.makeCylinder(CLR_DIA_14_20/2, INCH, App.Vector(0, 0, -INCH/2), App.Vector(0, 0, -1))
-        tempPart = Part.makeCylinder(WASHER_DIA_14_20, 100, App.Vector(0, 0, -INCH/2), App.Vector(0, 0, -1))
+        tempPart = Part.makeCylinder(WASHER_DIA_14_20/2, 10, App.Vector(0, 0, -INCH/2), App.Vector(0, 0, -1))
         part = part.fuse(tempPart)
         self.DrillPart = part
         self.DrillPart.Placement=obj.Placement
