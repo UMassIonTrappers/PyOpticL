@@ -164,9 +164,9 @@ class fiberport_holder:
 
     def execute(self, obj):
 
-            mesh = _orient_stl("HCA3-Solidworks.stl", (-pi/2, pi, -pi/2), (-6.35, -38.1/2, -26.9), 1)
-            mesh.Placement = obj.Mesh.Placement
-            obj.Mesh = mesh
+        mesh = _orient_stl("HCA3-Solidworks.stl", (-pi/2, pi, -pi/2), (-6.35, -38.1/2, -26.9), 1)
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
 
         temp = Part.makeCylinder(TAP_DIA_8_32/2, INCH, App.Vector(0, 0, -20.7), App.Vector(1, 0, 0))
         part = temp.copy()
