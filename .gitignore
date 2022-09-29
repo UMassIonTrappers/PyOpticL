@@ -1,4 +1,5 @@
 .env
 *.cfg
+.DS_Store
 webdata/
 Modules/freecadOptics/__pycache__/
