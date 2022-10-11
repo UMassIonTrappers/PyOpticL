@@ -1,19 +1,11 @@
 import FreeCAD as App
 from freecadOptics import laser, layout, optomech
+import math
 
 from importlib import reload
-import math
 reload(optomech)
 reload(layout)
 reload(laser)
-
-## Delete old components
-try:
-    for ShapeNameObj in App.ActiveDocument.Objects:
-            App.ActiveDocument.removeObject(ShapeNameObj.Name)        # remove objects not selecteds
-except Exception:
-    None
-
 
 INCH = 25.4
 

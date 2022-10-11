@@ -1,4 +1,4 @@
-"""FreeCAD init script of XXX module"""
+"""FreeCAD init script of optics module"""
 
 # ***************************************************************************
 # *   Copyright (c) 2015 John Doe john@doe.com                              *   
@@ -23,4 +23,6 @@
 # *                                                                         *
 # ***************************************************************************/
 
-print("I am executing some stuff here when FreeCAD starts!")
+import FreeCAD as App
+import sys
+sys.path.append(App.getUserAppDataDir() + "/Modules")
