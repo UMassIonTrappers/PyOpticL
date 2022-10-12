@@ -1,7 +1,7 @@
 """FreeCAD init script of optics module"""
 
 # ***************************************************************************
-# *   Copyright (c) 2015 John Doe john@doe.com                              *   
+# *   Copyright (c) 2015 John Doe john@doe.com                              *
 # *                                                                         *
 # *   This file is part of the FreeCAD CAx development system.              *
 # *                                                                         *
