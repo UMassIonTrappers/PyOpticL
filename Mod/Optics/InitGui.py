@@ -1,3 +1,5 @@
+import FreeCADGui as Gui
+
 class MyWorkbench (Workbench):
 
     MenuText = "Optics"
@@ -37,13 +39,11 @@ class MyWorkbench (Workbench):
         """This function is executed when the workbench is first activated.
         It is executed once in a FreeCAD session followed by the Activated function.
         """
-        from pathlib import Path
-        print(Path().absolute())
-        from freecadOptics import optomech # import here all the needed files that create your FreeCAD commands
-        self.list = ["MyCommand1", "MyCommand2"] # A list of command names created in the line above
-        self.appendToolbar("My Commands",self.list) # creates a new toolbar with your commands
-        self.appendMenu("My New Menu",self.list) # creates a new menu
-        self.appendMenu(["An existing Menu","My submenu"],self.list) # appends a submenu to an existing menu
+        import guiCommands # import here all the needed files that create your FreeCAD commands
+        toolbar = ["CreateBaseplate"] # A list of command names created in the line above
+        self.appendToolbar("Commands",toolbar) # creates a new toolbar with your commands
+        mirrors = []
+        self.appendMenu(["Add Optics","Mirrors"],self.list) # appends a submenu to an existing menu
 
     def Activated(self):
         """This function is executed whenever the workbench is activated"""
@@ -56,7 +56,7 @@ class MyWorkbench (Workbench):
     def ContextMenu(self, recipient):
         """This function is executed whenever the user right-clicks on screen"""
         # "recipient" will be either "view" or "tree"
-        self.appendContextMenu("My commands",self.list) # add commands to the context menu
+        self.appendContextMenu("My commands",["CreateBaseplate"]) # add commands to the context menu
 
     def GetClassName(self): 
         # This function is mandatory if this is a full Python workbench

@@ -4,6 +4,7 @@ from math import *
 
 INCH = 25.4
 
+# calculate intersection between two lines given the origin and angle of both
 def intersection(x1, y1, a1, x2, y2, a2):
     if (round(degrees(a1), 5)-90)%180 == 0:
         x = x1
@@ -18,6 +19,7 @@ def intersection(x1, y1, a1, x2, y2, a2):
     a = a1+2*(a2-a1)
     return (x, y, a)
 
+# compute full beam path given start point and angle
 def calculate_beam_path(part, x1, y1, a1, ref_list, rec=0):
     if rec > 5:
         return part
@@ -65,6 +67,7 @@ def calculate_beam_path(part, x1, y1, a1, ref_list, rec=0):
             ref_list.append(refs)
             return part
 
+# beam path freecad object
 class beam_path:
 
     def __init__(self, obj, x, y, angle):
