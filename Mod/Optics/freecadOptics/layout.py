@@ -14,6 +14,14 @@ def place_element(obj_name, draw_class, x, y, angle):
     App.ActiveDocument.recompute()
     return obj
 
+def place_element_along_beam(obj_name, draw_class, beam_obj, beam_index, distance, angle):
+    obj = App.ActiveDocument.addObject('Mesh::FeaturePython', obj_name)
+    draw_class(obj)
+    obj.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
+    obj.Proxy.ViewProvider(obj.ViewObject)
+    beam_obj.Proxy.components[beam_index].append((obj, distance))
+    return obj
+
 # Creates a new active baseplate
 def create_baseplate(dx, dy, dz):
     obj = App.ActiveDocument.addObject('Part::FeaturePython', "Baseplate")
@@ -23,7 +31,6 @@ def create_baseplate(dx, dy, dz):
     return obj
 
 # Create a new dynamic beam path
-# Should be called before placing optical elements
 def add_beam_path(x, y, angle):
     obj = App.ActiveDocument.addObject('Part::FeaturePython', "Beam_Path")
     laser.beam_path(obj, x, y, angle)

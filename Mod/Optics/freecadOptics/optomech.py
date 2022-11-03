@@ -103,7 +103,6 @@ class surface_adapter:
         part = part.fuse(temp)
         self.DrillPart = part
         self.DrillPart.Placement = obj.Placement
-
         layout.redraw()
 
 class skate_mount:
@@ -190,6 +189,8 @@ class pbs_on_skate_mount:
         self.Tags = ("pbs")
         self.ViewProvider = ViewProvider
         self.Adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
+        skate_mount(self.Adapter, obj.CubeSize.Value)
+        ViewProvider(self.Adapter.ViewObject)
 
 
     def execute(self, obj):
@@ -200,9 +201,7 @@ class pbs_on_skate_mount:
         mesh = mesh.unite(temp)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
-        skate_mount(self.Adapter, obj.CubeSize.Value)
         self.Adapter.Placement = mesh.Placement
-        ViewProvider(self.Adapter.ViewObject)
 
 class rotation_stage_rsp05:
 

@@ -1,11 +1,9 @@
 import FreeCAD as App
-from freecadOptics import laser, layout, optomech
+from freecadOptics import layout, optomech
 import math
 
 from importlib import reload
-reload(optomech)
 reload(layout)
-reload(laser)
 
 INCH = 25.4
 
@@ -24,10 +22,6 @@ pm_beam_ang = 3
 pm_ang_off = 0.5*pm_beam_ang
 pm_y_off = (hcl_xpos-pm_axis_x)*math.tan(math.radians(pm_beam_ang))
 
-layout.create_baseplate(base_dx, base_dy, base_dz)
-
-layout.add_beam_path(pr_axis_x, base_dy, -90)
-
 layout.place_element("Fiberport", optomech.fiberport_holder, pr_axis_x, base_dy, -90)
 
 layout.place_element("Input_Rotation_Stage", optomech.rotation_stage_rsp05, pr_axis_x, base_dy-15, -90)
@@ -45,3 +39,7 @@ layout.place_element("Pump_Rotation_Stage", optomech.rotation_stage_rsp05, 50, p
 layout.place_element("Probe_Mirror_2", optomech.mirror_mount_c05g, 80, pm_axis_y-10, 45+pm_ang_off)
 
 layout.place_element("Mount_Hole_1", optomech.baseplate_mount, 50, 50, 0)
+
+layout.create_baseplate(base_dx, base_dy, base_dz)
+
+layout.add_beam_path(pr_axis_x, base_dy, -90)
