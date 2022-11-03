@@ -25,7 +25,7 @@ def find_ref(x1, y1, a1, ref_obj):
 
     App.Console.PrintMessage("a1=%f,a2=%f"%(a1, a2))
 
-    if (isclose(x1, x2, abs_tol=1e-5) and isclose(y1, y2, abs_tol=1e-5)) or a1-pi/2 < a2 < a1+pi/2:
+    if (isclose(x1, x2, abs_tol=1e-5) and isclose(y1, y2, abs_tol=1e-5)) or abs(a1-a2) < pi/2:
         App.Console.PrintMessage("Same component\n")
         return
 
