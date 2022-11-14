@@ -77,6 +77,11 @@ class beam_path:
         while True:
             min_len = 0
             for obj in App.ActiveDocument.Objects:
+                for beam in enumerate(self.components[beam_index:]):
+                    for comp in enumerate(beam[1]):
+                        if obj in comp[1]:
+                            if beam[0] > beam_index or (beam[0] == beam_index and comp[0] > comp_index):
+                                continue
                 ref = find_ref(x1, y1, a1, obj)
                 if ref != None:
                     [x, y, a] = ref
