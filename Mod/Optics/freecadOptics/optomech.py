@@ -61,12 +61,11 @@ class surface_adapter:
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'MountHoleDistance').MountHoleDistance = mount_hole_dy
         obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
+        obj.setEditorMode('Placement', 2)
 
         self.Tags = ("adapter", "drill")
         self.ViewProvider = ViewProvider
         self.MountOffset = mountOff
-
-        obj.setEditorMode('Placement', 2)
 
     def execute(self, obj):
 
@@ -103,7 +102,7 @@ class surface_adapter:
         part = part.fuse(temp)
         self.DrillPart = part
         self.DrillPart.Placement = obj.Placement
-        layout.redraw()
+        
 
 class skate_mount:
 
@@ -112,6 +111,7 @@ class skate_mount:
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'MountHoleDistance').MountHoleDistance = 20
         obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
+        obj.setEditorMode('Placement', 2)
 
         self.Tags = ("adapter", "drill")
         self.ViewProvider = ViewProvider
@@ -148,7 +148,7 @@ class skate_mount:
         part = part.fuse(temp)
         self.DrillPart = part
         self.DrillPart.Placement=obj.Placement
-        layout.redraw()
+        
 
 class fiberport_holder:
 
@@ -175,7 +175,7 @@ class fiberport_holder:
         part = part.fuse(temp)
         self.DrillPart = part
         self.DrillPart.Placement=obj.Placement
-        layout.redraw()
+        
 
 class pbs_on_skate_mount:
 
@@ -247,7 +247,7 @@ class mirror_mount_k05s2:
         
         self.DrillPart = _mirror_drill((-8.0-obj.MirrorThickness.Value, 0, -INCH/2))
         self.DrillPart.Placement=obj.Placement
-        layout.redraw()
+        
 
 
 class mirror_mount_c05g:
@@ -272,7 +272,7 @@ class mirror_mount_c05g:
 
         self.DrillPart = _mirror_drill((-(6.4+obj.MirrorThickness.Value), 0, -INCH/2))
         self.DrillPart.Placement=obj.Placement
-        layout.redraw()
+        
 
 
 class baseplate_mount:
@@ -301,7 +301,7 @@ class baseplate_mount:
         part = part.fuse(tempPart)
         self.DrillPart = part
         self.DrillPart.Placement=obj.Placement
-        layout.redraw()
+        
 
 class isomet_1205c_on_km100pm:
 
@@ -338,7 +338,7 @@ class isomet_1205c_on_km100pm:
 
         self.DrillPart = solid
         self.DrillPart.Placement=obj.Placement
-        layout.redraw()
+        
 
 
 

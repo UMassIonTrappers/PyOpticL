@@ -21,4 +21,6 @@ layout.place_element_along_beam("Probe_Mirror_3", optomech.mirror_mount_k05s2, b
 
 layout.place_element_along_beam("Probe_Mirror_4", optomech.mirror_mount_k05s2, beam, 2, 30, 45)
 
-#layout.place_element_along_beam("PBS_2", optomech.pbs_on_skate_mount, beam, 1, 50, 0)
+layout.place_element_along_beam("PBS_2", optomech.pbs_on_skate_mount, beam, 1, 50, 0)
+
+layout.redraw()

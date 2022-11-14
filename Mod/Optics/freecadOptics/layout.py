@@ -43,8 +43,9 @@ def add_beam_path(x, y, angle):
 
 # Update function for dynamicly updated elements
 def redraw():
-    App.ActiveDocument.Baseplate.touch()
     App.ActiveDocument.Beam_Path.touch()
+    App.ActiveDocument.recompute()
+    App.ActiveDocument.Baseplate.touch()
 
 class baseplate:
 
