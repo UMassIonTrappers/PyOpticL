@@ -74,6 +74,8 @@ class beam_path:
             return
         ref_count = 0
         comp_index = 0
+        pre_refs = 0
+        refs_d = 0
         while True:
             min_len = 0
             for obj in App.ActiveDocument.Objects:
@@ -90,10 +92,12 @@ class beam_path:
                         min_len = comp_d
                         xf, yf, af = x, y, a
                         ref_obj = obj
+            inline_ref=False
             if len(self.components[beam_index]) > comp_index:
-                comp_obj = self.components[beam_index][comp_index][0]
-                comp_d = self.components[beam_index][comp_index][1]
-                if comp_d < min_len or min_len == 0:
+                comp_obj, comp_d, comp_pre_refs = self.components[beam_index][comp_index]
+                if (comp_d < min_len or min_len == 0) and pre_refs >= comp_pre_refs:
+                    if pre_refs > comp_pre_refs:
+                        comp_d -= refs_d
                     x2 = x1+comp_d*cos(a1)
                     y2 = y1+comp_d*sin(a1)
                     comp_obj.Placement.Base = App.Vector(x2, y2, 0)
@@ -103,6 +107,12 @@ class beam_path:
                         ref_obj = comp_obj
                         min_len = comp_d
                         comp_index += 1
+                        pre_refs = 0
+                        refs_d = 0
+                        inline_ref=True
+            if not inline_ref:
+                pre_refs += 1
+                refs_d += min_len
             if min_len != 0:
                 if "pbs" in ref_obj.Proxy.Tags:
                     self.components.append([])
