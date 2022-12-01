@@ -76,14 +76,15 @@ class beam_path:
         comp_index = 0
         while True:
             min_len = 0
+            comp_check = True
             for obj in App.ActiveDocument.Objects:
                 for beam in enumerate(self.components[beam_index:]):
                     for comp in enumerate(beam[1]):
-                        if obj in comp[1]:
-                            if beam[0] > beam_index or (beam[0] == beam_index and comp[0] > comp_index):
-                                continue
+                        if beam[0] > beam_index or (beam[0] == beam_index and comp[0] >= comp_index):
+                            if obj in comp[1]:
+                                comp_check = False
                 ref = find_ref(x1, y1, a1, obj)
-                if ref != None:
+                if ref != None and comp_check:
                     [x, y, a] = ref
                     comp_d = sqrt((x-x1)**2+(y-y1)**2)
                     if comp_d < min_len or min_len == 0:
