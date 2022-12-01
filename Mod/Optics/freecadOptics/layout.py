@@ -14,14 +14,14 @@ def place_element(obj_name, draw_class, x, y, angle):
     App.ActiveDocument.recompute()
     return obj
 
-def place_element_along_beam(obj_name, draw_class, beam_obj, beam_index, distance, angle):
+def place_element_along_beam(obj_name, draw_class, beam_obj, beam_index, distance, angle, pre_refs=0):
     obj = App.ActiveDocument.addObject('Mesh::FeaturePython', obj_name)
     draw_class(obj)
     obj.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
     obj.Proxy.ViewProvider(obj.ViewObject)
     while len(beam_obj.Proxy.components)-1 < beam_index:
         beam_obj.Proxy.components.append([])
-    beam_obj.Proxy.components[beam_index].append((obj, distance))
+    beam_obj.Proxy.components[beam_index].append((obj, distance, pre_refs))
     return obj
 
 # Creates a new active baseplate

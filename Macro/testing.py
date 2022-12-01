@@ -17,10 +17,14 @@ layout.place_element_along_beam("Probe_Mirror_2", optomech.mirror_mount_k05s2, b
 
 layout.place_element_along_beam("PBS_1", optomech.pbs_on_skate_mount, beam, 0, 50, 90)
 
-layout.place_element_along_beam("Probe_Mirror_3", optomech.mirror_mount_k05s2, beam, 1, 80, -45)
+layout.place_element_along_beam("Probe_Mirror_3", optomech.mirror_mount_k05s2, beam, 1, 80, -135, 1)
 
-layout.place_element_along_beam("Probe_Mirror_4", optomech.mirror_mount_k05s2, beam, 2, 30, 45)
+#layout.place_element_along_beam("Probe_Mirror_4", optomech.mirror_mount_k05s2, beam, 2, 50, 45)
 
-layout.place_element_along_beam("PBS_2", optomech.pbs_on_skate_mount, beam, 1, 50, 0)
+#layout.place_element_along_beam("PBS_2", optomech.pbs_on_skate_mount, beam, 1, 100, 90)
+
+layout.place_element("Probe_Mirror_5", optomech.mirror_mount_k05s2, 40, 150, -45)
+
+layout.place_element("Probe_Mirror_5", optomech.mirror_mount_k05s2, 100, 150, 135)
 
 layout.redraw()
