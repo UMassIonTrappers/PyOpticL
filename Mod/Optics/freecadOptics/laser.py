@@ -18,6 +18,8 @@ def find_ref(x1, y1, a1, ref_obj):
     (x2, y2, _) = ref_obj.Placement.Base
     a2 = ref_obj.Placement.Rotation.Angle+ref_angle
     a2 *= ref_obj.Placement.Rotation.Axis[2]
+    a1 %= 2*pi
+    a2 %= 2*pi
     a_dif = abs(a1-a2)%(2*pi)
     if a_dif > pi:
         a_dif = 2*pi-a_dif
@@ -26,6 +28,7 @@ def find_ref(x1, y1, a1, ref_obj):
         return
 
     a1_vert = isclose((a1-pi/2)%pi, 0, abs_tol=1e-5)
+    App.Console.PrintMessage("A1 vert? %d %.2f %.2f\n"%(a1_vert, a1, a2))
     a2_vert = isclose((a2-pi/2)%pi, 0, abs_tol=1e-5)
     if a1_vert:
         x = x1
@@ -104,6 +107,7 @@ class beam_path:
                     comp_obj.Placement.Base = App.Vector(x2, y2, 0)
                     ref = find_ref(x1, y1, a1, comp_obj)
                     if ref != None:
+                        App.Console.PrintMessage("Inline Ref Angle: %.2f\n"%(a1))
                         [xf, yf, af] = ref
                         ref_obj = comp_obj
                         min_len = comp_d
@@ -111,10 +115,12 @@ class beam_path:
                         pre_refs = 0
                         refs_d = 0
                         inline_ref=True
-            if not inline_ref:
-                pre_refs += 1
-                refs_d += min_len
+                if not inline_ref:
+                    pre_refs += 1
+                    if pre_refs > comp_pre_refs:
+                        refs_d += min_len
             if min_len != 0:
+                App.Console.PrintMessage("Final Ref: %.2f, %.2f, %.2f\n"%(xf, yf, af))
                 if "pbs" in ref_obj.Proxy.Tags:
                     self.components.append([])
                     self.components.append([])
@@ -161,7 +167,8 @@ class ViewProvider:
         return True
 
     def onChanged(self, vp, prop):
-        App.Console.PrintMessage("Change property: " + str(prop) + "\n")
+        #App.Console.PrintMessage("Change property: " + str(prop) + "\n")
+        pass
 
     def getIcon(self):
         return """

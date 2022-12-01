@@ -94,7 +94,8 @@ class ViewProvider:
         return True
 
     def onChanged(self, vp, prop):
-        App.Console.PrintMessage("Change property: " + str(prop) + "\n")
+        #App.Console.PrintMessage("Change property: " + str(prop) + "\n")
+        pass
 
     def getIcon(self):
         return 
