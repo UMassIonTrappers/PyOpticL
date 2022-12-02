@@ -22,6 +22,7 @@ def place_element_along_beam(obj_name, draw_class, beam_obj, beam_index, distanc
     while len(beam_obj.Proxy.components)-1 < beam_index:
         beam_obj.Proxy.components.append([])
     beam_obj.Proxy.components[beam_index].append((obj, distance, pre_refs))
+    App.ActiveDocument.recompute()
     return obj
 
 # Creates a new active baseplate

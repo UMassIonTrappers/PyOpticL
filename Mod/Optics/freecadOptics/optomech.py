@@ -157,7 +157,7 @@ class fiberport_holder:
         obj.Proxy = self
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.6)
 
-        self.Tags = ("fiberport", "drill")
+        self.Tags = ("port", "drill")
         self.ViewProvider = ViewProvider
 
 
@@ -212,16 +212,16 @@ class rotation_stage_rsp05:
 
         self.Tags = ("rts")
         self.ViewProvider = ViewProvider
-        self.Adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
+        #self.Adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
 
     def execute(self, obj):
         
         mesh = _orient_stl("RSP05-Solidworks.stl", (pi/2, 0, pi/2), (0.6, 0, 0), 1000)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
-        surface_adapter(self.Adapter, (0, 0, -14), 25)
-        self.Adapter.Placement = mesh.Placement
-        ViewProvider(self.Adapter.ViewObject)
+        #surface_adapter(self.Adapter, (0, 0, -14), 25)
+        #self.Adapter.Placement = mesh.Placement
+        #ViewProvider(self.Adapter.ViewObject)
 
         
 

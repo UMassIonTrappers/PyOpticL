@@ -6,16 +6,24 @@ INCH = 25.4
 
 # calculate intersection between two lines given the origin and angle of both
 def find_ref(x1, y1, a1, ref_obj):
+
+    (x2, y2, _) = ref_obj.Placement.Base
+
     if "mirror" in ref_obj.Proxy.Tags:
         ref_width = INCH/2
         ref_angle = 0
     elif "pbs" in ref_obj.Proxy.Tags:
         ref_width = sqrt(200)
         ref_angle = 3*pi/4
+    elif "port" in ref_obj.Proxy.Tags:
+        ref_width = sqrt(200)
+        ref_angle = 0
+    elif "rts" in ref_obj.Proxy.Tags:
+        ref_width = sqrt(200)
+        ref_angle = pi/2
     else:
         return
 
-    (x2, y2, _) = ref_obj.Placement.Base
     a2 = ref_obj.Placement.Rotation.Angle+ref_angle
     a2 *= ref_obj.Placement.Rotation.Axis[2]
     a1 %= 2*pi
@@ -24,11 +32,10 @@ def find_ref(x1, y1, a1, ref_obj):
     if a_dif > pi:
         a_dif = 2*pi-a_dif
 
-    if isclose(x1, x2, abs_tol=1e-5) and isclose(y1, y2, abs_tol=1e-5) or a_dif < pi/2:
+    if isclose(x1, x2, abs_tol=1e-5) and isclose(y1, y2, abs_tol=1e-5) or a_dif < pi/2 and not "rts" in ref_obj.Proxy.Tags:
         return
 
     a1_vert = isclose((a1-pi/2)%pi, 0, abs_tol=1e-5)
-    App.Console.PrintMessage("A1 vert? %d %.2f %.2f\n"%(a1_vert, a1, a2))
     a2_vert = isclose((a2-pi/2)%pi, 0, abs_tol=1e-5)
     if a1_vert:
         x = x1
@@ -41,7 +48,7 @@ def find_ref(x1, y1, a1, ref_obj):
     elif not a2_vert:
         y = x*tan(a2)+y2-x2*tan(a2)
     else:
-        return
+        y = y2
 
     a = 2*a2-a1-pi
 
@@ -107,7 +114,6 @@ class beam_path:
                     comp_obj.Placement.Base = App.Vector(x2, y2, 0)
                     ref = find_ref(x1, y1, a1, comp_obj)
                     if ref != None:
-                        App.Console.PrintMessage("Inline Ref Angle: %.2f\n"%(a1))
                         [xf, yf, af] = ref
                         ref_obj = comp_obj
                         min_len = comp_d
@@ -119,8 +125,17 @@ class beam_path:
                     pre_refs += 1
                     if pre_refs > comp_pre_refs:
                         refs_d += min_len
-            if min_len != 0:
-                App.Console.PrintMessage("Final Ref: %.2f, %.2f, %.2f\n"%(xf, yf, af))
+            if min_len == 0:
+                temp = Part.makeCylinder(0.5, 50, App.Vector(x1, y1, 0), App.Vector(1, 0, 0))
+                temp.rotate(App.Vector(x1, y1, 0),App.Vector(0, 0, 1), degrees(a1))
+                self.part = self.part.fuse(temp)
+                return
+            elif "port" in ref_obj.Proxy.Tags:
+                temp = Part.makeCylinder(0.5, min_len, App.Vector(x1, y1, 0), App.Vector(1, 0, 0))
+                temp.rotate(App.Vector(x1, y1, 0),App.Vector(0, 0, 1), degrees(a1))
+                self.part = self.part.fuse(temp)
+                return
+            else:
                 if "pbs" in ref_obj.Proxy.Tags:
                     self.components.append([])
                     self.components.append([])
@@ -132,11 +147,6 @@ class beam_path:
                 self.part = self.part.fuse(temp)
                 x1, y1, a1 = xf, yf, af
                 ref_count += 1
-            else:
-                temp = Part.makeCylinder(0.5, 50, App.Vector(x1, y1, 0), App.Vector(1, 0, 0))
-                temp.rotate(App.Vector(x1, y1, 0),App.Vector(0, 0, 1), degrees(a1))
-                self.part = self.part.fuse(temp)
-                return
             if ref_count > 100:
                 return
                     
