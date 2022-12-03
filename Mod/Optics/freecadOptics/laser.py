@@ -4,42 +4,63 @@ from math import *
 
 INCH = 25.4
 
+def is_mult(x, factor, tol=1e-5):
+    return isclose((abs(x)+tol/2)%factor, 0, abs_tol=tol)
+
 # calculate intersection between two lines given the origin and angle of both
 def find_ref(x1, y1, a1, ref_obj):
+    ref_angle = 0 # offset between placement angle and reflection angle
+    inline = False # bool for if beam should pass without reflection
 
-    (x2, y2, _) = ref_obj.Placement.Base
-
+    # check type of element
     if "mirror" in ref_obj.Proxy.Tags:
-        ref_width = INCH/2
-        ref_angle = 0
+        ref_width = INCH/2 # width of reflection surface
     elif "pbs" in ref_obj.Proxy.Tags:
         ref_width = sqrt(200)
         ref_angle = 3*pi/4
     elif "port" in ref_obj.Proxy.Tags:
         ref_width = sqrt(200)
-        ref_angle = 0
     elif "rts" in ref_obj.Proxy.Tags:
         ref_width = sqrt(200)
-        ref_angle = pi/2
+        inline = True
     else:
-        return
+        return # non-optical element
 
+    # get object placement
+    (x2, y2, _) = ref_obj.Placement.Base
     a2 = ref_obj.Placement.Rotation.Angle+ref_angle
     a2 *= ref_obj.Placement.Rotation.Axis[2]
     a1 %= 2*pi
     a2 %= 2*pi
-    a_dif = abs(a1-a2)%(2*pi)
-    if a_dif > pi:
-        a_dif = 2*pi-a_dif
 
-    if isclose(x1, x2, abs_tol=1e-5) and isclose(y1, y2, abs_tol=1e-5) or a_dif < pi/2 and not "rts" in ref_obj.Proxy.Tags:
+    # angle between beam and reflector
+    a_ref = abs(a1-a2)%(2*pi)
+    if a_ref > pi:
+        a_ref = 2*pi-a_ref
+    # angle from beam start to component
+    a_comp = abs(a1-atan2(y2-y1, x2-x1))%(2*pi)
+    if a_comp > pi:
+        a_comp = 2*pi-a_comp
+    if inline:
+        a_ref = pi-a_ref
+
+    # check if beam is from current object
+    if isclose(x1, x2, abs_tol=1e-5) and isclose(y1, y2, abs_tol=1e-5):
+        return
+    
+    # check if placement is suitable for reflection
+    if a_ref < pi/2 or a_comp > pi/2:
         return
 
-    a1_vert = isclose((a1-pi/2)%pi, 0, abs_tol=1e-5)
-    a2_vert = isclose((a2-pi/2)%pi, 0, abs_tol=1e-5)
+    # check for edge cases
+    a1_vert = is_mult(a1-pi/2, pi)
+    a2_vert = is_mult(a2-pi/2, pi)
+    a12_hor = is_mult(a1, pi) and is_mult(a2, pi)
+
+    # calculate position and angle of reflection
     if a1_vert:
         x = x1
-    elif a2_vert:
+    elif a2_vert or a12_hor:
         x = x2
     else:
         x = (y2-x2*tan(a2)-y1+x1*tan(a1))/(tan(a1)-tan(a2))
@@ -49,9 +70,12 @@ def find_ref(x1, y1, a1, ref_obj):
         y = x*tan(a2)+y2-x2*tan(a2)
     else:
         y = y2
+    if inline:
+        a = a1
+    else:
+        a = 2*a2-a1-pi
 
-    a = 2*a2-a1-pi
-
+    # check if reflection within reflective surface
     if sqrt((x-x2)**2+(y-y2)**2) > ref_width/2:
         return
 
@@ -82,72 +106,91 @@ class beam_path:
     def calculate_beam_path(self, x1, y1, a1, beam_index=0):
         if beam_index > 20:
             return
-        ref_count = 0
-        comp_index = 0
-        pre_refs = 0
-        refs_d = 0
+        ref_count = 0 # number of reflections per beam
+        comp_index = 0 # index of current inline component
+        pre_refs = 0 # current number of pre_refs for inline components
+        refs_d = 0 # current pre_ref distance for inline components
         while True:
             min_len = 0
             comp_check = True
             for obj in App.ActiveDocument.Objects:
+                # skip if current component is inline
                 for beam in enumerate(self.components[beam_index:]):
                     for comp in enumerate(beam[1]):
                         if beam[0] > beam_index or (beam[0] == beam_index and comp[0] >= comp_index):
                             if obj in comp[1]:
                                 comp_check = False
-                ref = find_ref(x1, y1, a1, obj)
+                ref = find_ref(x1, y1, a1, obj) # check for reflection
                 if ref != None and comp_check:
                     [x, y, a] = ref
+                    # check to find closest component
                     comp_d = sqrt((x-x1)**2+(y-y1)**2)
                     if comp_d < min_len or min_len == 0:
                         min_len = comp_d
                         xf, yf, af = x, y, a
                         ref_obj = obj
-            inline_ref=False
             if len(self.components[beam_index]) > comp_index:
-                comp_obj, comp_d, comp_pre_refs = self.components[beam_index][comp_index]
+                inline_ref=False
+                comp_obj, comp_pos, comp_pre_refs = self.components[beam_index][comp_index]
+
+                # handle different constraint methods
+                constraint = [i!=None for i in comp_pos].index(True)
+                if constraint == 0:
+                    comp_d = comp_pos[constraint]
+                if constraint == 1:
+                    comp_d = (comp_pos[constraint]-x1)/cos(a1)
+                if constraint == 2:
+                    comp_d = (comp_pos[constraint]-y1)/sin(a1)
+
+                # check for closest component or satisfied pre_refs
                 if (comp_d < min_len or min_len == 0) and pre_refs >= comp_pre_refs:
                     if pre_refs > comp_pre_refs:
-                        comp_d -= refs_d
+                        comp_d -= refs_d # account for pre_ref distance
+                    # inline placement
                     x2 = x1+comp_d*cos(a1)
                     y2 = y1+comp_d*sin(a1)
                     comp_obj.Placement.Base = App.Vector(x2, y2, 0)
+                    # check for valid reflection
                     ref = find_ref(x1, y1, a1, comp_obj)
                     if ref != None:
                         [xf, yf, af] = ref
                         ref_obj = comp_obj
                         min_len = comp_d
+                        # increment index and reset counters
                         comp_index += 1
                         pre_refs = 0
                         refs_d = 0
                         inline_ref=True
+                    else:
+                        comp_obj.Placement.Base = App.Vector(0, 0, 0)
+                # accumulate pre_ref info
                 if not inline_ref:
                     pre_refs += 1
                     if pre_refs > comp_pre_refs:
                         refs_d += min_len
+
+            # end if no reflection found
             if min_len == 0:
-                temp = Part.makeCylinder(0.5, 50, App.Vector(x1, y1, 0), App.Vector(1, 0, 0))
-                temp.rotate(App.Vector(x1, y1, 0),App.Vector(0, 0, 1), degrees(a1))
-                self.part = self.part.fuse(temp)
-                return
-            elif "port" in ref_obj.Proxy.Tags:
-                temp = Part.makeCylinder(0.5, min_len, App.Vector(x1, y1, 0), App.Vector(1, 0, 0))
-                temp.rotate(App.Vector(x1, y1, 0),App.Vector(0, 0, 1), degrees(a1))
-                self.part = self.part.fuse(temp)
-                return
+                beam_len = 50
             else:
+                beam_len = min_len
+            
+            # add beam segment
+            temp = Part.makeCylinder(0.5, beam_len, App.Vector(x1, y1, 0), App.Vector(1, 0, 0))
+            temp.rotate(App.Vector(x1, y1, 0),App.Vector(0, 0, 1), degrees(a1))
+            self.part = self.part.fuse(temp)
+
+            # continue beam if reflection was found
+            if min_len != 0 and not "port" in ref_obj.Proxy.Tags:
                 if "pbs" in ref_obj.Proxy.Tags:
                     self.components.append([])
                     self.components.append([])
                     self.calculate_beam_path(xf, yf, a1, beam_index+1)
                     beam_index += 2
                     comp_index = 0
-                temp = Part.makeCylinder(0.5, min_len, App.Vector(x1, y1, 0), App.Vector(1, 0, 0))
-                temp.rotate(App.Vector(x1, y1, 0),App.Vector(0, 0, 1), degrees(a1))
-                self.part = self.part.fuse(temp)
                 x1, y1, a1 = xf, yf, af
                 ref_count += 1
-            if ref_count > 100:
+            else:
                 return
                     
 class ViewProvider:

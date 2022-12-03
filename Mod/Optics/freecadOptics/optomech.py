@@ -29,6 +29,7 @@ HEAD_DZ_14_20 = 10.0
 
 WASHER_DIA_14_20 = 9/16 * INCH; #12 washer
 
+drill_depth = 100
 default_mirror_thickness = 6
 
 # Used to tranform an STL such that it's placement matches the optical center
@@ -44,8 +45,8 @@ def _orient_stl(stl, rotate, translate, scale=1):
 
 # Drill geometry for most mirror mounts
 def _mirror_drill(mountOff):
-    part = Part.makeCylinder(TAP_DIA_8_32/2, INCH, App.Vector(*mountOff), App.Vector(0, 0, -1))
-    tempPart = Part.makeCylinder(TAP_DIA_8_32/2, INCH, App.Vector(*mountOff), App.Vector(0, 0, -1))
+    part = Part.makeCylinder(TAP_DIA_8_32/2, drill_depth, App.Vector(*mountOff), App.Vector(0, 0, -1))
+    tempPart = Part.makeCylinder(TAP_DIA_8_32/2, drill_depth, App.Vector(*mountOff), App.Vector(0, 0, -1))
     part = part.fuse(tempPart)
     tempPart = Part.makeCylinder(1, 3, App.Vector(*mountOff), App.Vector(0, 0, -1))
     tempPart.translate(App.Vector(0, -5, 0))
@@ -95,7 +96,7 @@ class surface_adapter:
                 part = part.makeFillet(4, [i])
         part.translate(App.Vector(-(dx+1)/2, -(dy+1)/2, -(dz-self.MountOffset[2]-INCH/2)))
         part.translate(App.Vector(0, 0, -INCH/2))
-        temp = Part.makeCylinder(TAP_DIA_8_32/2, INCH, App.Vector(0, 0, 0), App.Vector(0, 0, -1))
+        temp = Part.makeCylinder(TAP_DIA_8_32/2, drill_depth, App.Vector(0, 0, 0), App.Vector(0, 0, -1))
         temp.translate(App.Vector(0, -obj.MountHoleDistance.Value/2, -(dz-self.MountOffset[2])))
         part = part.fuse(temp)
         temp.translate(App.Vector(0, obj.MountHoleDistance.Value, 0))
@@ -141,7 +142,7 @@ class skate_mount:
         part = part.fuse(part)
         obj.Shape = part
 
-        part = Part.makeCylinder(TAP_DIA_8_32/2, INCH, App.Vector(0, 0, 0), App.Vector(0, 0, -1))
+        part = Part.makeCylinder(TAP_DIA_8_32/2, drill_depth, App.Vector(0, 0, 0), App.Vector(0, 0, -1))
         part.translate(App.Vector(0, -obj.MountHoleDistance.Value/2, -INCH/2))
         temp = part.copy()
         temp.translate(App.Vector(0, obj.MountHoleDistance.Value, 0))
@@ -212,16 +213,16 @@ class rotation_stage_rsp05:
 
         self.Tags = ("rts")
         self.ViewProvider = ViewProvider
-        #self.Adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
+        self.Adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
+        surface_adapter(self.Adapter, (0, 0, -14), 25)
+        ViewProvider(self.Adapter.ViewObject)
 
     def execute(self, obj):
         
         mesh = _orient_stl("RSP05-Solidworks.stl", (pi/2, 0, pi/2), (0.6, 0, 0), 1000)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
-        #surface_adapter(self.Adapter, (0, 0, -14), 25)
-        #self.Adapter.Placement = mesh.Placement
-        #ViewProvider(self.Adapter.ViewObject)
+        self.Adapter.Placement = mesh.Placement
 
         
 
@@ -296,7 +297,7 @@ class baseplate_mount:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
-        part = Part.makeCylinder(CLR_DIA_14_20/2, INCH, App.Vector(0, 0, -INCH/2), App.Vector(0, 0, -1))
+        part = Part.makeCylinder(CLR_DIA_14_20/2, drill_depth, App.Vector(0, 0, -INCH/2), App.Vector(0, 0, -1))
         tempPart = Part.makeCylinder(WASHER_DIA_14_20/2, 10, App.Vector(0, 0, -INCH/2), App.Vector(0, 0, -1))
         part = part.fuse(tempPart)
         self.DrillPart = part
