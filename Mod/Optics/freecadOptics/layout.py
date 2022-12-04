@@ -19,6 +19,7 @@ def place_element_along_beam(obj_name, draw_class, beam_obj, beam_index, angle, 
     draw_class(obj)
     obj.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
     obj.Proxy.ViewProvider(obj.ViewObject)
+    obj.setEditorMode('Placement', 2)
     while len(beam_obj.Proxy.components)-1 < beam_index:
         beam_obj.Proxy.components.append([])
     beam_obj.Proxy.components[beam_index].append((obj, [distance, x, y], pre_refs))
@@ -36,7 +37,8 @@ def create_baseplate(dx, dy, dz):
 # Create a new dynamic beam path
 def add_beam_path(x, y, angle):
     obj = App.ActiveDocument.addObject('Part::FeaturePython', "Beam_Path")
-    laser.beam_path(obj, x, y, angle)
+    laser.beam_path(obj)
+    obj.Placement = App.Placement(App.Vector(x, y, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
     laser.ViewProvider(obj.ViewObject)
     obj.ViewObject.ShapeColor=(1.0, 0.0, 0.0)
     App.ActiveDocument.recompute()

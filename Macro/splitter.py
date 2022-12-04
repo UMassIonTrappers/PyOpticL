@@ -9,7 +9,7 @@ reload(laser)
 
 laser_input_height = 50
 
-layout.create_baseplate(200, 100, laser_input_height+layout.INCH/2)
+layout.create_baseplate(200, 100, laser_input_height-layout.INCH/2)
 
 beam = layout.add_beam_path(0, 40, 0)
 

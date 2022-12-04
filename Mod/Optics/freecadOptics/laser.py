@@ -55,7 +55,7 @@ def find_ref(x1, y1, a1, ref_obj):
     # check for edge cases
     a1_vert = is_mult(a1-pi/2, pi)
     a2_vert = is_mult(a2-pi/2, pi)
-    a12_hor = is_mult(a1, pi) and is_mult(a2, pi)
+    a12_hor = is_mult(a1, pi) and is_mult(a2, pi) or is_mult(a1-a2, pi)
 
     # calculate position and angle of reflection
     if a1_vert:
@@ -84,23 +84,24 @@ def find_ref(x1, y1, a1, ref_obj):
 # beam path freecad object
 class beam_path:
 
-    def __init__(self, obj, x, y, angle):
+    def __init__(self, obj):
 
         obj.Proxy = self
-        obj.addProperty('App::PropertyDistance', 'x').x = x
-        obj.addProperty('App::PropertyDistance', 'y').y = y
-        obj.addProperty('App::PropertyAngle', 'angle').angle = angle
 
         self.Tags = ("beam")
         self.components = [[]]
 
     def execute(self, obj):
-        x1 = obj.x.Value
-        y1 = obj.y.Value
-        a1 = radians(obj.angle.Value)
+        (self.x, self.y, _) = obj.Placement.Base
+        self.a = obj.Placement.Rotation.Angle
+        self.a *= obj.Placement.Rotation.Axis[2]
         self.part = Part.makeSphere(0)
-        self.calculate_beam_path(x1, y1, a1)
+        self.calculate_beam_path(self.x, self.y, self.a)
+        self.part.translate(App.Vector(-self.x, -self.y, 0))
+        self.part.rotate(App.Vector(0, 0, 0),App.Vector(0, 0, 1), degrees(-self.a))
+        self.part = self.part.fuse(self.part)
         obj.Shape = self.part
+        App.ActiveDocument.Baseplate.touch()
 
     # compute full beam path given start point and angle
     def calculate_beam_path(self, x1, y1, a1, beam_index=0):
@@ -115,19 +116,19 @@ class beam_path:
             comp_check = True
             for obj in App.ActiveDocument.Objects:
                 # skip if current component is inline
-                for beam in enumerate(self.components[beam_index:]):
+                for beam in enumerate(self.components[beam_index:], beam_index):
                     for comp in enumerate(beam[1]):
                         if beam[0] > beam_index or (beam[0] == beam_index and comp[0] >= comp_index):
                             if obj in comp[1]:
                                 comp_check = False
                 ref = find_ref(x1, y1, a1, obj) # check for reflection
                 if ref != None and comp_check:
-                    [x, y, a] = ref
+                    [x2, y2, a2] = ref
                     # check to find closest component
-                    comp_d = sqrt((x-x1)**2+(y-y1)**2)
+                    comp_d = sqrt((x2-x1)**2+(y2-y1)**2)
                     if comp_d < min_len or min_len == 0:
                         min_len = comp_d
-                        xf, yf, af = x, y, a
+                        xf, yf, af = x2, y2, a2
                         ref_obj = obj
             if len(self.components[beam_index]) > comp_index:
                 inline_ref=False
