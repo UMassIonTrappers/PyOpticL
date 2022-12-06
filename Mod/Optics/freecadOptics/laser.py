@@ -15,6 +15,8 @@ def find_ref(x1, y1, a1, ref_obj):
     # check type of element
     if "mirror" in ref_obj.Proxy.Tags:
         ref_width = INCH/2 # width of reflection surface
+    elif "split" in ref_obj.Proxy.Tags:
+        ref_width = INCH/2
     elif "pbs" in ref_obj.Proxy.Tags:
         ref_width = sqrt(200)
         ref_angle = 3*pi/4
@@ -96,6 +98,7 @@ class beam_path:
         self.a = obj.Placement.Rotation.Angle
         self.a *= obj.Placement.Rotation.Axis[2]
         self.part = Part.makeSphere(0)
+        self.comp_track = []
         self.calculate_beam_path(self.x, self.y, self.a)
         self.part.translate(App.Vector(-self.x, -self.y, 0))
         self.part.rotate(App.Vector(0, 0, 0),App.Vector(0, 0, 1), degrees(-self.a))
@@ -104,7 +107,7 @@ class beam_path:
         App.ActiveDocument.Baseplate.touch()
 
     # compute full beam path given start point and angle
-    def calculate_beam_path(self, x1, y1, a1, beam_index=0):
+    def calculate_beam_path(self, x1, y1, a1, beam_index=1):
         if beam_index > 20:
             return
         ref_count = 0 # number of reflections per beam
@@ -113,16 +116,16 @@ class beam_path:
         refs_d = 0 # current pre_ref distance for inline components
         while True:
             min_len = 0
-            comp_check = True
             for obj in App.ActiveDocument.Objects:
-                # skip if current component is inline
-                for beam in enumerate(self.components[beam_index:], beam_index):
-                    for comp in enumerate(beam[1]):
-                        if beam[0] > beam_index or (beam[0] == beam_index and comp[0] >= comp_index):
-                            if obj in comp[1]:
-                                comp_check = False
+                # skip if unplaced inline component
+                comp_check = True
+                for beam in self.components:
+                    for comp in beam:
+                        if obj in comp and not obj in self.comp_track:
+                            comp_check = False
                 ref = find_ref(x1, y1, a1, obj) # check for reflection
                 if ref != None and comp_check:
+                    App.Console.PrintMessage("%.2f, %s, %d\n"%(a1, obj.Name, beam_index))
                     [x2, y2, a2] = ref
                     # check to find closest component
                     comp_d = sqrt((x2-x1)**2+(y2-y1)**2)
@@ -130,7 +133,7 @@ class beam_path:
                         min_len = comp_d
                         xf, yf, af = x2, y2, a2
                         ref_obj = obj
-            if len(self.components[beam_index]) > comp_index:
+            if beam_index < len(self.components) and len(self.components[beam_index]) > comp_index:
                 inline_ref=False
                 comp_obj, comp_pos, comp_pre_refs = self.components[beam_index][comp_index]
 
@@ -155,6 +158,7 @@ class beam_path:
                     ref = find_ref(x1, y1, a1, comp_obj)
                     if ref != None:
                         [xf, yf, af] = ref
+                        self.comp_track.append(comp_obj)
                         ref_obj = comp_obj
                         min_len = comp_d
                         # increment index and reset counters
@@ -183,11 +187,9 @@ class beam_path:
 
             # continue beam if reflection was found
             if min_len != 0 and not "port" in ref_obj.Proxy.Tags:
-                if "pbs" in ref_obj.Proxy.Tags:
-                    self.components.append([])
-                    self.components.append([])
-                    self.calculate_beam_path(xf, yf, a1, beam_index+1)
-                    beam_index += 2
+                if "pbs" in ref_obj.Proxy.Tags or "split" in ref_obj.Proxy.Tags:
+                    self.calculate_beam_path(xf, yf, a1, beam_index<<1)
+                    beam_index = (beam_index<<1)+1
                     comp_index = 0
                 x1, y1, a1 = xf, yf, af
                 ref_count += 1

@@ -63,9 +63,8 @@ class surface_adapter:
         obj.addProperty('App::PropertyLength', 'MountHoleDistance').MountHoleDistance = mount_hole_dy
         obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
         obj.setEditorMode('Placement', 2)
-
+        ViewProvider(obj.ViewObject)
         self.Tags = ("adapter", "drill")
-        self.ViewProvider = ViewProvider
         self.MountOffset = mountOff
 
     def execute(self, obj):
@@ -113,9 +112,8 @@ class skate_mount:
         obj.addProperty('App::PropertyLength', 'MountHoleDistance').MountHoleDistance = 20
         obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
         obj.setEditorMode('Placement', 2)
-
+        ViewProvider(obj.ViewObject)
         self.Tags = ("adapter", "drill")
-        self.ViewProvider = ViewProvider
         self.CubeSize = cubeSize
 
 
@@ -157,10 +155,8 @@ class fiberport_holder:
 
         obj.Proxy = self
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.6)
-
+        ViewProvider(obj.ViewObject)
         self.Tags = ("port", "drill")
-        self.ViewProvider = ViewProvider
-
 
     def execute(self, obj):
 
@@ -186,9 +182,9 @@ class pbs_on_skate_mount:
         obj.addProperty('App::PropertyLength', 'CubeSize').CubeSize = 10
         obj.ViewObject.ShapeColor=(0.5, 0.5, 0.7)
         obj.ViewObject.Transparency=50
-
+        ViewProvider(obj.ViewObject)
         self.Tags = ("pbs")
-        self.ViewProvider = ViewProvider
+
         self.Adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
         skate_mount(self.Adapter, obj.CubeSize.Value)
         ViewProvider(self.Adapter.ViewObject)
@@ -210,9 +206,9 @@ class rotation_stage_rsp05:
 
         obj.Proxy = self
         obj.ViewObject.ShapeColor=(0.2, 0.2, 0.2)
-
+        ViewProvider(obj.ViewObject)
         self.Tags = ("rts")
-        self.ViewProvider = ViewProvider
+        
         self.Adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
         surface_adapter(self.Adapter, (0, 0, -14), 25)
         ViewProvider(self.Adapter.ViewObject)
@@ -233,9 +229,8 @@ class mirror_mount_k05s2:
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = default_mirror_thickness
         obj.ViewObject.ShapeColor=(0.5, 0.5, 0.55)
-
+        ViewProvider(obj.ViewObject)
         self.Tags = ("mirror", "drill")
-        self.ViewProvider = ViewProvider
 
     def execute(self, obj):
 
@@ -258,9 +253,30 @@ class mirror_mount_c05g:
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = default_mirror_thickness
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
-
+        ViewProvider(obj.ViewObject)
         self.Tags = ("mirror", "drill")
-        self.ViewProvider = ViewProvider
+
+    def execute(self, obj):
+
+        mesh = _orient_stl("POLARIS-C05G-Solidworks.stl", (pi/2, 0, pi/2), (-19-obj.MirrorThickness.Value, -4.3, -15.2), 1000)
+        temp = Mesh.createCylinder(INCH/4, obj.MirrorThickness.Value, True, 1, 50)
+        temp.rotate(0, 0, pi)
+        mesh.addMesh(temp)
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+        self.DrillPart = _mirror_drill((-(6.4+obj.MirrorThickness.Value), 0, -INCH/2))
+        self.DrillPart.Placement=obj.Placement
+
+class splitter_mount_c05g:
+
+    def __init__(self, obj):
+
+        obj.Proxy = self
+        obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = 0.5
+        obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
+        ViewProvider(obj.ViewObject)
+        self.Tags = ("split", "drill")
 
     def execute(self, obj):
 
@@ -282,10 +298,8 @@ class baseplate_mount:
 
         obj.Proxy = self
         obj.ViewObject.ShapeColor=(0.5, 0.5, 0.55)
-
+        ViewProvider(obj.ViewObject)
         self.Tags = ("drill")
-        self.ViewProvider = ViewProvider
-
 
     def execute(self, obj):
         
@@ -293,7 +307,7 @@ class baseplate_mount:
         temp = Mesh.createCylinder((WASHER_DIA_14_20-2)/2, 10, True, 1, 50)
         mesh.addMesh(temp)
         mesh.rotate(0, pi/2, 0)
-        mesh.translate(0, 0, -INCH/2)
+        mesh.translate(0, 0, -INCH/2+0.5)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 

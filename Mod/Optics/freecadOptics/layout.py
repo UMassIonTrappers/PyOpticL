@@ -10,20 +10,15 @@ def place_element(obj_name, draw_class, x, y, angle):
     obj = App.ActiveDocument.addObject('Mesh::FeaturePython', obj_name)
     draw_class(obj)
     obj.Placement = App.Placement(App.Vector(x, y, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
-    obj.Proxy.ViewProvider(obj.ViewObject)
-    App.ActiveDocument.recompute()
     return obj
 
 def place_element_along_beam(obj_name, draw_class, beam_obj, beam_index, angle, distance=None, x=None, y=None, pre_refs=0):
     obj = App.ActiveDocument.addObject('Mesh::FeaturePython', obj_name)
     draw_class(obj)
     obj.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
-    obj.Proxy.ViewProvider(obj.ViewObject)
-    obj.setEditorMode('Placement', 2)
-    while len(beam_obj.Proxy.components)-1 < beam_index:
+    while len(beam_obj.Proxy.components) <= beam_index:
         beam_obj.Proxy.components.append([])
     beam_obj.Proxy.components[beam_index].append((obj, [distance, x, y], pre_refs))
-    App.ActiveDocument.recompute()
     return obj
 
 # Creates a new active baseplate
@@ -41,10 +36,9 @@ def add_beam_path(x, y, angle):
     obj.Placement = App.Placement(App.Vector(x, y, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
     laser.ViewProvider(obj.ViewObject)
     obj.ViewObject.ShapeColor=(1.0, 0.0, 0.0)
-    App.ActiveDocument.recompute()
     return obj
 
-# Update function for dynamicly updated elements
+# Update function for dynamic elements
 def redraw():
     App.ActiveDocument.Beam_Path.touch()
     App.ActiveDocument.recompute()
@@ -62,7 +56,7 @@ class baseplate:
         self.Tags = ("baseplate") #set tags for classification
 
     def execute(self, obj):
-        part = Part.makeBox(obj.dx, obj.dy, obj.dz, App.Vector(0, 0, -(obj.dz.Value+INCH/2))) #recompute geometry on part update
+        part = Part.makeBox(obj.dx, obj.dy, obj.dz, App.Vector(0, 0, -(obj.dz.Value+INCH/2)))
 
         for i in App.ActiveDocument.Objects: #add drill holes for all necessary elements
             element = i.Proxy
@@ -91,6 +85,7 @@ class ViewProvider:
         return mode
 
     def onDelete(self, feature, subelements):
+        # delete all elements when baseplate is deleted
         for i in App.ActiveDocument.Objects:
             if i != feature.Object:
                 App.ActiveDocument.removeObject(i.Name)
