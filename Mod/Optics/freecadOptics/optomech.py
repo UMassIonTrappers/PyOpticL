@@ -330,9 +330,8 @@ class isomet_1205c_on_km100pm:
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = default_mirror_thickness
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
-
+        ViewProvider(obj.ViewObject)
         self.Tags = ("mirror", "drill")
-        self.ViewProvider = ViewProvider
 
     def execute(self, obj):
 

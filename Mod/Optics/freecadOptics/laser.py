@@ -30,8 +30,9 @@ def find_ref(x1, y1, a1, ref_obj):
 
     # get object placement
     (x2, y2, _) = ref_obj.Placement.Base
-    a2 = ref_obj.Placement.Rotation.Angle+ref_angle
+    a2 = ref_obj.Placement.Rotation.Angle
     a2 *= ref_obj.Placement.Rotation.Axis[2]
+    a2 += ref_angle
     a1 %= 2*pi
     a2 %= 2*pi
 
