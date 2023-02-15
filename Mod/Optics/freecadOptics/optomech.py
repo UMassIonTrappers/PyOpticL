@@ -157,6 +157,9 @@ class fiberport_holder:
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.6)
         ViewProvider(obj.ViewObject)
         self.Tags = ("port", "drill")
+        self.ref_angle = 0
+        self.ref_limit = 0
+        self.ref_width = INCH/2
 
     def execute(self, obj):
 
@@ -184,6 +187,9 @@ class pbs_on_skate_mount:
         obj.ViewObject.Transparency=50
         ViewProvider(obj.ViewObject)
         self.Tags = ("pbs")
+        self.ref_angle = 3*pi/4
+        self.ref_limit = pi/2
+        self.ref_width = INCH/2
 
         self.Adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
         skate_mount(self.Adapter, obj.CubeSize.Value)
@@ -208,6 +214,10 @@ class rotation_stage_rsp05:
         obj.ViewObject.ShapeColor=(0.2, 0.2, 0.2)
         ViewProvider(obj.ViewObject)
         self.Tags = ("rts")
+        self.ref_angle = 0
+        self.ref_limit = 2*pi
+        self.ref_width = INCH/2
+        
         
         self.Adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
         surface_adapter(self.Adapter, (0, 0, -14), 25)
@@ -231,6 +241,9 @@ class mirror_mount_k05s2:
         obj.ViewObject.ShapeColor=(0.5, 0.5, 0.55)
         ViewProvider(obj.ViewObject)
         self.Tags = ("mirror", "drill")
+        self.ref_angle = 0
+        self.ref_limit = pi/2
+        self.ref_width = INCH/2
 
     def execute(self, obj):
 
@@ -255,6 +268,9 @@ class mirror_mount_c05g:
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
         self.Tags = ("mirror", "drill")
+        self.ref_angle = 0
+        self.ref_limit = pi/2
+        self.ref_width = INCH/2
 
     def execute(self, obj):
 
@@ -277,6 +293,9 @@ class splitter_mount_c05g:
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
         self.Tags = ("split", "drill")
+        self.ref_angle = 0
+        self.ref_limit = pi/2
+        self.ref_width = INCH/2
 
     def execute(self, obj):
 
@@ -331,7 +350,10 @@ class isomet_1205c_on_km100pm:
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = default_mirror_thickness
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.Tags = ("mirror", "drill")
+        self.Tags = ("aom", "drill")
+        self.ref_angle = pi/30
+        self.ref_limit = 2*pi
+        self.ref_width = INCH/2
 
     def execute(self, obj):
 

@@ -33,60 +33,30 @@ for xy in mount_holes:
 
 input_x = INCH
 
-layout.add_beam_path(input_x, base_dy, -90)
+beam = layout.add_beam_path(input_x, base_dy, -90)
 
-beampos = [input_x,base_dy]
+#layout.place_element("Input_Fiberport", optomech.fiberport_holder, input_x, base_dy, -90)
 
-layout.place_element("Input_Fiberport", optomech.fiberport_holder, *beampos, -90)
+layout.place_element_along_beam("Input_Mirror_1", optomech.mirror_mount_k05s2, beam, 0b1, 45, 30)
+layout.place_element_along_beam("Input_Mirror_2", optomech.mirror_mount_k05s2, beam, 0b1, -135, 20)
 
-beampos[1] += -ddy
-layout.place_element("Input_Mirror_1", optomech.mirror_mount_k05s2, *beampos, 45)
+layout.place_element_along_beam("Half_waveplate", optomech.rotation_stage_rsp05, beam, 0b1, -90, 30)
+layout.place_element_along_beam("Beam_Splitter_1", optomech.pbs_on_skate_mount, beam, 0b1, -90, 50)
 
-beampos[0] += +ddx
-layout.place_element("Input_Mirror_2", optomech.mirror_mount_k05s2, *beampos,  -135)
+layout.place_element_along_beam("AOM_1", optomech.isomet_1205c_on_km100pm, beam, 0b11, 0, 80)
+layout.place_element_along_beam("Output_Mirror_1", optomech.mirror_mount_k05s2, beam, 0b11, -135+3, 30)
+layout.place_element_along_beam("Output_Mirror_2", optomech.mirror_mount_k05s2, beam, 0b11, 135, 50)
+layout.place_element_along_beam("Output_Fiberport", optomech.fiberport_holder, beam, 0b11, 0, x=0)
 
-beampos[1] += -ddy
-layout.place_element("Half_waveplate", optomech.rotation_stage_rsp05, *beampos, -90)
+layout.place_element_along_beam("Half_waveplate_2", optomech.rotation_stage_rsp05, beam, 0b10, -90, 80)
+layout.place_element_along_beam("Beam_Splitter_2", optomech.pbs_on_skate_mount, beam, 0b10, -90, 30)
 
-beampos[1] += -1*ddy
-layout.place_element("Beam_Splitter_1", optomech.pbs_on_skate_mount, *beampos, -90)
+layout.place_element_along_beam("AOM_2", optomech.isomet_1205c_on_km100pm, beam, 0b101, 0, 80)
+layout.place_element_along_beam("Output_2_Mirror_1", optomech.mirror_mount_k05s2, beam, 0b101, -135+3, 30)
+layout.place_element_along_beam("Output_2_Mirror_2", optomech.mirror_mount_k05s2, beam, 0b101, 135, 50)
+layout.place_element_along_beam("Output_Fiberport_2", optomech.fiberport_holder, beam, 0b101, 0, x=0)
 
-# 1st split
-beampos2 = beampos.copy()
-
-beampos2[0] += +3*ddx
-layout.place_element("AOM_1", optomech.isomet_1205c_on_km100pm, *beampos2, 0)
-
-beampos2[0] += +ddx
-layout.place_element("Output_Mirror_1", optomech.mirror_mount_k05s2, *beampos2, -135)
-
-beampos2[1] += -1.25*ddy
-layout.place_element("Output_Mirror_2", optomech.mirror_mount_k05s2, *beampos2,  135)
-
-layout.place_element("Output_Fiberport", optomech.fiberport_holder, 0, beampos2[1], 0)
-
-# 2nd split
-beampos3 = beampos.copy()
-beampos3[1] = beampos2[1] # update y
-
-beampos3[1] += -0.5*ddy
-layout.place_element("Half_waveplate_2", optomech.rotation_stage_rsp05, *beampos3, -90)
-
-beampos3[1] += -1*ddy
-layout.place_element("Beam_Splitter_2", optomech.pbs_on_skate_mount, *beampos3, -90)
-
-beampos3[0] += +3*ddx
-layout.place_element("AOM_2", optomech.isomet_1205c_on_km100pm, *beampos3, 0)
-
-beampos3[0] += +ddx
-layout.place_element("Output_2_Mirror_1", optomech.mirror_mount_k05s2, *beampos3, -135)
-
-beampos3[1] += -1.25*ddy
-layout.place_element("Output_2_Mirror_2", optomech.mirror_mount_k05s2, *beampos3,  135)
-
-layout.place_element("Output_Fiberport_2", optomech.fiberport_holder, 0, beampos3[1], 0)
-
-#layout.redraw()
+layout.redraw()
 
 
 #layout.place_element("Probe_Mirror_2", optomech.mirror_mount_c05g, 80, pm_axis_y-10, 45+pm_ang_off)

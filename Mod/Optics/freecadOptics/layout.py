@@ -12,6 +12,8 @@ def place_element(obj_name, draw_class, x, y, angle):
     obj.Placement = App.Placement(App.Vector(x, y, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
     return obj
 
+# Add an element along a beampath with a set angle and an extra constraint of distance from last element, x position, or y position
+# Draw class is the type of object, usually defined in another module
 def place_element_along_beam(obj_name, draw_class, beam_obj, beam_index, angle, distance=None, x=None, y=None, pre_refs=0):
     obj = App.ActiveDocument.addObject('Mesh::FeaturePython', obj_name)
     draw_class(obj)

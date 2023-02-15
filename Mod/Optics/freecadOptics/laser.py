@@ -12,7 +12,6 @@ def find_ref(x1, y1, a1, ref_obj):
     ref_angle = 0 # offset between placement angle and reflection angle
     inline = False # bool for if beam should pass without reflection
 
-    # check type of element
     if "mirror" in ref_obj.Proxy.Tags:
         ref_width = INCH/2 # width of reflection surface
     elif "split" in ref_obj.Proxy.Tags:
@@ -23,10 +22,17 @@ def find_ref(x1, y1, a1, ref_obj):
     elif "port" in ref_obj.Proxy.Tags:
         ref_width = sqrt(200)
     elif "rts" in ref_obj.Proxy.Tags:
-        ref_width = sqrt(200)
+        ref_width = INCH/2
+        ref_angle = 0
         inline = True
+    elif "aom" in ref_obj.Proxy.Tags:
+        ref_width = 5
     else:
         return # non-optical element
+
+    ref_angle = ref_obj.Proxy.ref_angle
+    ref_limit = ref_obj.Proxy.ref_limit
+    ref_width = ref_obj.Proxy.ref_width
 
     # get object placement
     (x2, y2, _) = ref_obj.Placement.Base
@@ -44,15 +50,13 @@ def find_ref(x1, y1, a1, ref_obj):
     a_comp = abs(a1-atan2(y2-y1, x2-x1))%(2*pi)
     if a_comp > pi:
         a_comp = 2*pi-a_comp
-    if inline:
-        a_ref = pi-a_ref
 
     # check if beam is from current object
     if isclose(x1, x2, abs_tol=1e-5) and isclose(y1, y2, abs_tol=1e-5):
         return
     
     # check if placement is suitable for reflection
-    if a_ref < pi/2 or a_comp > pi/2:
+    if a_ref < ref_limit  or a_comp > pi/2:
         return
 
     # check for edge cases
@@ -73,8 +77,8 @@ def find_ref(x1, y1, a1, ref_obj):
         y = x*tan(a2)+y2-x2*tan(a2)
     else:
         y = y2
-    if inline:
-        a = a1
+    if isclose(ref_limit, 2*pi, abs_tol=1e-5):
+        a = a1+ref_angle
     else:
         a = 2*a2-a1-pi
 
