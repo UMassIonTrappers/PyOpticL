@@ -9,82 +9,78 @@ def is_mult(x, factor, tol=1e-5):
 
 # calculate intersection between two lines given the origin and angle of both
 def find_ref(x1, y1, a1, ref_obj):
-    ref_angle = 0 # offset between placement angle and reflection angle
-    inline = False # bool for if beam should pass without reflection
 
-    if "mirror" in ref_obj.Proxy.Tags:
-        ref_width = INCH/2 # width of reflection surface
-    elif "split" in ref_obj.Proxy.Tags:
-        ref_width = INCH/2
-    elif "pbs" in ref_obj.Proxy.Tags:
-        ref_width = sqrt(200)
-        ref_angle = 3*pi/4
-    elif "port" in ref_obj.Proxy.Tags:
-        ref_width = sqrt(200)
-    elif "rts" in ref_obj.Proxy.Tags:
-        ref_width = INCH/2
-        ref_angle = 0
-        inline = True
-    elif "aom" in ref_obj.Proxy.Tags:
-        ref_width = 5
-    else:
-        return # non-optical element
-
-    ref_angle = ref_obj.Proxy.ref_angle
-    ref_limit = ref_obj.Proxy.ref_limit
-    ref_width = ref_obj.Proxy.ref_width
-
-    # get object placement
-    (x2, y2, _) = ref_obj.Placement.Base
-    a2 = ref_obj.Placement.Rotation.Angle
-    a2 *= ref_obj.Placement.Rotation.Axis[2]
-    a2 += ref_angle
-    a1 %= 2*pi
-    a2 %= 2*pi
-
-    # angle between beam and reflector
-    a_ref = abs(a1-a2)%(2*pi)
-    if a_ref > pi:
-        a_ref = 2*pi-a_ref
-    # angle from beam start to component
-    a_comp = abs(a1-atan2(y2-y1, x2-x1))%(2*pi)
-    if a_comp > pi:
-        a_comp = 2*pi-a_comp
-
+    # check if object is an optical component
+    if not ref_obj.Proxy.is_ref and not ref_obj.Proxy.is_tran:
+        return
+    
     # check if beam is from current object
     if isclose(x1, x2, abs_tol=1e-5) and isclose(y1, y2, abs_tol=1e-5):
         return
     
-    # check if placement is suitable for reflection
-    if a_ref < ref_limit  or a_comp > pi/2:
-        return
+    # get object placement
+    (x2, y2, _) = ref_obj.Placement.Base
+    a2 = ref_obj.Placement.Rotation.Angle
+    a2 *= ref_obj.Placement.Rotation.Axis[2]
+    a1 %= 2*pi
 
-    # check for edge cases
-    a1_vert = is_mult(a1-pi/2, pi)
-    a2_vert = is_mult(a2-pi/2, pi)
-    a12_hor = is_mult(a1, pi) and is_mult(a2, pi) or is_mult(a1-a2, pi)
+    # limits on incomming beam
+    in_limit = ref_obj.Proxy.in_limit
+    in_width = ref_obj.Proxy.in_width
 
-    # calculate position and angle of reflection
-    if a1_vert:
-        x = x1
-    elif a2_vert or a12_hor:
-        x = x2
-    else:
-        x = (y2-x2*tan(a2)-y1+x1*tan(a1))/(tan(a1)-tan(a2))
-    if not a1_vert:
-        y = x*tan(a1)+y1-x1*tan(a1)
-    elif not a2_vert:
-        y = x*tan(a2)+y2-x2*tan(a2)
-    else:
-        y = y2
-    if isclose(ref_limit, 2*pi, abs_tol=1e-5):
-        a = a1+ref_angle
-    else:
+    if ref_obj.Proxy.is_ref:
+        # offset angle of reflection
+        ref_angle = ref_obj.Proxy.ref_angle
+        a2 += ref_angle
+        a2 %= 2*pi
+
+        # angle between beam and reflector
+        a_in = abs(a1-a2)%(2*pi)
+        if a_in > pi:
+            a_in = 2*pi-a_in
+        # angle from beam start to component
+        a_rel = abs(a1-atan2(y2-y1, x2-x1))%(2*pi)
+        if a_rel > pi:
+            a_rel = 2*pi-a_rel
+    
+        # check if placement is suitable for reflection
+        if a_in < in_limit  or a_rel > pi/2:
+            return
+
+        # check for edge cases
+        a1_vert = is_mult(a1-pi/2, pi)
+        a2_vert = is_mult(a2-pi/2, pi)
+        a12_hor = is_mult(a1, pi) and is_mult(a2, pi) or is_mult(a1-a2, pi)
+
+        # calculate position and angle of reflection
+        if a1_vert:
+            x = x1
+        elif a2_vert or a12_hor:
+            x = x2
+        else:
+            x = (y2-x2*tan(a2)-y1+x1*tan(a1))/(tan(a1)-tan(a2))
+        if not a1_vert:
+            y = x*tan(a1)+y1-x1*tan(a1)
+        elif not a2_vert:
+            y = x*tan(a2)+y2-x2*tan(a2)
+        else:
+            y = y2 
         a = 2*a2-a1-pi
 
+        if sqrt((x-x2)**2+(y-y2)**2) > in_width/2:
+            return
+
+    if ref_obj.Proxy.is_tran:
+        tran_angle = ref_obj.Proxy.tran_angle
+        a2 %= 2*pi
+
+
+    
+
+    
+
     # check if reflection within reflective surface
-    if sqrt((x-x2)**2+(y-y2)**2) > ref_width/2:
-        return
+    
 
     return [x, y, a]
 

@@ -157,9 +157,8 @@ class fiberport_holder:
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.6)
         ViewProvider(obj.ViewObject)
         self.Tags = ("port", "drill")
-        self.ref_angle = 0
-        self.ref_limit = 0
-        self.ref_width = INCH/2
+        self.is_ref = False
+        self.is_tran = False
 
     def execute(self, obj):
 
@@ -187,9 +186,12 @@ class pbs_on_skate_mount:
         obj.ViewObject.Transparency=50
         ViewProvider(obj.ViewObject)
         self.Tags = ("pbs")
+        self.is_ref = True
+        self.is_tran = True
         self.ref_angle = 3*pi/4
-        self.ref_limit = pi/2
-        self.ref_width = INCH/2
+        self.tran_angle = 0
+        self.in_limit = pi/2
+        self.in_width = INCH/2
 
         self.Adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
         skate_mount(self.Adapter, obj.CubeSize.Value)
@@ -214,9 +216,11 @@ class rotation_stage_rsp05:
         obj.ViewObject.ShapeColor=(0.2, 0.2, 0.2)
         ViewProvider(obj.ViewObject)
         self.Tags = ("rts")
-        self.ref_angle = 0
-        self.ref_limit = 2*pi
-        self.ref_width = INCH/2
+        self.is_ref = False
+        self.is_tran = True
+        self.tran_angle = 0
+        self.in_limit = 2*pi
+        self.in_width = INCH/2
         
         
         self.Adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
@@ -241,9 +245,11 @@ class mirror_mount_k05s2:
         obj.ViewObject.ShapeColor=(0.5, 0.5, 0.55)
         ViewProvider(obj.ViewObject)
         self.Tags = ("mirror", "drill")
+        self.is_ref = True
+        self.is_tran = False
         self.ref_angle = 0
-        self.ref_limit = pi/2
-        self.ref_width = INCH/2
+        self.in_limit = pi/2
+        self.in_width = INCH/2
 
     def execute(self, obj):
 
@@ -268,9 +274,11 @@ class mirror_mount_c05g:
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
         self.Tags = ("mirror", "drill")
+        self.is_ref = True
+        self.is_tran = False
         self.ref_angle = 0
-        self.ref_limit = pi/2
-        self.ref_width = INCH/2
+        self.in_limit = pi/2
+        self.in_width = INCH/2
 
     def execute(self, obj):
 
@@ -293,9 +301,12 @@ class splitter_mount_c05g:
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
         self.Tags = ("split", "drill")
+        self.is_ref = True
+        self.is_tran = True
         self.ref_angle = 0
-        self.ref_limit = pi/2
-        self.ref_width = INCH/2
+        self.tran_angle = 0
+        self.in_limit = pi/2
+        self.in_width = INCH/2
 
     def execute(self, obj):
 
@@ -319,6 +330,8 @@ class baseplate_mount:
         obj.ViewObject.ShapeColor=(0.5, 0.5, 0.55)
         ViewProvider(obj.ViewObject)
         self.Tags = ("drill")
+        self.is_ref = False
+        self.is_tran = False
 
     def execute(self, obj):
         
@@ -351,9 +364,11 @@ class isomet_1205c_on_km100pm:
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
         self.Tags = ("aom", "drill")
-        self.ref_angle = pi/30
-        self.ref_limit = 2*pi
-        self.ref_width = INCH/2
+        self.is_ref = False
+        self.is_tran = True
+        self.tran_angle = pi/30
+        self.in_limit = 2*pi
+        self.in_width = INCH/2
 
     def execute(self, obj):
 
