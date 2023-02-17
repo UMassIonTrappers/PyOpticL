@@ -55,14 +55,13 @@ class baseplate:
         obj.addProperty('App::PropertyLength', 'dy').dy = dy
         obj.addProperty('App::PropertyLength', 'dz').dz = dz
 
-        self.Tags = ("baseplate") #set tags for classification
 
     def execute(self, obj):
         part = Part.makeBox(obj.dx, obj.dy, obj.dz, App.Vector(0, 0, -(obj.dz.Value+INCH/2)))
 
         for i in App.ActiveDocument.Objects: #add drill holes for all necessary elements
             element = i.Proxy
-            if "drill" in element.Tags:
+            if hasattr(element, 'DrillPart'):
                 part = part.cut(element.DrillPart)
         obj.Shape = part
 

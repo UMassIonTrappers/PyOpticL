@@ -35,7 +35,7 @@ input_x = INCH
 
 beam = layout.add_beam_path(input_x, base_dy, -90)
 
-#layout.place_element("Input_Fiberport", optomech.fiberport_holder, input_x, base_dy, -90)
+layout.place_element("Input_Fiberport", optomech.fiberport_holder, input_x, base_dy, -90)
 
 layout.place_element_along_beam("Input_Mirror_1", optomech.mirror_mount_k05s2, beam, 0b1, 45, 30)
 layout.place_element_along_beam("Input_Mirror_2", optomech.mirror_mount_k05s2, beam, 0b1, -135, 20)
@@ -57,8 +57,3 @@ layout.place_element_along_beam("Output_2_Mirror_2", optomech.mirror_mount_k05s2
 layout.place_element_along_beam("Output_Fiberport_2", optomech.fiberport_holder, beam, 0b101, 0, x=0)
 
 layout.redraw()
-
-
-#layout.place_element("Probe_Mirror_2", optomech.mirror_mount_c05g, 80, pm_axis_y-10, 45+pm_ang_off)
-
-

@@ -8,81 +8,80 @@ def is_mult(x, factor, tol=1e-5):
     return isclose((abs(x)+tol/2)%factor, 0, abs_tol=tol)
 
 # calculate intersection between two lines given the origin and angle of both
-def find_ref(x1, y1, a1, ref_obj):
+def find_interaction(x1, y1, a1, ref_obj):
 
     # check if object is an optical component
-    if not ref_obj.Proxy.is_ref and not ref_obj.Proxy.is_tran:
-        return
-    
-    # check if beam is from current object
-    if isclose(x1, x2, abs_tol=1e-5) and isclose(y1, y2, abs_tol=1e-5):
+    if not hasattr(ref_obj.Proxy, 'is_ref'):
         return
     
     # get object placement
     (x2, y2, _) = ref_obj.Placement.Base
-    a2 = ref_obj.Placement.Rotation.Angle
-    a2 *= ref_obj.Placement.Rotation.Axis[2]
+    a_comp = ref_obj.Placement.Rotation.Angle
+    a_comp *= ref_obj.Placement.Rotation.Axis[2]
     a1 %= 2*pi
+
+    # check if beam is from current object
+    if isclose(x1, x2, abs_tol=1e-5) and isclose(y1, y2, abs_tol=1e-5):
+        return
 
     # limits on incomming beam
     in_limit = ref_obj.Proxy.in_limit
     in_width = ref_obj.Proxy.in_width
 
+    a2 = a_comp
+    output = [None, None, [None, None]]
+
+    # transmitted beam
+    if ref_obj.Proxy.is_tran:
+        a2 = (a_comp+pi)%(2*pi)
+        a = a1+ref_obj.Proxy.tran_angle
+        output[2][1] = a
+
+    # reflected beam
     if ref_obj.Proxy.is_ref:
         # offset angle of reflection
-        ref_angle = ref_obj.Proxy.ref_angle
-        a2 += ref_angle
-        a2 %= 2*pi
-
-        # angle between beam and reflector
-        a_in = abs(a1-a2)%(2*pi)
-        if a_in > pi:
-            a_in = 2*pi-a_in
-        # angle from beam start to component
-        a_rel = abs(a1-atan2(y2-y1, x2-x1))%(2*pi)
-        if a_rel > pi:
-            a_rel = 2*pi-a_rel
-    
-        # check if placement is suitable for reflection
-        if a_in < in_limit  or a_rel > pi/2:
-            return
-
-        # check for edge cases
-        a1_vert = is_mult(a1-pi/2, pi)
-        a2_vert = is_mult(a2-pi/2, pi)
-        a12_hor = is_mult(a1, pi) and is_mult(a2, pi) or is_mult(a1-a2, pi)
-
-        # calculate position and angle of reflection
-        if a1_vert:
-            x = x1
-        elif a2_vert or a12_hor:
-            x = x2
-        else:
-            x = (y2-x2*tan(a2)-y1+x1*tan(a1))/(tan(a1)-tan(a2))
-        if not a1_vert:
-            y = x*tan(a1)+y1-x1*tan(a1)
-        elif not a2_vert:
-            y = x*tan(a2)+y2-x2*tan(a2)
-        else:
-            y = y2 
+        a_off = ref_obj.Proxy.ref_angle
+        a2 = (a_comp+a_off)%(2*pi)
         a = 2*a2-a1-pi
+        output[2][0] = a
 
-        if sqrt((x-x2)**2+(y-y2)**2) > in_width/2:
-            return
+    # relative angle between the beam and component input normal
+    a_in = abs(a1-a2)%(2*pi)
+    if a_in > pi:
+        a_in = 2*pi-a_in
+    # relative angle between beam angle and direction of the componet from the beam
+    a_rel = abs(a1-atan2(y2-y1, x2-x1))%(2*pi)
+    if a_rel > pi:
+        a_rel = 2*pi-a_rel
 
-    if ref_obj.Proxy.is_tran:
-        tran_angle = ref_obj.Proxy.tran_angle
-        a2 %= 2*pi
+    # check if placement is suitable for reflection
+    if a_in < in_limit or a_rel > pi/2:
+        return
 
+    # check for edge cases
+    a1_vert = is_mult(a1-pi/2, pi)
+    a2_vert = is_mult(a2-pi/2, pi)
+    a12_hor = is_mult(a1, pi) and is_mult(a2, pi) or is_mult(a1-a2, pi)
 
+    # calculate position and angle of reflection
+    if a1_vert:
+        x = x1
+    elif a2_vert or a12_hor:
+        x = x2
+    else:
+        x = (y2-x2*tan(a2)-y1+x1*tan(a1))/(tan(a1)-tan(a2))
+    if not a1_vert:
+        y = x*tan(a1)+y1-x1*tan(a1)
+    elif not a2_vert:
+        y = x*tan(a2)+y2-x2*tan(a2)
+    else:
+        y = y2
     
+    if sqrt((x-x2)**2+(y-y2)**2) > in_width/2:
+        return
 
-    
-
-    # check if reflection within reflective surface
-    
-
-    return [x, y, a]
+    output[0], output[1] = x, y
+    return output
 
 # beam path freecad object
 class beam_path:
@@ -90,8 +89,6 @@ class beam_path:
     def __init__(self, obj):
 
         obj.Proxy = self
-
-        self.Tags = ("beam")
         self.components = [[]]
 
     def execute(self, obj):
@@ -111,10 +108,10 @@ class beam_path:
     def calculate_beam_path(self, x1, y1, a1, beam_index=1):
         if beam_index > 20:
             return
-        ref_count = 0 # number of reflections per beam
+        count = 0 # number of reflections per beam
         comp_index = 0 # index of current inline component
-        pre_refs = 0 # current number of pre_refs for inline components
-        refs_d = 0 # current pre_ref distance for inline components
+        pre_count = 0 # current number of previous interactions for inline components
+        pre_d = 0 # current previous interaction distance for inline components
         while True:
             min_len = 0
             for obj in App.ActiveDocument.Objects:
@@ -124,19 +121,19 @@ class beam_path:
                     for comp in beam:
                         if obj in comp and not obj in self.comp_track:
                             comp_check = False
-                ref = find_ref(x1, y1, a1, obj) # check for reflection
+
+                ref = find_interaction(x1, y1, a1, obj) # check for reflection
                 if ref != None and comp_check:
-                    App.Console.PrintMessage("%.2f, %s, %d\n"%(a1, obj.Name, beam_index))
-                    [x2, y2, a2] = ref
+                    [x2, y2, a2_arr] = ref
                     # check to find closest component
                     comp_d = sqrt((x2-x1)**2+(y2-y1)**2)
                     if comp_d < min_len or min_len == 0:
                         min_len = comp_d
-                        xf, yf, af = x2, y2, a2
-                        ref_obj = obj
+                        xf, yf, af_arr = x2, y2, a2_arr
+
             if beam_index < len(self.components) and len(self.components[beam_index]) > comp_index:
                 inline_ref=False
-                comp_obj, comp_pos, comp_pre_refs = self.components[beam_index][comp_index]
+                comp_obj, comp_pos, comp_pre_count = self.components[beam_index][comp_index]
 
                 # handle different constraint methods
                 constraint = [i!=None for i in comp_pos].index(True)
@@ -147,33 +144,32 @@ class beam_path:
                 if constraint == 2:
                     comp_d = (comp_pos[constraint]-y1)/sin(a1)
 
-                # check for closest component or satisfied pre_refs
-                if (comp_d < min_len or min_len == 0) and pre_refs >= comp_pre_refs:
-                    if pre_refs > comp_pre_refs:
-                        comp_d -= refs_d # account for pre_ref distance
+                # check for closest component or satisfied pre_count
+                if (comp_d < min_len or min_len == 0) and pre_count >= comp_pre_count:
+                    if pre_count > comp_pre_count:
+                        comp_d -= pre_d # account for previous distance
                     # inline placement
                     x2 = x1+comp_d*cos(a1)
                     y2 = y1+comp_d*sin(a1)
                     comp_obj.Placement.Base = App.Vector(x2, y2, 0)
                     # check for valid reflection
-                    ref = find_ref(x1, y1, a1, comp_obj)
+                    ref = find_interaction(x1, y1, a1, comp_obj)
                     if ref != None:
-                        [xf, yf, af] = ref
+                        [xf, yf, af_arr] = ref
                         self.comp_track.append(comp_obj)
-                        ref_obj = comp_obj
                         min_len = comp_d
                         # increment index and reset counters
                         comp_index += 1
-                        pre_refs = 0
-                        refs_d = 0
+                        pre_count = 0
+                        pre_d = 0
                         inline_ref=True
                     else:
                         comp_obj.Placement.Base = App.Vector(0, 0, 0)
-                # accumulate pre_ref info
+                # previous interaction info
                 if not inline_ref:
-                    pre_refs += 1
-                    if pre_refs > comp_pre_refs:
-                        refs_d += min_len
+                    pre_count += 1
+                    if pre_count > comp_pre_count:
+                        pre_d += min_len
 
             # end if no reflection found
             if min_len == 0:
@@ -187,13 +183,22 @@ class beam_path:
             self.part = self.part.fuse(temp)
 
             # continue beam if reflection was found
-            if min_len != 0 and not "port" in ref_obj.Proxy.Tags:
-                if "pbs" in ref_obj.Proxy.Tags or "split" in ref_obj.Proxy.Tags:
-                    self.calculate_beam_path(xf, yf, a1, beam_index<<1)
+            if min_len != 0:
+                # splitter case
+                if af_arr[0] != None and af_arr[1] != None:
+                    self.calculate_beam_path(xf, yf, af_arr[1], beam_index<<1)
                     beam_index = (beam_index<<1)+1
                     comp_index = 0
-                x1, y1, a1 = xf, yf, af
-                ref_count += 1
+                # reflections
+                if af_arr[0] != None:
+                    x1, y1, a1 = xf, yf, af_arr[0]
+                    count += 1
+                # transmission
+                elif af_arr[1] != None:
+                    x1, y1, a1 = xf, yf, af_arr[1]
+                    count += 1
+                else:
+                    return
             else:
                 return
                     
