@@ -40,10 +40,9 @@ class MyWorkbench (Workbench):
         It is executed once in a FreeCAD session followed by the Activated function.
         """
         import guiCommands # import here all the needed files that create your FreeCAD commands
-        toolbar = ["CreateBaseplate"] # A list of command names created in the line above
-        self.appendToolbar("Commands",toolbar) # creates a new toolbar with your commands
-        mirrors = []
-        self.appendMenu(["Add Optics","Mirrors"],self.list) # appends a submenu to an existing menu
+        self.toolbar = ["CreateBaseplate"] # A list of command names created in the line above
+        self.appendToolbar("Commands",self.toolbar) # creates a new toolbar with your commands
+        self.appendMenu(["Add Optics","Mirrors"],self.toolbar) # appends a submenu to an existing menu
 
     def Activated(self):
         """This function is executed whenever the workbench is activated"""
@@ -56,7 +55,7 @@ class MyWorkbench (Workbench):
     def ContextMenu(self, recipient):
         """This function is executed whenever the user right-clicks on screen"""
         # "recipient" will be either "view" or "tree"
-        self.appendContextMenu("My commands",["CreateBaseplate"]) # add commands to the context menu
+        self.appendContextMenu("My commands",self.toolbar) # add commands to the context menu
 
     def GetClassName(self): 
         # This function is mandatory if this is a full Python workbench

@@ -91,6 +91,9 @@ class beam_path:
         obj.Proxy = self
         self.components = [[]]
 
+    def __getstate__(self):
+        return None
+
     def execute(self, obj):
         (self.x, self.y, _) = obj.Placement.Base
         self.a = obj.Placement.Rotation.Angle

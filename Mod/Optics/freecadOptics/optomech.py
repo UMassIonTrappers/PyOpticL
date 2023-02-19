@@ -33,7 +33,6 @@ drill_depth = 100
 default_mirror_thickness = 6
 
 # Used to tranform an STL such that it's placement matches the optical center
-### Should remove mountOff and integrate directly into each translation
 def _orient_stl(stl, rotate, translate, scale=1):
     mesh = Mesh.read(STL_PATH+stl)
     mat = App.Matrix()
@@ -55,10 +54,10 @@ def _mirror_drill(mountOff):
     part = part.fuse(tempPart)
     return part
 
+
 class surface_adapter:
 
     def __init__(self, obj, mountOff, mount_hole_dy):
-
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'MountHoleDistance').MountHoleDistance = mount_hole_dy
         obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
@@ -66,8 +65,25 @@ class surface_adapter:
         ViewProvider(obj.ViewObject)
         self.MountOffset = mountOff
 
-    def execute(self, obj):
+    def get_drill(self, obj):
+        dx = HEAD_DIA_8_32+3
+        dy = obj.MountHoleDistance.Value + CLR_DIA_8_32*2 + 2
+        dz = HEAD_DZ_8_32+3
+        part = Part.makeBox(dx+1, dy+1, dz-self.MountOffset[2]-INCH/2)
+        for i in part.Edges:
+            if i.tangentAt(i.FirstParameter) == App.Vector(0, 0, 1):
+                part = part.makeFillet(4, [i])
+        part.translate(App.Vector(-(dx+1)/2, -(dy+1)/2, -(dz-self.MountOffset[2]-INCH/2)))
+        part.translate(App.Vector(0, 0, -INCH/2))
+        temp = Part.makeCylinder(TAP_DIA_8_32/2, drill_depth, App.Vector(0, 0, 0), App.Vector(0, 0, -1))
+        temp.translate(App.Vector(0, -obj.MountHoleDistance.Value/2, -(dz-self.MountOffset[2])))
+        part = part.fuse(temp)
+        temp.translate(App.Vector(0, obj.MountHoleDistance.Value, 0))
+        part = part.fuse(temp)
+        part.Placement=obj.Placement
+        return part
 
+    def execute(self, obj):
         dx = HEAD_DIA_8_32+3
         dy = obj.MountHoleDistance.Value + CLR_DIA_8_32*2 + 2
         dz = HEAD_DZ_8_32+3
@@ -87,26 +103,13 @@ class surface_adapter:
         part.translate(App.Vector(*self.MountOffset))
         part = part.fuse(part)
         obj.Shape = part
-
-        part = Part.makeBox(dx+1, dy+1, dz-self.MountOffset[2]-INCH/2)
-        for i in part.Edges:
-            if i.tangentAt(i.FirstParameter) == App.Vector(0, 0, 1):
-                part = part.makeFillet(4, [i])
-        part.translate(App.Vector(-(dx+1)/2, -(dy+1)/2, -(dz-self.MountOffset[2]-INCH/2)))
-        part.translate(App.Vector(0, 0, -INCH/2))
-        temp = Part.makeCylinder(TAP_DIA_8_32/2, drill_depth, App.Vector(0, 0, 0), App.Vector(0, 0, -1))
-        temp.translate(App.Vector(0, -obj.MountHoleDistance.Value/2, -(dz-self.MountOffset[2])))
-        part = part.fuse(temp)
-        temp.translate(App.Vector(0, obj.MountHoleDistance.Value, 0))
-        part = part.fuse(temp)
-        self.DrillPart = part
-        self.DrillPart.Placement = obj.Placement
+        parent = obj.LinkToParent
+        obj.Placement=parent.Mesh.Placement
         
 
 class skate_mount:
 
     def __init__(self, obj, cubeSize):
-
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'MountHoleDistance').MountHoleDistance = 20
         obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
@@ -114,9 +117,17 @@ class skate_mount:
         ViewProvider(obj.ViewObject)
         self.CubeSize = cubeSize
 
+    def get_drill(self, obj):
+        part = Part.makeCylinder(TAP_DIA_8_32/2, drill_depth, App.Vector(0, 0, 0), App.Vector(0, 0, -1))
+        part.translate(App.Vector(0, -obj.MountHoleDistance.Value/2, -INCH/2))
+        temp = part.copy()
+        temp.translate(App.Vector(0, obj.MountHoleDistance.Value, 0))
+        part = part.fuse(temp)
+        part = part.fuse(temp)
+        part.Placement=obj.Placement
+        return part
 
     def execute(self, obj):
-        
         dx = HEAD_DIA_8_32+5
         dy = obj.MountHoleDistance.Value + CLR_DIA_8_32*2 + 2
         dz = INCH/2-self.CubeSize/2+1
@@ -137,20 +148,12 @@ class skate_mount:
         part.translate(App.Vector(0, 0, -self.CubeSize/2+1))
         part = part.fuse(part)
         obj.Shape = part
+        parent = obj.LinkToParent
+        obj.Placement=parent.Mesh.Placement
 
-        part = Part.makeCylinder(TAP_DIA_8_32/2, drill_depth, App.Vector(0, 0, 0), App.Vector(0, 0, -1))
-        part.translate(App.Vector(0, -obj.MountHoleDistance.Value/2, -INCH/2))
-        temp = part.copy()
-        temp.translate(App.Vector(0, obj.MountHoleDistance.Value, 0))
-        part = part.fuse(temp)
-        self.DrillPart = part
-        self.DrillPart.Placement=obj.Placement
-        
 
 class fiberport_holder:
-
     def __init__(self, obj):
-
         obj.Proxy = self
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.6)
         ViewProvider(obj.ViewObject)
@@ -159,26 +162,25 @@ class fiberport_holder:
         self.in_limit = pi/2
         self.in_width = INCH/2
 
-    def execute(self, obj):
-
-        mesh = _orient_stl("HCA3-Solidworks.stl", (-pi/2, pi, -pi/2), (-6.35, -38.1/2, -26.9), 1)
-        mesh.Placement = obj.Mesh.Placement
-        obj.Mesh = mesh
-
+    def get_drill(self, obj):
         temp = Part.makeCylinder(TAP_DIA_8_32/2, INCH, App.Vector(0, 0, -20.7), App.Vector(1, 0, 0))
         part = temp.copy()
         temp.translate(App.Vector(0, -12.7, 0))
         part = part.fuse(temp)
         temp.translate(App.Vector(0, 12.7*2, 0))
         part = part.fuse(temp)
-        self.DrillPart = part
-        self.DrillPart.Placement=obj.Placement
+        part.Placement=obj.Placement
+        return part
+
+    def execute(self, obj):
+        mesh = _orient_stl("HCA3-Solidworks.stl", (-pi/2, pi, -pi/2), (-6.35, -38.1/2, -26.9), 1)
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
         
 
 class pbs_on_skate_mount:
 
     def __init__(self, obj):
-
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'CubeSize').CubeSize = 10
         obj.ViewObject.ShapeColor=(0.5, 0.5, 0.7)
@@ -191,25 +193,24 @@ class pbs_on_skate_mount:
         self.in_limit = 0
         self.in_width = INCH/2
 
-        self.Adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
-        skate_mount(self.Adapter, obj.CubeSize.Value)
-        ViewProvider(self.Adapter.ViewObject)
-
+        adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
+        adapter.addProperty("App::PropertyLink","LinkToParent")
+        adapter.LinkToParent=obj
+        skate_mount(adapter, obj.CubeSize.Value)
+        ViewProvider(adapter.ViewObject)
 
     def execute(self, obj):
-        
         mesh = Mesh.createBox(obj.CubeSize.Value, obj.CubeSize.Value, obj.CubeSize.Value)
         temp = Mesh.createBox(10-1, sqrt(200)-1, 0.01)
         temp.rotate(0, pi/2, -pi/4)
         mesh = mesh.unite(temp)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
-        self.Adapter.Placement = mesh.Placement
+
 
 class rotation_stage_rsp05:
 
     def __init__(self, obj):
-
         obj.Proxy = self
         obj.ViewObject.ShapeColor=(0.2, 0.2, 0.2)
         ViewProvider(obj.ViewObject)
@@ -219,24 +220,22 @@ class rotation_stage_rsp05:
         self.in_limit = 0
         self.in_width = INCH/2
         
-        
-        self.Adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
-        surface_adapter(self.Adapter, (0, 0, -14), 25)
-        ViewProvider(self.Adapter.ViewObject)
+        adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
+        adapter.addProperty("App::PropertyLink","LinkToParent")
+        adapter.LinkToParent=obj
+        surface_adapter(adapter, (0, 0, -14), 25)
+        ViewProvider(adapter.ViewObject)
+        obj.Label = obj.Label
 
     def execute(self, obj):
-        
         mesh = _orient_stl("RSP05-Solidworks.stl", (pi/2, 0, pi/2), (0.6, 0, 0), 1000)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
-        self.Adapter.Placement = mesh.Placement
 
-        
 
 class mirror_mount_k05s2:
 
     def __init__(self, obj):
-
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = default_mirror_thickness
         obj.ViewObject.ShapeColor=(0.5, 0.5, 0.55)
@@ -247,24 +246,23 @@ class mirror_mount_k05s2:
         self.in_limit = pi/2
         self.in_width = INCH/2
 
-    def execute(self, obj):
+    def get_drill(self, obj):
+        part = _mirror_drill((-8.0-obj.MirrorThickness.Value, 0, -INCH/2))
+        part.Placement=obj.Placement
+        return part
 
+    def execute(self, obj):
         mesh = _orient_stl("POLARIS-K05S2-Solidworks.stl", (0, -pi/2, 0), (-4.5-obj.MirrorThickness.Value, -0.3, -0.25), 1000)
         temp = Mesh.createCylinder(INCH/4, obj.MirrorThickness.Value, True, 1, 50)
         temp.rotate(0, 0, pi)
         mesh.addMesh(temp)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
-        
-        self.DrillPart = _mirror_drill((-8.0-obj.MirrorThickness.Value, 0, -INCH/2))
-        self.DrillPart.Placement=obj.Placement
-        
 
 
 class mirror_mount_c05g:
 
     def __init__(self, obj):
-
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = default_mirror_thickness
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
@@ -275,8 +273,12 @@ class mirror_mount_c05g:
         self.in_limit = pi/2
         self.in_width = INCH/2
 
-    def execute(self, obj):
+    def get_drill(self, obj):
+        part = _mirror_drill((-(6.4+obj.MirrorThickness.Value), 0, -INCH/2))
+        part.Placement=obj.Placement
+        return part
 
+    def execute(self, obj):
         mesh = _orient_stl("POLARIS-C05G-Solidworks.stl", (pi/2, 0, pi/2), (-19-obj.MirrorThickness.Value, -4.3, -15.2), 1000)
         temp = Mesh.createCylinder(INCH/4, obj.MirrorThickness.Value, True, 1, 50)
         temp.rotate(0, 0, pi)
@@ -284,13 +286,10 @@ class mirror_mount_c05g:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
-        self.DrillPart = _mirror_drill((-(6.4+obj.MirrorThickness.Value), 0, -INCH/2))
-        self.DrillPart.Placement=obj.Placement
 
 class splitter_mount_c05g:
 
     def __init__(self, obj):
-
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = 0.5
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
@@ -302,30 +301,35 @@ class splitter_mount_c05g:
         self.in_limit = pi/2
         self.in_width = INCH/2
 
-    def execute(self, obj):
+    def get_drill(self, obj):
+        part = _mirror_drill((-(6.4+obj.MirrorThickness.Value), 0, -INCH/2))
+        part.Placement=obj.Placement
+        return part
 
+    def execute(self, obj):
         mesh = _orient_stl("POLARIS-C05G-Solidworks.stl", (pi/2, 0, pi/2), (-19-obj.MirrorThickness.Value, -4.3, -15.2), 1000)
         temp = Mesh.createCylinder(INCH/4, obj.MirrorThickness.Value, True, 1, 50)
         temp.rotate(0, 0, pi)
         mesh.addMesh(temp)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
-
-        self.DrillPart = _mirror_drill((-(6.4+obj.MirrorThickness.Value), 0, -INCH/2))
-        self.DrillPart.Placement=obj.Placement
         
-
 
 class baseplate_mount:
 
     def __init__(self, obj):
-
         obj.Proxy = self
         obj.ViewObject.ShapeColor=(0.5, 0.5, 0.55)
         ViewProvider(obj.ViewObject)
 
+    def get_drill(self, obj):
+        part = Part.makeCylinder(CLR_DIA_14_20/2, drill_depth, App.Vector(0, 0, -INCH/2), App.Vector(0, 0, -1))
+        tempPart = Part.makeCylinder(WASHER_DIA_14_20/2, 10, App.Vector(0, 0, -INCH/2), App.Vector(0, 0, -1))
+        part = part.fuse(tempPart)
+        part.Placement=obj.Placement
+        return part
+
     def execute(self, obj):
-        
         mesh = Mesh.createCylinder((CLR_DIA_14_20-1)/2, INCH, True, 1, 50)
         temp = Mesh.createCylinder((WASHER_DIA_14_20-2)/2, 10, True, 1, 50)
         mesh.addMesh(temp)
@@ -333,12 +337,6 @@ class baseplate_mount:
         mesh.translate(0, 0, -INCH/2+0.5)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
-
-        part = Part.makeCylinder(CLR_DIA_14_20/2, drill_depth, App.Vector(0, 0, -INCH/2), App.Vector(0, 0, -1))
-        tempPart = Part.makeCylinder(WASHER_DIA_14_20/2, 10, App.Vector(0, 0, -INCH/2), App.Vector(0, 0, -1))
-        part = part.fuse(tempPart)
-        self.DrillPart = part
-        self.DrillPart.Placement=obj.Placement
         
 
 class isomet_1205c_on_km100pm:
@@ -349,38 +347,28 @@ class isomet_1205c_on_km100pm:
     aom_dy = 50.76; # AOM width (perpendicular to optical axis) in mm
 
     def __init__(self, obj):
-
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = default_mirror_thickness
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
         self.is_ref = False
         self.is_tran = True
-        self.tran_angle = pi/30
+        self.tran_angle = -pi/30
         self.in_limit = 0
         self.in_width = INCH/2
 
-    def execute(self, obj):
-
-        mesh = _orient_stl("isomet_1205c_on_km100pm.stl", (0, 0, 0), (-6.4-obj.MirrorThickness.Value, 0, 0))
-
-        # temp = Mesh.createCylinder(INCH/4, obj.MirrorThickness.Value, True, 1, 50)
-        # temp.rotate(0, 0, pi)
-        # mesh.addMesh(temp)
-
-        mesh.Placement = obj.Mesh.Placement
-        obj.Mesh = mesh
-
-
+    def get_drill(self, obj):
         mesh_drill = _orient_stl("isomet_1205c_on_km100pm_drill.stl", (0, 0, 0), (-6.4-obj.MirrorThickness.Value, 0, 0))
         shape = Part.Shape()
         shape.makeShapeFromMesh(mesh_drill.Topology, 0.5) # the second arg is the tolerance for sewing
-        solid = Part.makeSolid(shape)
+        part = Part.makeSolid(shape)
+        part.Placement=obj.Placement
+        return part
 
-        self.DrillPart = solid
-        self.DrillPart.Placement=obj.Placement
-        
-
+    def execute(self, obj):
+        mesh = _orient_stl("isomet_1205c_on_km100pm.stl", (0, 0, 0), (-6.4-obj.MirrorThickness.Value, 0, 0))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
 
 
 class ViewProvider:
@@ -389,6 +377,7 @@ class ViewProvider:
         obj.Proxy = self
 
     def attach(self, obj):
+        self.Object = obj
         return
 
     def updateData(self, fp, prop):

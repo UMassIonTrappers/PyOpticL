@@ -60,9 +60,8 @@ class baseplate:
         part = Part.makeBox(obj.dx, obj.dy, obj.dz, App.Vector(0, 0, -(obj.dz.Value+INCH/2)))
 
         for i in App.ActiveDocument.Objects: #add drill holes for all necessary elements
-            element = i.Proxy
-            if hasattr(element, 'DrillPart'):
-                part = part.cut(element.DrillPart)
+            if hasattr(i.Proxy, 'get_drill'):
+                part = part.cut(i.Proxy.get_drill(i))
         obj.Shape = part
 
 class ViewProvider:
