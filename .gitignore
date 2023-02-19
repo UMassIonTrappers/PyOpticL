@@ -1,6 +1,5 @@
 .env
 *.cfg
+*.pyc
 .DS_Store
 webdata/
-Mod/Optics/__pycache__/
-Mod/Optics/freecadOptics/__pycache__/
