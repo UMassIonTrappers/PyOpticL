@@ -56,7 +56,6 @@ def _mirror_drill(mountOff):
 
 
 class surface_adapter:
-
     def __init__(self, obj, mountOff, mount_hole_dy):
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'MountHoleDistance').MountHoleDistance = mount_hole_dy
@@ -108,7 +107,6 @@ class surface_adapter:
         
 
 class skate_mount:
-
     def __init__(self, obj, cubeSize):
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'MountHoleDistance').MountHoleDistance = 20
@@ -159,8 +157,8 @@ class fiberport_holder:
         ViewProvider(obj.ViewObject)
         self.is_ref = False
         self.is_tran = False
-        self.in_limit = pi/2
-        self.in_width = INCH/2
+        self.in_limit = pi-0.01
+        self.in_width = 1
 
     def get_drill(self, obj):
         temp = Part.makeCylinder(TAP_DIA_8_32/2, INCH, App.Vector(0, 0, -20.7), App.Vector(1, 0, 0))
@@ -179,7 +177,6 @@ class fiberport_holder:
         
 
 class pbs_on_skate_mount:
-
     def __init__(self, obj):
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'CubeSize').CubeSize = 10
@@ -191,7 +188,7 @@ class pbs_on_skate_mount:
         self.ref_angle = 3*pi/4
         self.tran_angle = 0
         self.in_limit = 0
-        self.in_width = INCH/2
+        self.in_width = sqrt(200)
 
         adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
         adapter.addProperty("App::PropertyLink","LinkToParent")
@@ -209,7 +206,6 @@ class pbs_on_skate_mount:
 
 
 class rotation_stage_rsp05:
-
     def __init__(self, obj):
         obj.Proxy = self
         obj.ViewObject.ShapeColor=(0.2, 0.2, 0.2)
@@ -217,11 +213,11 @@ class rotation_stage_rsp05:
         self.is_ref = False
         self.is_tran = True
         self.tran_angle = 0
-        self.in_limit = 0
+        self.in_limit = pi/2
         self.in_width = INCH/2
         
         adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
-        adapter.addProperty("App::PropertyLink","LinkToParent")
+        adapter.addProperty("App::PropertyLinkChild","LinkToParent")
         adapter.LinkToParent=obj
         surface_adapter(adapter, (0, 0, -14), 25)
         ViewProvider(adapter.ViewObject)
@@ -234,7 +230,6 @@ class rotation_stage_rsp05:
 
 
 class mirror_mount_k05s2:
-
     def __init__(self, obj):
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = default_mirror_thickness
@@ -261,7 +256,6 @@ class mirror_mount_k05s2:
 
 
 class mirror_mount_c05g:
-
     def __init__(self, obj):
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = default_mirror_thickness
@@ -288,7 +282,6 @@ class mirror_mount_c05g:
 
 
 class splitter_mount_c05g:
-
     def __init__(self, obj):
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = 0.5
@@ -340,7 +333,6 @@ class baseplate_mount:
         
 
 class isomet_1205c_on_km100pm:
-
     ##isomet_1205c parameters
     aom_dz = 16;    # height of AOM optical axis from base of AOM
     aom_dx = 22.34; # AOM depth (along optical axis) in mm
@@ -354,8 +346,8 @@ class isomet_1205c_on_km100pm:
         self.is_ref = False
         self.is_tran = True
         self.tran_angle = -pi/30
-        self.in_limit = 0
-        self.in_width = INCH/2
+        self.in_limit = pi/2
+        self.in_width = 5
 
     def get_drill(self, obj):
         mesh_drill = _orient_stl("isomet_1205c_on_km100pm_drill.stl", (0, 0, 0), (-6.4-obj.MirrorThickness.Value, 0, 0))
@@ -372,7 +364,6 @@ class isomet_1205c_on_km100pm:
 
 
 class ViewProvider:
-
     def __init__(self, obj):
         obj.Proxy = self
 
@@ -394,10 +385,13 @@ class ViewProvider:
 
     def onDelete(self, feature, subelements):
         element = feature.Object.Proxy
-        if hasattr(element, "Adapter"):
-            App.ActiveDocument.removeObject(element.Adapter.Name)
-            element = element.Adapter.Proxy
-        if "drill" in element.Tags:
+        for i in App.ActiveDocument.Objects:
+            if hasattr(i, "LinkToParent"):
+                if i.LinkToParent == feature.Object:
+                    App.ActiveDocument.removeObject(i.Name)
+                    if hasattr(i.Proxy, "get_drill"):
+                        layout.redraw()
+        if hasattr(element, "get_drill"):
             layout.redraw()
         if "Adapter" in feature.Object.Name:
             return False
