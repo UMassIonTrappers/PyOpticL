@@ -306,10 +306,34 @@ class splitter_mount_c05g:
         mesh.addMesh(temp)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
+
+
+class lens_holder_l05g:
+    def __init__(self, obj):
+        obj.Proxy = self
+        obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
+        ViewProvider(obj.ViewObject)
+        self.is_ref = False
+        self.is_tran = True
+        self.tran_angle = 0
+        self.in_limit = pi/2
+        self.in_width = INCH/2
+
+    def get_drill(self, obj):
+        part = _mirror_drill((-9.5, 0, -INCH/2))
+        part.Placement=obj.Placement
+        return part
+
+    def execute(self, obj):
+        mesh = _orient_stl("POLARIS-L05G-Solidworks.stl", (pi/2, 0, pi/2), (-28.0, -13.3, -18.4), 1000)
+        temp = Mesh.createCylinder(INCH/4, 1, True, 1, 50)
+        temp.rotate(0, 0, pi)
+        mesh.addMesh(temp)
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
         
 
 class baseplate_mount:
-
     def __init__(self, obj):
         obj.Proxy = self
         obj.ViewObject.ShapeColor=(0.5, 0.5, 0.55)
@@ -398,7 +422,6 @@ class ViewProvider:
         return True
 
     def onChanged(self, vp, prop):
-        #App.Console.PrintMessage("Change property: " + str(prop) + "\n")
         pass
 
     def getIcon(self):

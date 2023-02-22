@@ -18,4 +18,16 @@ class Create_Baseplate():
     def IsActive(self):
         return not "baseplate" in [i.Proxy.Tags for i in App.ActiveDocument.Objects]
 
+class Recompute_Beam():
+
+    def GetResources(self):
+        return {"Pixmap"  : "My_Command_Icon",
+                "Accel"   : "Shift+R",
+                "MenuText": "Recompute Beam Path"}
+
+    def Activated(self):
+        layout.redraw()
+        return
+
 Gui.addCommand("CreateBaseplate", Create_Baseplate())
+Gui.addCommand("RecomputeBeam", Recompute_Beam())

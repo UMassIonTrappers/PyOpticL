@@ -109,7 +109,7 @@ class beam_path:
 
     # compute full beam path given start point and angle
     def calculate_beam_path(self, x1, y1, a1, beam_index=1):
-        if beam_index > 20:
+        if beam_index > 200:
             return
         count = 0 # number of reflections per beam
         comp_index = 0 # index of current inline component
