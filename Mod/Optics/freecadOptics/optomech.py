@@ -9,7 +9,8 @@ from pathlib import Path
 __package__ = "optics"
 __name__ = "optomech"
 
-STL_PATH = str(Path(__file__).parent.resolve()) + "\\stl\\thorlabs\\"
+STL_PATH = str(Path(__file__).parent.resolve()) + "\\parts\\thorlabs\\"
+CACHE_PATH = str(Path(__file__).parent.resolve()) + "\\parts\\cache\\"
 
 # Set all static dimentions
 INCH = 25.4
@@ -331,6 +332,23 @@ class lens_holder_l05g:
         mesh.addMesh(temp)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
+
+class pinhole_ida12:
+    def __init__(self, obj):
+        obj.Proxy = self
+        obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
+        ViewProvider(obj.ViewObject)
+        self.is_ref = False
+        self.is_tran = True
+        self.tran_angle = 0
+        self.in_limit = pi/2
+        self.in_width = INCH/2
+
+    def execute(self, obj):
+        mesh = _orient_stl("IDA12-P5-Solidworks.stl", (pi/2, 0, -pi/2), (-0.35, 0.05, 0), 1000)
+        mesh.rotate(pi/2, 0, 0)
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
         
 
 class baseplate_mount:
@@ -378,6 +396,7 @@ class isomet_1205c_on_km100pm:
         shape = Part.Shape()
         shape.makeShapeFromMesh(mesh_drill.Topology, 0.5) # the second arg is the tolerance for sewing
         part = Part.makeSolid(shape)
+        Part.export(part, CACHE_PATH+"isomet_1205c_on_km100pm_drill.stp")
         part.Placement=obj.Placement
         return part
 
