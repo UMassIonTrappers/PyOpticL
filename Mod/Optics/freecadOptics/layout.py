@@ -24,9 +24,9 @@ def place_element_along_beam(obj_name, draw_class, beam_obj, beam_index, angle, 
     return obj
 
 # Creates a new active baseplate
-def create_baseplate(dx, dy, dz):
+def create_baseplate(dx, dy, dz, drill=True):
     obj = App.ActiveDocument.addObject('Part::FeaturePython', "Baseplate")
-    baseplate(obj, dx, dy, dz)
+    baseplate(obj, dx, dy, dz, drill)
     ViewProvider(obj.ViewObject)
     App.ActiveDocument.recompute()
     return obj
@@ -48,20 +48,21 @@ def redraw():
 
 class baseplate:
 
-    def __init__(self, obj, dx, dy, dz):
+    def __init__(self, obj, dx, dy, dz, drill):
         obj.Proxy = self
 
         obj.addProperty('App::PropertyLength', 'dx').dx = dx #define and set baseplate dimentions
         obj.addProperty('App::PropertyLength', 'dy').dy = dy
         obj.addProperty('App::PropertyLength', 'dz').dz = dz
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
 
 
     def execute(self, obj):
         part = Part.makeBox(obj.dx, obj.dy, obj.dz, App.Vector(0, 0, -(obj.dz.Value+INCH/2)))
-
-        for i in App.ActiveDocument.Objects: #add drill holes for all necessary elements
-            if hasattr(i.Proxy, 'get_drill'):
-                part = part.cut(i.Proxy.get_drill(i))
+        if obj.Drill:
+            for i in App.ActiveDocument.Objects: #add drill holes for all necessary elements
+                if hasattr(i.Proxy, 'get_drill'):
+                    part = part.cut(i.Proxy.get_drill(i))
         obj.Shape = part
 
 class ViewProvider:
