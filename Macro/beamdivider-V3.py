@@ -57,14 +57,15 @@ layout.place_element_along_beam("Input_Mirror_CC_1", optomech.mirror_mount_c05g,
 layout.place_element_along_beam("Input_Mirror_CC_2", optomech.mirror_mount_c05g, beam, 0b101001, -45, 40)
 layout.place_element_along_beam("AOM_CC", optomech.isomet_1205c_on_km100pm, beam, 0b101001, 0, 55)
 layout.place_element_along_beam("Output_Mirror_CC_1", optomech.mirror_mount_k05s2, beam, 0b101001, -135-3, 20)
-layout.place_element_along_beam("Output_Mirror_CC_2", optomech.mirror_mount_k05s2, beam, 0b101001, 45, 30)
+layout.place_element_along_beam("Output_Mirror_CC_2", optomech.mirror_mount_k05s2, beam, 0b101001, 45, 57.5+20*(math.sin(math.pi/30)-math.cos(math.pi/30)))
 #layout.place_element_along_beam("Output_Fiberport_CC", optomech.fiberport_holder, beam, 0b101001, 180, x=base_dx)
 
 layout.place_element_along_beam("Half_waveplate_R1", optomech.rotation_stage_rsp05, beam, 0b101000, -90, 20)
 
 layout.place_element_along_beam("Input_Mirror_R1", optomech.mirror_mount_c05g, beam, 0b101000, 45, 20)
 layout.place_element_along_beam("AOM_R1", optomech.isomet_1205c_on_km100pm, beam, 0b101000, 0, 100)
-layout.place_element_along_beam("Output_Mirror_R1", optomech.mirror_mount_k05s2, beam, 0b101000, 135+3, 30)
+layout.place_element_along_beam("Output_Mirror_R1", optomech.mirror_mount_k05s2, beam, 0b101000, 135-3, 40)
+layout.place_element_along_beam("Beam_Splitter_CC_R1", optomech.pbs_on_skate_mount, beam, 0b101000, 0, 37.5+20*math.sin(math.pi/30))
 #layout.place_element_along_beam("Output_Fiberport_R1", optomech.fiberport_holder, beam, 0b101000, 180, x=base_dx)
 
 
