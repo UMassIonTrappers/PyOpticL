@@ -105,7 +105,6 @@ class beam_path:
         self.part.rotate(App.Vector(0, 0, 0),App.Vector(0, 0, 1), degrees(-self.a))
         self.part = self.part.fuse(self.part)
         obj.Shape = self.part
-        App.ActiveDocument.Baseplate.touch()
 
     # compute full beam path given start point and angle
     def calculate_beam_path(self, x1, y1, a1, beam_index=1):

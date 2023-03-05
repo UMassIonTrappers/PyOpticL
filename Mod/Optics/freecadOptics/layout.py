@@ -6,17 +6,17 @@ INCH = 25.4
 
 # Add an element to the active baseplate with position and angle
 # Draw class is the type of object, usually defined in another module
-def place_element(obj_name, draw_class, x, y, angle):
+def place_element(obj_name, draw_class, x, y, angle, **args):
     obj = App.ActiveDocument.addObject('Mesh::FeaturePython', obj_name)
-    draw_class(obj)
+    draw_class(obj, **args)
     obj.Placement = App.Placement(App.Vector(x, y, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
     return obj
 
 # Add an element along a beampath with a set angle and an extra constraint of distance from last element, x position, or y position
 # Draw class is the type of object, usually defined in another module
-def place_element_along_beam(obj_name, draw_class, beam_obj, beam_index, angle, distance=None, x=None, y=None, pre_refs=0):
+def place_element_along_beam(obj_name, draw_class, beam_obj, beam_index, angle, distance=None, x=None, y=None, pre_refs=0, **args):
     obj = App.ActiveDocument.addObject('Mesh::FeaturePython', obj_name)
-    draw_class(obj)
+    draw_class(obj, **args)
     obj.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
     while len(beam_obj.Proxy.components) <= beam_index:
         beam_obj.Proxy.components.append([])
@@ -24,9 +24,10 @@ def place_element_along_beam(obj_name, draw_class, beam_obj, beam_index, angle, 
     return obj
 
 # Creates a new active baseplate
-def create_baseplate(dx, dy, dz, drill=True):
-    obj = App.ActiveDocument.addObject('Part::FeaturePython', "Baseplate")
+def create_baseplate(dx, dy, dz, drill=True, name="Baseplate", x=0, y=0):
+    obj = App.ActiveDocument.addObject('Part::FeaturePython', name)
     baseplate(obj, dx, dy, dz, drill)
+    obj.Placement = App.Placement(App.Vector(x, y, 0), App.Rotation(0, 0, 0), App.Vector(0, 0, 0))
     ViewProvider(obj.ViewObject)
     App.ActiveDocument.recompute()
     return obj
@@ -42,9 +43,14 @@ def add_beam_path(x, y, angle):
 
 # Update function for dynamic elements
 def redraw():
-    App.ActiveDocument.Beam_Path.touch()
+    for i in App.ActiveDocument.Objects:
+        if isinstance(i.Proxy, laser.beam_path):
+            i.touch()
     App.ActiveDocument.recompute()
-    App.ActiveDocument.Baseplate.touch()
+    for i in App.ActiveDocument.Objects:
+        if isinstance(i.Proxy, baseplate):
+            i.touch()
+    App.ActiveDocument.recompute()
 
 class baseplate:
 
@@ -62,8 +68,11 @@ class baseplate:
         if obj.Drill:
             for i in App.ActiveDocument.Objects: #add drill holes for all necessary elements
                 if hasattr(i.Proxy, 'get_drill'):
-                    part = part.cut(i.Proxy.get_drill(i))
+                    temp = i.Proxy.get_drill(i)
+                    temp.translate(App.Vector(-obj.Placement.Base))
+                    part = part.cut(temp)
         obj.Shape = part
+
 
 class ViewProvider:
 

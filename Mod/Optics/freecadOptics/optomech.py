@@ -154,15 +154,19 @@ class fiberport_holder:
         
 
 class pbs_on_skate_mount:
-    def __init__(self, obj):
+    def __init__(self, obj, invert=False):
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'CubeSize').CubeSize = 10
         obj.ViewObject.ShapeColor=(0.5, 0.5, 0.7)
         obj.ViewObject.Transparency=50
+        self.invert = invert
         ViewProvider(obj.ViewObject)
         self.is_ref = True
         self.is_tran = True
-        self.ref_angle = 3*pi/4
+        if invert:
+            self.ref_angle = -3*pi/4
+        else:
+            self.ref_angle = 3*pi/4
         self.tran_angle = 0
         self.in_limit = 0
         self.in_width = sqrt(200)
@@ -178,6 +182,9 @@ class pbs_on_skate_mount:
         temp = Mesh.createBox(10-1, sqrt(200)-1, 0.01)
         temp.rotate(0, pi/2, -pi/4)
         mesh = mesh.unite(temp)
+        if self.invert:
+            self.ref_angle = -3*pi/4
+            mesh.rotate(0, 0, pi/2)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -342,9 +349,7 @@ class baseplate_mount:
         ViewProvider(obj.ViewObject)
 
     def get_drill(self, obj):
-        part = Part.makeCylinder(CLR_DIA_14_20/2, drill_depth, App.Vector(0, 0, -INCH/2), App.Vector(0, 0, -1))
-        tempPart = Part.makeCylinder(WASHER_DIA_14_20/2, 10, App.Vector(0, 0, -INCH/2), App.Vector(0, 0, -1))
-        part = part.fuse(tempPart)
+        part = _create_hole(CLR_DIA_14_20, drill_depth, 0, 0, -INCH/2, WASHER_DIA_14_20, 10)
         part.Placement=obj.Placement
         return part
 
