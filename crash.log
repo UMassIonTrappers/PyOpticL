@@ -1,0 +1,441 @@
+﻿Log: Id: 20820: SymInit: Symbol-SearchPath: '.;C:\Program Files\FreeCAD 0.20\bin;C:\Program Files\FreeCAD 0.20\bin;C:\WINDOWS;C:\WINDOWS\system32;SRV*C:\websymbols*http://msdl.microsoft.com/download/symbols;', symOptions: 530, UserName: 'jyers'
+Log: Id: 20820: OS-Version: 6.2.9200 () 0x100-0x1
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\FreeCAD.exe:FreeCAD.exe (00007FF600600000), size: 155648 (result: 0), SymType: '-nosymbols-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\FreeCAD.exe', fileVersion: 0.20.1.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\ntdll.dll:ntdll.dll (00007FFB2B750000), size: 2179072 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\ntdll.dll', fileVersion: 6.2.22621.900
+Log: Id: 20820: C:\WINDOWS\System32\KERNEL32.DLL:KERNEL32.DLL (00007FFB2A900000), size: 798720 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\KERNEL32.DLL', fileVersion: 6.2.22621.1194
+Log: Id: 20820: C:\WINDOWS\System32\KERNELBASE.dll:KERNELBASE.dll (00007FFB28DA0000), size: 3784704 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\KERNELBASE.dll', fileVersion: 6.2.22621.1194
+Log: Id: 20820: C:\WINDOWS\System32\ucrtbase.dll:ucrtbase.dll (00007FFB29410000), size: 1118208 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\ucrtbase.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\System32\SHELL32.dll:SHELL32.dll (00007FFB2AAA0000), size: 8318976 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\SHELL32.dll', fileVersion: 6.2.22621.1194
+Log: Id: 20820: C:\WINDOWS\System32\msvcp_win.dll:msvcp_win.dll (00007FFB292B0000), size: 630784 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\msvcp_win.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\System32\USER32.dll:USER32.dll (00007FFB2A750000), size: 1757184 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\USER32.dll', fileVersion: 6.2.22621.1194
+Log: Id: 20820: C:\WINDOWS\System32\win32u.dll:win32u.dll (00007FFB29530000), size: 155648 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\win32u.dll', fileVersion: 6.2.22621.1265
+Log: Id: 20820: C:\WINDOWS\System32\GDI32.dll:GDI32.dll (00007FFB29840000), size: 167936 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\GDI32.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\System32\gdi32full.dll:gdi32full.dll (00007FFB28C80000), size: 1122304 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\gdi32full.dll', fileVersion: 6.2.22621.1265
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\MSVCP140.dll:MSVCP140.dll (00007FFB0C1D0000), size: 577536 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\MSVCP140.dll', fileVersion: 14.28.29910.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\VCRUNTIME140.dll:VCRUNTIME140.dll (00007FFB23C20000), size: 106496 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\VCRUNTIME140.dll', fileVersion: 14.28.29910.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\VCRUNTIME140_1.dll:VCRUNTIME140_1.dll (00007FFB23C10000), size: 49152 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\VCRUNTIME140_1.dll', fileVersion: 14.28.29910.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\python38.dll:python38.dll (00007FFADAB50000), size: 4390912 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\python38.dll', fileVersion: 3.8.10150.1013
+Log: Id: 20820: C:\WINDOWS\System32\SHLWAPI.dll:SHLWAPI.dll (00007FFB297E0000), size: 385024 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\SHLWAPI.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\System32\msvcrt.dll:msvcrt.dll (00007FFB2A6A0000), size: 684032 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\msvcrt.dll', fileVersion: 7.0.22621.608
+Log: Id: 20820: C:\WINDOWS\System32\WS2_32.dll:WS2_32.dll (00007FFB2A150000), size: 462848 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\WS2_32.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\System32\RPCRT4.dll:RPCRT4.dll (00007FFB29EC0000), size: 1134592 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\RPCRT4.dll', fileVersion: 6.2.22621.1105
+Log: Id: 20820: C:\WINDOWS\System32\ADVAPI32.dll:ADVAPI32.dll (00007FFB2A9D0000), size: 712704 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\ADVAPI32.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\System32\sechost.dll:sechost.dll (00007FFB2A550000), size: 671744 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\sechost.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\Qt5Widgets.dll:Qt5Widgets.dll (00007FFADA600000), size: 5509120 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\Qt5Widgets.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\WINDOWS\System32\ole32.dll:ole32.dll (00007FFB29C00000), size: 1687552 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\ole32.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\System32\combase.dll:combase.dll (00007FFB29870000), size: 3710976 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\combase.dll', fileVersion: 6.2.22621.900
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\Qt5Gui.dll:Qt5Gui.dll (00007FFAD9F40000), size: 7057408 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\Qt5Gui.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\Qt5Core.dll:Qt5Core.dll (00007FFAD9970000), size: 6053888 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\Qt5Core.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\VERSION.dll:VERSION.dll (00007FFB1F640000), size: 40960 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\VERSION.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\UxTheme.dll:UxTheme.dll (00007FFB25CA0000), size: 700416 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\UxTheme.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\dwmapi.dll:dwmapi.dll (00007FFB25F00000), size: 176128 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\dwmapi.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\MSVCP140_1.dll:MSVCP140_1.dll (00007FFB23C00000), size: 36864 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\MSVCP140_1.dll', fileVersion: 14.28.29910.0
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\d3d11.dll:d3d11.dll (00007FFB245D0000), size: 2453504 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\d3d11.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\dxgi.dll:dxgi.dll (00007FFB25DD0000), size: 1011712 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\dxgi.dll', fileVersion: 6.2.22621.900
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\MPR.dll:MPR.dll (00007FFB0B6B0000), size: 122880 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\MPR.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\USERENV.dll:USERENV.dll (00007FFB28190000), size: 163840 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\USERENV.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\NETAPI32.dll:NETAPI32.dll (00007FFB0B3D0000), size: 102400 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\NETAPI32.dll', fileVersion: 6.2.22621.674
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\WINMM.dll:WINMM.dll (00007FFB1E530000), size: 212992 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\WINMM.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\NETUTILS.DLL:NETUTILS.DLL (00007FFB276F0000), size: 49152 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\NETUTILS.DLL', fileVersion: 6.2.22621.674
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\SRVCLI.DLL:SRVCLI.DLL (00007FFB0B3A0000), size: 163840 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\SRVCLI.DLL', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\CRYPTBASE.DLL:CRYPTBASE.DLL (00007FFB283F0000), size: 49152 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\CRYPTBASE.DLL', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\FreeCADBase.dll:FreeCADBase.dll (00007FFAFC050000), size: 1339392 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\FreeCADBase.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\FreeCADApp.dll:FreeCADApp.dll (00007FFAD9620000), size: 3424256 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\FreeCADApp.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\boost_filesystem-vc141-mt-x64-1_67.dll:boost_filesystem-vc141-mt-x64-1_67.dll (00007FFB1D000000), size: 147456 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\boost_filesystem-vc141-mt-x64-1_67.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\zlib.dll:zlib.dll (00007FFB1CFE0000), size: 110592 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\zlib.dll', fileVersion: 1.2.11.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\boost_program_options-vc141-mt-x64-1_67.dll:boost_program_options-vc141-mt-x64-1_67.dll (00007FFB0CED0000), size: 438272 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\boost_program_options-vc141-mt-x64-1_67.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\FreeCADGui.dll:FreeCADGui.dll (00007FFAD8900000), size: 13701120 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\FreeCADGui.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\xerces-c_3_2.dll:xerces-c_3_2.dll (00007FFAD8640000), size: 2875392 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\xerces-c_3_2.dll', fileVersion: 3.2.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\Qt5Xml.dll:Qt5Xml.dll (00007FFB0CC10000), size: 221184 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\Qt5Xml.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\SHFOLDER.dll:SHFOLDER.dll (00007FFB23BF0000), size: 28672 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\SHFOLDER.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\boost_regex-vc141-mt-x64-1_67.dll:boost_regex-vc141-mt-x64-1_67.dll (00007FFB05630000), size: 868352 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\boost_regex-vc141-mt-x64-1_67.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\boost_date_time-vc141-mt-x64-1_67.dll:boost_date_time-vc141-mt-x64-1_67.dll (00007FFB1C520000), size: 69632 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\boost_date_time-vc141-mt-x64-1_67.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\boost_system-vc141-mt-x64-1_67.dll:boost_system-vc141-mt-x64-1_67.dll (00007FFB1F8C0000), size: 40960 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\boost_system-vc141-mt-x64-1_67.dll'
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\OPENGL32.dll:OPENGL32.dll (00007FFAF60A0000), size: 1048576 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\OPENGL32.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\Qt5PrintSupport.dll:Qt5PrintSupport.dll (00007FFB0C180000), size: 323584 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\Qt5PrintSupport.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\HID.DLL:HID.DLL (00007FFB27440000), size: 57344 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\HID.DLL', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\System32\COMDLG32.dll:COMDLG32.dll (00007FFB29560000), size: 1011712 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\COMDLG32.dll', fileVersion: 6.2.22621.1105
+Log: Id: 20820: C:\WINDOWS\System32\shcore.dll:shcore.dll (00007FFB29DC0000), size: 987136 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\shcore.dll', fileVersion: 6.2.22621.900
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\Qt5Svg.dll:Qt5Svg.dll (00007FFB0B2B0000), size: 344064 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\Qt5Svg.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\Qt5WinExtras.dll:Qt5WinExtras.dll (00007FFB0C140000), size: 249856 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\Qt5WinExtras.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\pyside2.cp38-win_amd64.dll:pyside2.cp38-win_amd64.dll (00007FFB1C170000), size: 172032 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\pyside2.cp38-win_amd64.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\Qt5Network.dll:Qt5Network.dll (00007FFAE3B40000), size: 1355776 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\Qt5Network.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\WINDOWS\System32\CRYPT32.dll:CRYPT32.dll (00007FFB29140000), size: 1466368 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\CRYPT32.dll', fileVersion: 6.2.22621.674
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\shiboken2.cp38-win_amd64.dll:shiboken2.cp38-win_amd64.dll (00007FFB0A770000), size: 495616 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\shiboken2.cp38-win_amd64.dll'
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\GLU32.dll:GLU32.dll (00007FFB0D910000), size: 184320 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\GLU32.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\WINSPOOL.DRV:WINSPOOL.DRV (00007FFB17BF0000), size: 630784 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\WINSPOOL.DRV', fileVersion: 6.2.22621.1194
+Log: Id: 20820: C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_5.82.22621.608_none_fb280a3c7926c2cc\COMCTL32.dll:COMCTL32.dll (00007FFB10A40000), size: 733184 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_5.82.22621.608_none_fb280a3c7926c2cc\COMCTL32.dll', fileVersion: 5.82.22621.608
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\DNSAPI.dll:DNSAPI.dll (00007FFB27770000), size: 995328 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\DNSAPI.dll', fileVersion: 6.2.22621.1194
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\IPHLPAPI.DLL:IPHLPAPI.DLL (00007FFB27700000), size: 184320 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\IPHLPAPI.DLL', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\Qt5Qml.dll:Qt5Qml.dll (00007FFAD82C0000), size: 3608576 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\Qt5Qml.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\dxcore.dll:dxcore.dll (00007FFB25D90000), size: 221184 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\dxcore.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\Coin4.dll:Coin4.dll (00007FFAD7CA0000), size: 6365184 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\Coin4.dll', fileVersion: 4.0.1.0
+Log: Id: 20820: C:\WINDOWS\System32\IMM32.DLL:IMM32.DLL (00007FFB2A610000), size: 204800 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\IMM32.DLL', fileVersion: 6.2.22621.755
+Log: Id: 20820: C:\WINDOWS\System32\NSI.dll:NSI.dll (00007FFB2A2F0000), size: 36864 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\NSI.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\windows.storage.dll:windows.storage.dll (00007FFB26B70000), size: 9207808 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\windows.storage.dll', fileVersion: 6.2.22621.1194
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\wintypes.dll:wintypes.dll (00007FFB26A30000), size: 1302528 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\wintypes.dll', fileVersion: 6.2.22621.900
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\profapi.dll:profapi.dll (00007FFB28AC0000), size: 135168 (result: 0), SymType: '-nosymbols-', PDB: 'C:\WINDOWS\SYSTEM32\profapi.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\CRYPTSP.dll:CRYPTSP.dll (00007FFB28410000), size: 110592 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\CRYPTSP.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\system32\rsaenh.dll:rsaenh.dll (00007FFB27C00000), size: 217088 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\rsaenh.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\System32\bcryptPrimitives.dll:bcryptPrimitives.dll (00007FFB28B90000), size: 503808 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\bcryptPrimitives.dll', fileVersion: 6.2.22621.1105
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\dbghelp.dll:dbghelp.dll (00007FFB26440000), size: 2285568 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\dbghelp.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\System32\OLEAUT32.dll:OLEAUT32.dll (00007FFB29680000), size: 880640 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\OLEAUT32.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\dbgcore.DLL:dbgcore.DLL (00007FFB1F880000), size: 204800 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\dbgcore.DLL', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\platforms\qwindows.dll:qwindows.dll (00007FFAD7B30000), size: 1495040 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\platforms\qwindows.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\WTSAPI32.dll:WTSAPI32.dll (00007FFB25B70000), size: 81920 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\WTSAPI32.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\kernel.appcore.dll:kernel.appcore.dll (00007FFB27C90000), size: 98304 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\kernel.appcore.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\powrprof.dll:powrprof.dll (00007FFB27A60000), size: 315392 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\powrprof.dll', fileVersion: 6.2.22621.900
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\UMPDC.dll:UMPDC.dll (00007FFB27A40000), size: 77824 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\UMPDC.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\System32\clbcatq.dll:clbcatq.dll (00007FFB2A0A0000), size: 720896 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\clbcatq.dll', fileVersion: 2001.12.10941.16384
+Log: Id: 20820: C:\Windows\System32\AppXDeploymentClient.dll:AppXDeploymentClient.dll (00007FFB209F0000), size: 1265664 (result: 0), SymType: '-exported-', PDB: 'C:\Windows\System32\AppXDeploymentClient.dll', fileVersion: 6.2.22621.1194
+Log: Id: 20820: C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispig.inf_amd64_70cfb45e19c20af4\nvoglv64.dll:nvoglv64.dll (00007FFAC32C0000), size: 52142080 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\DriverStore\FileRepository\nv_dispig.inf_amd64_70cfb45e19c20af4\nvoglv64.dll', fileVersion: 31.0.15.1748
+Log: Id: 20820: C:\WINDOWS\System32\SETUPAPI.dll:SETUPAPI.dll (00007FFB2B290000), size: 4694016 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\SETUPAPI.dll', fileVersion: 6.2.22621.755
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\msasn1.dll:msasn1.dll (00007FFB28820000), size: 73728 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\msasn1.dll', fileVersion: 6.2.22621.819
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\cryptnet.dll:cryptnet.dll (00007FFB1F580000), size: 204800 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\cryptnet.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\drvstore.dll:drvstore.dll (00007FFB1F420000), size: 1409024 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\drvstore.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\devobj.dll:devobj.dll (00007FFB288B0000), size: 208896 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\devobj.dll', fileVersion: 6.2.22621.755
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\cfgmgr32.dll:cfgmgr32.dll (00007FFB28840000), size: 319488 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\cfgmgr32.dll', fileVersion: 6.2.22621.755
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\wldp.dll:wldp.dll (00007FFB28370000), size: 299008 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\wldp.dll', fileVersion: 6.2.22621.1194
+Log: Id: 20820: C:\WINDOWS\System32\WINTRUST.dll:WINTRUST.dll (00007FFB28C10000), size: 438272 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\WINTRUST.dll', fileVersion: 6.2.22621.1194
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\ntmarta.dll:ntmarta.dll (00007FFB27CB0000), size: 212992 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\ntmarta.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\System32\MSCTF.dll:MSCTF.dll (00007FFB2A1D0000), size: 1171456 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\MSCTF.dll', fileVersion: 6.2.22621.1194
+Log: Id: 20820: C:\WINDOWS\system32\nvspcap64.dll:nvspcap64.dll (00007FFA9CCB0000), size: 2953216 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\nvspcap64.dll', fileVersion: 3.27.0.112
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\WINSTA.dll:WINSTA.dll (00007FFB27680000), size: 417792 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\WINSTA.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\system32\d3d9.dll:d3d9.dll (00007FFB1CB80000), size: 1740800 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\d3d9.dll', fileVersion: 6.2.22621.755
+Log: Id: 20820: C:\WINDOWS\System32\imagehlp.dll:imagehlp.dll (00007FFB29DA0000), size: 126976 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\imagehlp.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\bcrypt.dll:bcrypt.dll (00007FFB28530000), size: 163840 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\bcrypt.dll', fileVersion: 6.2.22621.1105
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\directxdatabasehelper.dll:directxdatabasehelper.dll (00007FFB234F0000), size: 299008 (result: 0), SymType: '-nosymbols-', PDB: 'C:\WINDOWS\SYSTEM32\directxdatabasehelper.dll', fileVersion: 6.2.22621.1194
+Log: Id: 20820: C:\Windows\System32\DriverStore\FileRepository\iigd_dch.inf_amd64_ffc293fe8bdb391a\igc64.dll:igc64.dll (00007FFB10F50000), size: 58388480 (result: 0), SymType: '-exported-', PDB: 'C:\Windows\System32\DriverStore\FileRepository\iigd_dch.inf_amd64_ffc293fe8bdb391a\igc64.dll', fileVersion: 31.0.101.3222
+Log: Id: 20820: C:\Windows\System32\DriverStore\FileRepository\iigd_dch.inf_amd64_ffc293fe8bdb391a\igd12dxva64.dll:igd12dxva64.dll (00007FFAA70E0000), size: 86749184 (result: 0), SymType: '-exported-', PDB: 'C:\Windows\System32\DriverStore\FileRepository\iigd_dch.inf_amd64_ffc293fe8bdb391a\igd12dxva64.dll', fileVersion: 31.0.101.3222
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\styles\qwindowsvistastyle.dll:qwindowsvistastyle.dll (00007FFB0CBE0000), size: 155648 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\styles\qwindowsvistastyle.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\imageformats\qgif.dll:qgif.dll (00007FFB1EB70000), size: 53248 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\imageformats\qgif.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\imageformats\qicns.dll:qicns.dll (00007FFB1E300000), size: 61440 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\imageformats\qicns.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\imageformats\qico.dll:qico.dll (00007FFB1DE90000), size: 53248 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\imageformats\qico.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\imageformats\qjpeg.dll:qjpeg.dll (00007FFB06F70000), size: 438272 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\imageformats\qjpeg.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\imageformats\qsvg.dll:qsvg.dll (00007FFB1DD20000), size: 49152 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\imageformats\qsvg.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\imageformats\qtga.dll:qtga.dll (00007FFB1C240000), size: 49152 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\imageformats\qtga.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\imageformats\qtiff.dll:qtiff.dll (00007FFB032E0000), size: 405504 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\imageformats\qtiff.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\imageformats\qwbmp.dll:qwbmp.dll (00007FFB18390000), size: 45056 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\imageformats\qwbmp.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\imageformats\qwebp.dll:qwebp.dll (00007FFAFBBD0000), size: 536576 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\imageformats\qwebp.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\WINDOWS\system32\dwrite.dll:dwrite.dll (00007FFB24830000), size: 2519040 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\dwrite.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\system32\dataexchange.dll:dataexchange.dll (00007FFAE43E0000), size: 385024 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\dataexchange.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\system32\twinapi.appcore.dll:twinapi.appcore.dll (00007FFB20C70000), size: 2531328 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\twinapi.appcore.dll', fileVersion: 6.2.22621.755
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\textinputframework.dll:textinputframework.dll (00007FFB0E250000), size: 1232896 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\textinputframework.dll', fileVersion: 6.2.22621.1194
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\CoreMessaging.dll:CoreMessaging.dll (00007FFB25850000), size: 1257472 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\CoreMessaging.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\CoreUIComponents.dll:CoreUIComponents.dll (00007FFB22730000), size: 3588096 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\CoreUIComponents.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\python3.DLL:python3.DLL (00007FFB0F110000), size: 61440 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\python3.DLL', fileVersion: 3.8.10150.1013
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\lib\site-packages\pivy\_coin.cp38-win_amd64.pyd:_coin.cp38-win_amd64.pyd (00007FFAD6D00000), size: 14835712 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\lib\site-packages\pivy\_coin.cp38-win_amd64.pyd'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\DLLs\_bz2.pyd:_bz2.pyd (00007FFB0B690000), size: 98304 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\DLLs\_bz2.pyd', fileVersion: 3.8.10150.1013
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\DLLs\_lzma.pyd:_lzma.pyd (00007FFB0B280000), size: 172032 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\DLLs\_lzma.pyd', fileVersion: 3.8.10150.1013
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\DLLs\_hashlib.pyd:_hashlib.pyd (00007FFB0CB00000), size: 57344 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\DLLs\_hashlib.pyd', fileVersion: 3.8.10150.1013
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\DLLs\libcrypto-1_1.dll:libcrypto-1_1.dll (00007FFAD69B0000), size: 3440640 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\DLLs\libcrypto-1_1.dll', fileVersion: 1.1.1.11
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\lib\site-packages\shiboken2\shiboken2.cp38-win_amd64.pyd:shiboken2.cp38-win_amd64.pyd (00007FFB0C130000), size: 36864 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\lib\site-packages\shiboken2\shiboken2.cp38-win_amd64.pyd'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\lib\site-packages\PySide2\QtGui.cp38-win_amd64.pyd:QtGui.cp38-win_amd64.pyd (00007FFAD6600000), size: 3829760 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\lib\site-packages\PySide2\QtGui.cp38-win_amd64.pyd'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\lib\site-packages\PySide2\QtCore.cp38-win_amd64.pyd:QtCore.cp38-win_amd64.pyd (00007FFAD62B0000), size: 3473408 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\lib\site-packages\PySide2\QtCore.cp38-win_amd64.pyd'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\lib\site-packages\PySide2\QtWidgets.cp38-win_amd64.pyd:QtWidgets.cp38-win_amd64.pyd (00007FFAD5CA0000), size: 6332416 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\lib\site-packages\PySide2\QtWidgets.cp38-win_amd64.pyd'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\DLLs\_queue.pyd:_queue.pyd (00007FFB0B760000), size: 36864 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\DLLs\_queue.pyd', fileVersion: 3.8.10150.1013
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\DLLs\_ctypes.pyd:_ctypes.pyd (00007FFB0A550000), size: 139264 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\DLLs\_ctypes.pyd', fileVersion: 3.8.10150.1013
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\DLLs\libffi-7.dll:libffi-7.dll (00007FFB0AE00000), size: 45056 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\DLLs\libffi-7.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\lib\site-packages\PySide2\QtNetwork.cp38-win_amd64.pyd:QtNetwork.cp38-win_amd64.pyd (00007FFAE4820000), size: 962560 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\lib\site-packages\PySide2\QtNetwork.cp38-win_amd64.pyd'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\DLLs\_socket.pyd:_socket.pyd (00007FFB0A750000), size: 90112 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\DLLs\_socket.pyd', fileVersion: 3.8.10150.1013
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\DLLs\select.pyd:select.pyd (00007FFB06F60000), size: 36864 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\DLLs\select.pyd', fileVersion: 3.8.10150.1013
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\DLLs\_ssl.pyd:_ssl.pyd (00007FFB06F30000), size: 159744 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\DLLs\_ssl.pyd', fileVersion: 3.8.10150.1013
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\DLLs\libssl-1_1.dll:libssl-1_1.dll (00007FFAF5FF0000), size: 704512 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\DLLs\libssl-1_1.dll', fileVersion: 1.1.1.11
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\DLLs\_asyncio.pyd:_asyncio.pyd (00007FFB06F10000), size: 73728 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\DLLs\_asyncio.pyd', fileVersion: 3.8.10150.1013
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\DLLs\_overlapped.pyd:_overlapped.pyd (00007FFB05620000), size: 57344 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\DLLs\_overlapped.pyd', fileVersion: 3.8.10150.1013
+Log: Id: 20820: C:\WINDOWS\system32\mswsock.dll:mswsock.dll (00007FFB280F0000), size: 430080 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\mswsock.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\lib\site-packages\PySide2\QtWebEngineWidgets.cp38-win_amd64.pyd:QtWebEngineWidgets.cp38-win_amd64.pyd (00007FFB00670000), size: 323584 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\lib\site-packages\PySide2\QtWebEngineWidgets.cp38-win_amd64.pyd'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\Qt5WebEngineWidgets.dll:Qt5WebEngineWidgets.dll (00007FFB055E0000), size: 258048 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\Qt5WebEngineWidgets.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\Qt5QuickWidgets.dll:Qt5QuickWidgets.dll (00007FFB04F40000), size: 90112 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\Qt5QuickWidgets.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\Qt5Quick.dll:Qt5Quick.dll (00007FFAD58A0000), size: 4161536 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\Qt5Quick.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\Qt5QmlModels.dll:Qt5QmlModels.dll (00007FFAFEDD0000), size: 446464 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\Qt5QmlModels.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\Qt5WebEngineCore.dll:Qt5WebEngineCore.dll (00007FFA786C0000), size: 103616512 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\Qt5WebEngineCore.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\Qt5Positioning.dll:Qt5Positioning.dll (00007FFAF9220000), size: 327680 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\Qt5Positioning.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\Qt5WebChannel.dll:Qt5WebChannel.dll (00007FFB00640000), size: 143360 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\Qt5WebChannel.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\WINDOWS\system32\ncrypt.dll:ncrypt.dll (00007FFB28500000), size: 184320 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\ncrypt.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\system32\Secur32.dll:Secur32.dll (00007FFB20670000), size: 49152 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\Secur32.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\system32\WINHTTP.dll:WINHTTP.dll (00007FFB22380000), size: 1241088 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\WINHTTP.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\system32\dxva2.dll:dxva2.dll (00007FFAF0060000), size: 151552 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\dxva2.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\system32\dhcpcsvc.DLL:dhcpcsvc.DLL (00007FFB216E0000), size: 126976 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\dhcpcsvc.DLL', fileVersion: 6.2.22621.674
+Log: Id: 20820: C:\WINDOWS\system32\USP10.dll:USP10.dll (00007FFA9C1F0000), size: 102400 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\USP10.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\system32\urlmon.dll:urlmon.dll (00007FFB0A250000), size: 2031616 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\urlmon.dll', fileVersion: 11.0.22621.1265
+Log: Id: 20820: C:\WINDOWS\system32\iertutil.dll:iertutil.dll (00007FFB09F60000), size: 2822144 (result: 0), SymType: '-nosymbols-', PDB: 'C:\WINDOWS\system32\iertutil.dll', fileVersion: 11.0.22621.674
+Log: Id: 20820: C:\WINDOWS\system32\SSPICLI.DLL:SSPICLI.DLL (00007FFB27EE0000), size: 270336 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\SSPICLI.DLL', fileVersion: 6.2.22621.674
+Log: Id: 20820: C:\WINDOWS\system32\NTASN1.dll:NTASN1.dll (00007FFB284C0000), size: 225280 (result: 0), SymType: '-nosymbols-', PDB: 'C:\WINDOWS\system32\NTASN1.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\lib\site-packages\PySide2\QtWebChannel.cp38-win_amd64.pyd:QtWebChannel.cp38-win_amd64.pyd (00007FFAFC030000), size: 73728 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\lib\site-packages\PySide2\QtWebChannel.cp38-win_amd64.pyd'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\lib\site-packages\PySide2\QtWebEngineCore.cp38-win_amd64.pyd:QtWebEngineCore.cp38-win_amd64.pyd (00007FFAFC010000), size: 118784 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\lib\site-packages\PySide2\QtWebEngineCore.cp38-win_amd64.pyd'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\lib\site-packages\PySide2\QtPrintSupport.cp38-win_amd64.pyd:QtPrintSupport.cp38-win_amd64.pyd (00007FFAED5C0000), size: 307200 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\lib\site-packages\PySide2\QtPrintSupport.cp38-win_amd64.pyd'
+Log: Id: 20820: C:\Program Files\DisplayFusion\Hooks\AppHook64_3962A587-51B6-4299-ACDA-8D8ADDC07142.dll:AppHook64_3962A587-51B6-4299-ACDA-8D8ADDC07142.dll (0000000180000000), size: 471040 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\DisplayFusion\Hooks\AppHook64_3962A587-51B6-4299-ACDA-8D8ADDC07142.dll', fileVersion: 10.0.0.5
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\iconengines\qsvgicon.dll:qsvgicon.dll (00007FFB04F30000), size: 57344 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\iconengines\qsvgicon.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\lib\StartGui.pyd:StartGui.pyd (00007FFAE3220000), size: 991232 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\lib\StartGui.pyd'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\lib\WebGui.pyd:WebGui.pyd (00007FFAECC90000), size: 348160 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\lib\WebGui.pyd'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\lib\Start.pyd:Start.pyd (00007FFB032D0000), size: 36864 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\lib\Start.pyd'
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\edputil.dll:edputil.dll (00007FFAEC520000), size: 163840 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\edputil.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\mf.dll:mf.dll (00007FFAE29C0000), size: 565248 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\mf.dll', fileVersion: 6.2.22621.1194
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\mfplat.dll:mfplat.dll (00007FFB0A580000), size: 1892352 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\mfplat.dll', fileVersion: 6.2.22621.755
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\RTWorkQ.DLL:RTWorkQ.DLL (00007FFB0B980000), size: 208896 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\RTWorkQ.DLL', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\msmpeg2vdec.dll:msmpeg2vdec.dll (00007FFACEBD0000), size: 2703360 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\msmpeg2vdec.dll', fileVersion: 6.2.22621.1265
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\mfperfhelper.dll:mfperfhelper.dll (00007FFAECD20000), size: 1241088 (result: 0), SymType: '-nosymbols-', PDB: 'C:\WINDOWS\SYSTEM32\mfperfhelper.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\msvproc.dll:msvproc.dll (00007FFACEA60000), size: 1458176 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\msvproc.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\system32\nlansp_c.dll:nlansp_c.dll (00007FFAF0540000), size: 135168 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\nlansp_c.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\dhcpcsvc6.DLL:dhcpcsvc6.DLL (00007FFB218B0000), size: 102400 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\dhcpcsvc6.DLL', fileVersion: 6.2.22621.674
+Log: Id: 20820: C:\WINDOWS\System32\MMDevApi.dll:MMDevApi.dll (00007FFB1E7A0000), size: 643072 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\MMDevApi.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\system32\mfreadwrite.dll:mfreadwrite.dll (00007FFABD2F0000), size: 1183744 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\mfreadwrite.dll', fileVersion: 6.2.22621.1194
+Log: Id: 20820: C:\WINDOWS\system32\MFCaptureEngine.dll:MFCaptureEngine.dll (00007FFADB1E0000), size: 741376 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\MFCaptureEngine.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\CompPkgSup.DLL:CompPkgSup.DLL (00007FFB0F720000), size: 249856 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\CompPkgSup.DLL', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\Windows\System32\Windows.Media.dll:Windows.Media.dll (00007FFACCEF0000), size: 7065600 (result: 0), SymType: '-exported-', PDB: 'C:\Windows\System32\Windows.Media.dll', fileVersion: 6.2.22621.900
+Log: Id: 20820: C:\Windows\System32\Windows.ApplicationModel.dll:Windows.ApplicationModel.dll (00007FFB0F010000), size: 1007616 (result: 0), SymType: '-exported-', PDB: 'C:\Windows\System32\Windows.ApplicationModel.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\system32\propsys.dll:propsys.dll (00007FFB23D70000), size: 1048576 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\propsys.dll', fileVersion: 7.0.22621.608
+Log: Id: 20820: C:\Windows\System32\Windows.System.Launcher.dll:Windows.System.Launcher.dll (00007FFB1BF50000), size: 1265664 (result: 0), SymType: '-exported-', PDB: 'C:\Windows\System32\Windows.System.Launcher.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\Windows\System32\msvcp110_win.dll:msvcp110_win.dll (00007FFB23390000), size: 602112 (result: 0), SymType: '-exported-', PDB: 'C:\Windows\System32\msvcp110_win.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\windows.staterepositorycore.dll:windows.staterepositorycore.dll (00007FFB205B0000), size: 106496 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\windows.staterepositorycore.dll', fileVersion: 6.2.22621.1194
+Log: Id: 20820: C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.22621.608_none_a9444ca7c10bb01d\comctl32.dll:comctl32.dll (00007FFB10B00000), size: 2678784 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.22621.608_none_a9444ca7c10bb01d\comctl32.dll', fileVersion: 6.10.22621.608
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\WindowsCodecs.dll:WindowsCodecs.dll (00007FFB24020000), size: 1769472 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\WindowsCodecs.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\Windows\System32\Windows.FileExplorer.Common.dll:Windows.FileExplorer.Common.dll (00007FFAEDED0000), size: 655360 (result: 0), SymType: '-exported-', PDB: 'C:\Windows\System32\Windows.FileExplorer.Common.dll', fileVersion: 6.2.22621.1105
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\windows.staterepositoryclient.dll:windows.staterepositoryclient.dll (00007FFB1BF10000), size: 249856 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\windows.staterepositoryclient.dll', fileVersion: 6.2.22621.1194
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\apphelp.dll:apphelp.dll (00007FFB25BA0000), size: 618496 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\apphelp.dll', fileVersion: 6.2.22621.1194
+Log: Id: 20820: C:\Program Files\Microsoft OneDrive\23.033.0212.0001\FileSyncShell64.dll:FileSyncShell64.dll (00007FFAE2690000), size: 1900544 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\Microsoft OneDrive\23.033.0212.0001\FileSyncShell64.dll', fileVersion: 23.33.212.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\WININET.dll:WININET.dll (00007FFAFDBF0000), size: 5193728 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\WININET.dll', fileVersion: 11.0.22621.608
+Log: Id: 20820: C:\Windows\System32\OneCoreUAPCommonProxyStub.dll:OneCoreUAPCommonProxyStub.dll (00007FFB1FB40000), size: 6393856 (result: 0), SymType: '-exported-', PDB: 'C:\Windows\System32\OneCoreUAPCommonProxyStub.dll', fileVersion: 6.2.22621.1105
+Log: Id: 20820: C:\Program Files (x86)\Dropbox\Client\DropboxExt64.60.0.dll:DropboxExt64.60.0.dll (00007FFAE2600000), size: 569344 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files (x86)\Dropbox\Client\DropboxExt64.60.0.dll', fileVersion: 1.0.60.0
+Log: Id: 20820: C:\WINDOWS\system32\NetworkExplorer.dll:NetworkExplorer.dll (00007FFAECB20000), size: 106496 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\NetworkExplorer.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\Windows\System32\thumbcache.dll:thumbcache.dll (00007FFAE3950000), size: 450560 (result: 0), SymType: '-exported-', PDB: 'C:\Windows\System32\thumbcache.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\system32\PhotoMetadataHandler.dll:PhotoMetadataHandler.dll (00007FFAED4F0000), size: 516096 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\PhotoMetadataHandler.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\policymanager.dll:policymanager.dll (00007FFB23430000), size: 675840 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\policymanager.dll', fileVersion: 6.2.22621.1194
+Log: Id: 20820: C:\WINDOWS\system32\IconCodecService.dll:IconCodecService.dll (00007FFAED1E0000), size: 36864 (result: 0), SymType: '-nosymbols-', PDB: 'C:\WINDOWS\system32\IconCodecService.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\mscms.dll:mscms.dll (00007FFB211E0000), size: 774144 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\mscms.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\lib\Part.pyd:Part.pyd (00007FFAD5530000), size: 3547136 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\lib\Part.pyd'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKSTL.dll:TKSTL.dll (00007FFAF5FD0000), size: 118784 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKSTL.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKMesh.dll:TKMesh.dll (00007FFAD5490000), size: 622592 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKMesh.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKOffset.dll:TKOffset.dll (00007FFAD52A0000), size: 1970176 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKOffset.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKHLR.dll:TKHLR.dll (00007FFAD51B0000), size: 983040 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKHLR.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKIGES.dll:TKIGES.dll (00007FFAD4F00000), size: 2785280 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKIGES.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKFeat.dll:TKFeat.dll (00007FFAD4DE0000), size: 1163264 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKFeat.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKSTEP.dll:TKSTEP.dll (00007FFAD4B50000), size: 2662400 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKSTEP.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\freetype.dll:freetype.dll (00007FFAD4AC0000), size: 577536 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\freetype.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKFillet.dll:TKFillet.dll (00007FFAD4870000), size: 2400256 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKFillet.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKSTEP209.dll:TKSTEP209.dll (00007FFAE1520000), size: 442368 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKSTEP209.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKSTEPAttr.dll:TKSTEPAttr.dll (00007FFAD4760000), size: 1101824 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKSTEPAttr.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKXSBase.dll:TKXSBase.dll (00007FFAD4570000), size: 1982464 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKXSBase.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKBO.dll:TKBO.dll (00007FFAD2C70000), size: 2109440 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKBO.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKShHealing.dll:TKShHealing.dll (00007FFAD29F0000), size: 2568192 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKShHealing.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKBool.dll:TKBool.dll (00007FFAD2660000), size: 3678208 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKBool.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKPrim.dll:TKPrim.dll (00007FFAECB90000), size: 331776 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKPrim.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKBRep.dll:TKBRep.dll (00007FFAD4490000), size: 892928 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKBRep.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKTopAlgo.dll:TKTopAlgo.dll (00007FFAD1890000), size: 2416640 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKTopAlgo.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKGeomAlgo.dll:TKGeomAlgo.dll (00007FFAD0100000), size: 4227072 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKGeomAlgo.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKGeomBase.dll:TKGeomBase.dll (00007FFACDED0000), size: 3932160 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKGeomBase.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKG2d.dll:TKG2d.dll (00007FFAEC850000), size: 303104 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKG2d.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKG3d.dll:TKG3d.dll (00007FFAD2580000), size: 909312 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKG3d.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKMath.dll:TKMath.dll (00007FFAD16E0000), size: 1716224 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKMath.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKernel.dll:TKernel.dll (00007FFACD900000), size: 1658880 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKernel.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\WINDOWS\system32\WSOCK32.dll:WSOCK32.dll (00007FFB08C20000), size: 36864 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\WSOCK32.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKSTEPBase.dll:TKSTEPBase.dll (00007FFACD770000), size: 1576960 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKSTEPBase.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\lib\Mesh.pyd:Mesh.pyd (00007FFAC8EC0000), size: 2428928 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\lib\Mesh.pyd'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\Qt5Concurrent.dll:Qt5Concurrent.dll (00007FFB007C0000), size: 45056 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\Qt5Concurrent.dll', fileVersion: 5.15.2.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\lib\PartGui.pyd:PartGui.pyd (00007FFAC6A40000), size: 3682304 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\lib\PartGui.pyd'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\lib\MeshGui.pyd:MeshGui.pyd (00007FFAC8160000), size: 1798144 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\lib\MeshGui.pyd'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\lib\MeshPartGui.pyd:MeshPartGui.pyd (00007FFAD24A0000), size: 884736 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\lib\MeshPartGui.pyd'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\lib\flatmesh.pyd:flatmesh.pyd (00007FFAE1420000), size: 319488 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\lib\flatmesh.pyd'
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\AudioSes.DLL:AudioSes.DLL (00007FFB0F160000), size: 1986560 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\AudioSes.DLL', fileVersion: 6.2.22621.900
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\winmmbase.dll:winmmbase.dll (00007FFA83D20000), size: 167936 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\winmmbase.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\system32\wdmaud.drv:wdmaud.drv (00007FFA83CD0000), size: 286720 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\wdmaud.drv', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\system32\AVRT.dll:AVRT.dll (00007FFB23230000), size: 45056 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\AVRT.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\system32\ksuser.dll:ksuser.dll (00007FFA84210000), size: 36864 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\ksuser.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\system32\msacm32.drv:msacm32.drv (00007FFA83CC0000), size: 57344 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\msacm32.drv', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\system32\MSACM32.dll:MSACM32.dll (00007FFA83CA0000), size: 122880 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\MSACM32.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\system32\midimap.dll:midimap.dll (00007FFA83C90000), size: 45056 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\midimap.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\resourcepolicyclient.dll:resourcepolicyclient.dll (00007FFB26230000), size: 86016 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\resourcepolicyclient.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\DUI70.dll:DUI70.dll (00007FFAECFD0000), size: 1818624 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\DUI70.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\DUser.dll:DUser.dll (00007FFA30940000), size: 626688 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\DUser.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\Program Files\Common Files\microsoft shared\ink\tiptsf.dll:tiptsf.dll (00007FFACCC50000), size: 655360 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\Common Files\microsoft shared\ink\tiptsf.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\TextShaping.dll:TextShaping.dll (00007FFAEFDE0000), size: 720896 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\TextShaping.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\system32\explorerframe.dll:explorerframe.dll (00007FFAE3DF0000), size: 2699264 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\explorerframe.dll', fileVersion: 6.2.22621.1105
+Log: Id: 20820: C:\Windows\System32\oleacc.dll:oleacc.dll (00007FFB14E80000), size: 430080 (result: 0), SymType: '-exported-', PDB: 'C:\Windows\System32\oleacc.dll', fileVersion: 7.2.22621.1
+Log: Id: 20820: C:\Windows\System32\Windows.UI.FileExplorer.dll:Windows.UI.FileExplorer.dll (00007FFAC8320000), size: 991232 (result: 0), SymType: '-exported-', PDB: 'C:\Windows\System32\Windows.UI.FileExplorer.dll', fileVersion: 6.2.22621.1105
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\ntshrui.dll:ntshrui.dll (00007FFAFC960000), size: 589824 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\ntshrui.dll', fileVersion: 6.2.22621.1105
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\cscapi.dll:cscapi.dll (00007FFB0B380000), size: 73728 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\cscapi.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\system32\xmllite.dll:xmllite.dll (00007FFB23D30000), size: 225280 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\xmllite.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\System32\StructuredQuery.dll:StructuredQuery.dll (00007FFAF2950000), size: 765952 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\StructuredQuery.dll', fileVersion: 7.0.22621.900
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\atlthunk.dll:atlthunk.dll (00007FFADE3E0000), size: 57344 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\atlthunk.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\Windows\System32\cldapi.dll:cldapi.dll (00007FFAE3760000), size: 184320 (result: 0), SymType: '-exported-', PDB: 'C:\Windows\System32\cldapi.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\system32\windowsudk.shellcommon.dll:windowsudk.shellcommon.dll (00007FFAEDA50000), size: 4689920 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\windowsudk.shellcommon.dll', fileVersion: 6.2.22621.1105
+Log: Id: 20820: C:\Windows\System32\Windows.UI.dll:Windows.UI.dll (00007FFB0BA20000), size: 1523712 (result: 0), SymType: '-nosymbols-', PDB: 'C:\Windows\System32\Windows.UI.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\Windows\System32\Windows.UI.Immersive.dll:Windows.UI.Immersive.dll (00007FFAEEA30000), size: 1527808 (result: 0), SymType: '-exported-', PDB: 'C:\Windows\System32\Windows.UI.Immersive.dll', fileVersion: 6.2.22621.900
+Log: Id: 20820: C:\WINDOWS\System32\p9np.dll:p9np.dll (00007FFB0A220000), size: 167936 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\p9np.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\System32\drprov.dll:drprov.dll (00007FFB09F50000), size: 49152 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\drprov.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\System32\ntlanman.dll:ntlanman.dll (00007FFB09F30000), size: 102400 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\ntlanman.dll', fileVersion: 6.2.22621.674
+Log: Id: 20820: C:\WINDOWS\System32\davclnt.dll:davclnt.dll (00007FFB09F10000), size: 126976 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\davclnt.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\System32\wkscli.dll:wkscli.dll (00007FFB213D0000), size: 106496 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\wkscli.dll', fileVersion: 6.2.22621.674
+Log: Id: 20820: C:\WINDOWS\System32\coml2.dll:coml2.dll (00007FFB29760000), size: 512000 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\coml2.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\LINKINFO.dll:LINKINFO.dll (00007FFAFBB90000), size: 53248 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\LINKINFO.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\Windows\System32\twinapi.dll:twinapi.dll (00007FFAEC390000), size: 823296 (result: 0), SymType: '-nosymbols-', PDB: 'C:\Windows\System32\twinapi.dll', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\lib\MeshPart.pyd:MeshPart.pyd (00007FFB1C0F0000), size: 237568 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\lib\MeshPart.pyd'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\SMESHDS.dll:SMESHDS.dll (00007FFAE31E0000), size: 204800 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\SMESHDS.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\NETGENPlugin.dll:NETGENPlugin.dll (00007FFAD4440000), size: 294912 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\NETGENPlugin.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\StdMeshers.dll:StdMeshers.dll (00007FFAC7F50000), size: 2142208 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\StdMeshers.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\SMESH.dll:SMESH.dll (00007FFAC7D30000), size: 2187264 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\SMESH.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\SMDS.dll:SMDS.dll (00007FFAD0080000), size: 466944 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\SMDS.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\DriverSTL.dll:DriverSTL.dll (00007FFAFBE50000), size: 102400 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\DriverSTL.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\vtkCommonCore-8.2.dll:vtkCommonCore-8.2.dll (00007FFAC7550000), size: 2924544 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\vtkCommonCore-8.2.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\nglib.dll:nglib.dll (00007FFAC09D0000), size: 3633152 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\nglib.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\MEFISTO2.dll:MEFISTO2.dll (00007FFAED5A0000), size: 126976 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\MEFISTO2.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\ngcore.dll:ngcore.dll (00007FFACF220000), size: 491520 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\ngcore.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\DriverDAT.dll:DriverDAT.dll (00007FFAFF830000), size: 45056 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\DriverDAT.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKLCAF.dll:TKLCAF.dll (00007FFACDE20000), size: 671744 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKLCAF.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\DriverUNV.dll:DriverUNV.dll (00007FFAE0790000), size: 122880 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\DriverUNV.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\vtkFiltersVerdict-8.2.dll:vtkFiltersVerdict-8.2.dll (00007FFADFF40000), size: 122880 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\vtkFiltersVerdict-8.2.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\medC.dll:medC.dll (00007FFAC04D0000), size: 5218304 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\medC.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\boost_thread-vc141-mt-x64-1_67.dll:boost_thread-vc141-mt-x64-1_67.dll (00007FFAD4420000), size: 110592 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\boost_thread-vc141-mt-x64-1_67.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\Driver.dll:Driver.dll (00007FFAFF720000), size: 57344 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\Driver.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKMeshVS.dll:TKMeshVS.dll (00007FFACF1C0000), size: 331776 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKMeshVS.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKCDF.dll:TKCDF.dll (00007FFAD43D0000), size: 282624 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKCDF.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\vtkCommonDataModel-8.2.dll:vtkCommonDataModel-8.2.dll (00007FFAC0200000), size: 2945024 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\vtkCommonDataModel-8.2.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKXDEIGES.dll:TKXDEIGES.dll (00007FFAD4310000), size: 110592 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKXDEIGES.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\vtksys-8.2.dll:vtksys-8.2.dll (00007FFACDDC0000), size: 331776 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\vtksys-8.2.dll'
+Log: Id: 20820: C:\WINDOWS\System32\PSAPI.DLL:PSAPI.DLL (00007FFB29670000), size: 32768 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\System32\PSAPI.DLL', fileVersion: 6.2.22621.1
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\vtkverdict-8.2.dll:vtkverdict-8.2.dll (00007FFAD2470000), size: 192512 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\vtkverdict-8.2.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKXCAF.dll:TKXCAF.dll (00007FFACD6A0000), size: 794624 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKXCAF.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\vtkCommonExecutionModel-8.2.dll:vtkCommonExecutionModel-8.2.dll (00007FFAC8E30000), size: 589824 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\vtkCommonExecutionModel-8.2.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKXDESTEP.dll:TKXDESTEP.dll (00007FFAC8540000), size: 679936 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKXDESTEP.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\vtkCommonTransforms-8.2.dll:vtkCommonTransforms-8.2.dll (00007FFAD16B0000), size: 188416 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\vtkCommonTransforms-8.2.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\hdf5.dll:hdf5.dll (00007FFABFEF0000), size: 3170304 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\hdf5.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKService.dll:TKService.dll (00007FFAC8440000), size: 1015808 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKService.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKV3d.dll:TKV3d.dll (00007FFAC64C0000), size: 2473984 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKV3d.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\vtkCommonMisc-8.2.dll:vtkCommonMisc-8.2.dll (00007FFACF060000), size: 139264 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\vtkCommonMisc-8.2.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\vtkCommonMath-8.2.dll:vtkCommonMath-8.2.dll (00007FFACDD20000), size: 139264 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\vtkCommonMath-8.2.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\vtkCommonSystem-8.2.dll:vtkCommonSystem-8.2.dll (00007FFACD680000), size: 114688 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\vtkCommonSystem-8.2.dll'
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKVCAF.dll:TKVCAF.dll (00007FFACD5E0000), size: 212992 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKVCAF.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\Program Files\FreeCAD 0.20\bin\TKCAF.dll:TKCAF.dll (00007FFAC8DA0000), size: 540672 (result: 0), SymType: '-exported-', PDB: 'C:\Program Files\FreeCAD 0.20\bin\TKCAF.dll', fileVersion: 7.6.3.0
+Log: Id: 20820: C:\WINDOWS\system32\UIAutomationCore.dll:UIAutomationCore.dll (00007FFAE0C50000), size: 4460544 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\UIAutomationCore.dll', fileVersion: 7.2.22621.1105
+Log: Id: 20820: C:\Windows\System32\OneCoreCommonProxyStub.dll:OneCoreCommonProxyStub.dll (00007FFB0EEE0000), size: 667648 (result: 0), SymType: '-exported-', PDB: 'C:\Windows\System32\OneCoreCommonProxyStub.dll', fileVersion: 6.2.22621.755
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\sxs.dll:sxs.dll (00007FFB28A00000), size: 704512 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\sxs.dll', fileVersion: 6.2.22621.963
+Log: Id: 20820: C:\WINDOWS\system32\Windows.Storage.Search.dll:Windows.Storage.Search.dll (00007FFAD0720000), size: 933888 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\Windows.Storage.Search.dll', fileVersion: 6.2.22621.1105
+Log: Id: 20820: C:\Windows\System32\Windows.StateRepositoryPS.dll:Windows.StateRepositoryPS.dll (00007FFB0F4D0000), size: 962560 (result: 0), SymType: '-exported-', PDB: 'C:\Windows\System32\Windows.StateRepositoryPS.dll', fileVersion: 6.2.22621.1194
+Log: Id: 20820: C:\Windows\System32\ActXPrxy.dll:ActXPrxy.dll (00007FFB20860000), size: 520192 (result: 0), SymType: '-exported-', PDB: 'C:\Windows\System32\ActXPrxy.dll', fileVersion: 6.2.22621.900
+Log: Id: 20820: C:\WINDOWS\system32\mssprxy.dll:mssprxy.dll (00007FFAE1B70000), size: 155648 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\system32\mssprxy.dll', fileVersion: 7.0.22621.1194
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\mrmcorer.dll:mrmcorer.dll (00007FFB02630000), size: 1069056 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\mrmcorer.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\bcp47mrm.dll:bcp47mrm.dll (00007FFAF92B0000), size: 204800 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\bcp47mrm.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: C:\WINDOWS\WinSxS\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_1.1.22621.819_none_da30437f1b9d3de1\gdiplus.dll:gdiplus.dll (00007FFB10D90000), size: 1806336 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\WinSxS\amd64_microsoft.windows.gdiplus_6595b64144ccf1df_1.1.22621.819_none_da30437f1b9d3de1\gdiplus.dll', fileVersion: 6.2.22621.819
+Log: Id: 20820: C:\WINDOWS\SYSTEM32\d2d1.dll:d2d1.dll (00007FFB24B00000), size: 6033408 (result: 0), SymType: '-exported-', PDB: 'C:\WINDOWS\SYSTEM32\d2d1.dll', fileVersion: 6.2.22621.608
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD8919955)
+Log: Id: 20820: 00007FFAD8919955 (FreeCADGui): (filename not available): Gui::Tessellator::~Tessellator
+Log: Id: 20820: ERROR: SymGetSymFromAddr64, GetLastError: 487 (Address: 00007FFB23C110EA)
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB23C110EA)
+Log: Id: 20820: 00007FFB23C110EA (VCRUNTIME140_1): (filename not available): (function-name not available)
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB23C12C96)
+Log: Id: 20820: 00007FFB23C12C96 (VCRUNTIME140_1): (filename not available): _NLG_Return2
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB23C13AD5)
+Log: Id: 20820: 00007FFB23C13AD5 (VCRUNTIME140_1): (filename not available): _NLG_Return2
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB23C12244)
+Log: Id: 20820: 00007FFB23C12244 (VCRUNTIME140_1): (filename not available): _NLG_Return2
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB23C140D9)
+Log: Id: 20820: 00007FFB23C140D9 (VCRUNTIME140_1): (filename not available): _CxxFrameHandler4
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB2B7F3F2F)
+Log: Id: 20820: 00007FFB2B7F3F2F (ntdll): (filename not available): _chkstk
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB2B7703D4)
+Log: Id: 20820: 00007FFB2B7703D4 (ntdll): (filename not available): RtlUnwindEx
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB23C13D72)
+Log: Id: 20820: 00007FFB23C13D72 (VCRUNTIME140_1): (filename not available): _NLG_Return2
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB23C11635)
+Log: Id: 20820: 00007FFB23C11635 (VCRUNTIME140_1): (filename not available): _NLG_Return2
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB23C119D5)
+Log: Id: 20820: 00007FFB23C119D5 (VCRUNTIME140_1): (filename not available): _NLG_Return2
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB23C12317)
+Log: Id: 20820: 00007FFB23C12317 (VCRUNTIME140_1): (filename not available): _NLG_Return2
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB23C140D9)
+Log: Id: 20820: 00007FFB23C140D9 (VCRUNTIME140_1): (filename not available): _CxxFrameHandler4
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD8D267EC)
+Log: Id: 20820: 00007FFAD8D267EC (FreeCADGui): (filename not available): isatty
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB2B7F3EAF)
+Log: Id: 20820: 00007FFB2B7F3EAF (ntdll): (filename not available): _chkstk
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB2B76EAE6)
+Log: Id: 20820: 00007FFB2B76EAE6 (ntdll): (filename not available): RtlFindCharInUnicodeString
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB2B7A4B35)
+Log: Id: 20820: 00007FFB2B7A4B35 (ntdll): (filename not available): RtlRaiseException
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB28E3051C)
+Log: Id: 20820: 00007FFB28E3051C (KERNELBASE): (filename not available): RaiseException
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB23C26480)
+Log: Id: 20820: 00007FFB23C26480 (VCRUNTIME140): (filename not available): CxxThrowException
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD97BC7C4)
+Log: Id: 20820: 00007FFAD97BC7C4 (FreeCADApp): (filename not available): App::Application::runApplication
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB29474090)
+Log: Id: 20820: 00007FFB29474090 (ucrtbase): (filename not available): log2f
+Log: Id: 20820: ERROR: SymGetSymFromAddr64, GetLastError: 487 (Address: 00007FF60060619F)
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FF60060619F)
+Log: Id: 20820: 00007FF60060619F (FreeCAD): (filename not available): (function-name not available)
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB23C2EBC0)
+Log: Id: 20820: 00007FFB23C2EBC0 (VCRUNTIME140): (filename not available): _C_specific_handler
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB2B7F3EAF)
+Log: Id: 20820: 00007FFB2B7F3EAF (ntdll): (filename not available): _chkstk
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB2B76EAE6)
+Log: Id: 20820: 00007FFB2B76EAE6 (ntdll): (filename not available): RtlFindCharInUnicodeString
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB2B7F2E9E)
+Log: Id: 20820: 00007FFB2B7F2E9E (ntdll): (filename not available): KiUserExceptionDispatcher
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAFC062D87)
+Log: Id: 20820: 00007FFAFC062D87 (FreeCADBase): (filename not available): Py::_Dict_Check
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAFC082C60)
+Log: Id: 20820: 00007FFAFC082C60 (FreeCADBase): (filename not available): Base::Exception::setPyObject
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD895EE96)
+Log: Id: 20820: 00007FFAD895EE96 (FreeCADGui): (filename not available): Gui::Document::handleChildren3D
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD896322F)
+Log: Id: 20820: 00007FFAD896322F (FreeCADGui): (filename not available): Gui::Document::redo
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD8BD678F)
+Log: Id: 20820: 00007FFAD8BD678F (FreeCADGui): (filename not available): Gui::View3DInventor::onMsg
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD8936DC2)
+Log: Id: 20820: 00007FFAD8936DC2 (FreeCADGui): (filename not available): Gui::Application::sendMsgToActiveView
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD89B0267)
+Log: Id: 20820: 00007FFAD89B0267 (FreeCADGui): (filename not available): Gui::Command::_invoke
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD89B4A2D)
+Log: Id: 20820: 00007FFAD89B4A2D (FreeCADGui): (filename not available): Gui::Command::invoke
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD9B61DA7)
+Log: Id: 20820: 00007FFAD9B61DA7 (Qt5Core): (filename not available): QObject::qt_static_metacall
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFADA605DCF)
+Log: Id: 20820: 00007FFADA605DCF (Qt5Widgets): (filename not available): QAction::activate
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFADA606D6B)
+Log: Id: 20820: 00007FFADA606D6B (Qt5Widgets): (filename not available): QAction::event
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFADA614990)
+Log: Id: 20820: 00007FFADA614990 (Qt5Widgets): (filename not available): QApplicationPrivate::notify_helper
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFADA613A13)
+Log: Id: 20820: 00007FFADA613A13 (Qt5Widgets): (filename not available): QApplication::notify
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD8983B59)
+Log: Id: 20820: 00007FFAD8983B59 (FreeCADGui): (filename not available): Gui::ExpressionTextEdit::textChanged2
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD9B42ACA)
+Log: Id: 20820: 00007FFAD9B42ACA (Qt5Core): (filename not available): QCoreApplication::notifyInternal2
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD9FA888F)
+Log: Id: 20820: 00007FFAD9FA888F (Qt5Gui): (filename not available): QShortcutMap::dispatchEvent
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD9FAAD3A)
+Log: Id: 20820: 00007FFAD9FAAD3A (Qt5Gui): (filename not available): QShortcutMap::tryShortcut
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD9F6D82F)
+Log: Id: 20820: 00007FFAD9F6D82F (Qt5Gui): (filename not available): QWindowSystemInterface::handleShortcutEvent
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD9F8283D)
+Log: Id: 20820: 00007FFAD9F8283D (Qt5Gui): (filename not available): QGuiApplicationPrivate::processKeyEvent
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD9F6ECB0)
+Log: Id: 20820: 00007FFAD9F6ECB0 (Qt5Gui): (filename not available): QWindowSystemInterface::sendWindowSystemEvents
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD9B8BA5A)
+Log: Id: 20820: 00007FFAD9B8BA5A (Qt5Core): (filename not available): QEventDispatcherWin32::processEvents
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD7B92DD9)
+Log: Id: 20820: 00007FFAD7B92DD9 (qwindows): (filename not available): qt_plugin_query_metadata
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD9B3EF2C)
+Log: Id: 20820: 00007FFAD9B3EF2C (Qt5Core): (filename not available): QEventLoop::exec
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD9B41A94)
+Log: Id: 20820: 00007FFAD9B41A94 (Qt5Core): (filename not available): QCoreApplication::exec
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFAD893635E)
+Log: Id: 20820: 00007FFAD893635E (FreeCADGui): (filename not available): Gui::Application::runApplication
+Log: Id: 20820: ERROR: SymGetSymFromAddr64, GetLastError: 487 (Address: 00007FF600603F68)
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FF600603F68)
+Log: Id: 20820: 00007FF600603F68 (FreeCAD): (filename not available): (function-name not available)
+Log: Id: 20820: ERROR: SymGetSymFromAddr64, GetLastError: 487 (Address: 00007FF600605287)
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FF600605287)
+Log: Id: 20820: 00007FF600605287 (FreeCAD): (filename not available): (function-name not available)
+Log: Id: 20820: ERROR: SymGetSymFromAddr64, GetLastError: 487 (Address: 00007FF600604836)
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FF600604836)
+Log: Id: 20820: 00007FF600604836 (FreeCAD): (filename not available): (function-name not available)
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB2A9126BD)
+Log: Id: 20820: 00007FFB2A9126BD (KERNEL32): (filename not available): BaseThreadInitThunk
+Log: Id: 20820: ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 00007FFB2B7ADFB8)
+Log: Id: 20820: 00007FFB2B7ADFB8 (ntdll): (filename not available): RtlUserThreadStart
+Log: *** Unhandled Exception!
+Log:    ExpCode: 0xC0000005
+Log:    ExpFlags: 0
+Log:    ExpAddress: 0xD8919955
