@@ -26,7 +26,7 @@ class Show_Components():
 
     def Activated(self):
         self.state = not self.state
-        layout.hide_components(self.state)
+        layout.show_components(self.state)
         return
 
 Gui.addCommand("RecomputeBeam", Recompute_Beam())

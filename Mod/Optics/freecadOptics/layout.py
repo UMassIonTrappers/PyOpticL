@@ -52,7 +52,7 @@ def redraw():
             i.touch()
     App.ActiveDocument.recompute()
 
-def hide_components(state):
+def show_components(state):
     for i in App.ActiveDocument.Objects:
         if not isinstance(i.Proxy, baseplate):
             if state:
