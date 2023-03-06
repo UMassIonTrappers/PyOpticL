@@ -52,6 +52,14 @@ def redraw():
             i.touch()
     App.ActiveDocument.recompute()
 
+def hide_components(state):
+    for i in App.ActiveDocument.Objects:
+        if not isinstance(i.Proxy, baseplate):
+            if state:
+                i.ViewObject.show()
+            else:
+                i.ViewObject.hide()
+
 class baseplate:
 
     def __init__(self, obj, dx, dy, dz, drill):
@@ -81,18 +89,9 @@ class ViewProvider:
 
     def attach(self, obj):
         return
-
-    def updateData(self, fp, prop):
-        return
-
-    def getDisplayModes(self,obj):
-        return []
-
+    
     def getDefaultDisplayMode(self):
         return "Shaded"
-
-    def setDisplayMode(self,mode):
-        return mode
 
     def onDelete(self, feature, subelements):
         # delete all elements when baseplate is deleted
@@ -100,10 +99,6 @@ class ViewProvider:
             if i != feature.Object:
                 App.ActiveDocument.removeObject(i.Name)
         return True
-
-    def onChanged(self, vp, prop):
-        #App.Console.PrintMessage("Change property: " + str(prop) + "\n")
-        pass
 
     def getIcon(self):
         return 

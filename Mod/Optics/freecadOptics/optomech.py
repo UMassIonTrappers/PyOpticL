@@ -1,7 +1,6 @@
 import FreeCAD as App
 import Mesh
 import Part
-import MeshPart
 from math import *
 from . import layout
 
@@ -61,6 +60,26 @@ def _create_hole(dia, dz, x, y, z, head_dia=0, head_dz=0, dir=(0, 0, -1)):
     part.translate(App.Vector(x, y, z))
     part = part.fuse(part)
     return part
+
+class baseplate_mount:
+    def __init__(self, obj):
+        obj.Proxy = self
+        obj.ViewObject.ShapeColor=(0.5, 0.5, 0.55)
+        ViewProvider(obj.ViewObject)
+
+    def get_drill(self, obj):
+        part = _create_hole(CLR_DIA_14_20, drill_depth, 0, 0, -INCH/2, WASHER_DIA_14_20, 10)
+        part.Placement=obj.Placement
+        return part
+
+    def execute(self, obj):
+        mesh = Mesh.createCylinder((CLR_DIA_14_20-1)/2, INCH, True, 1, 50)
+        temp = Mesh.createCylinder((WASHER_DIA_14_20-2)/2, 10, True, 1, 50)
+        mesh.addMesh(temp)
+        mesh.rotate(0, pi/2, 0)
+        mesh.translate(0, 0, -INCH/2+0.5)
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
 
 class surface_adapter:
     def __init__(self, obj, mountOff, mount_hole_dy):
@@ -227,8 +246,8 @@ class mirror_mount_k05s2:
 
     def get_drill(self, obj):
         part = _create_hole(TAP_DIA_8_32, drill_depth, -8-obj.MirrorThickness.Value, 0, -INCH/2)
-        part = part.fuse(_create_hole(1, 3, -8-obj.MirrorThickness.Value, -5, -INCH/2))
-        part = part.fuse(_create_hole(1, 3, -8-obj.MirrorThickness.Value, 5, -INCH/2))
+        part = part.fuse(_create_hole(2, 2.2, -8-obj.MirrorThickness.Value, -5, -INCH/2))
+        part = part.fuse(_create_hole(2, 2.2, -8-obj.MirrorThickness.Value, 5, -INCH/2))
         part.Placement=obj.Placement
         return part
 
@@ -255,8 +274,8 @@ class mirror_mount_c05g:
 
     def get_drill(self, obj):
         part = _create_hole(TAP_DIA_8_32, drill_depth, -6.4-obj.MirrorThickness.Value, 0, -INCH/2)
-        part = part.fuse(_create_hole(1, 3, -6.4-obj.MirrorThickness.Value, -5, -INCH/2))
-        part = part.fuse(_create_hole(1, 3, -4.6-obj.MirrorThickness.Value, 5, -INCH/2))
+        part = part.fuse(_create_hole(2, 2.2, -6.4-obj.MirrorThickness.Value, -5, -INCH/2))
+        part = part.fuse(_create_hole(2, 2.2, -4.6-obj.MirrorThickness.Value, 5, -INCH/2))
         part.Placement=obj.Placement
         return part
 
@@ -284,8 +303,8 @@ class splitter_mount_c05g:
 
     def get_drill(self, obj):
         part = _create_hole(TAP_DIA_8_32, drill_depth, -6.4-obj.MirrorThickness.Value, 0, -INCH/2)
-        part = part.fuse(_create_hole(1, 3, -6.4-obj.MirrorThickness.Value, -5, -INCH/2))
-        part = part.fuse(_create_hole(1, 3, -4.6-obj.MirrorThickness.Value, 5, -INCH/2))
+        part = part.fuse(_create_hole(2, 2.2, -6.4-obj.MirrorThickness.Value, -5, -INCH/2))
+        part = part.fuse(_create_hole(2, 2.2, -4.6-obj.MirrorThickness.Value, 5, -INCH/2))
         part.Placement=obj.Placement
         return part
 
@@ -311,8 +330,8 @@ class lens_holder_l05g:
 
     def get_drill(self, obj):
         part = _create_hole(TAP_DIA_8_32, drill_depth, -9.5, 0, -INCH/2)
-        part = part.fuse(_create_hole(1, 3, -9.5, -5, -INCH/2))
-        part = part.fuse(_create_hole(1, 3, -9.5, 5, -INCH/2))
+        part = part.fuse(_create_hole(2, 2.2, -9.5, -5, -INCH/2))
+        part = part.fuse(_create_hole(2, 2.2, -9.5, 5, -INCH/2))
         part.Placement=obj.Placement
         return part
 
@@ -338,27 +357,6 @@ class pinhole_ida12:
     def execute(self, obj):
         mesh = _orient_stl("IDA12-P5-Solidworks.stl", (pi/2, 0, -pi/2), (-0.35, 0.05, 0), 1000)
         mesh.rotate(pi/2, 0, 0)
-        mesh.Placement = obj.Mesh.Placement
-        obj.Mesh = mesh
-        
-
-class baseplate_mount:
-    def __init__(self, obj):
-        obj.Proxy = self
-        obj.ViewObject.ShapeColor=(0.5, 0.5, 0.55)
-        ViewProvider(obj.ViewObject)
-
-    def get_drill(self, obj):
-        part = _create_hole(CLR_DIA_14_20, drill_depth, 0, 0, -INCH/2, WASHER_DIA_14_20, 10)
-        part.Placement=obj.Placement
-        return part
-
-    def execute(self, obj):
-        mesh = Mesh.createCylinder((CLR_DIA_14_20-1)/2, INCH, True, 1, 50)
-        temp = Mesh.createCylinder((WASHER_DIA_14_20-2)/2, 10, True, 1, 50)
-        mesh.addMesh(temp)
-        mesh.rotate(0, pi/2, 0)
-        mesh.translate(0, 0, -INCH/2+0.5)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
         
@@ -397,20 +395,11 @@ class ViewProvider:
         obj.Proxy = self
 
     def attach(self, obj):
-        self.Object = obj
         return
-
-    def updateData(self, fp, prop):
-        return
-
-    def getDisplayModes(self,obj):
-        return []
+        
 
     def getDefaultDisplayMode(self):
         return "Shaded"
-
-    def setDisplayMode(self,mode):
-        return mode
 
     def onDelete(self, feature, subelements):
         element = feature.Object.Proxy
@@ -425,9 +414,6 @@ class ViewProvider:
         if "Adapter" in feature.Object.Name:
             return False
         return True
-
-    def onChanged(self, vp, prop):
-        pass
 
     def getIcon(self):
         return """

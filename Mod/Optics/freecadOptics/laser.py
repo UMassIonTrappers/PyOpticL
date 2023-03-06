@@ -211,28 +211,15 @@ class ViewProvider:
 
     def attach(self, obj):
         return
-
-    def updateData(self, fp, prop):
-        return
-
-    def getDisplayModes(self,obj):
-        return []
-
+    
     def getDefaultDisplayMode(self):
         return "Shaded"
-
-    def setDisplayMode(self,mode):
-        return mode
 
     def onDelete(self, feature, subelements):
         for i in App.ActiveDocument.Objects:
             if i != feature.Object:
                 App.ActiveDocument.removeObject(i.Name)
         return True
-
-    def onChanged(self, vp, prop):
-        #App.Console.PrintMessage("Change property: " + str(prop) + "\n")
-        pass
 
     def getIcon(self):
         return """
