@@ -3,31 +3,31 @@ import FreeCADGui as Gui
 
 from freecadOptics import layout
 
-class Create_Baseplate():
-
-    def GetResources(self):
-        return {"Pixmap"  : "My_Command_Icon",
-                "Accel"   : "Shift+B",
-                "MenuText": "Create Baseplate",
-                "ToolTip" : "Add a new baseplate object"}
-
-    def Activated(self):
-        layout.create_baseplate(100, 100, layout.INCH)
-        return
-
-    def IsActive(self):
-        return not "baseplate" in [i.Proxy.Tags for i in App.ActiveDocument.Objects]
-
 class Recompute_Beam():
 
     def GetResources(self):
-        return {"Pixmap"  : "My_Command_Icon",
+        return {"Pixmap"  : ":/icons/view-refresh.svg",
                 "Accel"   : "Shift+R",
                 "MenuText": "Recompute Beam Path"}
 
     def Activated(self):
         layout.redraw()
         return
+    
+class Show_Components():
 
-Gui.addCommand("CreateBaseplate", Create_Baseplate())
+    def __init__(self):
+        self.state = True
+
+    def GetResources(self):
+        return {"Pixmap"  : ":/icons/dagViewVisible.svg",
+                "Accel"   : "Shift+V",
+                "MenuText": "Toggle Component Visibility"}
+
+    def Activated(self):
+        self.state = not self.state
+        layout.hide_components(self.state)
+        return
+
 Gui.addCommand("RecomputeBeam", Recompute_Beam())
+Gui.addCommand("ShowComponents", Show_Components())

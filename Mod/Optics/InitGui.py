@@ -1,6 +1,6 @@
 import FreeCADGui as Gui
 
-class MyWorkbench (Workbench):
+class OpticsWorkbench (Workbench):
 
     MenuText = "Optics"
     ToolTip = "A workbench for designing baseplates for optical layouts"
@@ -39,10 +39,10 @@ class MyWorkbench (Workbench):
         """This function is executed when the workbench is first activated.
         It is executed once in a FreeCAD session followed by the Activated function.
         """
-        import guiCommands # import here all the needed files that create your FreeCAD commands
-        self.toolbar = ["CreateBaseplate", "RecomputeBeam"] # A list of command names created in the line above
-        self.appendToolbar("Commands",self.toolbar) # creates a new toolbar with your commands
-        self.appendMenu(["Add Optics"],self.toolbar) # appends a submenu to an existing menu
+        import guiCommands
+        self.toolbar = ["RecomputeBeam", "ShowComponents"] # A list of command names created in the line above
+        self.appendToolbar("Optics Commands",self.toolbar) # creates a new toolbar with your commands
+        self.appendMenu(["Optics"],self.toolbar) # appends a submenu to an existing menu
 
     def Activated(self):
         """This function is executed whenever the workbench is activated"""
@@ -61,5 +61,5 @@ class MyWorkbench (Workbench):
         # This function is mandatory if this is a full Python workbench
         # This is not a template, the returned string should be exactly "Gui::PythonWorkbench"
         return "Gui::PythonWorkbench"
-       
-Gui.addWorkbench(MyWorkbench())
+
+Gui.addWorkbench(OpticsWorkbench())
