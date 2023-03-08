@@ -109,45 +109,12 @@ class surface_adapter:
         dy = obj.MountHoleDistance.Value+CLR_DIA_8_32*2+2
         dz = HEAD_DZ_8_32+3
         part = _create_box(dx, dy, dz, 0, 0, -dz, 4)
-        temp = _create_hole(CLR_DIA_8_32, dz, 0, 0, -dz-INCH/2, HEAD_DIA_8_32, HEAD_DZ_8_32, dir=(0,0,1))
+        temp = _create_hole(CLR_DIA_8_32, dz, 0, 0, -dz, HEAD_DIA_8_32, HEAD_DZ_8_32, dir=(0,0,1))
         temp = temp.fuse(_create_hole(CLR_DIA_8_32, dz, 0, -obj.MountHoleDistance.Value/2, 0, HEAD_DIA_8_32, HEAD_DZ_8_32))
         temp = temp.fuse(_create_hole(CLR_DIA_8_32, dz, 0, obj.MountHoleDistance.Value/2, 0, HEAD_DIA_8_32, HEAD_DZ_8_32))
         part = part.cut(temp)
         part.translate(App.Vector(*self.MountOffset))
         part = part.fuse(part)
-        obj.Shape = part
-        parent = obj.LinkToParent
-        obj.Placement=parent.Mesh.Placement
-
-class universal_mount:
-    def __init__(self, obj, size, mountOff, zOff, mountDrill, drill=True):
-        obj.Proxy = self
-        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
-        obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
-        obj.setEditorMode('Placement', 2)
-        ViewProvider(obj.ViewObject)
-        self.dx = size[0]
-        self.dy = size[1]
-        self.dz = size[2]
-        self.mountOffset = mountOff
-        self.zOff = zOff
-        self.mountDrill = mountDrill
-
-    def get_drill(self, obj):
-        part = _create_box(self.dx+1, self.dy+1, self.dz, self.mountOffset[0], self.mountOffset[1], -self.dz-INCH/2, 4)
-        part = part.fuse(_create_hole(TAP_DIA_8_32, drill_depth, self.mountOffset[0], self.mountOffset[1]-self.dy/2+5, -self.dz-INCH/2))
-        part = part.fuse(_create_hole(TAP_DIA_8_32, drill_depth, self.mountOffset[0], self.mountOffset[1]+self.dy/2-5, -self.dz-INCH/2))
-        part.Placement=obj.Placement
-        return part
-
-    def execute(self, obj):
-        dz = self.dz+self.zOff+INCH/2
-        part = _create_box(self.dx, self.dy, dz, 0, 0, -dz, 4)
-        temp = _create_hole(CLR_DIA_8_32, dz, 0, -self.dy/2+5, 0, HEAD_DIA_8_32, HEAD_DZ_8_32)
-        temp = temp.fuse(_create_hole(CLR_DIA_8_32, dz, 0, self.dy/2-5, 0, HEAD_DIA_8_32, HEAD_DZ_8_32))
-        part = part.cut(temp)
-        part.translate(App.Vector(*self.mountOffset, self.zOff))
-        part = part.cut(self.mountDrill)
         obj.Shape = part
         parent = obj.LinkToParent
         obj.Placement=parent.Mesh.Placement
@@ -182,6 +149,73 @@ class skate_mount:
         part = part.cut(temp)
         part.translate(App.Vector(0, 0, -self.CubeSize/2+1))
         part = part.fuse(part)
+        obj.Shape = part
+        parent = obj.LinkToParent
+        obj.Placement=parent.Mesh.Placement
+
+
+class slide_mount:
+    def __init__(self, obj, mountOff, mount_hole_dy, drill=True):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'MountHoleDistance').MountHoleDistance = mount_hole_dy
+        obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
+        obj.setEditorMode('Placement', 2)
+        ViewProvider(obj.ViewObject)
+        self.MountOffset = mountOff
+
+    def get_drill(self, obj):
+        dx = HEAD_DIA_8_32+4
+        dy = obj.MountHoleDistance.Value+CLR_DIA_8_32*2+3
+        dz = HEAD_DZ_8_32+3-self.MountOffset[2]-INCH/2
+        part = _create_box(dx, dy, dz, 0, 0, -dz-INCH/2, 4)
+        part = part.fuse(_create_hole(TAP_DIA_8_32, drill_depth, 0, -obj.MountHoleDistance.Value/2, -dz-INCH/2))
+        part = part.fuse(_create_hole(TAP_DIA_8_32, drill_depth, 0, obj.MountHoleDistance.Value/2, -dz-INCH/2))
+        part.Placement=obj.Placement
+        return part
+
+    def execute(self, obj):
+        dx = HEAD_DIA_8_32+3
+        dy = obj.MountHoleDistance.Value+CLR_DIA_8_32*2+2
+        dz = HEAD_DZ_8_32+3
+        part = _create_box(dx, dy, dz, 0, 0, -dz, 4)
+        part = part.cut(temp)
+        part.translate(App.Vector(*self.MountOffset))
+        part = part.fuse(part)
+        obj.Shape = part
+        parent = obj.LinkToParent
+        obj.Placement=parent.Mesh.Placement
+
+
+class universal_mount:
+    def __init__(self, obj, size, mountOff, zOff, mountDrill, drill=True):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
+        obj.setEditorMode('Placement', 2)
+        ViewProvider(obj.ViewObject)
+        self.dx = size[0]
+        self.dy = size[1]
+        self.dz = size[2]
+        self.mountOffset = mountOff
+        self.zOff = zOff
+        self.mountDrill = mountDrill
+
+    def get_drill(self, obj):
+        part = _create_box(self.dx+1, self.dy+1, self.dz, self.mountOffset[0], self.mountOffset[1], -self.dz-INCH/2, 4)
+        part = part.fuse(_create_hole(TAP_DIA_8_32, drill_depth, self.mountOffset[0], self.mountOffset[1]-self.dy/2+5, -self.dz-INCH/2))
+        part = part.fuse(_create_hole(TAP_DIA_8_32, drill_depth, self.mountOffset[0], self.mountOffset[1]+self.dy/2-5, -self.dz-INCH/2))
+        part.Placement=obj.Placement
+        return part
+
+    def execute(self, obj):
+        dz = self.dz+self.zOff+INCH/2
+        part = _create_box(self.dx, self.dy, dz, 0, 0, -dz, 4)
+        temp = _create_hole(CLR_DIA_8_32, dz, 0, -self.dy/2+5, 0, HEAD_DIA_8_32, HEAD_DZ_8_32)
+        temp = temp.fuse(_create_hole(CLR_DIA_8_32, dz, 0, self.dy/2-5, 0, HEAD_DIA_8_32, HEAD_DZ_8_32))
+        part = part.cut(temp)
+        part.translate(App.Vector(*self.mountOffset, self.zOff))
+        part = part.cut(self.mountDrill)
         obj.Shape = part
         parent = obj.LinkToParent
         obj.Placement=parent.Mesh.Placement
@@ -491,11 +525,6 @@ class pinhole_ida12:
         
 
 class isomet_1205c_on_km100pm:
-    ##isomet_1205c parameters
-    aom_dz = 16;    # height of AOM optical axis from base of AOM
-    aom_dx = 22.34; # AOM depth (along optical axis) in mm
-    aom_dy = 50.76; # AOM width (perpendicular to optical axis) in mm
-
     def __init__(self, obj, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
