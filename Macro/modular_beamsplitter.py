@@ -22,12 +22,11 @@ aom_dy = 70
 
 input_y = base_dy-50
 
-
 layout.create_baseplate(base_dx, base_dy, base_dz, name="AOM_Splitter_Baseplate")
 
 beam = layout.add_beam_path(base_dx, input_y, -180)
 
-layout.place_element_along_beam("Input_Mirror_1", optomech.mirror_mount_k05s2, beam, 0b1, 45, 25)
+layout.place_element_along_beam("Input_Mirror_1", optomech.mirror_mount_mk05, beam, 0b1, 45, 25, uMountParam=[(20, 28, 10), (-10, 0)])
 layout.place_element_along_beam("Input_Mirror_2", optomech.mirror_mount_k05s2, beam, 0b1, -135, INCH)
 
 layout.place_element_along_beam("Half_waveplate", optomech.rotation_stage_rsp05, beam, 0b1, 180, 20)
