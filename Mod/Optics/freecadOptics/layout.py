@@ -75,7 +75,7 @@ class baseplate:
         part = Part.makeBox(obj.dx, obj.dy, obj.dz, App.Vector(0, 0, -(obj.dz.Value+INCH/2)))
         if obj.Drill:
             for i in App.ActiveDocument.Objects: #add drill holes for all necessary elements
-                if hasattr(i.Proxy, 'get_drill'):
+                if hasattr(i.Proxy, 'get_drill') and i.Drill:
                     temp = i.Proxy.get_drill(i)
                     temp.translate(App.Vector(-obj.Placement.Base))
                     part = part.cut(temp)
