@@ -175,7 +175,7 @@ class beam_path:
 
             # end if no reflection found
             if min_len == 0:
-                beam_len = 50
+                beam_len = 100
             else:
                 beam_len = min_len
             
