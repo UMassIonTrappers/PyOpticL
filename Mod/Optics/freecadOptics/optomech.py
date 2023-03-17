@@ -165,21 +165,21 @@ class slide_mount:
         self.MountOffset = mountOff
 
     def get_drill(self, obj):
-        dx = HEAD_DIA_8_32+4
-        dy = obj.MountHoleDistance.Value+CLR_DIA_8_32*2+3
-        dz = HEAD_DZ_8_32+3-self.MountOffset[2]-INCH/2
-        part = _create_box(dx, dy, dz, 0, 0, -dz-INCH/2, 4)
-        part = part.fuse(_create_hole(TAP_DIA_8_32, drill_depth, 0, -obj.MountHoleDistance.Value/2, -dz-INCH/2))
-        part = part.fuse(_create_hole(TAP_DIA_8_32, drill_depth, 0, obj.MountHoleDistance.Value/2, -dz-INCH/2))
+        dy = obj.MountHoleDistance.Value+HEAD_DIA_8_32*2+2
+        part = _create_box(6.5, 10, 1, self.MountOffset[0]-0.2, 0, -1-INCH/2, 2)
+        part = part.fuse(_create_hole(TAP_DIA_8_32, drill_depth, self.MountOffset[0], -2.5-dy/2+self.MountOffset[1], -INCH/2))
         part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
         dx = HEAD_DIA_8_32+3
-        dy = obj.MountHoleDistance.Value+CLR_DIA_8_32*2+2
+        dy = obj.MountHoleDistance.Value+HEAD_DIA_8_32*2+2
         dz = HEAD_DZ_8_32+3
-        part = _create_box(dx, dy, dz, 0, 0, -dz, 4)
-        part = part.cut(temp)
+        part = _create_box(dx, dy, dz, 0, -dy/2, -INCH/2, 4)
+        part = part.cut(_create_box(CLR_DIA_8_32, obj.MountHoleDistance.Value+CLR_DIA_8_32, dz, 0, -dy/2-2.5, -INCH/2, CLR_DIA_8_32/2-1e-3))
+        part = part.cut(_create_box(HEAD_DIA_8_32, obj.MountHoleDistance.Value+HEAD_DIA_8_32, 3, 0, -dy/2-2.5, -INCH/2+HEAD_DZ_8_32, HEAD_DIA_8_32/2-1e-3))
+        part = part.fuse(_create_box(dx, 5, INCH/2+CLR_DIA_8_32, 0, -2.5, -INCH/2))
+        part = part.cut(_create_hole(CLR_DIA_8_32, 5, 0, 0, 0, dir=(0, -1, 0)))
         part.translate(App.Vector(*self.MountOffset))
         part = part.fuse(part)
         obj.Shape = part
@@ -517,8 +517,15 @@ class pinhole_ida12:
         self.in_limit = pi/2
         self.in_width = INCH/2
 
+        adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
+        adapter.addProperty("App::PropertyLinkChild","LinkToParent")
+        adapter.LinkToParent=obj
+        slide_mount(adapter, (-0.75, -12.85, 0), 10)
+        ViewProvider(adapter.ViewObject)
+        obj.Label = obj.Label
+
     def execute(self, obj):
-        mesh = _orient_stl("IDA12-P5-Solidworks.stl", (pi/2, 0, -pi/2), (-0.35, 0.05, 0), 1000)
+        mesh = _orient_stl("IDA12-P5-Solidworks.stl", (-pi/2, 0, -pi/2), (-0.35, 0.05, 0), 1000)
         mesh.rotate(pi/2, 0, 0)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
