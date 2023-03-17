@@ -28,28 +28,26 @@ def find_interaction(x1, y1, a1, ref_obj):
     in_limit = ref_obj.Proxy.in_limit
     in_width = ref_obj.Proxy.in_width
 
-    a2 = a_comp
+    a_norm = a_comp
     output = [None, None, [None, None]]
 
     # transmitted beam
     if ref_obj.Proxy.is_tran:
-        a2 = (a_comp+pi)%(2*pi)
-        a = a1+ref_obj.Proxy.tran_angle
-        output[2][1] = a
+        a_norm = (a_comp+pi)%(2*pi)
+        output[2][1] = a1+ref_obj.Proxy.tran_angle
 
     # reflected beam
     if ref_obj.Proxy.is_ref:
-        # offset angle of reflection
-        a_off = ref_obj.Proxy.ref_angle
-        a2 = (a_comp+a_off)%(2*pi)
-        a = 2*a2-a1-pi
-        output[2][0] = a
+        a_norm = (a_comp+ref_obj.Proxy.ref_angle)%(2*pi)
+        output[2][0] = 2*a_norm-a1-pi
+
+    a2 = a_norm+pi/2
 
     # relative angle between the beam and component input normal
-    a_in = abs(a1-a2)%(2*pi)
+    a_in = abs(a1-a_norm)%(2*pi)
     if a_in > pi:
         a_in = 2*pi-a_in
-    # relative angle between beam angle and direction of the componet from the beam
+    # relative angle between beam angle and direction of the component from the beam
     a_rel = abs(a1-atan2(y2-y1, x2-x1))%(2*pi)
     if a_rel > pi:
         a_rel = 2*pi-a_rel
