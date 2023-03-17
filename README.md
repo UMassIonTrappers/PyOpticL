@@ -1,12 +1,14 @@
 # FreeCAD Mini Optics
 
-Based on the MIT QUANTA LAB repo - C4PO ('CAD for Precision Optics') which is written for OpenSCAD
+## Based on MIT QUANTA LAB repo - C4PO ('CAD for Precision Optics') which is written for OpenSCAD
 
 This port is motivated by FreeCADs ability to utilize python libraries.
 
-Examples: 
+For instance, python allows a function to track beam paths within the optics layout.
 
-Modular double pass AOM baseplate, small enough to print on a resin 3D printer:
+Beam path function tracks reflections through PBS and pick offs using a binary encoding
+eg. two beams from a PBS are named 0b00 (transmission) and 0b01 (reflection)
+Allows unique beam tracking even through a double pass AOM. This modular double pass AOM baseplate is small enough to print on a resin 3D printer:
 
 ![image](https://user-images.githubusercontent.com/103533593/225905737-54318378-d2fa-444c-aab7-e172df4a0bad.png)
 
@@ -16,11 +18,8 @@ Modular designs are stackable and independent:
 
 ![image](https://user-images.githubusercontent.com/103533593/225907411-c28c953b-345c-4921-9965-d5707ece66d7.png)
 
-Beam path function tracks reflections through PBS and pick offs using a binary encoding
-eg. two beams from a PBS are named 0b00 (transmission) and 0b01 (reflection)
-Allows unique beam tracking even through a double pass AOM
 
-Optics can be placed ALONG the beam path and follow it. For example if the beam angle is deliberatly skewed, the subsequent optics move:
+Optics can be placed ALONG the beam path and follow it. For example if the beam angle is deliberately skewed, the subsequent optics shift as well:
 ![image](https://user-images.githubusercontent.com/103533593/225908758-4c196c09-486d-4347-9094-3af1f606a397.png)
 
 
@@ -51,6 +50,7 @@ You should now be fully setup to start using the FreeCAD for optics packages
 
 Example of a MWE baseplate:
 
+````
 layout.place_element_along_beam("Input_Mirror_1", optomech.mirror_mount_k05s2, beam, 0b1, up_right, 15)
 layout.place_element_along_beam("Input_Mirror_2", optomech.mirror_mount_k05s2, beam, 0b1, right_up,  INCH)
 layout.place_element_along_beam("Half_waveplate", optomech.rotation_stage_rsp05, beam, 0b1, up, 55)
@@ -74,4 +74,4 @@ layout.place_element("Mount_Hole", optomech.baseplate_mount, (4-offset)*INCH-gap
 layout.place_element("Mount_Hole", optomech.baseplate_mount, (3-offset)*INCH-gap/2, (4-offset)*INCH-gap/2, 0)
 layout.place_element("Mount_Hole", optomech.baseplate_mount, (3-offset)*INCH-gap/2, (6-offset)*INCH-gap/2, 0)
 layout.place_element("Mount_Hole", optomech.baseplate_mount, (2-offset)*INCH-gap/2, (7-offset)*INCH-gap/2, 0)
-
+````
