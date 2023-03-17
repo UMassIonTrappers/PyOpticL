@@ -233,8 +233,6 @@ class fiberport_holder:
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.6)
         ViewProvider(obj.ViewObject)
-        self.is_ref = False
-        self.is_tran = False
         self.in_limit = pi-0.01
         self.in_width = 1
 
@@ -259,8 +257,6 @@ class pbs_on_skate_mount:
         obj.ViewObject.Transparency=50
         self.invert = invert
         ViewProvider(obj.ViewObject)
-        self.is_ref = True
-        self.is_tran = True
         if invert:
             self.ref_angle = -3*pi/4
         else:
@@ -287,8 +283,6 @@ class rotation_stage_rsp05:
         obj.Proxy = self
         obj.ViewObject.ShapeColor=(0.2, 0.2, 0.2)
         ViewProvider(obj.ViewObject)
-        self.is_ref = False
-        self.is_tran = True
         self.tran_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
@@ -306,8 +300,6 @@ class mirror_mount_k05s2:
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = default_mirror_thickness
         obj.ViewObject.ShapeColor=(0.5, 0.5, 0.55)
         ViewProvider(obj.ViewObject)
-        self.is_ref = True
-        self.is_tran = False
         self.ref_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
@@ -340,8 +332,6 @@ class mirror_mount_c05g:
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = mirror_thickness
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.is_ref = True
-        self.is_tran = False
         self.ref_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
@@ -373,8 +363,6 @@ class mirror_mount_km05:
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = mirror_thickness
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.is_ref = True
-        self.is_tran = False
         self.ref_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
@@ -404,8 +392,6 @@ class mirror_mount_mk05:
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.is_ref = True
-        self.is_tran = False
         self.ref_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
@@ -434,8 +420,6 @@ class splitter_mount_c05g:
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.is_ref = True
-        self.is_tran = True
         self.ref_angle = 0
         self.tran_angle = 0
         self.in_limit = pi/2
@@ -463,8 +447,6 @@ class lens_holder_l05g:
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.is_ref = False
-        self.is_tran = True
         self.tran_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
@@ -490,8 +472,6 @@ class pinhole_ida12:
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.is_ref = False
-        self.is_tran = True
         self.tran_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
@@ -510,8 +490,6 @@ class isomet_1205c_on_km100pm:
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.is_ref = False
-        self.is_tran = True
         self.tran_angle = -0.026 #https://isomet.com/PDF%20acousto-optics_modulators/data%20sheets-moduvblue/M1250-T250L-0.45.pdf
         self.in_limit = pi/2
         self.in_width = 5
@@ -536,8 +514,6 @@ class isomet_1205c_on_km100pm_doublepass:
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.is_ref = False
-        self.is_tran = True
         self.tran_angle = 0 #doublepass must retro reflect to connect back to PBS
         self.in_limit = 0
         self.in_width = 5

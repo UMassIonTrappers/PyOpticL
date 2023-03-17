@@ -11,7 +11,7 @@ def is_mult(x, factor, tol=1e-5):
 def find_interaction(x1, y1, a1, ref_obj):
 
     # check if object is an optical component
-    if not hasattr(ref_obj.Proxy, 'is_ref'):
+    if not (hasattr(ref_obj.Proxy, 'in_limit') and hasattr(ref_obj.Proxy, 'in_width')):
         return
     
     # get object placement
@@ -32,12 +32,12 @@ def find_interaction(x1, y1, a1, ref_obj):
     output = [None, None, [None, None]]
 
     # transmitted beam
-    if ref_obj.Proxy.is_tran:
+    if hasattr(ref_obj.Proxy, 'tran_angle'):
         a_norm = (a_comp+pi)%(2*pi)
         output[2][1] = a1+ref_obj.Proxy.tran_angle
 
     # reflected beam
-    if ref_obj.Proxy.is_ref:
+    if hasattr(ref_obj.Proxy, 'ref_angle'):
         a_norm = (a_comp+ref_obj.Proxy.ref_angle)%(2*pi)
         output[2][0] = 2*a_norm-a1-pi
 
