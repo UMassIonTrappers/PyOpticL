@@ -7,7 +7,7 @@ This port is motivated by FreeCADs ability to utilize python libraries.
 For instance, python allows a function to track beam paths within the optics layout.
 
 Beam path function tracks reflections through PBS and pick offs using a binary encoding
-eg. two beams from a PBS are named 0b00 (transmission) and 0b01 (reflection)
+eg. two beams from a PBS are named 0b10 (transmission) and 0b11 (reflection)
 Allows unique beam tracking even through a double pass AOM. This modular double pass AOM baseplate is small enough to print on a resin 3D printer:
 
 ![image](https://user-images.githubusercontent.com/103533593/225905737-54318378-d2fa-444c-aab7-e172df4a0bad.png)
