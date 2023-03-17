@@ -22,6 +22,9 @@ Modular designs are stackable and independent:
 Optics can be placed ALONG the beam path and follow it. For example if the beam angle is deliberately skewed, the subsequent optics shift as well:
 ![image](https://user-images.githubusercontent.com/103533593/225908758-4c196c09-486d-4347-9094-3af1f606a397.png)
 
+3D printed prototype before getting an aluminum plate machined:
+![image](https://user-images.githubusercontent.com/103533593/225912508-68dd4000-5342-4b57-9fbf-bde178d6664b.png)
+
 
 Getting Setup:
 There are a few important things to ensure before you can use the FreeCAD for optics packages:
