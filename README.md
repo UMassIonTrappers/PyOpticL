@@ -18,15 +18,15 @@ Modular designs are stackable and independent:
 
 ![image](https://user-images.githubusercontent.com/103533593/225907411-c28c953b-345c-4921-9965-d5707ece66d7.png)
 
-
 Optics can be placed ALONG the beam path and follow it. For example if the beam angle is deliberately skewed, the subsequent optics shift as well:
 ![image](https://user-images.githubusercontent.com/103533593/225908758-4c196c09-486d-4347-9094-3af1f606a397.png)
 
 3D printed prototype before getting an aluminum plate machined:
 ![image](https://user-images.githubusercontent.com/103533593/225912508-68dd4000-5342-4b57-9fbf-bde178d6664b.png)
 
-Universal mirror mounts:
+## Universal mirror mounts
 Polaris mirrors are expensive. To tryout other mount options you can use 'universal' mirror mount adapters:
+
 ![image](https://user-images.githubusercontent.com/103533593/225914594-f241deee-e438-4b53-9f5f-39edc5ba4fc9.png)
 ![image](https://user-images.githubusercontent.com/103533593/225914625-2159fe6f-c0bc-4131-9200-ce152fada791.png)
 
