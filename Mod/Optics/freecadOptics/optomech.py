@@ -71,7 +71,7 @@ class baseplate_mount:
         ViewProvider(obj.ViewObject)
 
     def get_drill(self, obj):
-        part = _create_hole(CLR_DIA_14_20, drill_depth, 0, 0, -INCH/2, WASHER_DIA_14_20, 10)
+        part = _create_hole(CLR_DIA_14_20+0.5, drill_depth, 0, 0, -INCH/2, WASHER_DIA_14_20+0.5, 10)
         part.Placement=obj.Placement
         return part
 
@@ -465,7 +465,7 @@ class splitter_mount_c05g:
     def get_drill(self, obj):
         part = _create_hole(TAP_DIA_8_32, drill_depth, -6.4-obj.MirrorThickness.Value, 0, -INCH/2)
         part = part.fuse(_create_hole(2, 2.2, -6.4-obj.MirrorThickness.Value, -5, -INCH/2))
-        part = part.fuse(_create_hole(2, 2.2, -4.6-obj.MirrorThickness.Value, 5, -INCH/2))
+        part = part.fuse(_create_hole(2, 2.2, -6.4-obj.MirrorThickness.Value, 5, -INCH/2))
         part.Placement=obj.Placement
         return part
 
@@ -476,7 +476,6 @@ class splitter_mount_c05g:
         mesh.addMesh(temp)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
-
 
 class lens_holder_l05g:
     def __init__(self, obj, drill=True):
