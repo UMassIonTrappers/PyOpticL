@@ -442,13 +442,14 @@ class splitter_mount_c05g:
 
 
 class lens_holder_l05g:
-    def __init__(self, obj, drill=True):
+    def __init__(self, obj, foc_len=50, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
         self.tran_angle = 0
-        self.in_limit = pi/2
+        self.foc_len = foc_len
+        self.in_limit = 0
         self.in_width = INCH/2
 
     def get_drill(self, obj):
@@ -473,7 +474,7 @@ class pinhole_ida12:
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
         self.tran_angle = 0
-        self.in_limit = pi/2
+        self.in_limit = 0
         self.in_width = INCH/2
         _add_adapter(obj, slide_mount, mountOff=(-0.75, -12.85, 0), slot_length=slot_length)
 

@@ -20,10 +20,6 @@ def find_interaction(x1, y1, a1, ref_obj):
     a_comp *= ref_obj.Placement.Rotation.Axis[2]
     a1 %= 2*pi
 
-    # check if beam is from current object
-    if isclose(x1, x2, abs_tol=1e-5) and isclose(y1, y2, abs_tol=1e-5):
-        return
-
     # limits on incomming beam
     in_limit = ref_obj.Proxy.in_limit
     in_width = ref_obj.Proxy.in_width
@@ -74,10 +70,27 @@ def find_interaction(x1, y1, a1, ref_obj):
         y = x*tan(a2)+y2-x2*tan(a2)
     else:
         y = y2
-    
-    if sqrt((x-x2)**2+(y-y2)**2) > in_width/2:
+
+    # check if beam is from current object
+    if isclose(x1, x, abs_tol=1e-5) and isclose(y1, y, abs_tol=1e-5):
         return
 
+    ref_d = sqrt((x-x2)**2+(y-y2)**2)
+    
+    if ref_d > in_width/2:
+        return
+    
+    # transmitted beam
+    if hasattr(ref_obj.Proxy, 'foc_len'):
+        a_rel = abs(a2-atan2(y-y2, x-x2))%(2*pi)
+        offset = pi/2-atan2(ref_obj.Proxy.foc_len, ref_d)
+        #App.Console.PrintMessage("coords: " + str(x) +","+ str(y) + "\n")
+        #App.Console.PrintMessage("Laser Before: " + str(a_in) + "\n\n")
+        if is_mult(a_rel, 2*pi):
+            offset *= -1
+        if a_in > pi/2:
+            offset *= -1
+        output[2][1] += offset
     output[0], output[1] = x, y
     return output
 
