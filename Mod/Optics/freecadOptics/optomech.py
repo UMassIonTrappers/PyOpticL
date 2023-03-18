@@ -44,6 +44,12 @@ def _orient_stl(stl, rotate, translate, scale=1):
     mesh.translate(*translate)
     return mesh
 
+def _add_adapter(obj, adapter_class, **args):
+    adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
+    adapter.addProperty("App::PropertyLinkChild","LinkToParent")
+    adapter.LinkToParent=obj
+    adapter_class(adapter, **args)
+    ViewProvider(adapter.ViewObject)
 
 def _create_box(dx, dy, dz, x, y, z, fillet=0):
     part = Part.makeBox(dx, dy, dz)
@@ -155,31 +161,32 @@ class skate_mount:
 
 
 class slide_mount:
-    def __init__(self, obj, mountOff, mount_hole_dy, drill=True):
+    def __init__(self, obj, mountOff, slot_length, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
-        obj.addProperty('App::PropertyLength', 'MountHoleDistance').MountHoleDistance = mount_hole_dy
+        obj.addProperty('App::PropertyLength', 'SlotLength').SlotLength = slot_length
         obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
         obj.setEditorMode('Placement', 2)
         ViewProvider(obj.ViewObject)
         self.MountOffset = mountOff
+        self.post_dy = 4
 
     def get_drill(self, obj):
-        dx = HEAD_DIA_8_32+4
-        dy = obj.MountHoleDistance.Value+CLR_DIA_8_32*2+3
-        dz = HEAD_DZ_8_32+3-self.MountOffset[2]-INCH/2
-        part = _create_box(dx, dy, dz, 0, 0, -dz-INCH/2, 4)
-        part = part.fuse(_create_hole(TAP_DIA_8_32, drill_depth, 0, -obj.MountHoleDistance.Value/2, -dz-INCH/2))
-        part = part.fuse(_create_hole(TAP_DIA_8_32, drill_depth, 0, obj.MountHoleDistance.Value/2, -dz-INCH/2))
+        dy = obj.SlotLength.Value+HEAD_DIA_8_32*2+2
+        part = _create_box(6.5, 10, 1, self.MountOffset[0]-0.2, 0, -1-INCH/2, 2)
+        part = part.fuse(_create_hole(TAP_DIA_8_32, drill_depth, self.MountOffset[0], -self.post_dy/2-dy/2+self.MountOffset[1], -INCH/2))
         part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
         dx = HEAD_DIA_8_32+3
-        dy = obj.MountHoleDistance.Value+CLR_DIA_8_32*2+2
+        dy = obj.SlotLength.Value+HEAD_DIA_8_32*2+2
         dz = HEAD_DZ_8_32+3
-        part = _create_box(dx, dy, dz, 0, 0, -dz, 4)
-        part = part.cut(temp)
+        part = _create_box(dx, dy, dz, 0, -dy/2, -INCH/2, 4)
+        part = part.cut(_create_box(CLR_DIA_8_32, obj.SlotLength.Value+CLR_DIA_8_32, dz, 0, -dy/2-self.post_dy/2, -INCH/2, CLR_DIA_8_32/2-1e-3))
+        part = part.cut(_create_box(HEAD_DIA_8_32, obj.SlotLength.Value+HEAD_DIA_8_32, 3, 0, -dy/2-self.post_dy/2, -INCH/2+HEAD_DZ_8_32, HEAD_DIA_8_32/2-1e-3))
+        part = part.fuse(_create_box(dx, self.post_dy, INCH/2+CLR_DIA_8_32, 0, -self.post_dy/2, -INCH/2))
+        part = part.cut(_create_hole(CLR_DIA_8_32, self.post_dy, 0, 0, 0, dir=(0, -1, 0)))
         part.translate(App.Vector(*self.MountOffset))
         part = part.fuse(part)
         obj.Shape = part
@@ -188,7 +195,7 @@ class slide_mount:
 
 
 class universal_mount:
-    def __init__(self, obj, size, mountOff, zOff, mountDrill, drill=True):
+    def __init__(self, obj, mountOff, size, zOff, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
@@ -199,7 +206,6 @@ class universal_mount:
         self.dz = size[2]
         self.mountOffset = mountOff
         self.zOff = zOff
-        self.mountDrill = mountDrill
 
     def get_drill(self, obj):
         part = _create_box(self.dx+1, self.dy+1, self.dz, self.mountOffset[0], self.mountOffset[1], -self.dz-INCH/2, 4)
@@ -215,9 +221,9 @@ class universal_mount:
         temp = temp.fuse(_create_hole(CLR_DIA_8_32, dz, 0, self.dy/2-5, 0, HEAD_DIA_8_32, HEAD_DZ_8_32))
         part = part.cut(temp)
         part.translate(App.Vector(*self.mountOffset, self.zOff))
-        part = part.cut(self.mountDrill)
-        obj.Shape = part
         parent = obj.LinkToParent
+        part = part.cut(parent.Proxy.get_drill(parent))
+        obj.Shape = part
         obj.Placement=parent.Mesh.Placement
 
 
@@ -227,8 +233,6 @@ class fiberport_holder:
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.6)
         ViewProvider(obj.ViewObject)
-        self.is_ref = False
-        self.is_tran = False
         self.in_limit = pi-0.01
         self.in_width = 1
 
@@ -246,15 +250,13 @@ class fiberport_holder:
         
 
 class pbs_on_skate_mount:
-    def __init__(self, obj, invert=False):
+    def __init__(self, obj, CubeSize=10, invert=False):
         obj.Proxy = self
-        obj.addProperty('App::PropertyLength', 'CubeSize').CubeSize = 10
+        obj.addProperty('App::PropertyLength', 'CubeSize').CubeSize = CubeSize
         obj.ViewObject.ShapeColor=(0.5, 0.5, 0.7)
         obj.ViewObject.Transparency=50
         self.invert = invert
         ViewProvider(obj.ViewObject)
-        self.is_ref = True
-        self.is_tran = True
         if invert:
             self.ref_angle = -3*pi/4
         else:
@@ -262,12 +264,7 @@ class pbs_on_skate_mount:
         self.tran_angle = 0
         self.in_limit = 0
         self.in_width = sqrt(200)
-
-        adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
-        adapter.addProperty("App::PropertyLink","LinkToParent")
-        adapter.LinkToParent=obj
-        skate_mount(adapter, obj.CubeSize.Value)
-        ViewProvider(adapter.ViewObject)
+        _add_adapter(obj, skate_mount, cubeSize=obj.CubeSize.Value)
 
     def execute(self, obj):
         mesh = Mesh.createBox(obj.CubeSize.Value, obj.CubeSize.Value, obj.CubeSize.Value)
@@ -282,22 +279,14 @@ class pbs_on_skate_mount:
 
 
 class rotation_stage_rsp05:
-    def __init__(self, obj):
+    def __init__(self, obj, mount_hole_dy=25):
         obj.Proxy = self
         obj.ViewObject.ShapeColor=(0.2, 0.2, 0.2)
         ViewProvider(obj.ViewObject)
-        self.is_ref = False
-        self.is_tran = True
         self.tran_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
-        
-        adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
-        adapter.addProperty("App::PropertyLinkChild","LinkToParent")
-        adapter.LinkToParent=obj
-        surface_adapter(adapter, (0, 0, -14), 25)
-        ViewProvider(adapter.ViewObject)
-        obj.Label = obj.Label
+        _add_adapter(obj, surface_adapter, mountOff=(0, 0, -14), mount_hole_dy=mount_hole_dy)
 
     def execute(self, obj):
         mesh = _orient_stl("RSP05-Solidworks.stl", (pi/2, 0, pi/2), (0.6, 0, 0), 1000)
@@ -311,18 +300,12 @@ class mirror_mount_k05s2:
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = default_mirror_thickness
         obj.ViewObject.ShapeColor=(0.5, 0.5, 0.55)
         ViewProvider(obj.ViewObject)
-        self.is_ref = True
-        self.is_tran = False
         self.ref_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
 
         if uMountParam != None:
-            adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
-            adapter.addProperty("App::PropertyLinkChild","LinkToParent")
-            adapter.LinkToParent=obj
-            universal_mount(adapter, *uMountParam, -INCH/2, self.get_drill(obj))
-            ViewProvider(adapter.ViewObject)
+            _add_adapter(obj, universal_mount, mountOff=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
             obj.setEditorMode('Drill', 2)
             obj.Drill = False
 
@@ -343,24 +326,18 @@ class mirror_mount_k05s2:
 
 
 class mirror_mount_c05g:
-    def __init__(self, obj, drill=True, uMountParam=None):
+    def __init__(self, obj, mirror_thickness=6, uMountParam=None, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
-        obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = default_mirror_thickness
+        obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = mirror_thickness
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.is_ref = True
-        self.is_tran = False
         self.ref_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
 
         if uMountParam != None:
-            adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
-            adapter.addProperty("App::PropertyLinkChild","LinkToParent")
-            adapter.LinkToParent=obj
-            universal_mount(adapter, *uMountParam, -INCH/2, self.get_drill(obj))
-            ViewProvider(adapter.ViewObject)
+            _add_adapter(obj, universal_mount, mountOff=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
             obj.setEditorMode('Drill', 2)
             obj.Drill = False
 
@@ -380,24 +357,18 @@ class mirror_mount_c05g:
         obj.Mesh = mesh
 
 class mirror_mount_km05:
-    def __init__(self, obj, drill=True, uMountParam=None):
+    def __init__(self, obj, mirror_thickness=6, uMountParam=None, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
-        obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = default_mirror_thickness
+        obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = mirror_thickness
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.is_ref = True
-        self.is_tran = False
         self.ref_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
 
         if uMountParam != None:
-            adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
-            adapter.addProperty("App::PropertyLinkChild","LinkToParent")
-            adapter.LinkToParent=obj
-            universal_mount(adapter, *uMountParam, -0.58*INCH, self.get_drill(obj))
-            ViewProvider(adapter.ViewObject)
+            _add_adapter(obj, universal_mount, mountOff=uMountParam[1], size=uMountParam[0], zOff=-0.58*INCH)
             obj.setEditorMode('Drill', 2)
             obj.Drill = False
 
@@ -415,23 +386,18 @@ class mirror_mount_km05:
         obj.Mesh = mesh
 
 class mirror_mount_mk05:
-    def __init__(self, obj, drill=True, uMountParam=None):
+    def __init__(self, obj, mirror_thickness=6, uMountParam=None, drill=True):
         obj.Proxy = self
+        obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = mirror_thickness
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.is_ref = True
-        self.is_tran = False
         self.ref_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
 
         if uMountParam != None:
-            adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
-            adapter.addProperty("App::PropertyLinkChild","LinkToParent")
-            adapter.LinkToParent=obj
-            universal_mount(adapter, *uMountParam, -10.2, self.get_drill(obj))
-            ViewProvider(adapter.ViewObject)
+            _add_adapter(obj, universal_mount, mountOff=uMountParam[1], size=uMountParam[0], zOff=-10.2)
             obj.setEditorMode('Drill', 2)
             obj.Drill = False
 
@@ -442,7 +408,7 @@ class mirror_mount_mk05:
 
     def execute(self, obj):
         mesh = _orient_stl("MK05-Solidworks.stl", (0, -pi/2, 0), ([-27.5, -5.6, -26.0]), 1000)
-        temp = Mesh.createCylinder(INCH/4, 6, True, 1, 50)
+        temp = Mesh.createCylinder(INCH/4, obj.MirrorThickness.Value, True, 1, 50)
         temp.rotate(0, 0, pi)
         mesh.addMesh(temp)
         mesh.Placement = obj.Mesh.Placement
@@ -452,11 +418,8 @@ class splitter_mount_c05g:
     def __init__(self, obj, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
-        obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = 0.5
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.is_ref = True
-        self.is_tran = True
         self.ref_angle = 0
         self.tran_angle = 0
         self.in_limit = pi/2
@@ -470,23 +433,22 @@ class splitter_mount_c05g:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("POLARIS-C05G-Solidworks.stl", (pi/2, 0, pi/2), (-19-obj.MirrorThickness.Value, -4.3, -15.2), 1000)
-        temp = Mesh.createCylinder(INCH/4, obj.MirrorThickness.Value, True, 1, 50)
+        mesh = _orient_stl("POLARIS-C05G-Solidworks.stl", (pi/2, 0, pi/2), (-19, -4.3, -15.2), 1000)
+        temp = Mesh.createCylinder(INCH/4, 1, True, 1, 50)
         temp.rotate(0, 0, pi)
         mesh.addMesh(temp)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
 class lens_holder_l05g:
-    def __init__(self, obj, drill=True):
+    def __init__(self, obj, foc_len=50, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.is_ref = False
-        self.is_tran = True
         self.tran_angle = 0
-        self.in_limit = pi/2
+        self.foc_len = foc_len
+        self.in_limit = 0
         self.in_width = INCH/2
 
     def get_drill(self, obj):
@@ -505,19 +467,18 @@ class lens_holder_l05g:
         obj.Mesh = mesh
 
 class pinhole_ida12:
-    def __init__(self, obj, drill=True):
+    def __init__(self, obj, slot_length=10, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.is_ref = False
-        self.is_tran = True
         self.tran_angle = 0
-        self.in_limit = pi/2
+        self.in_limit = 0
         self.in_width = INCH/2
+        _add_adapter(obj, slide_mount, mountOff=(-0.75, -12.85, 0), slot_length=slot_length)
 
     def execute(self, obj):
-        mesh = _orient_stl("IDA12-P5-Solidworks.stl", (pi/2, 0, -pi/2), (-0.35, 0.05, 0), 1000)
+        mesh = _orient_stl("IDA12-P5-Solidworks.stl", (-pi/2, 0, -pi/2), (-0.35, 0.05, 0), 1000)
         mesh.rotate(pi/2, 0, 0)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
@@ -529,8 +490,6 @@ class isomet_1205c_on_km100pm:
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.is_ref = False
-        self.is_tran = True
         self.tran_angle = -0.026 #https://isomet.com/PDF%20acousto-optics_modulators/data%20sheets-moduvblue/M1250-T250L-0.45.pdf
         self.in_limit = pi/2
         self.in_width = 5
@@ -555,8 +514,6 @@ class isomet_1205c_on_km100pm_doublepass:
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.is_ref = False
-        self.is_tran = True
         self.tran_angle = 0 #doublepass must retro reflect to connect back to PBS
         self.in_limit = 0
         self.in_width = 5
