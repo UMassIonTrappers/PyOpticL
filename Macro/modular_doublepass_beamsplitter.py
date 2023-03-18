@@ -11,7 +11,7 @@ reload(laser)
 
 INCH = 25.4
 
-gap = 0.25*INCH
+gap = 0.5*INCH
 base_dx = 5*INCH-gap
 base_dy = 10*INCH-gap
 base_dz = INCH
@@ -23,24 +23,26 @@ ddy = 1.5*INCH
 
 aom_dy = 70
 
-input_offset = 80
 
-input_y = base_dy-input_offset
+input_y = base_dy-3.5*INCH+gap/2
 
 
+''' 'Cardinal' beam directions'''
 left = -90
 right = left + 180
 up = 180
 down = up - 180 
+
+# Turns
 up_right = 45
 right_up = up_right-180
 left_down = up_right
 down_left = right_up
-left_up = 135
+left_up = up_right +90
 up_left = left_up-180
 right_down = up_left
 
-layout.create_baseplate(base_dx, base_dy, base_dz, name="AOM_Splitter_Baseplate")
+layout.create_baseplate(base_dx, base_dy, base_dz, name="Doublepass_modular_Baseplate")
 
 beam = layout.add_beam_path(base_dx, input_y, -180)
 aom_beam_plus1 = layout.add_beam_path(INCH, input_y-10, left-0.026*180/pi)  #https://isomet.com/PDF%20acousto-optics_modulators/data%20sheets-moduvblue/M1250-T250L-0.45.pdf
@@ -72,9 +74,9 @@ layout.place_element_along_beam("Output_Fiberport", optomech.fiberport_holder, b
 
 
 layout.place_element("Mount_Hole", optomech.baseplate_mount, (5-0.5)*INCH-gap/2, (1-0.5)*INCH-gap/2, 0)
-layout.place_element("Mount_Hole", optomech.baseplate_mount, (3-0.5)*INCH-gap/2, (1-0.5)*INCH-gap/2, 0)
+layout.place_element("Mount_Hole", optomech.baseplate_mount, (3-0.5)*INCH-gap/2, (2-0.5)*INCH-gap/2, 0)
 layout.place_element("Mount_Hole", optomech.baseplate_mount, (5-0.5)*INCH-gap/2, (10-0.5)*INCH-gap/2, 0)
-layout.place_element("Mount_Hole", optomech.baseplate_mount, (2-0.5)*INCH-gap/2, (10-0.5)*INCH-gap/2, 0)
+layout.place_element("Mount_Hole", optomech.baseplate_mount, (1-0.5)*INCH-gap/2, (8-0.5)*INCH-gap/2, 0)
 # layout.place_element("Mount_Hole", optomech.baseplate_mount, (3-0.5)*INCH-gap/2, (3-0.5)*INCH-gap/2, 0)
 layout.place_element("Mount_Hole", optomech.baseplate_mount, (5-0.5)*INCH-gap/2, (5-0.5)*INCH-gap/2, 0)
 
