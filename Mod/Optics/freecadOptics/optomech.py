@@ -344,7 +344,7 @@ class mirror_mount_c05g:
     def get_drill(self, obj):
         part = _create_hole(TAP_DIA_8_32, drill_depth, -6.4-obj.MirrorThickness.Value, 0, -INCH/2)
         part = part.fuse(_create_hole(2, 2.2, -6.4-obj.MirrorThickness.Value, -5, -INCH/2))
-        part = part.fuse(_create_hole(2, 2.2, -4.6-obj.MirrorThickness.Value, 5, -INCH/2))
+        part = part.fuse(_create_hole(2, 2.2, -6.4-obj.MirrorThickness.Value, 5, -INCH/2))
         part.Placement=obj.Placement
         return part
 
@@ -414,9 +414,11 @@ class mirror_mount_mk05:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
+#What is the splitter thickness?
 class splitter_mount_c05g:
-    def __init__(self, obj, drill=True):
+    def __init__(self, obj, mirror_thickness=0, drill=True):
         obj.Proxy = self
+        obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = mirror_thickness
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
