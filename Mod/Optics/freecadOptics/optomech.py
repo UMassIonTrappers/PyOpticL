@@ -486,13 +486,14 @@ class pinhole_ida12:
         
 
 class isomet_1205c_on_km100pm:
-    def __init__(self, obj, diff_dir=(1,1), drill=True):
+    #https://isomet.com/PDF%20acousto-optics_modulators/data%20sheets-moduvblue/M1250-T250L-0.45.pdf
+    def __init__(self, obj, diff_angle=-0.026, diff_dir=(1,1), drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
         self.diff_dir = diff_dir
-        self.tran_angle = -0.026 #https://isomet.com/PDF%20acousto-optics_modulators/data%20sheets-moduvblue/M1250-T250L-0.45.pdf
+        self.tran_angle = diff_angle
         self.in_limit = 0
         self.in_width = 5
 
