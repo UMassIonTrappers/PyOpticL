@@ -416,9 +416,9 @@ class mirror_mount_mk05:
 
 #What is the splitter thickness?
 class splitter_mount_c05g:
-    def __init__(self, obj, mirror_thickness=0, drill=True):
+    def __init__(self, obj, plate_thickness=3, drill=True):
         obj.Proxy = self
-        obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = mirror_thickness
+        obj.addProperty('App::PropertyLength', 'PlateThickness').PlateThickness = plate_thickness
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
@@ -428,15 +428,15 @@ class splitter_mount_c05g:
         self.in_width = INCH/2
 
     def get_drill(self, obj):
-        part = _create_hole(TAP_DIA_8_32, drill_depth, -6.4-obj.MirrorThickness.Value, 0, -INCH/2)
-        part = part.fuse(_create_hole(2, 2.2, -6.4-obj.MirrorThickness.Value, -5, -INCH/2))
-        part = part.fuse(_create_hole(2, 2.2, -6.4-obj.MirrorThickness.Value, 5, -INCH/2))
+        part = _create_hole(TAP_DIA_8_32, drill_depth, -6.4-obj.PlateThickness.Value, 0, -INCH/2)
+        part = part.fuse(_create_hole(2, 2.2, -6.4-obj.PlateThickness.Value, -5, -INCH/2))
+        part = part.fuse(_create_hole(2, 2.2, -6.4-obj.PlateThickness.Value, 5, -INCH/2))
         part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
         mesh = _orient_stl("POLARIS-C05G-Solidworks.stl", (pi/2, 0, pi/2), (-19, -4.3, -15.2), 1000)
-        temp = Mesh.createCylinder(INCH/4, 1, True, 1, 50)
+        temp = Mesh.createCylinder(INCH/4, obj.PlateThickness.Value, True, 1, 50)
         temp.rotate(0, 0, pi)
         mesh.addMesh(temp)
         mesh.Placement = obj.Mesh.Placement
