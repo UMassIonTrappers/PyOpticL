@@ -509,30 +509,6 @@ class isomet_1205c_on_km100pm:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
-      
-
-class isomet_1205c_on_km100pm_doublepass:
-    def __init__(self, obj, drill=True):
-        obj.Proxy = self
-        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
-        obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
-        ViewProvider(obj.ViewObject)
-        self.tran_angle = 0 #doublepass must retro reflect to connect back to PBS
-        self.in_limit = 0
-        self.in_width = 5
-
-    def get_drill(self, obj):
-        part = _create_box(34, 53.5, 23.9, -19.27, -7.52, -23.9, 5)
-        part = part.fuse(_create_box(40, 15.5, 26, -44.77, -26.52, -26, 5))
-        part = part.fuse(_create_hole(TAP_DIA_8_32, drill_depth, -29.27, -7.52, 0))
-        part.Placement=obj.Placement
-        return part
-
-    def execute(self, obj):
-        mesh = _orient_stl("isomet_1205c_on_km100pm.stl", (0, 0, 0), (0, 0, 0))
-        mesh.Placement = obj.Mesh.Placement
-        obj.Mesh = mesh
-
 
 class ViewProvider:
     def __init__(self, obj):

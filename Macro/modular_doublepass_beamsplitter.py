@@ -55,7 +55,7 @@ layout.place_element_along_beam("Input_Mirror_2", optomech.mirror_mount_k05s2, b
 layout.place_element_along_beam("Half_waveplate", optomech.rotation_stage_rsp05, beam, 0b1, up, 55)
 layout.place_element_along_beam("Beam_Splitter", optomech.pbs_on_skate_mount, beam, 0b1, up, 25)
 
-layout.place_element_along_beam("AOM", optomech.isomet_1205c_on_km100pm_doublepass, beam, 0b11, right, 35)
+layout.place_element_along_beam("AOM", optomech.isomet_1205c_on_km100pm, beam, 0b11, right, 35, diff_angle=0)
 layout.place_element_along_beam("Quarter_waveplate", optomech.rotation_stage_rsp05, beam, 0b11, left, 60)
 layout.place_element_along_beam("f_100_Collimation_Lens", optomech.lens_holder_l05g, beam_obj=beam, beam_index=0b11, angle=left, distance=40, foc_len=100)
 layout.place_element_along_beam("Iris", optomech.pinhole_ida12, beam, 0b11, right, 15)
