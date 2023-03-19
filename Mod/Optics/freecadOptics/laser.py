@@ -84,13 +84,12 @@ def find_interaction(x1, y1, a1, ref_obj):
     if hasattr(ref_obj.Proxy, 'foc_len'):
         a_rel = abs(a2-atan2(y-y2, x-x2))%(2*pi)
         offset = pi/2-atan2(ref_obj.Proxy.foc_len, ref_d)
-        #App.Console.PrintMessage("coords: " + str(x) +","+ str(y) + "\n")
-        #App.Console.PrintMessage("Laser Before: " + str(a_in) + "\n\n")
         if is_mult(a_rel, 2*pi):
             offset *= -1
         if a_in > pi/2:
             offset *= -1
         output[2][1] += offset
+        
     output[0], output[1] = x, y
     return output
 
