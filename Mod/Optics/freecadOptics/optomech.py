@@ -414,7 +414,6 @@ class mirror_mount_mk05:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
-#What is the splitter thickness?
 class splitter_mount_c05g:
     def __init__(self, obj, plate_thickness=3, drill=True):
         obj.Proxy = self
@@ -487,13 +486,14 @@ class pinhole_ida12:
         
 
 class isomet_1205c_on_km100pm:
-    def __init__(self, obj, drill=True):
+    def __init__(self, obj, diff_dir=(1,1), drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
+        self.diff_dir = diff_dir
         self.tran_angle = -0.026 #https://isomet.com/PDF%20acousto-optics_modulators/data%20sheets-moduvblue/M1250-T250L-0.45.pdf
-        self.in_limit = pi/2
+        self.in_limit = 0
         self.in_width = 5
 
     def get_drill(self, obj):

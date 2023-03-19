@@ -15,7 +15,7 @@ def find_interaction(x1, y1, a1, ref_obj):
         return
     
     # get object placement
-    (x2, y2, _) = ref_obj.Placement.Base
+    x2, y2, _ = ref_obj.Placement.Base
     a_comp = ref_obj.Placement.Rotation.Angle
     a_comp *= ref_obj.Placement.Rotation.Axis[2]
     a1 %= 2*pi
@@ -51,6 +51,12 @@ def find_interaction(x1, y1, a1, ref_obj):
     # check if placement is suitable for reflection
     if a_in < in_limit or a_rel > pi/2:
         return
+    
+    if hasattr(ref_obj.Proxy, 'diff_dir'):
+        if a_in > pi/2:
+            output[2][1] = a1+ref_obj.Proxy.tran_angle*ref_obj.Proxy.diff_dir[0]
+        else:
+            output[2][1] = a1+ref_obj.Proxy.tran_angle*ref_obj.Proxy.diff_dir[1]
 
     # check for edge cases
     a1_vert = is_mult(a1-pi/2, pi)
@@ -105,7 +111,7 @@ class beam_path:
         return None
 
     def execute(self, obj):
-        (self.x, self.y, _) = obj.Placement.Base
+        self.x, self.y, _ = obj.Placement.Base
         self.a = obj.Placement.Rotation.Angle
         self.a *= obj.Placement.Rotation.Axis[2]
         self.part = Part.makeSphere(0)
