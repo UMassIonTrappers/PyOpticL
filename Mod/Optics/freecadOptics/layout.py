@@ -77,9 +77,10 @@ class baseplate:
         if obj.Drill:
             for i in App.ActiveDocument.Objects: #add drill holes for all necessary elements
                 if hasattr(i.Proxy, 'get_drill'):
-                    temp = i.Proxy.get_drill(i)
-                    temp.translate(App.Vector(-obj.Placement.Base))
-                    part = part.cut(temp)
+                    if i.Drill:
+                        temp = i.Proxy.get_drill(i)
+                        temp.translate(App.Vector(-obj.Placement.Base))
+                        part = part.cut(temp)
         obj.Shape = part
 
 

@@ -222,7 +222,9 @@ class universal_mount:
         part = part.cut(temp)
         part.translate(App.Vector(*self.mountOffset, self.zOff))
         parent = obj.LinkToParent
-        part = part.cut(parent.Proxy.get_drill(parent))
+        temp = parent.Proxy.get_drill(parent)
+        temp.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(0, 0, 0), App.Vector(0, 0, 0))
+        part = part.cut(temp)
         obj.Shape = part
         obj.Placement=parent.Mesh.Placement
 
