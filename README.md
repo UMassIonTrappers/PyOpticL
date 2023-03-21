@@ -49,7 +49,6 @@ The same universal mirror mount for three mirrors:
 ![image](https://user-images.githubusercontent.com/103533593/226721943-3984bdcd-9abe-4df4-a6c2-102d04fe3eb1.png)
 ![image](https://user-images.githubusercontent.com/103533593/226722031-bafe2a32-d902-4fc2-bf7d-2c830fe7318f.png)
 ![image](https://user-images.githubusercontent.com/103533593/226722154-ab0ab1ce-a737-48ac-afea-57c727d85642.png)
-![image](https://user-images.githubusercontent.com/103533593/226722557-86e42a58-b71e-4d6f-b20a-2aa73beaa77e.png)
 
 
 ## Getting Setup
