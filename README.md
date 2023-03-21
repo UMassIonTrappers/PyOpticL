@@ -2,7 +2,7 @@
 
 ### Based on MIT QUANTA LAB repo - C4PO ('CAD for Precision Optics') which is written for OpenSCAD
 
-This port is motivated by FreeCADs ability to utilize python libraries, and utilize custom worbenches.
+This port is motivated by FreeCADs ability to utilize python libraries, and custom worbenches.
 This repository contains a custom optics workbench for freecad which allows for the creation of optical layouts through python scripting.
 Once created, freecad also facilitates the ability to easily view and modify the baseplate for testing.
 Lastly, GUI functions are also integrated into the workbench, allowing for easy toggling of component visibility, export to stl, etc.
@@ -32,24 +32,20 @@ Polaris mirrors are expensive. To tryout other mount options you can use univers
 
 ## Examples
 
-A double pass AOM scripted purely using along-beam component placement. This modular double pass AOM baseplate is small enough to print on a resin 3D printer:
-
+A double pass AOM scripted purely using along-beam component placement. This modular double pass AOM baseplate is small enough to print on a resin 3D printer:  
 ![image](https://user-images.githubusercontent.com/103533593/226716244-0ecad33d-71e4-46a8-a218-f00bf779ac8a.png)
-
 ![image](https://user-images.githubusercontent.com/103533593/226716319-9bad9d81-a907-4680-9812-3d6e7ccdd8c4.png)
 
-Modular designs are stackable and independent:
-
+Modular designs are stackable and independent:  
 ![image](https://user-images.githubusercontent.com/103533593/225907411-c28c953b-345c-4921-9965-d5707ece66d7.png)
 
-Example of the beam angle being deliberately skewed, causing the subsequent optics to shift as well:
+Example of the beam angle being deliberately skewed, causing the subsequent optics to shift as well:  
 ![image](https://user-images.githubusercontent.com/103533593/225908758-4c196c09-486d-4347-9094-3af1f606a397.png)
 
-3D printed prototype before getting an aluminum plate machined:
+3D printed prototype before getting an aluminum plate machined:  
 ![image](https://user-images.githubusercontent.com/103533593/225912508-68dd4000-5342-4b57-9fbf-bde178d6664b.png)
 
-The same universal mirror mount for three mirrors:
-
+The same universal mirror mount for three mirrors:  
 ![image](https://user-images.githubusercontent.com/103533593/226721943-3984bdcd-9abe-4df4-a6c2-102d04fe3eb1.png)
 ![image](https://user-images.githubusercontent.com/103533593/226722031-bafe2a32-d902-4fc2-bf7d-2c830fe7318f.png)
 ![image](https://user-images.githubusercontent.com/103533593/226722154-ab0ab1ce-a737-48ac-afea-57c727d85642.png)
@@ -61,16 +57,15 @@ There are a few important things to ensure before you can use the FreeCAD for op
 
 1. Install FreeCAD, Python, and Git
 
-2. Clone the GitHub repo into your FreeCAD user folder
-	On windows, in a terminal run:  
-	```cd "C:\Users\<username goes here>\AppData\Roaming\FreeCAD```  
+2. Clone the GitHub repo into your FreeCAD user folder  
+	To do this on windows, run the following in a terminal:  
+	```cd "C:\Users\<username goes here>\AppData\Roaming\FreeCAD"```  
 	```git init -b main```  
-	```git remote add origin "https://github.com/UMassIonTrappers/FreeCAD.git``` 
-	```git config --global --add safe.directory C:/Users/<username goes here>/AppData/Roaming/FreeCAD``` 
+	```git remote add origin "https://github.com/UMassIonTrappers/FreeCAD.git"```  
+	```git config --global --add safe.directory "C:/Users/<username goes here>/AppData/Roaming/FreeCAD"```  
 	```git pull origin main```  
 		
-To check everything is setup correctly, should now be able to launch FreeCAD and see the "Optics" workbench in the dropdown
-
+To check everything is setup correctly, you should now be able to launch FreeCAD and see the "Optics" workbench in the dropdown  
 ![image](https://user-images.githubusercontent.com/103533593/226724665-77b05f5b-1faa-43ca-9329-f6a0894ec1fc.png)
 
 
