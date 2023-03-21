@@ -44,7 +44,7 @@ layout.create_baseplate(base_dx, base_dy, base_dz, name=name)
 
 beam = layout.add_beam_path(base_dx, input_y, -180)
 AOM_location_x = 0.75*INCH
-aom_beam_minus1 = layout.add_beam_path(AOM_location_x, input_y-10, left+0.026*180/pi)  #https://isomet.com/PDF%20acousto-optics_modulators/data%20sheets-moduvblue/M1250-T250L-0.45.pdf
+# aom_beam_minus1 = layout.add_beam_path(AOM_location_x, input_y-10, left+0.026*180/pi)  #https://isomet.com/PDF%20acousto-optics_modulators/data%20sheets-moduvblue/M1250-T250L-0.45.pdf
 
 
 layout.place_element_along_beam("Input_Mirror_1", optomech.mirror_mount_k05s2, beam, 0b1, up_right, 15)
@@ -52,7 +52,7 @@ layout.place_element_along_beam("Input_Mirror_2", optomech.mirror_mount_k05s2, b
 layout.place_element_along_beam("Half_waveplate", optomech.rotation_stage_rsp05, beam, 0b1, up, 55)
 layout.place_element_along_beam("Beam_Splitter", optomech.pbs_on_skate_mount, beam, 0b1, up, 25)
 
-layout.place_element_along_beam("AOM_R2", optomech.isomet_1205c_on_km100pm_doublepass, beam, 0b11, right, 30)
+layout.place_element_along_beam("AOM", optomech.isomet_1205c_on_km100pm, beam, 0b11, right, 30, diff_angle=0)
 layout.place_element_along_beam("Quarter_waveplate", optomech.rotation_stage_rsp05, beam, 0b11, left, 45)
 layout.place_element_along_beam("f_75_Collimation_Lens", optomech.lens_holder_l05g, beam, 0b11, left, 30)
 layout.place_element_along_beam("Iris", optomech.pinhole_ida12, beam, 0b11, right, 10)
