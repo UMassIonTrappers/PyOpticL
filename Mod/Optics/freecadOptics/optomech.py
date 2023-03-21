@@ -101,20 +101,20 @@ class surface_adapter:
         self.MountOffset = mountOff
 
     def get_drill(self, obj):
-        dx = HEAD_DIA_8_32+4
-        dy = obj.MountHoleDistance.Value+CLR_DIA_8_32*2+3
+        dx = HEAD_DIA_8_32+6
+        dy = obj.MountHoleDistance.Value+CLR_DIA_8_32*2+4
         dz = HEAD_DZ_8_32+3-self.MountOffset[2]-INCH/2
-        part = _create_box(dx, dy, dz, 0, 0, -dz-INCH/2, 4)
+        part = _create_box(dx, dy, dz, 0, 0, -dz-INCH/2, 5)
         part = part.fuse(_create_hole(TAP_DIA_8_32, drill_depth, 0, -obj.MountHoleDistance.Value/2, -dz-INCH/2))
         part = part.fuse(_create_hole(TAP_DIA_8_32, drill_depth, 0, obj.MountHoleDistance.Value/2, -dz-INCH/2))
         part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
-        dx = HEAD_DIA_8_32+3
-        dy = obj.MountHoleDistance.Value+CLR_DIA_8_32*2+2
+        dx = HEAD_DIA_8_32+5
+        dy = obj.MountHoleDistance.Value+CLR_DIA_8_32*2+3
         dz = HEAD_DZ_8_32+3
-        part = _create_box(dx, dy, dz, 0, 0, -dz, 4)
+        part = _create_box(dx, dy, dz, 0, 0, -dz, 5)
         temp = _create_hole(CLR_DIA_8_32, dz, 0, 0, -dz, HEAD_DIA_8_32, HEAD_DZ_8_32, dir=(0,0,1))
         temp = temp.fuse(_create_hole(CLR_DIA_8_32, dz, 0, -obj.MountHoleDistance.Value/2, 0, HEAD_DIA_8_32, HEAD_DZ_8_32))
         temp = temp.fuse(_create_hole(CLR_DIA_8_32, dz, 0, obj.MountHoleDistance.Value/2, 0, HEAD_DIA_8_32, HEAD_DZ_8_32))
@@ -145,9 +145,9 @@ class skate_mount:
 
     def execute(self, obj):
         dx = HEAD_DIA_8_32+5
-        dy = obj.MountHoleDistance.Value + CLR_DIA_8_32*2 + 2
+        dy = obj.MountHoleDistance.Value + CLR_DIA_8_32*2+3
         dz = INCH/2-self.CubeSize/2+1
-        part = _create_box(dx, dy, dz, 0, 0, -dz, 4)
+        part = _create_box(dx, dy, dz, 0, 0, -dz, 5)
         temp = _create_box(self.CubeSize+obj.CubeTolerance.Value, self.CubeSize+obj.CubeTolerance.Value, 1+1e-3, 0, 0, -1-1e-3)
         part = part.cut(temp)
         temp = _create_hole(CLR_DIA_8_32, dz, 0, -obj.MountHoleDistance.Value/2, 0, HEAD_DIA_8_32, HEAD_DZ_8_32)
