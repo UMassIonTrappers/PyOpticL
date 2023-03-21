@@ -50,7 +50,6 @@ The same universal mirror mount for three mirrors:
 ![image](https://user-images.githubusercontent.com/103533593/226722031-bafe2a32-d902-4fc2-bf7d-2c830fe7318f.png)
 ![image](https://user-images.githubusercontent.com/103533593/226722154-ab0ab1ce-a737-48ac-afea-57c727d85642.png)
 
-
 ## Getting Setup
 There are a few important things to ensure before you can use the FreeCAD for optics packages:
 
