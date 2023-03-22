@@ -524,6 +524,41 @@ class isomet_1205c_on_km100pm:
         obj.Mesh = mesh
 
 
+class periscope:
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, lower_dz, upper_dz, table_mount=False, lower_mirror=mirror_mount_k05s2, upper_mirror=mirror_mount_k05s2, drill=True):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyLength', 'Lower_dz').Lower_dz = lower_dz
+        obj.addProperty('App::PropertyLength', 'Upper_dz').Upper_dz = upper_dz
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.ViewObject.ShapeColor=(0.6, 0.6, 0.6)
+        ViewProvider(obj.ViewObject)
+        self.in_limit = pi-0.01
+        self.in_width = 1
+        self.table_mount=table_mount
+
+        self.lower_obj = _add_linked_object(obj, obj.Name+"_Lower_Mirror", lower_mirror)
+        self.upper_obj = _add_linked_object(obj, obj.Name+"_Upper_Mirror", upper_mirror)
+
+    def get_drill(self, obj):
+        part = _create_hole(TAP_DIA_8_32, INCH, 0, 0, -20.7, dir=(1,0,0))
+        part = part.fuse(_create_hole(TAP_DIA_8_32, INCH, 0, -12.7, -20.7, dir=(1,0,0)))
+        part = part.fuse(_create_hole(TAP_DIA_8_32, INCH, 0, 12.7, -20.7, dir=(1,0,0)))
+        part.Placement=obj.Placement
+        return part
+
+    def execute(self, obj):
+        part = _create_box(10, 50, 20, 0, 0, 0)
+        part = part.fuse(_create_box(10, 20, obj.Upper_dz.Value+10, 0, 0, 0))
+        part.translate(App.Vector(-5-INCH/2, 0, 0))
+        self.lower_obj.Mesh.rotate(App.Vector(pi/2, pi/4, 0))
+        self.upper_obj.Mesh.rotate(App.Vector(pi/2, -pi/4, 0))
+        self.lower_obj.Mesh.translate(App.Vector(0, 0, obj.Lower_dz.Value))
+        self.upper_obj.Mesh.translate(App.Vector(0, 0, obj.Upper_dz.Value))
+        self.lower_obj.Placement = self.upper_obj.Placement = obj.Placement
+        obj.Shape = part
+
+
 class ViewProvider:
     def __init__(self, obj):
         obj.Proxy = self
