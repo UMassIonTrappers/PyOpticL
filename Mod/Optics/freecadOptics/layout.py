@@ -6,18 +6,18 @@ from . import laser
 INCH = 25.4
 
 # Add an element to the active baseplate with position and angle
-# Draw class is the type of object, usually defined in another module
-def place_element(obj_name, draw_class, x, y, angle, **args):
-    obj = App.ActiveDocument.addObject('Mesh::FeaturePython', obj_name)
-    draw_class(obj, **args)
+# Obj class is the type of object, usually defined in another module
+def place_element(obj_name, obj_class, x, y, angle, **args):
+    obj = App.ActiveDocument.addObject(obj_class.type, obj_name)
+    obj_class(obj, **args)
     obj.Placement = App.Placement(App.Vector(x, y, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
     return obj
 
 # Add an element along a beampath with a set angle and an extra constraint of distance from last element, x position, or y position
-# Draw class is the type of object, usually defined in another module
-def place_element_along_beam(obj_name, draw_class, beam_obj, beam_index, angle, distance=None, x=None, y=None, pre_refs=0, **args):
+# Obj class is the type of object, usually defined in another module
+def place_element_along_beam(obj_name, obj_class, beam_obj, beam_index, angle, distance=None, x=None, y=None, pre_refs=0, **args):
     obj = App.ActiveDocument.addObject('Mesh::FeaturePython', obj_name)
-    draw_class(obj, **args)
+    obj_class(obj, **args)
     obj.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
     while len(beam_obj.Proxy.components) <= beam_index:
         beam_obj.Proxy.components.append([])

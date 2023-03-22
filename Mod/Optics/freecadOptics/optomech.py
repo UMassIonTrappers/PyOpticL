@@ -45,11 +45,12 @@ def _orient_stl(stl, rotate, translate, scale=1):
     return mesh
 
 def _add_linked_object(obj, obj_name, obj_class, **args):
-    new_obj = App.ActiveDocument.addObject('Part::FeaturePython', obj_name)
+    new_obj = App.ActiveDocument.addObject(obj_class.type, obj_name)
     new_obj.addProperty("App::PropertyLinkChild","LinkToParent")
     new_obj.LinkToParent=obj
     obj_class(new_obj, **args)
     ViewProvider(new_obj.ViewObject)
+    return new_obj
 
 def _create_box(dx, dy, dz, x, y, z, fillet=0):
     part = Part.makeBox(dx, dy, dz)
@@ -70,6 +71,7 @@ def _create_hole(dia, dz, x, y, z, head_dia=0, head_dz=0, dir=(0, 0, -1)):
     return part
 
 class baseplate_mount:
+    type = 'Part::FeaturePython'
     def __init__(self, obj, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
@@ -82,15 +84,11 @@ class baseplate_mount:
         return part
 
     def execute(self, obj):
-        mesh = Mesh.createCylinder((CLR_DIA_14_20-1)/2, INCH, True, 1, 50)
-        temp = Mesh.createCylinder((WASHER_DIA_14_20-2)/2, 10, True, 1, 50)
-        mesh.addMesh(temp)
-        mesh.rotate(0, pi/2, 0)
-        mesh.translate(0, 0, -INCH/2+0.5)
-        mesh.Placement = obj.Mesh.Placement
-        obj.Mesh = mesh
+        part = _create_hole(CLR_DIA_14_20-1, INCH, 0, 0, -INCH/2, WASHER_DIA_14_20-1, 10)
+        obj.Shape = part
 
 class surface_adapter:
+    type = 'Part::FeaturePython'
     def __init__(self, obj, mountOff, mount_hole_dy, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
@@ -127,6 +125,7 @@ class surface_adapter:
         
 
 class skate_mount:
+    type = 'Part::FeaturePython'
     def __init__(self, obj, cubeSize, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
@@ -161,6 +160,7 @@ class skate_mount:
 
 
 class slide_mount:
+    type = 'Part::FeaturePython'
     def __init__(self, obj, mountOff, slot_length, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
@@ -195,6 +195,7 @@ class slide_mount:
 
 
 class universal_mount:
+    type = 'Part::FeaturePython'
     def __init__(self, obj, mountOff, size, zOff, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
@@ -230,6 +231,7 @@ class universal_mount:
 
 
 class fiberport_holder:
+    type = 'Mesh::FeaturePython'
     def __init__(self, obj, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
@@ -252,6 +254,7 @@ class fiberport_holder:
         
 
 class pbs_on_skate_mount:
+    type = 'Mesh::FeaturePython'
     def __init__(self, obj, CubeSize=10, invert=False):
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'CubeSize').CubeSize = CubeSize
@@ -281,6 +284,7 @@ class pbs_on_skate_mount:
 
 
 class rotation_stage_rsp05:
+    type = 'Mesh::FeaturePython'
     def __init__(self, obj, mount_hole_dy=25):
         obj.Proxy = self
         obj.ViewObject.ShapeColor=(0.2, 0.2, 0.2)
@@ -296,6 +300,7 @@ class rotation_stage_rsp05:
         obj.Mesh = mesh
 
 class mirror_mount_k05s2:
+    type = 'Mesh::FeaturePython'
     def __init__(self, obj, drill=True, uMountParam=None):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
@@ -328,6 +333,7 @@ class mirror_mount_k05s2:
 
 
 class mirror_mount_c05g:
+    type = 'Mesh::FeaturePython'
     def __init__(self, obj, mirror_thickness=6, uMountParam=None, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
@@ -359,6 +365,7 @@ class mirror_mount_c05g:
         obj.Mesh = mesh
 
 class mirror_mount_km05:
+    type = 'Mesh::FeaturePython'
     def __init__(self, obj, mirror_thickness=6, uMountParam=None, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
@@ -388,6 +395,7 @@ class mirror_mount_km05:
         obj.Mesh = mesh
 
 class mirror_mount_mk05:
+    type = 'Mesh::FeaturePython'
     def __init__(self, obj, mirror_thickness=6, uMountParam=None, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = mirror_thickness
@@ -417,6 +425,7 @@ class mirror_mount_mk05:
         obj.Mesh = mesh
 
 class splitter_mount_c05g:
+    type = 'Mesh::FeaturePython'
     def __init__(self, obj, plate_thickness=3, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'PlateThickness').PlateThickness = plate_thickness
@@ -444,6 +453,7 @@ class splitter_mount_c05g:
         obj.Mesh = mesh
 
 class lens_holder_l05g:
+    type = 'Mesh::FeaturePython'
     def __init__(self, obj, foc_len=50, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
@@ -470,6 +480,7 @@ class lens_holder_l05g:
         obj.Mesh = mesh
 
 class pinhole_ida12:
+    type = 'Mesh::FeaturePython'
     def __init__(self, obj, slot_length=10, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
@@ -488,6 +499,7 @@ class pinhole_ida12:
         
 
 class isomet_1205c_on_km100pm:
+    type = 'Mesh::FeaturePython'
     #https://isomet.com/PDF%20acousto-optics_modulators/data%20sheets-moduvblue/M1250-T250L-0.45.pdf
     def __init__(self, obj, diff_angle=-0.026, diff_dir=(1,1), drill=True):
         obj.Proxy = self
