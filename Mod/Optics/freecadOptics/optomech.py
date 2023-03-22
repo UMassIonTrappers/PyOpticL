@@ -44,12 +44,12 @@ def _orient_stl(stl, rotate, translate, scale=1):
     mesh.translate(*translate)
     return mesh
 
-def _add_adapter(obj, adapter_class, **args):
-    adapter = App.ActiveDocument.addObject('Part::FeaturePython', obj.Name+"_Adapter")
-    adapter.addProperty("App::PropertyLinkChild","LinkToParent")
-    adapter.LinkToParent=obj
-    adapter_class(adapter, **args)
-    ViewProvider(adapter.ViewObject)
+def _add_linked_object(obj, obj_name, obj_class, **args):
+    new_obj = App.ActiveDocument.addObject('Part::FeaturePython', obj_name)
+    new_obj.addProperty("App::PropertyLinkChild","LinkToParent")
+    new_obj.LinkToParent=obj
+    obj_class(new_obj, **args)
+    ViewProvider(new_obj.ViewObject)
 
 def _create_box(dx, dy, dz, x, y, z, fillet=0):
     part = Part.makeBox(dx, dy, dz)
@@ -266,7 +266,7 @@ class pbs_on_skate_mount:
         self.tran_angle = 0
         self.in_limit = 0
         self.in_width = sqrt(200)
-        _add_adapter(obj, skate_mount, cubeSize=obj.CubeSize.Value)
+        _add_linked_object(obj, obj.Name+"_Adapter", skate_mount, cubeSize=obj.CubeSize.Value)
 
     def execute(self, obj):
         mesh = Mesh.createBox(obj.CubeSize.Value, obj.CubeSize.Value, obj.CubeSize.Value)
@@ -288,7 +288,7 @@ class rotation_stage_rsp05:
         self.tran_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
-        _add_adapter(obj, surface_adapter, mountOff=(0, 0, -14), mount_hole_dy=mount_hole_dy)
+        _add_linked_object(obj, obj.Name+"_Adapter", surface_adapter, mountOff=(0, 0, -14), mount_hole_dy=mount_hole_dy)
 
     def execute(self, obj):
         mesh = _orient_stl("RSP05-Solidworks.stl", (pi/2, 0, pi/2), (0.6, 0, 0), 1000)
@@ -307,7 +307,7 @@ class mirror_mount_k05s2:
         self.in_width = INCH/2
 
         if uMountParam != None:
-            _add_adapter(obj, universal_mount, mountOff=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mountOff=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
             obj.setEditorMode('Drill', 2)
             obj.Drill = False
 
@@ -339,7 +339,7 @@ class mirror_mount_c05g:
         self.in_width = INCH/2
 
         if uMountParam != None:
-            _add_adapter(obj, universal_mount, mountOff=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mountOff=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
             obj.setEditorMode('Drill', 2)
             obj.Drill = False
 
@@ -370,7 +370,7 @@ class mirror_mount_km05:
         self.in_width = INCH/2
 
         if uMountParam != None:
-            _add_adapter(obj, universal_mount, mountOff=uMountParam[1], size=uMountParam[0], zOff=-0.58*INCH)
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mountOff=uMountParam[1], size=uMountParam[0], zOff=-0.58*INCH)
             obj.setEditorMode('Drill', 2)
             obj.Drill = False
 
@@ -399,7 +399,7 @@ class mirror_mount_mk05:
         self.in_width = INCH/2
 
         if uMountParam != None:
-            _add_adapter(obj, universal_mount, mountOff=uMountParam[1], size=uMountParam[0], zOff=-10.2)
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mountOff=uMountParam[1], size=uMountParam[0], zOff=-10.2)
             obj.setEditorMode('Drill', 2)
             obj.Drill = False
 
@@ -478,7 +478,7 @@ class pinhole_ida12:
         self.tran_angle = 0
         self.in_limit = 0
         self.in_width = INCH/2
-        _add_adapter(obj, slide_mount, mountOff=(-0.75, -12.85, 0), slot_length=slot_length)
+        _add_linked_object(obj, obj.Name+"_Adapter", slide_mount, mountOff=(-0.75, -12.85, 0), slot_length=slot_length)
 
     def execute(self, obj):
         mesh = _orient_stl("IDA12-P5-Solidworks.stl", (-pi/2, 0, -pi/2), (-0.35, 0.05, 0), 1000)
