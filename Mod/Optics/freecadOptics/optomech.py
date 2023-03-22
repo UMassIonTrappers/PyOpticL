@@ -52,6 +52,15 @@ def _add_linked_object(obj, obj_name, obj_class, **args):
     ViewProvider(new_obj.ViewObject)
     return new_obj
 
+def _place_object(obj, rotate, translate, rel_obj=None):
+    mat = App.Placement(App.Vector(0, 0, 0), rel_obj.Placement.Rotation, App.Vector(0, 0, 0)).toMatrix()
+    mat.rotateX(rotate[0])
+    mat.rotateY(rotate[1])
+    mat.rotateZ(rotate[2])
+    mat.move(*rel_obj.Placement.Base)
+    mat.move(*translate)
+    obj.Placement = App.Placement(mat)
+
 def _create_box(dx, dy, dz, x, y, z, fillet=0):
     part = Part.makeBox(dx, dy, dz)
     if fillet != 0:
@@ -61,6 +70,10 @@ def _create_box(dx, dy, dz, x, y, z, fillet=0):
     part.translate(App.Vector(x-dx/2, y-dy/2, z))
     part = part.fuse(part)
     return part
+
+def _absolute_cut(obj, part, cut_part):
+    cut_part.translate(App.Vector(-obj.Placement.Base))
+    return part.cut(cut_part)
 
 def _create_hole(dia, dz, x, y, z, head_dia=0, head_dz=0, dir=(0, 0, -1)):
     part = Part.makeCylinder(dia/2, dz, App.Vector(0, 0, 0), App.Vector(*dir))
@@ -535,7 +548,10 @@ class periscope:
         ViewProvider(obj.ViewObject)
         self.in_limit = pi-0.01
         self.in_width = 1
-        self.table_mount=table_mount
+        if table_mount:
+            self.z_off = -3*INCH/2
+        else:
+            self.z_off = -INCH/2
 
         self.lower_obj = _add_linked_object(obj, obj.Name+"_Lower_Mirror", lower_mirror)
         self.upper_obj = _add_linked_object(obj, obj.Name+"_Upper_Mirror", upper_mirror)
@@ -548,14 +564,16 @@ class periscope:
         return part
 
     def execute(self, obj):
-        part = _create_box(10, 50, 20, 0, 0, 0)
-        part = part.fuse(_create_box(10, 20, obj.Upper_dz.Value+10, 0, 0, 0))
-        part.translate(App.Vector(-5-INCH/2, 0, 0))
-        self.lower_obj.Mesh.rotate(App.Vector(pi/2, pi/4, 0))
-        self.upper_obj.Mesh.rotate(App.Vector(pi/2, -pi/4, 0))
-        self.lower_obj.Mesh.translate(App.Vector(0, 0, obj.Lower_dz.Value))
-        self.upper_obj.Mesh.translate(App.Vector(0, 0, obj.Upper_dz.Value))
-        self.lower_obj.Placement = self.upper_obj.Placement = obj.Placement
+        part = _create_box(65, 15, 20, 0, 0, 0, 5)
+        part = part.fuse(_create_box(30, 15, obj.Upper_dz.Value+20, 0, 0, 0))
+        part = part.cut(_create_hole(CLR_DIA_14_20+0.5, INCH, -INCH, 0, 20, HEAD_DIA_14_20+0.5, 10, dir=(0,0,-1)))
+        part = part.cut(_create_hole(CLR_DIA_14_20+0.5, INCH, INCH, 0, 20, HEAD_DIA_14_20+0.5, 10, dir=(0,0,-1)))
+        part.translate(App.Vector(0, 15/2+INCH/2, self.z_off))
+        part = part.fuse(part)
+        _place_object(self.lower_obj, (pi/2, -pi/4, 0), (0, 0, obj.Lower_dz.Value+self.z_off), obj)
+        _place_object(self.upper_obj, (pi/2, 3*pi/4, 0), (0, 0, obj.Upper_dz.Value+self.z_off), obj)
+        part = _absolute_cut(obj, part, self.lower_obj.Proxy.get_drill(self.lower_obj))
+        part = _absolute_cut(obj, part, self.upper_obj.Proxy.get_drill(self.upper_obj))
         obj.Shape = part
 
 
