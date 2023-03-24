@@ -232,9 +232,6 @@ class ViewProvider:
         return "Shaded"
 
     def onDelete(self, feature, subelements):
-        for i in App.ActiveDocument.Objects:
-            if i != feature.Object:
-                App.ActiveDocument.removeObject(i.Name)
         return True
 
     def getIcon(self):
