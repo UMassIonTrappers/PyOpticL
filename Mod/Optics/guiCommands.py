@@ -1,6 +1,9 @@
 import FreeCAD as App
 import FreeCADGui as Gui
 
+import csv
+import re
+import math
 from pathlib import Path
 from freecadOptics import layout
 
@@ -32,9 +35,6 @@ class Show_Components():
     
 class Export_STLs():
 
-    def __init__(self):
-        self.state = True
-
     def GetResources(self):
         return {"Pixmap"  : ":/icons/LinkSelect.svg",
                 "Accel"   : "Shift+E",
@@ -57,9 +57,6 @@ class Export_STLs():
     
 class Top_View_Fit():
 
-    def __init__(self):
-        self.state = True
-
     def GetResources(self):
         return {"Pixmap"  : ":/icons/view-top.svg",
                 "Accel"   : "Shift+T",
@@ -71,8 +68,56 @@ class Top_View_Fit():
         Gui.SendMsgToActiveView("ViewFit")
         Gui.runCommand('Std_ViewZoomIn',0)
         return
+    
+class Export_Cart():
+
+    def GetResources(self):
+        return {"Pixmap"  : ":/icons/edit-paste.svg",
+                "Accel"   : "Shift+T",
+                "MenuText": "Export Optomech Parts to Order List"}
+
+    def Activated(self):
+        export_path = str(Path.home() / "Downloads" / "FreeCAD_Optics_Cart_")
+        n = 0
+        while Path(export_path+str(n)).is_dir():
+            n += 1
+
+        path = Path(export_path+str(n))
+        path.mkdir()
+
+        doc = App.activeDocument()
+        parts = []
+        objs = []
+        for obj in doc.Objects:
+            if hasattr(obj.Proxy, 'part_numbers'):
+                if '' in obj.Proxy.part_numbers:
+                    App.Console.PrintMessage(obj.Name + " is missing an auxiliary part number\n")
+                parts.extend(obj.Proxy.part_numbers)
+                objs.extend([obj]*len(obj.Proxy.part_numbers))
+
+        cart = open(str(path / "Thorlabs_Cart.csv"), 'w', newline='')
+        list = open(str(path / "Parts_List.csv"), 'w', newline='')
+        cart_w= csv.writer(cart)
+        list_w= csv.writer(list)
+        cart_w.writerow(["Part Number", "Qty"])
+        list_w.writerow(["Part Class / Name", "Part Number", "Qty"])
+        for i in enumerate(set(parts)):
+            if i[1] != '':
+                test = re.match(".*-P([0-9]+)$", i[1])
+                pack = 1
+                if test != None:
+                    pack = int(test.group(1))
+                cart_w.writerow([i[1], math.ceil(parts.count(i[1])/pack)])
+                list_w.writerow([type(objs[i[0]].Proxy).__name__, i[1], math.ceil(parts.count(i[1])/pack)])
+        for i in enumerate(parts):
+            if i[1] == '':
+                list_w.writerow([objs[i[0]].Name, "Unknown", 1])
+            
+        return
+    
 
 Gui.addCommand("RecomputeBeam", Recompute_Beam())
 Gui.addCommand("ShowComponents", Show_Components())
 Gui.addCommand("ExportSTLs", Export_STLs())
 Gui.addCommand("TopViewFit", Top_View_Fit())
+Gui.addCommand("ExportCart", Export_Cart())
