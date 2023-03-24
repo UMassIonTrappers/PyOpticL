@@ -1,6 +1,7 @@
 import FreeCAD as App
 import Mesh
 import Part
+import Draft
 from . import laser
 
 INCH = 25.4
@@ -25,9 +26,9 @@ def place_element_along_beam(obj_name, obj_class, beam_obj, beam_index, angle, d
     return obj
 
 # Creates a new active baseplate
-def create_baseplate(dx, dy, dz, drill=True, name="Baseplate", x=0, y=0):
+def create_baseplate(dx, dy, dz, drill=True, name="Baseplate", x=0, y=0, label=""):
     obj = App.ActiveDocument.addObject('Part::FeaturePython', name)
-    baseplate(obj, dx, dy, dz, drill)
+    baseplate(obj, dx, dy, dz, drill, label)
     obj.Placement = App.Placement(App.Vector(x, y, 0), App.Rotation(0, 0, 0), App.Vector(0, 0, 0))
     ViewProvider(obj.ViewObject)
     App.ActiveDocument.recompute()
@@ -63,13 +64,14 @@ def show_components(state):
 
 class baseplate:
 
-    def __init__(self, obj, dx, dy, dz, drill):
+    def __init__(self, obj, dx, dy, dz, drill, label):
         obj.Proxy = self
 
         obj.addProperty('App::PropertyLength', 'dx').dx = dx #define and set baseplate dimentions
         obj.addProperty('App::PropertyLength', 'dy').dy = dy
         obj.addProperty('App::PropertyLength', 'dz').dz = dz
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyString', 'CutLabel').CutLabel = label
 
 
     def execute(self, obj):
@@ -81,6 +83,13 @@ class baseplate:
                         temp = i.Proxy.get_drill(i)
                         temp.translate(App.Vector(-obj.Placement.Base))
                         part = part.cut(temp)
+        if obj.CutLabel != "":
+            face = Draft.make_shapestring(obj.CutLabel, "C:/Windows/Fonts/Arial.ttf", 4)
+            face.Placement.Base = App.Vector(5, 0, -INCH/2-10)
+            face.Placement.Rotation = App.Rotation(App.Vector(1, 0, 0), 90)
+            text = face.Shape.extrude(App.Vector(0,0.5,0))
+            part = part.cut(text)
+            App.ActiveDocument.removeObject(face.Label)
         obj.Shape = part
 
 

@@ -43,7 +43,7 @@ up_left = left_up-180
 right_down = up_left
 
 name = "baseplate_modular_doublepass"
-layout.create_baseplate(base_dx, base_dy, base_dz, name=name)
+layout.create_baseplate(base_dx, base_dy, base_dz, name=name, label="Modular Doublepass")
 
 beam = layout.add_beam_path(base_dx, input_y, -180)
 # aom_beam_minus1 = layout.add_beam_path(19, input_y-10, left+0.026*180/pi)  #https://isomet.com/PDF%20acousto-optics_modulators/data%20sheets-moduvblue/M1250-T250L-0.45.pdf
