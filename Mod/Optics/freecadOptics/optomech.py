@@ -564,11 +564,52 @@ class periscope:
         return part
 
     def execute(self, obj):
-        part = _create_box(65, 15, 20, 0, 0, 0, 5)
-        part = part.fuse(_create_box(30, 15, obj.Upper_dz.Value+20, 0, 0, 0))
+        width = INCH #Must be INCH wide to keep periscope mirrors 1 inch from mount holes. 
+        part = _create_box(65, width, 20, 0, 0, 0, 5)
+        part = part.fuse(_create_box(30, width, obj.Upper_dz.Value+20, 0, 0, 0))
         part = part.cut(_create_hole(CLR_DIA_14_20+0.5, INCH, -INCH, 0, 20, HEAD_DIA_14_20+0.5, 10, dir=(0,0,-1)))
         part = part.cut(_create_hole(CLR_DIA_14_20+0.5, INCH, INCH, 0, 20, HEAD_DIA_14_20+0.5, 10, dir=(0,0,-1)))
-        part.translate(App.Vector(0, 15/2+INCH/2, self.z_off))
+        part.translate(App.Vector(0, width/2+INCH/2, self.z_off))
+        part = part.fuse(part)
+        _place_object(self.lower_obj, (pi/2, -pi/4, 0), (0, 0, obj.Lower_dz.Value+self.z_off), obj)
+        _place_object(self.upper_obj, (pi/2, 3*pi/4, 0), (0, 0, obj.Upper_dz.Value+self.z_off), obj)
+        part = _absolute_cut(obj, part, self.lower_obj.Proxy.get_drill(self.lower_obj))
+        part = _absolute_cut(obj, part, self.upper_obj.Proxy.get_drill(self.upper_obj))
+        obj.Shape = part
+
+class periscope_fixed:
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, lower_dz, upper_dz, table_mount=False, lower_mirror=mirror_mount_c05g, upper_mirror=mirror_mount_c05g, drill=True):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyLength', 'Lower_dz').Lower_dz = lower_dz
+        obj.addProperty('App::PropertyLength', 'Upper_dz').Upper_dz = upper_dz
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.ViewObject.ShapeColor=(0.6, 0.6, 0.6)
+        ViewProvider(obj.ViewObject)
+        self.in_limit = pi-0.01
+        self.in_width = 1
+        if table_mount:
+            self.z_off = -3*INCH/2
+        else:
+            self.z_off = -INCH/2
+
+        self.lower_obj = _add_linked_object(obj, obj.Name+"_Lower_Mirror", lower_mirror)
+        self.upper_obj = _add_linked_object(obj, obj.Name+"_Upper_Mirror", upper_mirror)
+
+    def get_drill(self, obj):
+        part = _create_hole(TAP_DIA_8_32, INCH, 0, 0, -20.7, dir=(1,0,0))
+        part = part.fuse(_create_hole(TAP_DIA_8_32, INCH, 0, -12.7, -20.7, dir=(1,0,0)))
+        part = part.fuse(_create_hole(TAP_DIA_8_32, INCH, 0, 12.7, -20.7, dir=(1,0,0)))
+        part.Placement=obj.Placement
+        return part
+
+    def execute(self, obj):
+        width = INCH #Must be INCH wide to keep periscope mirrors 1 inch from mount holes. 
+        part = _create_box(65, width, 20, 0, 0, 0, 5)
+        part = part.fuse(_create_box(30, width, obj.Upper_dz.Value+20, 0, 0, 0))
+        part = part.cut(_create_hole(CLR_DIA_14_20+0.5, INCH, -INCH, 0, 20, HEAD_DIA_14_20+0.5, 10, dir=(0,0,-1)))
+        part = part.cut(_create_hole(CLR_DIA_14_20+0.5, INCH, INCH, 0, 20, HEAD_DIA_14_20+0.5, 10, dir=(0,0,-1)))
+        part.translate(App.Vector(0, width/2+INCH/2, self.z_off))
         part = part.fuse(part)
         _place_object(self.lower_obj, (pi/2, -pi/4, 0), (0, 0, obj.Lower_dz.Value+self.z_off), obj)
         _place_object(self.upper_obj, (pi/2, 3*pi/4, 0), (0, 0, obj.Upper_dz.Value+self.z_off), obj)
