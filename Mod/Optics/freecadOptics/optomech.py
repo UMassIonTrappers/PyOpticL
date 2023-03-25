@@ -250,7 +250,7 @@ class fiberport_holder:
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.6)
         ViewProvider(obj.ViewObject)
-        self.part_numbers = ['HCA3']
+        self.part_numbers = ['HCA3','PAF2-5A'] #https://www.thorlabs.com/newgrouppage9.cfm?objectgroup_id=2940
         self.in_limit = pi-0.01
         self.in_width = 1
 
@@ -269,12 +269,12 @@ class fiberport_holder:
 
 class pbs_on_skate_mount:
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, CubeSize=10, invert=False, cube_part_num=''):
+    def __init__(self, obj, CubeSize=10, invert=False, cube_part_num='PBS101'):
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'CubeSize').CubeSize = CubeSize
         obj.ViewObject.ShapeColor=(0.5, 0.5, 0.7)
         obj.ViewObject.Transparency=50
-        self.part_numbers = ['HCA3', cube_part_num]
+        self.part_numbers = [cube_part_num]
         self.invert = invert
         ViewProvider(obj.ViewObject)
         if invert:
@@ -300,11 +300,11 @@ class pbs_on_skate_mount:
 
 class rotation_stage_rsp05:
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, mount_hole_dy=25):
+    def __init__(self, obj, mount_hole_dy=25 , wave_plate_part_num = ''):
         obj.Proxy = self
         obj.ViewObject.ShapeColor=(0.2, 0.2, 0.2)
         ViewProvider(obj.ViewObject)
-        self.part_numbers = ['RSP05']
+        self.part_numbers = ['RSP05',wave_plate_part_num]
         self.tran_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
@@ -317,13 +317,13 @@ class rotation_stage_rsp05:
 
 class mirror_mount_k05s2:
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, drill=True, uMountParam=None):
+    def __init__(self, obj, drill=True, uMountParam=None , mirror_part_num = 'BB05-E02'):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = default_mirror_thickness
         obj.ViewObject.ShapeColor=(0.5, 0.5, 0.55)
         ViewProvider(obj.ViewObject)
-        self.part_numbers = ['POLARIS-K05S2']
+        self.part_numbers = ['POLARIS-K05S1', mirror_part_num]
         self.ref_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
@@ -341,7 +341,42 @@ class mirror_mount_k05s2:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("POLARIS-K05S2-Solidworks.stl", (0, -pi/2, 0), (-4.5-obj.MirrorThickness.Value, -0.3, -0.25), 1000)
+        # mesh = _orient_stl("POLARIS-K05S2-Solidworks.stl", (0, -pi/2, 0), (-4.5-obj.MirrorThickness.Value, -0.3, -0.25), 1000)
+        mesh = _orient_stl("POLARIS-K05S1-Solidworks.stl", (0, 0, -pi/2), (-4.5-obj.MirrorThickness.Value, -0.3, -0.25), 1)
+        temp = Mesh.createCylinder(INCH/4, obj.MirrorThickness.Value, True, 1, 50)
+        temp.rotate(0, 0, pi)
+        mesh.addMesh(temp)
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+class mirror_mount_k05s1:
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True, uMountParam=None , mirror_part_num = 'BB05-E02'):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = default_mirror_thickness
+        obj.ViewObject.ShapeColor=(0.5, 0.5, 0.55)
+        ViewProvider(obj.ViewObject)
+        self.part_numbers = ['POLARIS-K05S1' , mirror_part_num]
+        self.ref_angle = 0
+        self.in_limit = pi/2
+        self.in_width = INCH/2
+
+        if uMountParam != None:
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mountOff=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
+            obj.setEditorMode('Drill', 2)
+            obj.Drill = False
+
+    def get_drill(self, obj):
+        part = _create_hole(TAP_DIA_8_32, drill_depth, -8-obj.MirrorThickness.Value, 0, -INCH/2)
+        part = part.fuse(_create_hole(2, 2.2, -8-obj.MirrorThickness.Value, -5, -INCH/2))
+        part = part.fuse(_create_hole(2, 2.2, -8-obj.MirrorThickness.Value, 5, -INCH/2))
+        part.Placement=obj.Placement
+        return part
+
+    def execute(self, obj):
+        # mesh = _orient_stl("POLARIS-K05S2-Solidworks.stl", (0, -pi/2, 0), (-4.5-obj.MirrorThickness.Value, -0.3, -0.25), 1000)
+        mesh = _orient_stl("POLARIS-K05S1-Solidworks.stl", (0, 0, -pi/2), (-4.5-obj.MirrorThickness.Value, -0.3, -0.25), 1)
         temp = Mesh.createCylinder(INCH/4, obj.MirrorThickness.Value, True, 1, 50)
         temp.rotate(0, 0, pi)
         mesh.addMesh(temp)
@@ -384,7 +419,7 @@ class mirror_mount_c05g:
 
 class mirror_mount_km05:
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, mirror_thickness=6, uMountParam=None, drill=True):
+    def __init__(self, obj, mirror_thickness=6, uMountParam=[(20, 28, 10), (-10, 0)], drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = mirror_thickness
@@ -415,7 +450,7 @@ class mirror_mount_km05:
 
 class mirror_mount_mk05:
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, mirror_thickness=6, uMountParam=None, drill=True):
+    def __init__(self, obj, mirror_thickness=6, uMountParam=[(20, 28, 10), (-10, 0)], drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = mirror_thickness
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
@@ -508,7 +543,7 @@ class pinhole_ida12:
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.part_numbers = ['IDA12-P5']
+        self.part_numbers = ['IDA12']
         self.tran_angle = 0
         self.in_limit = 0
         self.in_width = INCH/2
