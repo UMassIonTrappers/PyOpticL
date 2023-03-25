@@ -82,14 +82,14 @@ Gui.runCommand('Std_ViewZoomIn',0)
 #'compile the baseplate'
 layout.redraw()
 
-#prepare for export
-import Mesh
+# #prepare for export
+# import Mesh
 
-filename = App.getUserMacroDir(True) + "stl/" + name + ".stl" #Filename for model
-print(filename)
-obj = App.ActiveDocument.getObject(name) 	# get baseplate object
-Gui.Selection.addSelection(obj) 			# select baseplate
-__objs__ = Gui.Selection.getSelection() 	# get selection for meshing
-Mesh.export(__objs__, filename) 			#Mesh and export (as .stl given filename)
+# filename = App.getUserMacroDir(True) + "stl/" + name + ".stl" #Filename for model
+# print(filename)
+# obj = App.ActiveDocument.getObject(name) 	# get baseplate object
+# Gui.Selection.addSelection(obj) 			# select baseplate
+# __objs__ = Gui.Selection.getSelection() 	# get selection for meshing
+# Mesh.export(__objs__, filename) 			#Mesh and export (as .stl given filename)
 
 print('Done!')
