@@ -543,7 +543,7 @@ class pinhole_ida12:
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.part_numbers = ['IDA12']
+        self.part_numbers = ['IDA12-P5']
         self.tran_angle = 0
         self.in_limit = 0
         self.in_width = INCH/2
