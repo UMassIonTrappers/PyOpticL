@@ -5,14 +5,15 @@ from importlib import reload
 import math
 from math import *
 import os
+import datetime
+from datetime import datetime
 
 reload(optomech)
 reload(layout)
 reload(laser)
 
+
 INCH = 25.4
-ddx = INCH
-ddy = 1.5*INCH
 
 aom_dy = 70
 base_split = INCH/4
@@ -25,10 +26,10 @@ base_dz = INCH
 input_y = base_dy-3.0*INCH+gap/2
 
 ''' 'Cardinal' beam directions'''
-left = -90
+down = 0 
+up = down+ 180
+left = down - 90
 right = left + 180
-up = 180
-down = up - 180 
 
 # Turns
 up_right = 45
@@ -39,8 +40,18 @@ left_up = up_right +90
 up_left = left_up-180
 right_down = up_left
 
-name = "baseplate_modular_doublepass_resin"
-layout.create_baseplate(base_dx, base_dy, base_dz, name=name)
+
+"""
+Start BASEPLATE
+"""
+
+name = "Doublepass_Resin"
+
+date_time = datetime.now().strftime("%m/%d/%Y")
+label = name + " " +  date_time
+print("label name date and time:",label)
+
+layout.create_baseplate(base_dx, base_dy, base_dz, name=name, label=label)
 
 beam = layout.add_beam_path(base_dx, input_y, -180)
 AOM_location_x = 0.75*INCH
@@ -48,7 +59,11 @@ AOM_location_x = 0.75*INCH
 mirror_mounts = optomech.mirror_mount_km05
 
 
-layout.place_element_along_beam("Input_Mirror_1", mirror_mounts, beam, 0b1, up_right, 15)
+"""
+Add Optical Elements
+"""
+
+layout.place_element_along_beam("Input_Mirror_1", mirror_mounts, beam, 0b1, up_right, 16)
 layout.place_element_along_beam("Input_Mirror_2", mirror_mounts, beam, 0b1, right_up,  INCH)
 layout.place_element_along_beam("Half_waveplate", optomech.rotation_stage_rsp05, beam, 0b1, up, 55, wave_plate_part_num = '') #421nm custom waveplates from CASIX
 layout.place_element_along_beam("Beam_Splitter", optomech.pbs_on_skate_mount, beam, 0b1, up, 25)
@@ -65,7 +80,12 @@ layout.place_element_along_beam("Output_Mirror_2", mirror_mounts, beam, 0b110, d
 layout.place_element_along_beam("Half_waveplate_Out", optomech.rotation_stage_rsp05, beam, 0b110, left, 100, wave_plate_part_num = '') #421nm custom waveplates from CASIX
 layout.place_element_along_beam("Output_Fiberport", optomech.fiberport_holder, beam, 0b110, right, y=0)
 
-offset = -10/INCH
+
+"""
+Add holes to baseplate to mount to optical table 
+ >>> Make sure to align laser beam above bolt holes so plates line up together <<<
+"""
+offset = -10/INCH # arbitrary shift to make sure laser is over bolt holes
 layout.place_element("Mount_Hole", optomech.baseplate_mount, (2-offset)*INCH-gap/2, (1-offset)*INCH-gap/2, 0)
 layout.place_element("Mount_Hole", optomech.baseplate_mount, (4-offset)*INCH-gap/2, (1-offset)*INCH-gap/2, 0)
 layout.place_element("Mount_Hole", optomech.baseplate_mount, (3-offset)*INCH-gap/2, (4-offset)*INCH-gap/2, 0)
