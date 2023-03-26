@@ -6,7 +6,8 @@ from . import layout
 
 from pathlib import Path
 
-STL_PATH = str(Path(__file__).parent.resolve()) + "\\stl\\thorlabs\\"
+STL_PATH_thorlabs = str(Path(__file__).parent.resolve()) + "\\stl\\thorlabs\\"
+STL_PATH_newport = str(Path(__file__).parent.resolve()) + "\\stl\\newport\\"
 
 # Set all static dimentions
 INCH = 25.4
@@ -35,7 +36,7 @@ drill_depth = 100
 default_mirror_thickness = 6
 
 # Used to tranform an STL such that it's placement matches the optical center
-def _orient_stl(stl, rotate, translate, scale=1):
+def _orient_stl(stl, rotate, translate, scale=1, STL_PATH = STL_PATH_thorlabs ):
     mesh = Mesh.read(STL_PATH+stl)
     mat = App.Matrix()
     mat.scale(App.Vector(scale, scale, scale))
@@ -376,7 +377,7 @@ class mirror_mount_k05s1:
 
     def execute(self, obj):
         # mesh = _orient_stl("POLARIS-K05S2-Solidworks.stl", (0, -pi/2, 0), (-4.5-obj.MirrorThickness.Value, -0.3, -0.25), 1000)
-        mesh = _orient_stl("POLARIS-K05S1-Solidworks.stl", (0, 0, -pi/2), (-4.5-obj.MirrorThickness.Value, -0.3, -0.25), 1)
+        mesh = _orient_stl("POLARIS-K05S1-Solidworks.stl", (0, 0, -pi/2), (-4.5-obj.MirrorThickness.Value, -0.3+0.5, -0.25), 1)
         temp = Mesh.createCylinder(INCH/4, obj.MirrorThickness.Value, True, 1, 50)
         temp.rotate(0, 0, pi)
         mesh.addMesh(temp)
@@ -622,6 +623,87 @@ class periscope:
         part = _absolute_cut(obj, part, self.lower_obj.Proxy.get_drill(self.lower_obj))
         part = _absolute_cut(obj, part, self.upper_obj.Proxy.get_drill(self.upper_obj))
         obj.Shape = part
+
+
+
+class isolator_670:
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, mount_hole_dy=50, newport=True):
+        obj.Proxy = self
+        obj.ViewObject.ShapeColor=(0.2, 0.2, 0.2)
+        ViewProvider(obj.ViewObject)
+        self.part_numbers = ['IOT-5-670-VLP']
+        self.tran_angle = 0
+        self.in_limit = pi/2
+        self.in_width = INCH/2
+        _add_linked_object(obj, obj.Name+"_Adapter", surface_adapter, mountOff=(0, 0, -14), mount_hole_dy=mount_hole_dy)
+
+    def execute(self, obj):
+        # mesh = _orient_stl("ISO-04-650-LP.stl", (pi/2, 0, 0), (0, 0, 0), 1, STL_PATH = STL_PATH_newport) #Newport ISO-04-650-LP
+        mesh = _orient_stl("IOT-5-670-VLP.stl", (pi/2, 0, pi/2), (19, 0, 0), 1) #Thorlabs 670 (better for injection?)
+        # if self.newport:
+            # mesh = _orient_stl("ISO-04-650-LP.stl", (pi/2, 0, 0), (19, 0, 0), 1, STL_PATH = STL_PATH_newport) #Newport ISO-04-650-LP
+        # else:
+            # mesh = _orient_stl("IOT-5-670-VLP.stl", (pi/2, 0, pi/2), (19, 0, 0), 1) #Thorlabs 670
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+
+
+class laser_diode_mount:
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
+        ViewProvider(obj.ViewObject)
+        self.part_numbers = ['LT230P-B','AD15NT']
+        self.ref_angle = 0
+        self.in_limit = pi/2
+        self.in_width = INCH/2
+
+    def get_drill(self, obj):
+        part = _create_hole(TAP_DIA_8_32, drill_depth, -13.4*0, 0, -INCH/2)
+        part.Placement=obj.Placement
+        return part
+
+    def execute(self, obj):
+        mesh = _orient_stl("LT230P-B.stl", (0, pi/2, 0 ), ([0, 0, 0]))
+        # temp = Mesh.createCylinder(INCH/4, 6, True, 1, 50)
+        # temp.rotate(0, 0, pi)
+        # mesh.addMesh(temp)
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+
+
+class laser_grating_mount:
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, mirror_thickness=6, drill=True):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = mirror_thickness
+        obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
+        ViewProvider(obj.ViewObject)
+        self.part_numbers = ['GH13-24V']
+        self.ref_angle = 0
+        self.in_limit = pi/2
+        self.in_width = INCH/2
+
+    def get_drill(self, obj):
+        part = _create_hole(TAP_DIA_8_32, drill_depth, 0, 0, -INCH/2)
+        part.Placement=obj.Placement
+        return part
+
+    def execute(self, obj):
+        mesh = _orient_stl("GH13-24V.stl", (0, pi/2, 0), ([-3, 0, 0]))
+        # temp = Mesh.createCylinder(INCH/4, 6, True, 1, 50)
+        # temp.rotate(0, 0, pi)
+        # mesh.addMesh(temp)
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+
 
 
 class ViewProvider:
