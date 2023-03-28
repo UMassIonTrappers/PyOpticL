@@ -85,7 +85,7 @@ class baseplate:
                         part = part.cut(temp)
         if obj.CutLabel != "":
             face = Draft.make_shapestring(obj.CutLabel, "C:/Windows/Fonts/Arial.ttf", 4)
-            face.Placement.Base = App.Vector(5, 0, -INCH/2-10)
+            face.Placement.Base = App.Vector(5, 0, -INCH-10)
             face.Placement.Rotation = App.Rotation(App.Vector(1, 0, 0), 90)
             text = face.Shape.extrude(App.Vector(0,0.5,0))
             part = part.cut(text)

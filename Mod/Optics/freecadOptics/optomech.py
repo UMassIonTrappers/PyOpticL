@@ -6,7 +6,8 @@ from . import layout
 
 from pathlib import Path
 
-STL_PATH = str(Path(__file__).parent.resolve()) + "\\stl\\thorlabs\\"
+STL_PATH_thorlabs = str(Path(__file__).parent.resolve()) + "\\stl\\thorlabs\\"
+STL_PATH_newport = str(Path(__file__).parent.resolve()) + "\\stl\\newport\\"
 
 # Set all static dimentions
 INCH = 25.4
@@ -35,7 +36,7 @@ drill_depth = 100
 default_mirror_thickness = 6
 
 # Used to tranform an STL such that it's placement matches the optical center
-def _orient_stl(stl, rotate, translate, scale=1):
+def _orient_stl(stl, rotate, translate, scale=1, STL_PATH = STL_PATH_thorlabs ):
     mesh = Mesh.read(STL_PATH+stl)
     mat = App.Matrix()
     mat.scale(App.Vector(scale, scale, scale))
@@ -84,6 +85,13 @@ def _create_hole(dia, dz, x, y, z, head_dia=0, head_dz=0, dir=(0, 0, -1)):
     return part
 
 class baseplate_mount:
+    '''
+    Mount holes for attaching to an optical table
+    Currently uses 14_20 bolts
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+    '''
     type = 'Part::FeaturePython'
     def __init__(self, obj, drill=True):
         obj.Proxy = self
@@ -101,6 +109,13 @@ class baseplate_mount:
         obj.Shape = part
 
 class surface_adapter:
+    '''
+    Surface adapter for post-mounted parts
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mount_hole_dy (float) : The spacing (in mm) between the two mount holes of the adapter
+    '''
     type = 'Part::FeaturePython'
     def __init__(self, obj, mountOff, mount_hole_dy, drill=True):
         obj.Proxy = self
@@ -138,8 +153,15 @@ class surface_adapter:
         
 
 class skate_mount:
+    '''
+    Skate mount for splitter cubes
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        cube_size (float) : The side length (in mm) of the splitter cube
+    '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, cubeSize, drill=True):
+    def __init__(self, obj, cube_size, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty('App::PropertyLength', 'MountHoleDistance').MountHoleDistance = 20
@@ -147,7 +169,7 @@ class skate_mount:
         obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
         obj.setEditorMode('Placement', 2)
         ViewProvider(obj.ViewObject)
-        self.CubeSize = cubeSize
+        self.cube_size = cube_size
 
     def get_drill(self, obj):
         part = _create_hole(TAP_DIA_8_32, drill_depth, 0, -obj.MountHoleDistance.Value/2, -INCH/2)
@@ -158,14 +180,14 @@ class skate_mount:
     def execute(self, obj):
         dx = HEAD_DIA_8_32+5
         dy = obj.MountHoleDistance.Value + CLR_DIA_8_32*2+3
-        dz = INCH/2-self.CubeSize/2+1
+        dz = INCH/2-self.cube_size/2+1
         part = _create_box(dx, dy, dz, 0, 0, -dz, 5)
-        temp = _create_box(self.CubeSize+obj.CubeTolerance.Value, self.CubeSize+obj.CubeTolerance.Value, 1+1e-3, 0, 0, -1-1e-3)
+        temp = _create_box(self.cube_size+obj.CubeTolerance.Value, self.cube_size+obj.CubeTolerance.Value, 1+1e-3, 0, 0, -1-1e-3)
         part = part.cut(temp)
         temp = _create_hole(CLR_DIA_8_32, dz, 0, -obj.MountHoleDistance.Value/2, 0, HEAD_DIA_8_32, HEAD_DZ_8_32)
         temp = temp.fuse(_create_hole(CLR_DIA_8_32, dz, 0, obj.MountHoleDistance.Value/2, 0, HEAD_DIA_8_32, HEAD_DZ_8_32))
         part = part.cut(temp)
-        part.translate(App.Vector(0, 0, -self.CubeSize/2+1))
+        part.translate(App.Vector(0, 0, -self.cube_size/2+1))
         part = part.fuse(part)
         obj.Shape = part
         parent = obj.LinkToParent
@@ -250,7 +272,7 @@ class fiberport_holder:
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.6)
         ViewProvider(obj.ViewObject)
-        self.part_numbers = ['HCA3']
+        self.part_numbers = ['HCA3','PAF2-5A'] #https://www.thorlabs.com/newgrouppage9.cfm?objectgroup_id=2940
         self.in_limit = pi-0.01
         self.in_width = 1
 
@@ -268,13 +290,22 @@ class fiberport_holder:
         
 
 class pbs_on_skate_mount:
+    '''
+    Beam-splitter cube
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        invert (bool) : Invert pick-off direction, false is left, true is right
+        cube_size (float) : The side length (in mm) of the splitter cube
+        cube_part_num (string) : The Thorlabs part number of the splitter cube being used
+    '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, CubeSize=10, invert=False, cube_part_num=''):
+    def __init__(self, obj, invert=False, cube_size=10, cube_part_num='PBS101'):
         obj.Proxy = self
-        obj.addProperty('App::PropertyLength', 'CubeSize').CubeSize = CubeSize
+        obj.addProperty('App::PropertyLength', 'CubeSize').CubeSize = cube_size
         obj.ViewObject.ShapeColor=(0.5, 0.5, 0.7)
         obj.ViewObject.Transparency=50
-        self.part_numbers = ['HCA3', cube_part_num]
+        self.part_numbers = [cube_part_num]
         self.invert = invert
         ViewProvider(obj.ViewObject)
         if invert:
@@ -284,7 +315,7 @@ class pbs_on_skate_mount:
         self.tran_angle = 0
         self.in_limit = 0
         self.in_width = sqrt(200)
-        _add_linked_object(obj, obj.Name+"_Adapter", skate_mount, cubeSize=obj.CubeSize.Value)
+        _add_linked_object(obj, obj.Name+"_Adapter", skate_mount, cube_size=obj.CubeSize.Value)
 
     def execute(self, obj):
         mesh = Mesh.createBox(obj.CubeSize.Value, obj.CubeSize.Value, obj.CubeSize.Value)
@@ -299,12 +330,20 @@ class pbs_on_skate_mount:
 
 
 class rotation_stage_rsp05:
+    '''
+    Rotation stage, model RSP05
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mount_hole_dy (float) : The spacing (in mm) between the two mount holes of it's adapter
+        wave_plate_part_num (string) : The Thorlabs part number of the wave plate being used
+    '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, mount_hole_dy=25):
+    def __init__(self, obj, mount_hole_dy=25 , wave_plate_part_num=''):
         obj.Proxy = self
         obj.ViewObject.ShapeColor=(0.2, 0.2, 0.2)
         ViewProvider(obj.ViewObject)
-        self.part_numbers = ['RSP05']
+        self.part_numbers = ['RSP05',wave_plate_part_num]
         self.tran_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
@@ -316,14 +355,23 @@ class rotation_stage_rsp05:
         obj.Mesh = mesh
 
 class mirror_mount_k05s2:
+    '''
+    Mirror mount, model K05S2
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mirror_part_num (string) : The Thorlabs part number of the mirror being used
+        uMountParam (float[3], float[2]) : Universal mount parameters consisting of a tuple for the size of
+            the mount in x,y,z and a tuple of the x,y offset of the mount
+    '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, drill=True, uMountParam=None):
+    def __init__(self, obj, drill=True, uMountParam=None , mirror_part_num = 'BB05-E02'):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = default_mirror_thickness
         obj.ViewObject.ShapeColor=(0.5, 0.5, 0.55)
         ViewProvider(obj.ViewObject)
-        self.part_numbers = ['POLARIS-K05S2']
+        self.part_numbers = ['POLARIS-K05S1', mirror_part_num]
         self.ref_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
@@ -341,7 +389,51 @@ class mirror_mount_k05s2:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("POLARIS-K05S2-Solidworks.stl", (0, -pi/2, 0), (-4.5-obj.MirrorThickness.Value, -0.3, -0.25), 1000)
+        # mesh = _orient_stl("POLARIS-K05S2-Solidworks.stl", (0, -pi/2, 0), (-4.5-obj.MirrorThickness.Value, -0.3, -0.25), 1000)
+        mesh = _orient_stl("POLARIS-K05S1-Solidworks.stl", (0, 0, -pi/2), (-4.5-obj.MirrorThickness.Value, -0.3, -0.25), 1)
+        temp = Mesh.createCylinder(INCH/4, obj.MirrorThickness.Value, True, 1, 50)
+        temp.rotate(0, 0, pi)
+        mesh.addMesh(temp)
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+class mirror_mount_k05s1:
+    '''
+    Mirror mount, model K05S1
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mirror_part_num (string) : The Thorlabs part number of the mirror being used
+        uMountParam (float[3], float[2]) : Universal mount parameters consisting of a tuple for the size of
+            the mount in x,y,z and a tuple of the x,y offset of the mount
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True, uMountParam=None , mirror_part_num = 'BB05-E02'):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = default_mirror_thickness
+        obj.ViewObject.ShapeColor=(0.5, 0.5, 0.55)
+        ViewProvider(obj.ViewObject)
+        self.part_numbers = ['POLARIS-K05S1' , mirror_part_num]
+        self.ref_angle = 0
+        self.in_limit = pi/2
+        self.in_width = INCH/2
+
+        if uMountParam != None:
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mountOff=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
+            obj.setEditorMode('Drill', 2)
+            obj.Drill = False
+
+    def get_drill(self, obj):
+        part = _create_hole(TAP_DIA_8_32, drill_depth, -8-obj.MirrorThickness.Value, 0, -INCH/2)
+        part = part.fuse(_create_hole(2, 2.2, -8-obj.MirrorThickness.Value, -5, -INCH/2))
+        part = part.fuse(_create_hole(2, 2.2, -8-obj.MirrorThickness.Value, 5, -INCH/2))
+        part.Placement=obj.Placement
+        return part
+
+    def execute(self, obj):
+        # mesh = _orient_stl("POLARIS-K05S2-Solidworks.stl", (0, -pi/2, 0), (-4.5-obj.MirrorThickness.Value, -0.3, -0.25), 1000)
+        mesh = _orient_stl("POLARIS-K05S1-Solidworks.stl", (0, 0, -pi/2), (-4.5-obj.MirrorThickness.Value, -0.3+0.5, -0.25), 1)
         temp = Mesh.createCylinder(INCH/4, obj.MirrorThickness.Value, True, 1, 50)
         temp.rotate(0, 0, pi)
         mesh.addMesh(temp)
@@ -350,6 +442,16 @@ class mirror_mount_k05s2:
 
 
 class mirror_mount_c05g:
+    '''
+    Mirror mount, model C05G
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mirror_thickness (float) : The thickness (in mm) of the mirror being used
+        mirror_part_num (string) : The Thorlabs part number of the mirror being used
+        uMountParam (float[3], float[2]) : Universal mount parameters consisting of a tuple for the size of
+            the mount in x,y,z and a tuple of the x,y offset of the mount
+    '''
     type = 'Mesh::FeaturePython'
     def __init__(self, obj, mirror_thickness=6, uMountParam=None, drill=True):
         obj.Proxy = self
@@ -383,8 +485,18 @@ class mirror_mount_c05g:
         obj.Mesh = mesh
 
 class mirror_mount_km05:
+    '''
+    Mirror mount, model KM05
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mirror_thickness (float) : The thickness (in mm) of the mirror being used
+        mirror_part_num (string) : The Thorlabs part number of the mirror being used
+        uMountParam (float[3], float[2]) : Universal mount parameters consisting of a tuple for the size of
+            the mount in x,y,z and a tuple of the x,y offset of the mount
+    '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, mirror_thickness=6, uMountParam=None, drill=True):
+    def __init__(self, obj, mirror_thickness=6, uMountParam=[(20, 28, 10), (-10, 0)], drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = mirror_thickness
@@ -414,8 +526,18 @@ class mirror_mount_km05:
         obj.Mesh = mesh
 
 class mirror_mount_mk05:
+    '''
+    Mirror mount, model MK05
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mirror_thickness (float) : The thickness (in mm) of the mirror being used
+        mirror_part_num (string) : The Thorlabs part number of the mirror being used
+        uMountParam (float[3], float[2]) : Universal mount parameters consisting of a tuple for the size of
+            the mount in x,y,z and a tuple of the x,y offset of the mount
+    '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, mirror_thickness=6, uMountParam=None, drill=True):
+    def __init__(self, obj, mirror_thickness=6, uMountParam=[(20, 28, 10), (-10, 0)], drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = mirror_thickness
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
@@ -445,6 +567,16 @@ class mirror_mount_mk05:
         obj.Mesh = mesh
 
 class splitter_mount_c05g:
+    '''
+    Splitter mount, model C05G
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        plate_thickness (float) : The thickness (in mm) of the splitter plate being used
+        plate_part_num (string) : The Thorlabs part number of the splitter plate being used
+        uMountParam (float[3], float[2]) : Universal mount parameters consisting of a tuple for the size of
+            the mount in x,y,z and a tuple of the x,y offset of the mount
+    '''
     type = 'Mesh::FeaturePython'
     def __init__(self, obj, plate_thickness=3, drill=True, plate_part_num=''):
         obj.Proxy = self
@@ -474,6 +606,14 @@ class splitter_mount_c05g:
         obj.Mesh = mesh
 
 class lens_holder_l05g:
+    '''
+    Lens holder, model L05G
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        foc_len (float) : The focal length (in mm) of the lens being used
+        lens_part_num (string) : The Thorlabs part number of the lens being used
+    '''
     type = 'Mesh::FeaturePython'
     def __init__(self, obj, foc_len=50, drill=True, lens_part_num=''):
         obj.Proxy = self
@@ -502,6 +642,13 @@ class lens_holder_l05g:
         obj.Mesh = mesh
 
 class pinhole_ida12:
+    '''
+    Pinhole iris, model IDA12
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        slot_len (float) : The slot length (in mm) of the slide mount adapter
+    '''
     type = 'Mesh::FeaturePython'
     def __init__(self, obj, slot_length=10, drill=True):
         obj.Proxy = self
@@ -522,6 +669,15 @@ class pinhole_ida12:
         
 
 class isomet_1205c_on_km100pm:
+    '''
+    AOM on a kinematic mount, AOM model isomet-1205C, mount model KM100PM
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        diff_angle (float) : The diffraction angle (in radians) of the AOM
+        diff_dir (int[2]) : The forward and reverse diffraction factor, ie (1,-1) would
+            diffract right on a forward pass and left on a return pass
+    '''
     type = 'Mesh::FeaturePython'
     #https://isomet.com/PDF%20acousto-optics_modulators/data%20sheets-moduvblue/M1250-T250L-0.45.pdf
     def __init__(self, obj, diff_angle=-0.026, diff_dir=(1,1), drill=True):
@@ -549,6 +705,17 @@ class isomet_1205c_on_km100pm:
 
 
 class periscope:
+    '''
+    Custom periscope mount
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        lower_dz (float) : Distance from the bottom of the mount to the center of the lower mirror
+        upper_dz (float) : Distance from the bottom of the mount to the center of the upper mirror
+        lower_mirror (obj class) : Object class of lower mirror to be used
+        upper_mirror (obj class) : Object class of upper mirror to be used
+        table_mount (bool) : Whether the periscope is meant to be mounted directly to the optical table
+    '''
     type = 'Part::FeaturePython'
     def __init__(self, obj, lower_dz, upper_dz, table_mount=False, lower_mirror=mirror_mount_k05s2, upper_mirror=mirror_mount_k05s2, drill=True):
         obj.Proxy = self
@@ -587,6 +754,87 @@ class periscope:
         part = _absolute_cut(obj, part, self.lower_obj.Proxy.get_drill(self.lower_obj))
         part = _absolute_cut(obj, part, self.upper_obj.Proxy.get_drill(self.upper_obj))
         obj.Shape = part
+
+
+
+class isolator_670:
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, mount_hole_dy=50, newport=True):
+        obj.Proxy = self
+        obj.ViewObject.ShapeColor=(0.2, 0.2, 0.2)
+        ViewProvider(obj.ViewObject)
+        self.part_numbers = ['IOT-5-670-VLP']
+        self.tran_angle = 0
+        self.in_limit = pi/2
+        self.in_width = INCH/2
+        _add_linked_object(obj, obj.Name+"_Adapter", surface_adapter, mountOff=(0, 0, -14), mount_hole_dy=mount_hole_dy)
+
+    def execute(self, obj):
+        # mesh = _orient_stl("ISO-04-650-LP.stl", (pi/2, 0, 0), (0, 0, 0), 1, STL_PATH = STL_PATH_newport) #Newport ISO-04-650-LP
+        mesh = _orient_stl("IOT-5-670-VLP.stl", (pi/2, 0, pi/2), (19, 0, 0), 1) #Thorlabs 670 (better for injection?)
+        # if self.newport:
+            # mesh = _orient_stl("ISO-04-650-LP.stl", (pi/2, 0, 0), (19, 0, 0), 1, STL_PATH = STL_PATH_newport) #Newport ISO-04-650-LP
+        # else:
+            # mesh = _orient_stl("IOT-5-670-VLP.stl", (pi/2, 0, pi/2), (19, 0, 0), 1) #Thorlabs 670
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+
+
+class laser_diode_mount:
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
+        ViewProvider(obj.ViewObject)
+        self.part_numbers = ['LT230P-B','AD15NT']
+        self.ref_angle = 0
+        self.in_limit = pi/2
+        self.in_width = INCH/2
+
+    def get_drill(self, obj):
+        part = _create_hole(TAP_DIA_8_32, drill_depth, -13.4*0, 0, -INCH/2)
+        part.Placement=obj.Placement
+        return part
+
+    def execute(self, obj):
+        mesh = _orient_stl("LT230P-B.stl", (0, pi/2, 0 ), ([0, 0, 0]))
+        # temp = Mesh.createCylinder(INCH/4, 6, True, 1, 50)
+        # temp.rotate(0, 0, pi)
+        # mesh.addMesh(temp)
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+
+
+class laser_grating_mount:
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, mirror_thickness=6, drill=True):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = mirror_thickness
+        obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
+        ViewProvider(obj.ViewObject)
+        self.part_numbers = ['GH13-24V']
+        self.ref_angle = 0
+        self.in_limit = pi/2
+        self.in_width = INCH/2
+
+    def get_drill(self, obj):
+        part = _create_hole(TAP_DIA_8_32, drill_depth, 0, 0, -INCH/2)
+        part.Placement=obj.Placement
+        return part
+
+    def execute(self, obj):
+        mesh = _orient_stl("GH13-24V.stl", (0, pi/2, 0), ([-3, 0, 0]))
+        # temp = Mesh.createCylinder(INCH/4, 6, True, 1, 50)
+        # temp.rotate(0, 0, pi)
+        # mesh.addMesh(temp)
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+
 
 
 class ViewProvider:
