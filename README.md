@@ -42,7 +42,7 @@ A double pass AOM scripted purely using along-beam component placement. This mod
 
 With laser light:
 
-<img src="https://user-images.githubusercontent.com/103533593/227656698-e453a4dc-6f9e-4715-acd9-d12d77c47c9a.png" width=700>
+<img src="https://user-images.githubusercontent.com/103533593/228976512-4c84138e-d237-438b-be3c-9d94bae56b7b.jpg" width=500>
 
 Modular designs are stackable and independent:  
 ![image](https://user-images.githubusercontent.com/103533593/225907411-c28c953b-345c-4921-9965-d5707ece66d7.png)
