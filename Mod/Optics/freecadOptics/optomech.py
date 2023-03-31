@@ -231,14 +231,14 @@ class slide_mount:
 
 class mount_for_km100pm:
     type = 'Part::FeaturePython'
-    def __init__(self, obj, mountOff, slot_length, drill=True):
+    def __init__(self, obj, mount_offset, slot_length, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty('App::PropertyLength', 'SlotLength').SlotLength = slot_length
         obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
         obj.setEditorMode('Placement', 2)
         ViewProvider(obj.ViewObject)
-        self.MountOffset = mountOff
+        self.mount_offset = mount_offset
         self.post_dy = 4
 
     def execute(self, obj):
@@ -247,7 +247,7 @@ class mount_for_km100pm:
         dz = 32.92-16
         part = _create_box(dx, dy, dz, 0, 0, -3.3)
         part = part.fuse(_create_box(21, dy, 4, 0, 0, 0))
-        part.translate(App.Vector(*self.MountOffset))
+        part.translate(App.Vector(*self.mount_offset))
         part = part.fuse(part)
         obj.Shape = part
         parent = obj.LinkToParent
@@ -716,7 +716,7 @@ class kinematic_mount_km100pm:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("KM100-Solidworks.stl", (pi/2, 0, -pi/2), self.mount_offset)
+        mesh = _orient_stl("KM100PM-Solidworks-modified.stl", (pi/2, 0, 0), self.mount_offset, 1)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
         
@@ -745,7 +745,7 @@ class isomet_1205c_on_km100pm:
         self.in_width = 5
 
         _add_linked_object(obj, obj.Name+"_Mount", kinematic_mount_km100pm, mount_offset=(14.2, 26.0, -17.92))
-        _add_linked_object(obj, obj.Name+"_Adapter", mount_for_km100pm, mount_offset=(14.2, 26.0, -17.92))
+        _add_linked_object(obj, obj.Name+"_Adapter", mount_for_km100pm, mount_offset=(51.8-25.8-8, 26.0, -(32.92-16)), slot_length=5)
 
     def execute(self, obj):
         mesh = _orient_stl("isomet_1205c.stl", (0, 0, 0), (0, 0, 0))
