@@ -1,10 +1,13 @@
 from math import *
 import numpy as np
 
-vec = [0,0,0]
+translation = np.array([0,0,0])
+rotation = np.array([0,0,0], dtype=np.float32)
 
 def rotate(rot):
-    global vec
+    global translation
+    global rotation
+    rotation += rot
     rot = np.deg2rad(rot)
     rotx = [[1, 0, 0],
             [0, cos(rot[0]), -sin(rot[0])],
@@ -16,17 +19,20 @@ def rotate(rot):
             [sin(rot[2]), cos(rot[2]), 0],
             [0, 0, 1]]
 
-    vec = np.dot(rotx, vec)
-    vec = np.dot(roty, vec)
-    vec = np.dot(rotz, vec)
+    translation = np.dot(rotx, translation)
+    translation = np.dot(roty, translation)
+    translation = np.dot(rotz, translation)
 
 def translate(tran):
-    global vec
-    vec = np.add(vec, tran)
+    global translation
+    translation = np.add(translation, tran)
 
-translate([-13.3, -19 + 0.6 + 12.7, -28])
-rotate([90, 0, 90])
-translate([0, 0, -12.7])
-translate([0, 0, 0])
 
-print(list(np.round(vec,2)))
+
+rotate([90, 0, 0])
+translate([0, 14.2, 0])
+translate([-51.8+25.8, 0, -(32.92-16)-1])
+rotate([0, 0, -90])
+
+print(list(np.round(translation,2)))
+print(list(np.round(rotation,2)))

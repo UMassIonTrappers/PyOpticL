@@ -207,6 +207,31 @@ class slide_mount:
         obj.Placement=parent.Mesh.Placement
 
 
+class mount_for_km100pm:
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, mountOff, slot_length, drill=True):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'SlotLength').SlotLength = slot_length
+        obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
+        obj.setEditorMode('Placement', 2)
+        ViewProvider(obj.ViewObject)
+        self.MountOffset = mountOff
+        self.post_dy = 4
+
+    def execute(self, obj):
+        dx = 8
+        dy = 52.5-5
+        dz = 32.92-16
+        part = _create_box(dx, dy, dz, 0, 0, -3.3)
+        part = part.fuse(_create_box(21, dy, 4, 0, 0, 0))
+        part.translate(App.Vector(*self.MountOffset))
+        part = part.fuse(part)
+        obj.Shape = part
+        parent = obj.LinkToParent
+        obj.Placement=parent.Mesh.Placement
+
+
 class universal_mount:
     type = 'Part::FeaturePython'
     def __init__(self, obj, mountOff, size, zOff, drill=True):
@@ -519,6 +544,30 @@ class pinhole_ida12:
         mesh.rotate(pi/2, 0, 0)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
+
+
+class kinematic_mount_km100pm:
+    type = 'Mesh::FeaturePython'
+    #https://isomet.com/PDF%20acousto-optics_modulators/data%20sheets-moduvblue/M1250-T250L-0.45.pdf
+    def __init__(self, obj, mount_offset, drill=True):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
+        ViewProvider(obj.ViewObject)
+        self.part_numbers = ['KM100PM']
+        self.mount_offset = mount_offset
+
+    def get_drill(self, obj):
+        part = _create_box(34, 53.5, 23.9, -19.27, -7.52, -23.9, 5)
+        part = part.fuse(_create_box(40, 15.5, 26, -44.77, -26.52, -26, 5))
+        part = part.fuse(_create_hole(TAP_DIA_8_32, drill_depth, -29.27, -7.52, 0))
+        part.Placement=obj.Placement
+        return part
+
+    def execute(self, obj):
+        mesh = _orient_stl("KM100-Solidworks.stl", (pi/2, 0, -pi/2), self.mount_offset)
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
         
 
 class isomet_1205c_on_km100pm:
@@ -529,21 +578,17 @@ class isomet_1205c_on_km100pm:
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.part_numbers = ['KM100PM']
+        self.part_numbers = ['ISOMET_1205C']
         self.diff_dir = diff_dir
         self.tran_angle = diff_angle
         self.in_limit = 0
         self.in_width = 5
 
-    def get_drill(self, obj):
-        part = _create_box(34, 53.5, 23.9, -19.27, -7.52, -23.9, 5)
-        part = part.fuse(_create_box(40, 15.5, 26, -44.77, -26.52, -26, 5))
-        part = part.fuse(_create_hole(TAP_DIA_8_32, drill_depth, -29.27, -7.52, 0))
-        part.Placement=obj.Placement
-        return part
+        _add_linked_object(obj, obj.Name+"_Mount", kinematic_mount_km100pm, mount_offset=(14.2, 26.0, -17.92))
+        _add_linked_object(obj, obj.Name+"_Adapter", mount_for_km100pm, mount_offset=(14.2, 26.0, -17.92))
 
     def execute(self, obj):
-        mesh = _orient_stl("isomet_1205c_on_km100pm.stl", (0, 0, 0), (0, 0, 0))
+        mesh = _orient_stl("isomet_1205c.stl", (0, 0, 0), (0, 0, 0))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
