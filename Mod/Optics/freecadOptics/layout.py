@@ -17,7 +17,7 @@ def place_element(obj_name, obj_class, x, y, angle, **args):
 # Add an element along a beampath with a set angle and an extra constraint of distance from last element, x position, or y position
 # Obj class is the type of object, usually defined in another module
 def place_element_along_beam(obj_name, obj_class, beam_obj, beam_index, angle, distance=None, x=None, y=None, pre_refs=0, **args):
-    obj = App.ActiveDocument.addObject('Mesh::FeaturePython', obj_name)
+    obj = App.ActiveDocument.addObject(obj_class.type, obj_name)
     obj_class(obj, **args)
     obj.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
     while len(beam_obj.Proxy.components) <= beam_index:
@@ -85,7 +85,7 @@ class baseplate:
                         part = part.cut(temp)
         if obj.CutLabel != "":
             face = Draft.make_shapestring(obj.CutLabel, "C:/Windows/Fonts/Arial.ttf", 4)
-            face.Placement.Base = App.Vector(5, 0, -INCH/2-10)
+            face.Placement.Base = App.Vector(5, 0, -INCH-10)
             face.Placement.Rotation = App.Rotation(App.Vector(1, 0, 0), 90)
             text = face.Shape.extrude(App.Vector(0,0.5,0))
             part = part.cut(text)

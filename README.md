@@ -36,14 +36,20 @@ A double pass AOM scripted purely using along-beam component placement. This mod
 ![image](https://user-images.githubusercontent.com/103533593/226716244-0ecad33d-71e4-46a8-a218-f00bf779ac8a.png)
 ![image](https://user-images.githubusercontent.com/103533593/226716319-9bad9d81-a907-4680-9812-3d6e7ccdd8c4.png)
 
+3D printed prototype before getting an aluminum plate machined:  
+
+<img src="https://user-images.githubusercontent.com/103533593/227657213-c2eaf5f6-3d0c-4007-8453-f4db15ae9c57.jpg" width=500>
+
+With laser light:
+
+<img src="https://user-images.githubusercontent.com/103533593/228976512-4c84138e-d237-438b-be3c-9d94bae56b7b.jpg" width=500>
+
 Modular designs are stackable and independent:  
 ![image](https://user-images.githubusercontent.com/103533593/225907411-c28c953b-345c-4921-9965-d5707ece66d7.png)
 
 Example of the beam angle being deliberately skewed, causing the subsequent optics to shift as well:  
 ![image](https://user-images.githubusercontent.com/103533593/225908758-4c196c09-486d-4347-9094-3af1f606a397.png)
 
-3D printed prototype before getting an aluminum plate machined:  
-![image](https://user-images.githubusercontent.com/103533593/225912508-68dd4000-5342-4b57-9fbf-bde178d6664b.png)
 
 The same universal mirror mount for three mirrors:  
 ![image](https://user-images.githubusercontent.com/103533593/226721943-3984bdcd-9abe-4df4-a6c2-102d04fe3eb1.png)
