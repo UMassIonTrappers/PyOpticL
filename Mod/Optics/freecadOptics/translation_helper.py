@@ -1,6 +1,8 @@
 from math import *
 import numpy as np
 
+INCH = 25.4
+
 translation = np.array([0,0,0])
 rotation = np.array([0,0,0], dtype=np.float32)
 
@@ -27,12 +29,11 @@ def translate(tran):
     global translation
     translation = np.add(translation, tran)
 
-
-
 rotate([90, 0, 0])
 translate([0, 14.2, 0])
 translate([-51.8+25.8, 0, -(32.92-16)-1])
 rotate([0, 0, -90])
+translate([0, 0, -(6.35 +0.089*INCH/2)])
 
 print(list(np.round(translation,2)))
 print(list(np.round(rotation,2)))

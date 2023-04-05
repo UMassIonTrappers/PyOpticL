@@ -3,6 +3,7 @@ import Mesh
 import Part
 from math import *
 from . import layout
+import numpy as np
 
 from pathlib import Path
 
@@ -16,7 +17,7 @@ TAP_DIA_6_32 = 0.1065*INCH
 TAP_DIA_8_32 = 0.1360*INCH
 TAP_DIA_14_20 = 0.201*INCH
 
-CLEAR_DIA_4_40 = 0.120*INCH
+CLR_DIA_4_40 = 0.120*INCH
 TAP_DIA_4_40 = 0.089*INCH
 NUT_DIA_4_40 = 6.4
 HEAD_DIA_4_40 = 5.50
@@ -62,27 +63,29 @@ def _place_object(obj, rotate, translate, rel_obj=None):
     mat.move(*translate)
     obj.Placement = App.Placement(mat)
 
-def _create_box(dx, dy, dz, x, y, z, fillet=0):
+def _create_box(dx, dy, dz, x, y, z, fillet=0, fillet_dir=(0,0,1), dir=(0,0,-1)):
     part = Part.makeBox(dx, dy, dz)
     if fillet != 0:
         for i in part.Edges:
-            if i.tangentAt(i.FirstParameter) == App.Vector(0, 0, 1):
+            if i.tangentAt(i.FirstParameter) == App.Vector(*fillet_dir):
                 part = part.makeFillet(fillet, [i])
-    part.translate(App.Vector(x-dx/2, y-dy/2, z))
+    part.translate(App.Vector(x-(1+dir[0])*dx/2, y-(1+dir[1])*dy/2, z-(1+dir[2])*dz/2))
+    part = part.fuse(part)
+    return part
+
+def _create_hole(dia, dz, x, y, z, head_dia=0, head_dz=0, dir=(0, 0, -1), countersink=False):
+    part = Part.makeCylinder(dia/2, dz, App.Vector(0, 0, 0), App.Vector(*dir))
+    if countersink:
+        part = part.fuse(Part.makeCone(head_dia/2, dia/2, head_dz, App.Vector(0, 0, 0), App.Vector(*dir)))
+    else:
+        part = part.fuse(Part.makeCylinder(head_dia/2, head_dz, App.Vector(0, 0, 0), App.Vector(*dir)))
+    part.translate(App.Vector(x, y, z))
     part = part.fuse(part)
     return part
 
 def _absolute_cut(obj, part, cut_part):
     cut_part.translate(App.Vector(-obj.Placement.Base))
     return part.cut(cut_part)
-
-def _create_hole(dia, dz, x, y, z, head_dia=0, head_dz=0, dir=(0, 0, -1)):
-    part = Part.makeCylinder(dia/2, dz, App.Vector(0, 0, 0), App.Vector(*dir))
-    temp = Part.makeCylinder(head_dia/2, head_dz, App.Vector(0, 0, 0), App.Vector(*dir))
-    part = part.fuse(temp)
-    part.translate(App.Vector(x, y, z))
-    part = part.fuse(part)
-    return part
 
 class baseplate_mount:
     '''
@@ -245,9 +248,13 @@ class mount_for_km100pm:
         dx = 8
         dy = 52.5-5
         dz = 32.92-16
-        part = _create_box(dx, dy, dz, 0, 0, -3.3)
-        part = part.fuse(_create_box(21, dy, 4, 0, 0, 0))
-        part.translate(App.Vector(*self.mount_offset))
+        part = _create_box(dx, dy, dz-3.3, 0, 0, 3.3)
+        part = part.fuse(_create_box(21, dy, 4, 21/2, 0, dz-4))
+        part = part.cut(_create_box(dx, 12, CLR_DIA_4_40+1e-6, 0, 25.4-15.2, 6.4, CLR_DIA_4_40/2, (1,0,0)))
+        part = part.cut(_create_box(dx, 12, CLR_DIA_4_40+1e-6, 0, 25.4-38.1, 6.4, CLR_DIA_4_40/2, (1,0,0)))
+        part = part.cut(_create_box(dx/2, 12, HEAD_DIA_4_40+1e-6, dx/2, 25.4-15.2, 6.4, HEAD_DIA_4_40/2, (1,0,0)))
+        part = part.cut(_create_box(dx/2, 12, HEAD_DIA_4_40+1e-6, dx/2, 25.4-38.1, 6.4, HEAD_DIA_4_40/2, (1,0,0)))
+        part.translate(App.Vector(*np.add((51.8-25.8-8, 0, -(32.92-16)), self.mount_offset)))
         part = part.fuse(part)
         obj.Shape = part
         parent = obj.LinkToParent
@@ -716,7 +723,7 @@ class kinematic_mount_km100pm:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("KM100PM-Solidworks-modified.stl", (pi/2, 0, 0), self.mount_offset, 1)
+        mesh = _orient_stl("KM100PM-Solidworks-modified.stl", (pi/2, 0, -pi/2), np.add((14.2, 26.0, -17.92), self.mount_offset), 1)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
         
@@ -744,12 +751,13 @@ class isomet_1205c_on_km100pm:
         self.in_limit = 0
         self.in_width = 5
 
-        _add_linked_object(obj, obj.Name+"_Mount", kinematic_mount_km100pm, mount_offset=(14.2, 26.0, -17.92))
-        _add_linked_object(obj, obj.Name+"_Adapter", mount_for_km100pm, mount_offset=(51.8-25.8-8, 26.0, -(32.92-16)), slot_length=5)
+        self.mount = _add_linked_object(obj, obj.Name+"_Mount", kinematic_mount_km100pm, mount_offset=(-(51.8-25.7-12+15.17), -(6.35+0.089*INCH/2), -6.98))
+        _add_linked_object(obj, obj.Name+"_Adapter", mount_for_km100pm, mount_offset=(-(51.8-25.7-12+15.17), -(6.35+0.089*INCH/2), -6.98), slot_length=5)
 
     def execute(self, obj):
-        mesh = _orient_stl("isomet_1205c.stl", (0, 0, 0), (0, 0, 0))
+        mesh = _orient_stl("isomet_1205c.stl", (0, 0, pi/2), (0, 0, 0))
         mesh.Placement = obj.Mesh.Placement
+        self.mount.Placement = obj.Placement
         obj.Mesh = mesh
 
 
