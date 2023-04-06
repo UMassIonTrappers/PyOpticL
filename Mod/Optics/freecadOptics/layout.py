@@ -81,6 +81,7 @@ class baseplate:
                 if hasattr(i.Proxy, 'get_drill'):
                     if i.Drill:
                         temp = i.Proxy.get_drill(i)
+                        temp.Placement = i.Placement
                         temp.translate(App.Vector(-obj.Placement.Base))
                         part = part.cut(temp)
         if obj.CutLabel != "":

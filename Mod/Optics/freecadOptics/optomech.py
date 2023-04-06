@@ -106,7 +106,6 @@ class baseplate_mount:
 
     def get_drill(self, obj):
         part = _mount_hole(CLR_DIA_14_20, drill_depth, 0, 0, -INCH/2, WASHER_DIA_14_20, 10)
-        part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
@@ -138,7 +137,6 @@ class surface_adapter:
         part = _custom_box(dx, dy, dz, 0, 0, -INCH/2, 5, (0,0,-1))
         part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, 0, -obj.MountHoleDistance.Value/2, -dz-INCH/2))
         part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, 0, obj.MountHoleDistance.Value/2, -dz-INCH/2))
-        part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
@@ -179,7 +177,6 @@ class skate_mount:
     def get_drill(self, obj):
         part = _mount_hole(TAP_DIA_8_32, drill_depth, 0, -obj.MountHoleDistance.Value/2, -INCH/2)
         part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, 0, obj.MountHoleDistance.Value/2, -INCH/2))
-        part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
@@ -215,7 +212,6 @@ class slide_mount:
         dy = obj.SlotLength.Value+HEAD_DIA_8_32*2+2
         part = _custom_box(6.5, 10, 1, self.mount_offset[0]-0.2, 0, -INCH/2, 2, (0,0,-1))
         part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, self.mount_offset[0], -self.post_dy/2-dy/2+self.mount_offset[1], -INCH/2))
-        part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
@@ -282,7 +278,6 @@ class universal_mount:
         part = _custom_box(self.dx+1, self.dy+1, self.dz, self.mount_offset[0], self.mount_offset[1], -INCH/2, 4, (0,0,-1))
         part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, self.mount_offset[0], self.mount_offset[1]-self.dy/2+5, -self.dz-INCH/2))
         part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, self.mount_offset[0], self.mount_offset[1]+self.dy/2-5, -self.dz-INCH/2))
-        part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
@@ -315,7 +310,6 @@ class fiberport_holder:
         part = _mount_hole(TAP_DIA_8_32, INCH, 0, 0, -20.7, dir=(1,0,0))
         part = part.fuse(_mount_hole(TAP_DIA_8_32, INCH, 0, -12.7, -20.7, dir=(1,0,0)))
         part = part.fuse(_mount_hole(TAP_DIA_8_32, INCH, 0, 12.7, -20.7, dir=(1,0,0)))
-        part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
@@ -420,12 +414,10 @@ class mirror_mount_k05s2:
         part = _mount_hole(TAP_DIA_8_32, drill_depth, -8-obj.MirrorThickness.Value, 0, -INCH/2)
         part = part.fuse(_mount_hole(2, 2.2, -8-obj.MirrorThickness.Value, -5, -INCH/2))
         part = part.fuse(_mount_hole(2, 2.2, -8-obj.MirrorThickness.Value, 5, -INCH/2))
-        part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
-        # mesh = _orient_stl("POLARIS-K05S2-Solidworks.stl", (0, -pi/2, 0), (-4.5-obj.MirrorThickness.Value, -0.3, -0.25), 1000)
-        mesh = _orient_stl("POLARIS-K05S1-Solidworks.stl", (0, 0, -pi/2), (-4.5-obj.MirrorThickness.Value, -0.3, -0.25), 1)
+        mesh = _orient_stl("POLARIS-K05S2-Solidworks.stl", (0, -pi/2, 0), (-4.5-obj.MirrorThickness.Value, -0.3, -0.25), 1000)
         temp = Mesh.createCylinder(INCH/4, obj.MirrorThickness.Value, True, 1, 50)
         temp.rotate(0, 0, pi)
         mesh.addMesh(temp)
@@ -463,11 +455,9 @@ class mirror_mount_k05s1:
         part = _mount_hole(TAP_DIA_8_32, drill_depth, -8-obj.MirrorThickness.Value, 0, -INCH/2)
         part = part.fuse(_mount_hole(2, 2.2, -8-obj.MirrorThickness.Value, -5, -INCH/2))
         part = part.fuse(_mount_hole(2, 2.2, -8-obj.MirrorThickness.Value, 5, -INCH/2))
-        part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
-        # mesh = _orient_stl("POLARIS-K05S2-Solidworks.stl", (0, -pi/2, 0), (-4.5-obj.MirrorThickness.Value, -0.3, -0.25), 1000)
         mesh = _orient_stl("POLARIS-K05S1-Solidworks.stl", (0, 0, -pi/2), (-4.5-obj.MirrorThickness.Value, -0.3+0.5, -0.25), 1)
         temp = Mesh.createCylinder(INCH/4, obj.MirrorThickness.Value, True, 1, 50)
         temp.rotate(0, 0, pi)
@@ -508,7 +498,6 @@ class mirror_mount_c05g:
         part = _mount_hole(TAP_DIA_8_32, drill_depth, -6.4-obj.MirrorThickness.Value, 0, -INCH/2)
         part = part.fuse(_mount_hole(2, 2.2, -6.4-obj.MirrorThickness.Value, -5, -INCH/2))
         part = part.fuse(_mount_hole(2, 2.2, -6.4-obj.MirrorThickness.Value, 5, -INCH/2))
-        part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
@@ -553,7 +542,6 @@ class mirror_mount_km05:
     def get_drill(self, obj):
         part = _mount_hole(CLR_DIA_8_32, INCH, -13.4, 0, -INCH*3/2, HEAD_DIA_8_32, 0.92*INCH-self.bolt_len+5, dir=(0,0,1))
         part = part.fuse(_custom_box(21, 29, 0.08*INCH, -10, 0, -INCH/2-0.08*INCH, 3))
-        part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
@@ -594,7 +582,6 @@ class mirror_mount_mk05:
 
     def get_drill(self, obj):
         part = _mount_hole(TAP_DIA_4_40, drill_depth, -10.2, 0, -10.2)
-        part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
@@ -633,7 +620,6 @@ class splitter_mount_c05g:
         part = _mount_hole(TAP_DIA_8_32, drill_depth, -6.4-obj.PlateThickness.Value, 0, -INCH/2)
         part = part.fuse(_mount_hole(2, 2.2, -6.4-obj.PlateThickness.Value, -5, -INCH/2))
         part = part.fuse(_mount_hole(2, 2.2, -6.4-obj.PlateThickness.Value, 5, -INCH/2))
-        part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
@@ -669,7 +655,6 @@ class lens_holder_l05g:
         part = _mount_hole(TAP_DIA_8_32, drill_depth, -9.5, 0, -INCH/2)
         part = part.fuse(_mount_hole(2, 2.2, -9.5, -5, -INCH/2))
         part = part.fuse(_mount_hole(2, 2.2, -9.5, 5, -INCH/2))
-        part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
@@ -722,7 +707,6 @@ class kinematic_mount_km100pm:
         part = _custom_box(34, 53.5, 23.9, -19.27, -7.52, -23.9, 5)
         part = part.fuse(_custom_box(40, 15.5, 26, -44.77, -26.52, 0, 5, (0,0,-1)))
         part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, -29.27, -7.52, 0))
-        part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
@@ -798,7 +782,6 @@ class periscope:
         part = _mount_hole(TAP_DIA_8_32, INCH, 0, 0, -20.7, dir=(1,0,0))
         part = part.fuse(_mount_hole(TAP_DIA_8_32, INCH, 0, -12.7, -20.7, dir=(1,0,0)))
         part = part.fuse(_mount_hole(TAP_DIA_8_32, INCH, 0, 12.7, -20.7, dir=(1,0,0)))
-        part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
@@ -832,7 +815,6 @@ class isolator_670:
 
     def get_drill(self, obj):
         part = _custom_box(80, 25, 5, 0, 0, -INCH/2, 5, (0,0,-1))
-        part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
@@ -861,7 +843,6 @@ class laser_diode_mount:
 
     def get_drill(self, obj):
         part = _mount_hole(TAP_DIA_8_32, drill_depth, -13.4*0, 0, -INCH/2)
-        part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
@@ -889,7 +870,6 @@ class laser_grating_mount:
 
     def get_drill(self, obj):
         part = _mount_hole(TAP_DIA_8_32, drill_depth, 0, 0, -INCH/2)
-        part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
