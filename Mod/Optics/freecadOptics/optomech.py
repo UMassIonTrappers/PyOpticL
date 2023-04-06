@@ -819,15 +819,21 @@ class periscope:
 
 class isolator_670:
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, mount_hole_dy=50, newport=True):
+    def __init__(self, obj, mount_hole_dy=50, drill=True):
         obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.2, 0.2, 0.2)
         ViewProvider(obj.ViewObject)
         self.part_numbers = ['IOT-5-670-VLP']
         self.tran_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
-        _add_linked_object(obj, obj.Name+"_Adapter", surface_adapter, mount_offset=(0, 0, -14), mount_hole_dy=mount_hole_dy)
+        _add_linked_object(obj, obj.Name+"_Adapter", surface_adapter, mount_offset=(0, 0, -22.1), mount_hole_dy=mount_hole_dy)
+
+    def get_drill(self, obj):
+        part = _custom_box(80, 25, 5, 0, 0, -INCH/2, 5, (0,0,-1))
+        part.Placement=obj.Placement
+        return part
 
     def execute(self, obj):
         # mesh = _orient_stl("ISO-04-650-LP.stl", (pi/2, 0, 0), (0, 0, 0), 1, STL_PATH = STL_PATH_newport) #Newport ISO-04-650-LP
