@@ -63,7 +63,7 @@ def _place_object(obj, rotate, translate, rel_obj=None):
     mat.move(*translate)
     obj.Placement = App.Placement(mat)
 
-def _custom_box(dx, dy, dz, x, y, z, fillet=0, dir=(0,0,-1), fillet_dir=None):
+def _custom_box(dx, dy, dz, x, y, z, fillet=0, dir=(0,0,1), fillet_dir=None):
     if fillet_dir == None:
         fillet_dir = np.abs(dir)
     part = Part.makeBox(dx, dy, dz)
@@ -71,7 +71,7 @@ def _custom_box(dx, dy, dz, x, y, z, fillet=0, dir=(0,0,-1), fillet_dir=None):
         for i in part.Edges:
             if i.tangentAt(i.FirstParameter) == App.Vector(*fillet_dir):
                 part = part.makeFillet(fillet, [i])
-    part.translate(App.Vector(x-(1+dir[0])*dx/2, y-(1+dir[1])*dy/2, z-(1+dir[2])*dz/2))
+    part.translate(App.Vector(x-(1-dir[0])*dx/2, y-(1-dir[1])*dy/2, z-(1-dir[2])*dz/2))
     part = part.fuse(part)
     return part
 
@@ -122,20 +122,20 @@ class surface_adapter:
         mount_hole_dy (float) : The spacing (in mm) between the two mount holes of the adapter
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, mountOff, mount_hole_dy, drill=True):
+    def __init__(self, obj, mount_offset, mount_hole_dy, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty('App::PropertyLength', 'MountHoleDistance').MountHoleDistance = mount_hole_dy
         obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
         obj.setEditorMode('Placement', 2)
         ViewProvider(obj.ViewObject)
-        self.MountOffset = mountOff
+        self.mount_offset = mount_offset
 
     def get_drill(self, obj):
         dx = HEAD_DIA_8_32+6
         dy = obj.MountHoleDistance.Value+CLR_DIA_8_32*2+4
-        dz = HEAD_DZ_8_32+3-self.MountOffset[2]-INCH/2
-        part = _custom_box(dx, dy, dz, 0, 0, -dz-INCH/2, 5)
+        dz = HEAD_DZ_8_32+3-self.mount_offset[2]-INCH/2
+        part = _custom_box(dx, dy, dz, 0, 0, -INCH/2, 5, (0,0,-1))
         part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, 0, -obj.MountHoleDistance.Value/2, -dz-INCH/2))
         part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, 0, obj.MountHoleDistance.Value/2, -dz-INCH/2))
         part.Placement=obj.Placement
@@ -145,12 +145,12 @@ class surface_adapter:
         dx = HEAD_DIA_8_32+5
         dy = obj.MountHoleDistance.Value+CLR_DIA_8_32*2+3
         dz = HEAD_DZ_8_32+3
-        part = _custom_box(dx, dy, dz, 0, 0, -dz, 5)
+        part = _custom_box(dx, dy, dz, 0, 0, 0, 5, (0,0,-1))
         temp = _mount_hole(CLR_DIA_8_32, dz, 0, 0, -dz, HEAD_DIA_8_32, HEAD_DZ_8_32, dir=(0,0,1))
         temp = temp.fuse(_mount_hole(CLR_DIA_8_32, dz, 0, -obj.MountHoleDistance.Value/2, 0, HEAD_DIA_8_32, HEAD_DZ_8_32))
         temp = temp.fuse(_mount_hole(CLR_DIA_8_32, dz, 0, obj.MountHoleDistance.Value/2, 0, HEAD_DIA_8_32, HEAD_DZ_8_32))
         part = part.cut(temp)
-        part.translate(App.Vector(*self.MountOffset))
+        part.translate(App.Vector(*self.mount_offset))
         part = part.fuse(part)
         obj.Shape = part
         parent = obj.LinkToParent
@@ -186,8 +186,8 @@ class skate_mount:
         dx = HEAD_DIA_8_32+5
         dy = obj.MountHoleDistance.Value + CLR_DIA_8_32*2+3
         dz = INCH/2-self.cube_size/2+1
-        part = _custom_box(dx, dy, dz, 0, 0, -dz, 5)
-        temp = _custom_box(self.cube_size+obj.CubeTolerance.Value, self.cube_size+obj.CubeTolerance.Value, 1+1e-3, 0, 0, -1-1e-3)
+        part = _custom_box(dx, dy, dz, 0, 0, 0, 5, (0,0,-1))
+        temp = _custom_box(self.cube_size+obj.CubeTolerance.Value, self.cube_size+obj.CubeTolerance.Value, 1+1e-3, 0, 0, 0, dir=(0,0,-1))
         part = part.cut(temp)
         temp = _mount_hole(CLR_DIA_8_32, dz, 0, -obj.MountHoleDistance.Value/2, 0, HEAD_DIA_8_32, HEAD_DZ_8_32)
         temp = temp.fuse(_mount_hole(CLR_DIA_8_32, dz, 0, obj.MountHoleDistance.Value/2, 0, HEAD_DIA_8_32, HEAD_DZ_8_32))
@@ -201,20 +201,20 @@ class skate_mount:
 
 class slide_mount:
     type = 'Part::FeaturePython'
-    def __init__(self, obj, mountOff, slot_length, drill=True):
+    def __init__(self, obj, mount_offset, slot_length, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty('App::PropertyLength', 'SlotLength').SlotLength = slot_length
         obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
         obj.setEditorMode('Placement', 2)
         ViewProvider(obj.ViewObject)
-        self.MountOffset = mountOff
+        self.mount_offset = mount_offset
         self.post_dy = 4
 
     def get_drill(self, obj):
         dy = obj.SlotLength.Value+HEAD_DIA_8_32*2+2
-        part = _custom_box(6.5, 10, 1, self.MountOffset[0]-0.2, 0, -1-INCH/2, 2)
-        part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, self.MountOffset[0], -self.post_dy/2-dy/2+self.MountOffset[1], -INCH/2))
+        part = _custom_box(6.5, 10, 1, self.mount_offset[0]-0.2, 0, -INCH/2, 2, (0,0,-1))
+        part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, self.mount_offset[0], -self.post_dy/2-dy/2+self.mount_offset[1], -INCH/2))
         part.Placement=obj.Placement
         return part
 
@@ -227,7 +227,7 @@ class slide_mount:
         part = part.cut(_custom_box(HEAD_DIA_8_32, obj.SlotLength.Value+HEAD_DIA_8_32, 3, 0, -dy/2-self.post_dy/2, -INCH/2+HEAD_DZ_8_32, HEAD_DIA_8_32/2-1e-3))
         part = part.fuse(_custom_box(dx, self.post_dy, INCH/2+CLR_DIA_8_32, 0, -self.post_dy/2, -INCH/2))
         part = part.cut(_mount_hole(CLR_DIA_8_32, self.post_dy, 0, 0, 0, dir=(0, -1, 0)))
-        part.translate(App.Vector(*self.MountOffset))
+        part.translate(App.Vector(*self.mount_offset))
         part = part.fuse(part)
         obj.Shape = part
         parent = obj.LinkToParent
@@ -253,8 +253,8 @@ class mount_for_km100pm:
         part = _custom_box(dx, dy, dz-3.3, 0, 0, 3.3)
         part = part.fuse(_custom_box(21, dy, 4, 21/2, 0, dz-4))
         for ddy in [15.2, 38.1]:
-            part = part.cut(_custom_box(dx, 8+CLR_DIA_4_40, CLR_DIA_4_40+1e-6, dx/2, 25.4-ddy, 6.4, CLR_DIA_4_40/2, (1,0,0)))
-            part = part.cut(_custom_box(dx/2, 8+HEAD_DIA_4_40, HEAD_DIA_4_40+1e-6, dx/2, 25.4-ddy, 6.4, HEAD_DIA_4_40/2, (1,0,0)))
+            part = part.cut(_custom_box(dx, 8+CLR_DIA_4_40, CLR_DIA_4_40+1e-6, dx/2, 25.4-ddy, 6.4, CLR_DIA_4_40/2, (-1,0,0)))
+            part = part.cut(_custom_box(dx/2, 8+HEAD_DIA_4_40, HEAD_DIA_4_40+1e-6, dx/2, 25.4-ddy, 6.4, HEAD_DIA_4_40/2, (-1,0,0)))
         for ddy in [0, -38.07, -11.42, -38.07 + 11.42]:
             part = part.cut(_mount_hole(CLR_DIA_4_40, 4, 8-12+15.17, 25.4-6.35+ddy, dz-4, HEAD_DIA_4_40, 2, (0,0,1), True))
         part.translate(App.Vector(*np.add((51.8-25.8-8, 0, -(32.92-16)), self.mount_offset)))
@@ -266,7 +266,7 @@ class mount_for_km100pm:
 
 class universal_mount:
     type = 'Part::FeaturePython'
-    def __init__(self, obj, mountOff, size, zOff, drill=True):
+    def __init__(self, obj, mount_offset, size, zOff, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
@@ -275,23 +275,23 @@ class universal_mount:
         self.dx = size[0]
         self.dy = size[1]
         self.dz = size[2]
-        self.mountOffset = mountOff
+        self.mount_offset = mount_offset
         self.zOff = zOff
 
     def get_drill(self, obj):
-        part = _custom_box(self.dx+1, self.dy+1, self.dz, self.mountOffset[0], self.mountOffset[1], -self.dz-INCH/2, 4)
-        part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, self.mountOffset[0], self.mountOffset[1]-self.dy/2+5, -self.dz-INCH/2))
-        part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, self.mountOffset[0], self.mountOffset[1]+self.dy/2-5, -self.dz-INCH/2))
+        part = _custom_box(self.dx+1, self.dy+1, self.dz, self.mount_offset[0], self.mount_offset[1], -INCH/2, 4, (0,0,-1))
+        part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, self.mount_offset[0], self.mount_offset[1]-self.dy/2+5, -self.dz-INCH/2))
+        part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, self.mount_offset[0], self.mount_offset[1]+self.dy/2-5, -self.dz-INCH/2))
         part.Placement=obj.Placement
         return part
 
     def execute(self, obj):
         dz = self.dz+self.zOff+INCH/2
-        part = _custom_box(self.dx, self.dy, dz, 0, 0, -dz, 4)
+        part = _custom_box(self.dx, self.dy, dz, 0, 0, 0, 4, (0,0,-1))
         temp = _mount_hole(CLR_DIA_8_32, dz, 0, -self.dy/2+5, 0, HEAD_DIA_8_32, HEAD_DZ_8_32)
         temp = temp.fuse(_mount_hole(CLR_DIA_8_32, dz, 0, self.dy/2-5, 0, HEAD_DIA_8_32, HEAD_DZ_8_32))
         part = part.cut(temp)
-        part.translate(App.Vector(*self.mountOffset, self.zOff))
+        part.translate(App.Vector(*self.mount_offset, self.zOff))
         parent = obj.LinkToParent
         temp = parent.Proxy.get_drill(parent)
         temp.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(0, 0, 0), App.Vector(0, 0, 0))
@@ -382,7 +382,7 @@ class rotation_stage_rsp05:
         self.tran_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
-        _add_linked_object(obj, obj.Name+"_Adapter", surface_adapter, mountOff=(0, 0, -14), mount_hole_dy=mount_hole_dy)
+        _add_linked_object(obj, obj.Name+"_Adapter", surface_adapter, mount_offset=(0, 0, -14), mount_hole_dy=mount_hole_dy)
 
     def execute(self, obj):
         mesh = _orient_stl("RSP05-Solidworks.stl", (pi/2, 0, pi/2), (0.6, 0, 0), 1000)
@@ -412,7 +412,7 @@ class mirror_mount_k05s2:
         self.in_width = INCH/2
 
         if uMountParam != None:
-            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mountOff=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
             obj.setEditorMode('Drill', 2)
             obj.Drill = False
 
@@ -455,7 +455,7 @@ class mirror_mount_k05s1:
         self.in_width = INCH/2
 
         if uMountParam != None:
-            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mountOff=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
             obj.setEditorMode('Drill', 2)
             obj.Drill = False
 
@@ -500,7 +500,7 @@ class mirror_mount_c05g:
         self.in_width = INCH/2
 
         if uMountParam != None:
-            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mountOff=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
             obj.setEditorMode('Drill', 2)
             obj.Drill = False
 
@@ -545,7 +545,7 @@ class mirror_mount_km05:
         self.in_width = INCH/2
 
         if uMountParam != None:
-            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mountOff=uMountParam[1], size=uMountParam[0], zOff=-0.58*INCH)
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-0.58*INCH)
             obj.setEditorMode('Drill', 2)
             obj.Drill = False
             self.bolt_len = uMountParam[0][2]-0.08*INCH-HEAD_DZ_8_32+5
@@ -588,7 +588,7 @@ class mirror_mount_mk05:
         self.in_width = INCH/2
 
         if uMountParam != None:
-            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mountOff=uMountParam[1], size=uMountParam[0], zOff=-10.2)
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-10.2)
             obj.setEditorMode('Drill', 2)
             obj.Drill = False
 
@@ -698,7 +698,7 @@ class pinhole_ida12:
         self.tran_angle = 0
         self.in_limit = 0
         self.in_width = INCH/2
-        _add_linked_object(obj, obj.Name+"_Adapter", slide_mount, mountOff=(-0.75, -12.85, 0), slot_length=slot_length)
+        _add_linked_object(obj, obj.Name+"_Adapter", slide_mount, mount_offset=(-0.75, -12.85, 0), slot_length=slot_length)
 
     def execute(self, obj):
         mesh = _orient_stl("IDA12-P5-Solidworks.stl", (-pi/2, 0, -pi/2), (-0.35, 0.05, 0), 1000)
@@ -720,7 +720,7 @@ class kinematic_mount_km100pm:
 
     def get_drill(self, obj):
         part = _custom_box(34, 53.5, 23.9, -19.27, -7.52, -23.9, 5)
-        part = part.fuse(_custom_box(40, 15.5, 26, -44.77, -26.52, -26, 5))
+        part = part.fuse(_custom_box(40, 15.5, 26, -44.77, -26.52, 0, 5, (0,0,-1)))
         part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, -29.27, -7.52, 0))
         part.Placement=obj.Placement
         return part
@@ -827,7 +827,7 @@ class isolator_670:
         self.tran_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
-        _add_linked_object(obj, obj.Name+"_Adapter", surface_adapter, mountOff=(0, 0, -14), mount_hole_dy=mount_hole_dy)
+        _add_linked_object(obj, obj.Name+"_Adapter", surface_adapter, mount_offset=(0, 0, -14), mount_hole_dy=mount_hole_dy)
 
     def execute(self, obj):
         # mesh = _orient_stl("ISO-04-650-LP.stl", (pi/2, 0, 0), (0, 0, 0), 1, STL_PATH = STL_PATH_newport) #Newport ISO-04-650-LP
@@ -893,8 +893,6 @@ class laser_grating_mount:
         # mesh.addMesh(temp)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
-
-
 
 
 class ViewProvider:
