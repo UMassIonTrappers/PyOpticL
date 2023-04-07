@@ -29,7 +29,7 @@ HEAD_DIA_8_32 = 7
 HEAD_DIA_14_20 = 9.8
 
 HEAD_DZ_8_32 = 4.4
-HEAD_DZ_14_20 = 10.0
+HEAD_DZ_14_20 = 8
 
 WASHER_DIA_14_20 = 9/16 * INCH; #12 washer
 
@@ -96,20 +96,23 @@ class baseplate_mount:
 
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
+        bore_depth (float) : The depth (in mm) for the counterbore of the mount hole
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True):
+    def __init__(self, obj, bore_depth=10, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'BoreDepth').BoreDepth = bore_depth
         obj.ViewObject.ShapeColor=(0.5, 0.5, 0.55)
         ViewProvider(obj.ViewObject)
 
     def get_drill(self, obj):
-        part = _mount_hole(CLR_DIA_14_20, drill_depth, 0, 0, -INCH/2, WASHER_DIA_14_20, 10)
+        part = _mount_hole(CLR_DIA_14_20, drill_depth, 0, 0, -INCH/2, WASHER_DIA_14_20, obj.BoreDepth.Value)
         return part
 
     def execute(self, obj):
-        part = _mount_hole(CLR_DIA_14_20-1, INCH, 0, 0, -INCH/2, WASHER_DIA_14_20-1, 10)
+        len = INCH-obj.BoreDepth.Value+HEAD_DZ_14_20
+        part = _mount_hole(CLR_DIA_14_20-1, len, 0, 0, -INCH*3/2+len, HEAD_DIA_14_20-1, HEAD_DZ_14_20)
         obj.Shape = part
 
 class surface_adapter:
@@ -119,30 +122,34 @@ class surface_adapter:
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
         mount_hole_dy (float) : The spacing (in mm) between the two mount holes of the adapter
+        adapter_height (float) : The height (in mm) of the suface adapter
+        outer_thickness (float) : The thickness (in mm) of the walls around the bolt holes
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, mount_offset, mount_hole_dy, drill=True):
+    def __init__(self, obj, mount_offset, mount_hole_dy, adapter_height=8, outer_thickness=2, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty('App::PropertyLength', 'MountHoleDistance').MountHoleDistance = mount_hole_dy
+        obj.addProperty('App::PropertyLength', 'AdapterHeight').AdapterHeight = adapter_height
+        obj.addProperty('App::PropertyLength', 'OuterThickness').OuterThickness = outer_thickness
         obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
         obj.setEditorMode('Placement', 2)
         ViewProvider(obj.ViewObject)
         self.mount_offset = mount_offset
 
     def get_drill(self, obj):
-        dx = HEAD_DIA_8_32+6
-        dy = obj.MountHoleDistance.Value+CLR_DIA_8_32*2+4
-        dz = HEAD_DZ_8_32+3-self.mount_offset[2]-INCH/2
+        dx = HEAD_DIA_8_32+obj.OuterThickness.Value*2+1
+        dy = obj.MountHoleDistance.Value+HEAD_DIA_8_32+obj.OuterThickness.Value*2+1
+        dz = obj.AdapterHeight.Value-self.mount_offset[2]-INCH/2
         part = _custom_box(dx, dy, dz, 0, 0, -INCH/2, 5, (0,0,-1))
         part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, 0, -obj.MountHoleDistance.Value/2, -dz-INCH/2))
         part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, 0, obj.MountHoleDistance.Value/2, -dz-INCH/2))
         return part
 
     def execute(self, obj):
-        dx = HEAD_DIA_8_32+5
-        dy = obj.MountHoleDistance.Value+CLR_DIA_8_32*2+3
-        dz = HEAD_DZ_8_32+3
+        dx = HEAD_DIA_8_32+obj.OuterThickness.Value*2
+        dy = obj.MountHoleDistance.Value+HEAD_DIA_8_32+obj.OuterThickness.Value*2
+        dz = obj.AdapterHeight.Value
         part = _custom_box(dx, dy, dz, 0, 0, 0, 5, (0,0,-1))
         temp = _mount_hole(CLR_DIA_8_32, dz, 0, 0, -dz, HEAD_DIA_8_32, HEAD_DZ_8_32, dir=(0,0,1))
         temp = temp.fuse(_mount_hole(CLR_DIA_8_32, dz, 0, -obj.MountHoleDistance.Value/2, 0, HEAD_DIA_8_32, HEAD_DZ_8_32))
@@ -164,11 +171,12 @@ class skate_mount:
         cube_size (float) : The side length (in mm) of the splitter cube
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, cube_size, drill=True):
+    def __init__(self, obj, cube_size, mount_hole_dy=20, outer_thickness=2, cube_tol=0.1, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
-        obj.addProperty('App::PropertyLength', 'MountHoleDistance').MountHoleDistance = 20
-        obj.addProperty('App::PropertyLength', 'CubeTolerance').CubeTolerance = 0.1
+        obj.addProperty('App::PropertyLength', 'MountHoleDistance').MountHoleDistance = mount_hole_dy
+        obj.addProperty('App::PropertyLength', 'OuterThickness').OuterThickness = outer_thickness
+        obj.addProperty('App::PropertyLength', 'CubeTolerance').CubeTolerance = cube_tol
         obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
         obj.setEditorMode('Placement', 2)
         ViewProvider(obj.ViewObject)
