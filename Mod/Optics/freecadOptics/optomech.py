@@ -70,7 +70,7 @@ def _custom_box(dx, dy, dz, x, y, z, fillet=0, dir=(0,0,1), fillet_dir=None):
     if fillet != 0:
         for i in part.Edges:
             if i.tangentAt(i.FirstParameter) == App.Vector(*fillet_dir):
-                part = part.makeFillet(fillet, [i])
+                part = part.makeFillet(fillet-1e-3, [i])
     part.translate(App.Vector(x-(1-dir[0])*dx/2, y-(1-dir[1])*dy/2, z-(1-dir[2])*dz/2))
     part = part.fuse(part)
     return part
@@ -142,8 +142,8 @@ class surface_adapter:
         dy = obj.MountHoleDistance.Value+HEAD_DIA_8_32+obj.OuterThickness.Value*2+1
         dz = obj.AdapterHeight.Value-self.mount_offset[2]-INCH/2
         part = _custom_box(dx, dy, dz, 0, 0, -INCH/2, 5, (0,0,-1))
-        part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, 0, -obj.MountHoleDistance.Value/2, -dz-INCH/2))
-        part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, 0, obj.MountHoleDistance.Value/2, -dz-INCH/2))
+        for i in [-1, 1]:
+            part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, 0, i*obj.MountHoleDistance.Value/2, -dz-INCH/2))
         return part
 
     def execute(self, obj):
@@ -151,10 +151,9 @@ class surface_adapter:
         dy = obj.MountHoleDistance.Value+HEAD_DIA_8_32+obj.OuterThickness.Value*2
         dz = obj.AdapterHeight.Value
         part = _custom_box(dx, dy, dz, 0, 0, 0, 5, (0,0,-1))
-        temp = _mount_hole(CLR_DIA_8_32, dz, 0, 0, -dz, HEAD_DIA_8_32, HEAD_DZ_8_32, dir=(0,0,1))
-        temp = temp.fuse(_mount_hole(CLR_DIA_8_32, dz, 0, -obj.MountHoleDistance.Value/2, 0, HEAD_DIA_8_32, HEAD_DZ_8_32))
-        temp = temp.fuse(_mount_hole(CLR_DIA_8_32, dz, 0, obj.MountHoleDistance.Value/2, 0, HEAD_DIA_8_32, HEAD_DZ_8_32))
-        part = part.cut(temp)
+        part = part.cut(_mount_hole(CLR_DIA_8_32, dz, 0, 0, -dz, HEAD_DIA_8_32, HEAD_DZ_8_32, dir=(0,0,1)))
+        for i in [-1, 1]:
+            part = part.cut(_mount_hole(CLR_DIA_8_32, dz, 0, i*obj.MountHoleDistance.Value/2, 0, HEAD_DIA_8_32, HEAD_DZ_8_32))
         part.translate(App.Vector(*self.mount_offset))
         part = part.fuse(part)
         obj.Shape = part
@@ -169,12 +168,16 @@ class skate_mount:
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
         cube_size (float) : The side length (in mm) of the splitter cube
+        mount_hole_dy (float) : The spacing (in mm) between the two mount holes of the adapter
+        cube_depth (float) : The depth (in mm) of the recess for the cube
+        outer_thickness (float) : The thickness (in mm) of the walls around the bolt holes
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, cube_size, mount_hole_dy=20, outer_thickness=2, cube_tol=0.1, drill=True):
+    def __init__(self, obj, cube_size, mount_hole_dy=20, cube_depth=1, outer_thickness=2, cube_tol=0.1, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty('App::PropertyLength', 'MountHoleDistance').MountHoleDistance = mount_hole_dy
+        obj.addProperty('App::PropertyLength', 'CubeDepth').CubeDepth = cube_depth+1e-3
         obj.addProperty('App::PropertyLength', 'OuterThickness').OuterThickness = outer_thickness
         obj.addProperty('App::PropertyLength', 'CubeTolerance').CubeTolerance = cube_tol
         obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
@@ -188,15 +191,13 @@ class skate_mount:
         return part
 
     def execute(self, obj):
-        dx = HEAD_DIA_8_32+5
-        dy = obj.MountHoleDistance.Value + CLR_DIA_8_32*2+3
-        dz = INCH/2-self.cube_size/2+1
+        dx = HEAD_DIA_8_32+obj.OuterThickness.Value*2
+        dy = obj.MountHoleDistance.Value + CLR_DIA_8_32*2+obj.OuterThickness.Value*2
+        dz = INCH/2-self.cube_size/2+obj.CubeDepth.Value
         part = _custom_box(dx, dy, dz, 0, 0, 0, 5, (0,0,-1))
-        temp = _custom_box(self.cube_size+obj.CubeTolerance.Value, self.cube_size+obj.CubeTolerance.Value, 1+1e-3, 0, 0, 0, dir=(0,0,-1))
-        part = part.cut(temp)
-        temp = _mount_hole(CLR_DIA_8_32, dz, 0, -obj.MountHoleDistance.Value/2, 0, HEAD_DIA_8_32, HEAD_DZ_8_32)
-        temp = temp.fuse(_mount_hole(CLR_DIA_8_32, dz, 0, obj.MountHoleDistance.Value/2, 0, HEAD_DIA_8_32, HEAD_DZ_8_32))
-        part = part.cut(temp)
+        part = part.cut(_custom_box(self.cube_size+obj.CubeTolerance.Value, self.cube_size+obj.CubeTolerance.Value, obj.CubeDepth.Value, 0, 0, 0, dir=(0,0,-1)))
+        for i in [-1, 1]:
+            part = part.cut(_mount_hole(CLR_DIA_8_32, dz, 0, i*obj.MountHoleDistance.Value/2, 0, HEAD_DIA_8_32, HEAD_DZ_8_32))
         part.translate(App.Vector(0, 0, -self.cube_size/2+1))
         part = part.fuse(part)
         obj.Shape = part
@@ -205,32 +206,43 @@ class skate_mount:
 
 
 class slide_mount:
+    '''
+    Slide mount adapter for post-mounted parts
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        slot_length (float) : The length (in mm) of the slot used for mounting to the baseplate
+        adapter_height (float) : The height (in mm) of the suface adapter
+        post_thickness (float) : The thickness (in mm) of the post that mounts to the element
+        outer_thickness (float) : The thickness (in mm) of the walls around the bolt holes
+    '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, mount_offset, slot_length, drill=True):
+    def __init__(self, obj, mount_offset, slot_length, adapter_height=8, post_thickness=4, outer_thickness=2, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty('App::PropertyLength', 'SlotLength').SlotLength = slot_length
+        obj.addProperty('App::PropertyLength', 'AdapterHeight').AdapterHeight = adapter_height
+        obj.addProperty('App::PropertyLength', 'PostThickness').PostThickness = post_thickness
+        obj.addProperty('App::PropertyLength', 'OuterThickness').OuterThickness = outer_thickness
         obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
         obj.setEditorMode('Placement', 2)
         ViewProvider(obj.ViewObject)
         self.mount_offset = mount_offset
-        self.post_dy = 4
 
     def get_drill(self, obj):
-        dy = obj.SlotLength.Value+HEAD_DIA_8_32*2+2
-        part = _custom_box(6.5, 10, 1, self.mount_offset[0]-0.2, 0, -INCH/2, 2, (0,0,-1))
-        part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, self.mount_offset[0], -self.post_dy/2-dy/2+self.mount_offset[1], -INCH/2))
+        bolt_dy = self.mount_offset[1]-obj.PostThickness.Value-(obj.SlotLength.Value+HEAD_DIA_8_32+obj.OuterThickness.Value*2)/2
+        part = _mount_hole(TAP_DIA_8_32, drill_depth, self.mount_offset[0], bolt_dy, -INCH/2)
         return part
 
     def execute(self, obj):
-        dx = HEAD_DIA_8_32+3
-        dy = obj.SlotLength.Value+HEAD_DIA_8_32*2+2
-        dz = HEAD_DZ_8_32+3
+        dx = HEAD_DIA_8_32+obj.OuterThickness.Value*2
+        dy = obj.SlotLength.Value+HEAD_DIA_8_32+obj.OuterThickness.Value*2+obj.PostThickness.Value
+        dz = obj.AdapterHeight.Value
         part = _custom_box(dx, dy, dz, 0, -dy/2, -INCH/2, 4)
-        part = part.cut(_custom_box(CLR_DIA_8_32, obj.SlotLength.Value+CLR_DIA_8_32, dz, 0, -dy/2-self.post_dy/2, -INCH/2, CLR_DIA_8_32/2-1e-3))
-        part = part.cut(_custom_box(HEAD_DIA_8_32, obj.SlotLength.Value+HEAD_DIA_8_32, 3, 0, -dy/2-self.post_dy/2, -INCH/2+HEAD_DZ_8_32, HEAD_DIA_8_32/2-1e-3))
-        part = part.fuse(_custom_box(dx, self.post_dy, INCH/2+CLR_DIA_8_32, 0, -self.post_dy/2, -INCH/2))
-        part = part.cut(_mount_hole(CLR_DIA_8_32, self.post_dy, 0, 0, 0, dir=(0, -1, 0)))
+        part = part.cut(_custom_box(CLR_DIA_8_32, obj.SlotLength.Value+CLR_DIA_8_32, dz, 0, -dy/2-obj.PostThickness.Value/2, -INCH/2, CLR_DIA_8_32/2))
+        part = part.cut(_custom_box(HEAD_DIA_8_32, obj.SlotLength.Value+HEAD_DIA_8_32, 3, 0, -dy/2-obj.PostThickness.Value/2, -INCH/2+HEAD_DZ_8_32, HEAD_DIA_8_32/2))
+        part = part.fuse(_custom_box(dx, obj.PostThickness.Value, INCH/2+CLR_DIA_8_32, 0, -obj.PostThickness.Value/2, -INCH/2))
+        part = part.cut(_mount_hole(CLR_DIA_8_32, obj.PostThickness.Value, 0, 0, 0, dir=(0, -1, 0)))
         part.translate(App.Vector(*self.mount_offset))
         part = part.fuse(part)
         obj.Shape = part
@@ -239,29 +251,43 @@ class slide_mount:
 
 
 class mount_for_km100pm:
+    '''
+    Adapter for mounting isomet AOMs to km100pm kinematic mount
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        slot_length (float) : The length (in mm) of the slots used for mounting to the km100pm
+        arm_thickness (float) : The thickness (in mm) of the arm the mounts to the km100PM
+        stage_thickness (float) : The thickness (in mm) of the stage that mounts to the AOM
+        stage_length (float) : The length (in mm) of the stage that mounts to the AOM
+    '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, mount_offset, slot_length, drill=True):
+    def __init__(self, obj, mount_offset, slot_length=8, arm_thickness=8, stage_thickness=4, stage_length=21, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty('App::PropertyLength', 'SlotLength').SlotLength = slot_length
+        obj.addProperty('App::PropertyLength', 'ArmThickness').ArmThickness = arm_thickness
+        obj.addProperty('App::PropertyLength', 'StageThickness').StageThickness = stage_thickness
+        obj.addProperty('App::PropertyLength', 'StageLength').StageLength = stage_length
         obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
         obj.setEditorMode('Placement', 2)
         ViewProvider(obj.ViewObject)
         self.mount_offset = mount_offset
-        self.post_dy = 4
 
     def execute(self, obj):
-        dx = 8
-        dy = 52.5-5
-        dz = 32.92-16
+        dx = obj.ArmThickness.Value
+        dy = 47.5
+        dz = 16.92
+        stage_dx = obj.StageLength.Value
+        stage_dz = obj.StageThickness.Value
         part = _custom_box(dx, dy, dz-3.3, 0, 0, 3.3)
-        part = part.fuse(_custom_box(21, dy, 4, 21/2, 0, dz-4))
+        part = part.fuse(_custom_box(stage_dx, dy, stage_dz, 0, 0, dz, dir=(1,0,-1)))
         for ddy in [15.2, 38.1]:
-            part = part.cut(_custom_box(dx, 8+CLR_DIA_4_40, CLR_DIA_4_40+1e-6, dx/2, 25.4-ddy, 6.4, CLR_DIA_4_40/2, (-1,0,0)))
-            part = part.cut(_custom_box(dx/2, 8+HEAD_DIA_4_40, HEAD_DIA_4_40+1e-6, dx/2, 25.4-ddy, 6.4, HEAD_DIA_4_40/2, (-1,0,0)))
-        for ddy in [0, -38.07, -11.42, -38.07 + 11.42]:
-            part = part.cut(_mount_hole(CLR_DIA_4_40, 4, 8-12+15.17, 25.4-6.35+ddy, dz-4, HEAD_DIA_4_40, 2, (0,0,1), True))
-        part.translate(App.Vector(*np.add((51.8-25.8-8, 0, -(32.92-16)), self.mount_offset)))
+            part = part.cut(_custom_box(dx, obj.SlotLength.Value+CLR_DIA_4_40, CLR_DIA_4_40, dx/2, 25.4-ddy, 6.4, CLR_DIA_4_40/2, (-1,0,0)))
+            part = part.cut(_custom_box(dx/2, obj.SlotLength.Value+HEAD_DIA_4_40, HEAD_DIA_4_40, dx/2, 25.4-ddy, 6.4, HEAD_DIA_4_40/2, (-1,0,0)))
+        for ddy in [0, -11.42, -26.65, -38.07]:
+            part = part.cut(_mount_hole(CLR_DIA_4_40, stage_dz, 11.25, 18.9+ddy, dz-4, HEAD_DIA_4_40, 2, (0,0,1), True)) ## TODO: get actual countersink depth
+        part.translate(App.Vector(*np.add((18, 0, -dz), self.mount_offset)))
         part = part.fuse(part)
         obj.Shape = part
         parent = obj.LinkToParent
@@ -691,7 +717,12 @@ class pinhole_ida12:
         self.tran_angle = 0
         self.in_limit = 0
         self.in_width = INCH/2
+        self.slot_length=slot_length
         _add_linked_object(obj, obj.Name+"_Adapter", slide_mount, mount_offset=(-0.75, -12.85, 0), slot_length=slot_length)
+
+    def get_drill(self, obj):
+        part = _custom_box(6.5, 10+self.slot_length, 1, -0.75, 0, -INCH/2, 2, (0,0,-1))
+        return part
 
     def execute(self, obj):
         mesh = _orient_stl("IDA12-P5-Solidworks.stl", (-pi/2, 0, -pi/2), (-0.35, 0.05, 0), 1000)
