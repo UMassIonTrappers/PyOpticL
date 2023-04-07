@@ -105,7 +105,7 @@ class baseplate_mount:
         ViewProvider(obj.ViewObject)
 
     def get_drill(self, obj):
-        part = _mount_hole(CLR_DIA_14_20+0.5, drill_depth, 0, 0, -INCH/2, WASHER_DIA_14_20+0.5, 10)
+        part = _mount_hole(CLR_DIA_14_20, drill_depth, 0, 0, -INCH/2, WASHER_DIA_14_20, 10)
         part.Placement=obj.Placement
         return part
 
