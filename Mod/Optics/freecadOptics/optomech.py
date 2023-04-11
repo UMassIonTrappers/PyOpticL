@@ -834,7 +834,15 @@ class periscope:
         part = part.fuse(_custom_box(30, width, obj.Upper_dz.Value+20, 0, 0, 0))
         for i in [-1, 1]:
             part = part.cut(_mount_hole(CLR_DIA_14_20+0.5, INCH, i*INCH, 0, 20, HEAD_DIA_14_20+0.5, 10, dir=(0,0,-1)))
-        part.translate(App.Vector(0, inv*(width/2+INCH/2), self.z_off))
+        part.translate(App.Vector(0, -inv*(width/2+INCH/2), self.z_off))
+        part = part.fuse(part)
+        _place_object(self.lower_obj, (-inv*pi/2, -pi/4, 0), (0, 0, obj.Lower_dz.Value+self.z_off), obj)
+        _place_object(self.upper_obj, (-inv*pi/2, 3*pi/4, 0), (0, 0, obj.Upper_dz.Value+self.z_off), obj)
+        for i in [self.lower_obj, self.upper_obj]:
+            drill = i.Proxy.get_drill(i)
+            drill.Placement = i.Placement
+            part = _absolute_cut(obj, part, drill)
+        part.translate(App.Vector(0, inv*(width+INCH), 0))
         part = part.fuse(part)
         _place_object(self.lower_obj, (inv*pi/2, -pi/4, 0), (0, 0, obj.Lower_dz.Value+self.z_off), obj)
         _place_object(self.upper_obj, (inv*pi/2, 3*pi/4, 0), (0, 0, obj.Upper_dz.Value+self.z_off), obj)
