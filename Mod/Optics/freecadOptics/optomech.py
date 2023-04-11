@@ -800,7 +800,7 @@ class periscope:
         table_mount (bool) : Whether the periscope is meant to be mounted directly to the optical table
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, lower_dz, upper_dz, table_mount=False, lower_mirror=mirror_mount_k05s2, upper_mirror=mirror_mount_k05s2, drill=True):
+    def __init__(self, obj, lower_dz, upper_dz, left_handed=False, table_mount=False, lower_mirror=mirror_mount_k05s2, upper_mirror=mirror_mount_k05s2, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'Lower_dz').Lower_dz = lower_dz
         obj.addProperty('App::PropertyLength', 'Upper_dz').Upper_dz = upper_dz
@@ -816,6 +816,7 @@ class periscope:
 
         self.lower_obj = _add_linked_object(obj, obj.Name+"_Lower_Mirror", lower_mirror)
         self.upper_obj = _add_linked_object(obj, obj.Name+"_Upper_Mirror", upper_mirror)
+        self.left_handed = left_handed
 
     def get_drill(self, obj):
         part = _mount_hole(TAP_DIA_8_32, INCH, 0, 0, -20.7, dir=(1,0,0))
@@ -824,17 +825,23 @@ class periscope:
         return part
 
     def execute(self, obj):
+        if self.left_handed:
+            inv = -1
+        else:
+            inv = 1
         width = INCH #Must be INCH wide to keep periscope mirrors 1 inch from mount holes. 
         part = _custom_box(65, width, 20, 0, 0, 0, 5)
         part = part.fuse(_custom_box(30, width, obj.Upper_dz.Value+20, 0, 0, 0))
-        part = part.cut(_mount_hole(CLR_DIA_14_20+0.5, INCH, -INCH, 0, 20, HEAD_DIA_14_20+0.5, 10, dir=(0,0,-1)))
-        part = part.cut(_mount_hole(CLR_DIA_14_20+0.5, INCH, INCH, 0, 20, HEAD_DIA_14_20+0.5, 10, dir=(0,0,-1)))
-        part.translate(App.Vector(0, width/2+INCH/2, self.z_off))
+        for i in [-1, 1]:
+            part = part.cut(_mount_hole(CLR_DIA_14_20+0.5, INCH, i*INCH, 0, 20, HEAD_DIA_14_20+0.5, 10, dir=(0,0,-1)))
+        part.translate(App.Vector(0, inv*(width/2+INCH/2), self.z_off))
         part = part.fuse(part)
-        _place_object(self.lower_obj, (pi/2, -pi/4, 0), (0, 0, obj.Lower_dz.Value+self.z_off), obj)
-        _place_object(self.upper_obj, (pi/2, 3*pi/4, 0), (0, 0, obj.Upper_dz.Value+self.z_off), obj)
-        part = _absolute_cut(obj, part, self.lower_obj.Proxy.get_drill(self.lower_obj))
-        part = _absolute_cut(obj, part, self.upper_obj.Proxy.get_drill(self.upper_obj))
+        _place_object(self.lower_obj, (inv*pi/2, -pi/4, 0), (0, 0, obj.Lower_dz.Value+self.z_off), obj)
+        _place_object(self.upper_obj, (inv*pi/2, 3*pi/4, 0), (0, 0, obj.Upper_dz.Value+self.z_off), obj)
+        for i in [self.lower_obj, self.upper_obj]:
+            drill = i.Proxy.get_drill(i)
+            drill.Placement = i.Placement
+            part = _absolute_cut(obj, part, drill)
         obj.Shape = part
 
 
