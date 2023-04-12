@@ -28,14 +28,19 @@ def find_interaction(x1, y1, a1, ref_obj):
     output = [None, None, [None, None]]
 
     # transmitted beam
-    if hasattr(ref_obj.Proxy, 'tran_angle'):
+    if hasattr(ref_obj.Proxy, 'tran'):
         a_norm = (a_comp+pi)%(2*pi)
-        output[2][1] = a1+ref_obj.Proxy.tran_angle
+        output[2][0] = a1
+    
+    # diffracted beam
+    if hasattr(ref_obj.Proxy, 'diff_angle'):
+        a_norm = (a_comp+pi)%(2*pi)
+        output[2][1] = a1+ref_obj.Proxy.diff_angle
 
     # reflected beam
     if hasattr(ref_obj.Proxy, 'ref_angle'):
         a_norm = (a_comp+ref_obj.Proxy.ref_angle)%(2*pi)
-        output[2][0] = 2*a_norm-a1-pi
+        output[2][1] = 2*a_norm-a1-pi
 
     a2 = a_norm+pi/2
 
@@ -52,11 +57,11 @@ def find_interaction(x1, y1, a1, ref_obj):
     if a_in < in_limit or a_rel > pi/2:
         return
     
-    if hasattr(ref_obj.Proxy, 'diff_dir'):
+    if hasattr(ref_obj.Proxy, 'diff_dir') and output[2][1] != None:
         if a_in > pi/2:
-            output[2][1] = a1+ref_obj.Proxy.tran_angle*ref_obj.Proxy.diff_dir[0]
+            output[2][1] *= ref_obj.Proxy.diff_dir[0]
         else:
-            output[2][1] = a1+ref_obj.Proxy.tran_angle*ref_obj.Proxy.diff_dir[1]
+            output[2][1] *= ref_obj.Proxy.diff_dir[1]
 
     # check for edge cases
     a1_vert = is_mult(a1-pi/2, pi)
@@ -84,8 +89,12 @@ def find_interaction(x1, y1, a1, ref_obj):
     ref_d = sqrt((x-x2)**2+(y-y2)**2)
     
     if ref_d > in_width/2:
+        #if ref_d < INCH/2:
+        #    return False
+        #else:
+        #    return
         return
-    
+
     # transmitted beam
     if hasattr(ref_obj.Proxy, 'foc_len'):
         a_rel = abs(a2-atan2(y-y2, x-x2))%(2*pi)
@@ -94,7 +103,7 @@ def find_interaction(x1, y1, a1, ref_obj):
             offset *= -1
         if a_in > pi/2:
             offset *= -1
-        output[2][1] += offset
+        output[2][0] += offset
         
     output[0], output[1] = x, y
     return output
@@ -141,6 +150,9 @@ class beam_path:
                             comp_check = False
 
                 ref = find_interaction(x1, y1, a1, obj) # check for reflection
+                #if ref == False:
+                #    min_len = 0
+                #    break
                 if ref != None and comp_check:
                     [x2, y2, a2_arr] = ref
                     # check to find closest component
@@ -180,7 +192,7 @@ class beam_path:
                         comp_index += 1
                         pre_count = 0
                         pre_d = 0
-                        inline_ref=True
+                        inline_ref = True
                     else:
                         comp_obj.Placement.Base = App.Vector(0, 0, 0)
                 # previous interaction info
@@ -204,16 +216,14 @@ class beam_path:
             if min_len != 0:
                 # splitter case
                 if af_arr[0] != None and af_arr[1] != None:
-                    self.calculate_beam_path(xf, yf, af_arr[1], beam_index<<1)
+                    self.calculate_beam_path(xf, yf, af_arr[0], beam_index<<1)
                     beam_index = (beam_index<<1)+1
                     comp_index = 0
-                # reflections
-                if af_arr[0] != None:
-                    x1, y1, a1 = xf, yf, af_arr[0]
-                    count += 1
-                # transmission
-                elif af_arr[1] != None:
+                if af_arr[1] != None:
                     x1, y1, a1 = xf, yf, af_arr[1]
+                    count += 1
+                elif af_arr[0] != None:
+                    x1, y1, a1 = xf, yf, af_arr[0]
                     count += 1
                 else:
                     return

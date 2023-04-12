@@ -375,7 +375,7 @@ class pbs_on_skate_mount:
             self.ref_angle = -3*pi/4
         else:
             self.ref_angle = 3*pi/4
-        self.tran_angle = 0
+        self.tran = True
         self.in_limit = 0
         self.in_width = sqrt(200)
         _add_linked_object(obj, obj.Name+"_Adapter", skate_mount, cube_size=obj.CubeSize.Value)
@@ -407,7 +407,7 @@ class rotation_stage_rsp05:
         obj.ViewObject.ShapeColor=(0.2, 0.2, 0.2)
         ViewProvider(obj.ViewObject)
         self.part_numbers = ['RSP05',wave_plate_part_num]
-        self.tran_angle = 0
+        self.tran = True
         self.in_limit = pi/2
         self.in_width = INCH/2
         _add_linked_object(obj, obj.Name+"_Adapter", surface_adapter, mount_offset=(0, 0, -14), mount_hole_dy=mount_hole_dy)
@@ -555,7 +555,7 @@ class mirror_mount_km05:
             the mount in x,y,z and a tuple of the x,y offset of the mount
     '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, mirror_thickness=6, bolt_length=15, uMountParam=[(20, 28, 10), (-10, 0)], drill=True):
+    def __init__(self, obj, mirror_thickness=6, bolt_length=15, uMountParam=None, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = mirror_thickness
@@ -646,7 +646,7 @@ class splitter_mount_c05g:
         ViewProvider(obj.ViewObject)
         self.part_numbers = ['POLARIS-C05G', plate_part_num]
         self.ref_angle = 0
-        self.tran_angle = 0
+        self.tran = True
         self.in_limit = pi/2
         self.in_width = INCH/2
 
@@ -680,7 +680,7 @@ class lens_holder_l05g:
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
         self.part_numbers = ['POLARIS-L05G', lens_part_num]
-        self.tran_angle = 0
+        self.tran = True
         self.foc_len = foc_len
         self.in_limit = 0
         self.in_width = INCH/2
@@ -714,9 +714,9 @@ class pinhole_ida12:
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
         self.part_numbers = ['IDA12-P5']
-        self.tran_angle = 0
+        self.tran = True
         self.in_limit = 0
-        self.in_width = INCH/2
+        self.in_width = 10
         self.slot_length=slot_length
         _add_linked_object(obj, obj.Name+"_Adapter", slide_mount, mount_offset=(-0.75, -12.85, 0), slot_length=slot_length)
 
@@ -766,14 +766,16 @@ class isomet_1205c_on_km100pm:
     '''
     type = 'Mesh::FeaturePython'
     #https://isomet.com/PDF%20acousto-optics_modulators/data%20sheets-moduvblue/M1250-T250L-0.45.pdf
-    def __init__(self, obj, diff_angle=-0.026, diff_dir=(1,1), drill=True):
+    def __init__(self, obj, diff_angle=-0.026, diff_dir=(1,1), drill=True, exp=False):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
         self.part_numbers = ['ISOMET_1205C']
         self.diff_dir = diff_dir
-        self.tran_angle = diff_angle
+        self.tran = True
+        if exp:
+            self.diff_angle = diff_angle
         self.in_limit = 0
         self.in_width = 5
 
@@ -862,7 +864,7 @@ class isolator_670:
         obj.ViewObject.ShapeColor=(0.2, 0.2, 0.2)
         ViewProvider(obj.ViewObject)
         self.part_numbers = ['IOT-5-670-VLP']
-        self.tran_angle = 0
+        self.tran = True
         self.in_limit = pi/2
         self.in_width = INCH/2
         _add_linked_object(obj, obj.Name+"_Adapter", surface_adapter, mount_offset=(0, 0, -22.1), mount_hole_dy=mount_hole_dy)
