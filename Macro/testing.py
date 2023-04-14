@@ -16,7 +16,7 @@ INCH = 25.4
 #beam2 = layout.add_beam_path(104, 200, -90)
 #beam3 = layout.add_beam_path(96, 200, -90)
 
-#layout.place_element_along_beam("AOM", optomech.isomet_1205c_on_km100pm, beam, 0b1, -90, 80, diff_angle=0)
+#layout.place_element("AOM", optomech.isomet_1205c_on_km100pm, 50, 50, 0)
 
 #layout.place_element("Input_Fiberport", optomech.fiberport_holder, 100, 200, -90)
 layout.place_element("Periscope1", optomech.periscope, -50, 50, 0, lower_dz=layout.INCH*3/2, upper_dz=80, table_mount=True, left_handed=True)

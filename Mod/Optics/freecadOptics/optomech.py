@@ -77,10 +77,11 @@ def _custom_box(dx, dy, dz, x, y, z, fillet=0, dir=(0,0,1), fillet_dir=None):
 
 def _mount_hole(dia, dz, x, y, z, head_dia=0, head_dz=0, dir=(0, 0, -1), countersink=False):
     part = Part.makeCylinder(dia/2, dz, App.Vector(0, 0, 0), App.Vector(*dir))
-    if countersink:
-        part = part.fuse(Part.makeCone(head_dia/2, dia/2, head_dz, App.Vector(0, 0, 0), App.Vector(*dir)))
-    else:
-        part = part.fuse(Part.makeCylinder(head_dia/2, head_dz, App.Vector(0, 0, 0), App.Vector(*dir)))
+    if head_dia != 0 and head_dz != 0:
+        if countersink:
+            part = part.fuse(Part.makeCone(head_dia/2, dia/2, head_dz, App.Vector(0, 0, 0), App.Vector(*dir)))
+        else:
+            part = part.fuse(Part.makeCylinder(head_dia/2, head_dz, App.Vector(0, 0, 0), App.Vector(*dir)))
     part.translate(App.Vector(x, y, z))
     part = part.fuse(part)
     return part
@@ -257,16 +258,20 @@ class mount_for_km100pm:
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
         slot_length (float) : The length (in mm) of the slots used for mounting to the km100pm
+        countersink_depth (float) : The depth (in mm) of the countersinks for the AOM mount holes
         arm_thickness (float) : The thickness (in mm) of the arm the mounts to the km100PM
+        arm_clearance (float) : The distance (in mm) between the bottom of the adapter arm and the bottom of the km100pm
         stage_thickness (float) : The thickness (in mm) of the stage that mounts to the AOM
         stage_length (float) : The length (in mm) of the stage that mounts to the AOM
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, mount_offset, slot_length=8, arm_thickness=8, stage_thickness=4, stage_length=21, drill=True):
+    def __init__(self, obj, mount_offset, slot_length=8, countersink_depth=0, arm_thickness=8, arm_clearance=2, stage_thickness=4, stage_length=21, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty('App::PropertyLength', 'SlotLength').SlotLength = slot_length
+        obj.addProperty('App::PropertyLength', 'CountersinkDepth').CountersinkDepth = countersink_depth
         obj.addProperty('App::PropertyLength', 'ArmThickness').ArmThickness = arm_thickness
+        obj.addProperty('App::PropertyLength', 'ArmClearance').ArmClearance = arm_clearance
         obj.addProperty('App::PropertyLength', 'StageThickness').StageThickness = stage_thickness
         obj.addProperty('App::PropertyLength', 'StageLength').StageLength = stage_length
         obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
@@ -280,13 +285,13 @@ class mount_for_km100pm:
         dz = 16.92
         stage_dx = obj.StageLength.Value
         stage_dz = obj.StageThickness.Value
-        part = _custom_box(dx, dy, dz-3.3, 0, 0, 3.3)
+        part = _custom_box(dx, dy, dz-obj.ArmClearance.Value, 0, 0, obj.ArmClearance.Value)
         part = part.fuse(_custom_box(stage_dx, dy, stage_dz, 0, 0, dz, dir=(1,0,-1)))
         for ddy in [15.2, 38.1]:
             part = part.cut(_custom_box(dx, obj.SlotLength.Value+CLR_DIA_4_40, CLR_DIA_4_40, dx/2, 25.4-ddy, 6.4, CLR_DIA_4_40/2, (-1,0,0)))
             part = part.cut(_custom_box(dx/2, obj.SlotLength.Value+HEAD_DIA_4_40, HEAD_DIA_4_40, dx/2, 25.4-ddy, 6.4, HEAD_DIA_4_40/2, (-1,0,0)))
         for ddy in [0, -11.42, -26.65, -38.07]:
-            part = part.cut(_mount_hole(CLR_DIA_4_40, stage_dz, 11.25, 18.9+ddy, dz-4, HEAD_DIA_4_40, 2, (0,0,1), True)) ## TODO: get actual countersink depth
+            part = part.cut(_mount_hole(CLR_DIA_4_40, stage_dz, 11.25, 18.9+ddy, dz-4, HEAD_DIA_4_40, obj.CountersinkDepth.Value, (0,0,1), True))
         part.translate(App.Vector(*np.add((18, 0, -dz), self.mount_offset)))
         part = part.fuse(part)
         obj.Shape = part
@@ -832,7 +837,7 @@ class periscope:
         else:
             inv = 1
         width = INCH #Must be INCH wide to keep periscope mirrors 1 inch from mount holes. 
-        part = _custom_box(65, width, 20, 0, 0, 0, 5)
+        part = _custom_box(68, width, 20, 0, 0, 0, 5)
         part = part.fuse(_custom_box(30, width, obj.Upper_dz.Value+20, 0, 0, 0))
         for i in [-1, 1]:
             part = part.cut(_mount_hole(CLR_DIA_14_20+0.5, INCH, i*INCH, 0, 20, HEAD_DIA_14_20+0.5, 10, dir=(0,0,-1)))
