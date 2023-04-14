@@ -837,10 +837,11 @@ class periscope:
         else:
             inv = 1
         width = INCH #Must be INCH wide to keep periscope mirrors 1 inch from mount holes. 
-        part = _custom_box(68, width, 20, 0, 0, 0, 5)
-        part = part.fuse(_custom_box(30, width, obj.Upper_dz.Value+20, 0, 0, 0))
+        fillet = 15
+        part = _custom_box(70, width, obj.Upper_dz.Value+20, 0, 0, 0)
         for i in [-1, 1]:
-            part = part.cut(_mount_hole(CLR_DIA_14_20+0.5, INCH, i*INCH, 0, 20, HEAD_DIA_14_20+0.5, 10, dir=(0,0,-1)))
+            part = part.cut(_custom_box(fillet*2+4, width, obj.Upper_dz.Value+20, i*(35+fillet), 0, 20, 15, dir=(-i,0,1), fillet_dir=(0,1,0)))
+            part = part.cut(_mount_hole(CLR_DIA_14_20+0.5, INCH+5, i*INCH, 0, 25, HEAD_DIA_14_20+0.5, 10, dir=(0,0,-1)))
         part.translate(App.Vector(0, -inv*(width/2+INCH/2), self.z_off))
         part = part.fuse(part)
         _place_object(self.lower_obj, (-inv*pi/2, -pi/4, 0), (0, 0, obj.Lower_dz.Value+self.z_off), obj)
