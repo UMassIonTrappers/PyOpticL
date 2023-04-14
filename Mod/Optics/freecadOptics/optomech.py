@@ -300,6 +300,12 @@ class mount_for_km100pm:
 
 
 class universal_mount:
+    '''
+    Universal adapter allowing for multiple mirror mounts to work on a single baseplate
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+    '''
     type = 'Part::FeaturePython'
     def __init__(self, obj, mount_offset, size, zOff, drill=True):
         obj.Proxy = self
@@ -335,6 +341,12 @@ class universal_mount:
 
 
 class fiberport_holder:
+    '''
+    Part for mounting an HCA3 fiberport coupler to the side of a baseplate
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+    '''
     type = 'Mesh::FeaturePython'
     def __init__(self, obj, drill=True):
         obj.Proxy = self
@@ -362,7 +374,6 @@ class pbs_on_skate_mount:
     Beam-splitter cube
 
     Args:
-        drill (bool) : Whether baseplate mounting for this part should be drilled
         invert (bool) : Invert pick-off direction, false is left, true is right
         cube_size (float) : The side length (in mm) of the splitter cube
         cube_part_num (string) : The Thorlabs part number of the splitter cube being used
@@ -370,11 +381,11 @@ class pbs_on_skate_mount:
     type = 'Mesh::FeaturePython'
     def __init__(self, obj, invert=False, cube_size=10, cube_part_num='PBS101'):
         obj.Proxy = self
+        obj.addProperty('App::PropertyLength', 'Invert').Invert = invert
         obj.addProperty('App::PropertyLength', 'CubeSize').CubeSize = cube_size
         obj.ViewObject.ShapeColor=(0.5, 0.5, 0.7)
         obj.ViewObject.Transparency=50
         self.part_numbers = [cube_part_num]
-        self.invert = invert
         ViewProvider(obj.ViewObject)
         if invert:
             self.ref_angle = -3*pi/4
@@ -390,7 +401,7 @@ class pbs_on_skate_mount:
         temp = Mesh.createBox(10-1, sqrt(200)-1, 0.01)
         temp.rotate(0, pi/2, -pi/4)
         mesh = mesh.unite(temp)
-        if self.invert:
+        if obj.Invert:
             self.ref_angle = -3*pi/4
             mesh.rotate(0, 0, pi/2)
         mesh.Placement = obj.Mesh.Placement
@@ -402,12 +413,11 @@ class rotation_stage_rsp05:
     Rotation stage, model RSP05
 
     Args:
-        drill (bool) : Whether baseplate mounting for this part should be drilled
         mount_hole_dy (float) : The spacing (in mm) between the two mount holes of it's adapter
         wave_plate_part_num (string) : The Thorlabs part number of the wave plate being used
     '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, mount_hole_dy=25 , wave_plate_part_num=''):
+    def __init__(self, obj, mount_hole_dy=25, wave_plate_part_num='', **adapter_args):
         obj.Proxy = self
         obj.ViewObject.ShapeColor=(0.2, 0.2, 0.2)
         ViewProvider(obj.ViewObject)
@@ -415,7 +425,7 @@ class rotation_stage_rsp05:
         self.tran = True
         self.in_limit = pi/2
         self.in_width = INCH/2
-        _add_linked_object(obj, obj.Name+"_Adapter", surface_adapter, mount_offset=(0, 0, -14), mount_hole_dy=mount_hole_dy)
+        _add_linked_object(obj, obj.Name+"_Adapter", surface_adapter, mount_offset=(0, 0, -14), mount_hole_dy=mount_hole_dy, **adapter_args)
 
     def execute(self, obj):
         mesh = _orient_stl("RSP05-Solidworks.stl", (pi/2, 0, pi/2), (0.6, 0, 0), 1000)
@@ -710,10 +720,9 @@ class pinhole_ida12:
 
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
-        slot_len (float) : The slot length (in mm) of the slide mount adapter
     '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, slot_length=10, drill=True):
+    def __init__(self, obj, slot_length=10, drill=True, **adapter_args):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
@@ -723,7 +732,7 @@ class pinhole_ida12:
         self.in_limit = 0
         self.in_width = 10
         self.slot_length=slot_length
-        _add_linked_object(obj, obj.Name+"_Adapter", slide_mount, mount_offset=(-0.75, -12.85, 0), slot_length=slot_length)
+        _add_linked_object(obj, obj.Name+"_Adapter", slide_mount, mount_offset=(-0.75, -12.85, 0), slot_length=slot_length, **adapter_args)
 
     def get_drill(self, obj):
         part = _custom_box(6.5, 10+self.slot_length, 1, -0.75, 0, -INCH/2, 2, (0,0,-1))
@@ -762,6 +771,7 @@ class kinematic_mount_km100pm:
 class isomet_1205c_on_km100pm:
     '''
     AOM on a kinematic mount, AOM model isomet-1205C, mount model KM100PM
+    https://isomet.com/PDF%20acousto-optics_modulators/data%20sheets-moduvblue/M1250-T250L-0.45.pdf
 
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
@@ -770,10 +780,8 @@ class isomet_1205c_on_km100pm:
             diffract right on a forward pass and left on a return pass
     '''
     type = 'Mesh::FeaturePython'
-    #https://isomet.com/PDF%20acousto-optics_modulators/data%20sheets-moduvblue/M1250-T250L-0.45.pdf
-    def __init__(self, obj, diff_angle=-0.026, diff_dir=(1,1), drill=True, exp=False):
+    def __init__(self, obj, diff_angle=-0.026, diff_dir=(1,1), exp=False):
         obj.Proxy = self
-        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
         self.part_numbers = ['ISOMET_1205C']
