@@ -59,9 +59,9 @@ def find_interaction(x1, y1, a1, ref_obj):
     
     if hasattr(ref_obj.Proxy, 'diff_dir') and output[2][1] != None:
         if a_in > pi/2:
-            output[2][1] *= ref_obj.Proxy.diff_dir[0]
+            output[2][1] = a1+ref_obj.Proxy.diff_angle*ref_obj.Proxy.diff_dir[0]
         else:
-            output[2][1] *= ref_obj.Proxy.diff_dir[1]
+            output[2][1] = a1+ref_obj.Proxy.diff_angle*ref_obj.Proxy.diff_dir[1]
 
     # check for edge cases
     a1_vert = is_mult(a1-pi/2, pi)
