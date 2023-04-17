@@ -123,13 +123,14 @@ class beam_path:
         self.x, self.y, _ = obj.Placement.Base
         self.a = obj.Placement.Rotation.Angle
         self.a *= obj.Placement.Rotation.Axis[2]
-        self.part = Part.makeSphere(0)
+        self.shapes = []
         self.comp_track = []
         self.calculate_beam_path(self.x, self.y, self.a)
-        self.part.translate(App.Vector(-self.x, -self.y, 0))
-        self.part.rotate(App.Vector(0, 0, 0),App.Vector(0, 0, 1), degrees(-self.a))
-        self.part = self.part.fuse(self.part)
-        obj.Shape = self.part
+        comp = Part.makeCompound(self.shapes)
+        comp.translate(App.Vector(-self.x, -self.y, 0))
+        comp.rotate(App.Vector(0, 0, 0),App.Vector(0, 0, 1), degrees(-self.a))
+        comp = comp.fuse(comp)
+        obj.Shape = comp
 
     # compute full beam path given start point and angle
     def calculate_beam_path(self, x1, y1, a1, beam_index=1):
@@ -210,7 +211,7 @@ class beam_path:
             # add beam segment
             temp = Part.makeCylinder(0.5, beam_len, App.Vector(x1, y1, 0), App.Vector(1, 0, 0))
             temp.rotate(App.Vector(x1, y1, 0),App.Vector(0, 0, 1), degrees(a1))
-            self.part = self.part.fuse(temp)
+            self.shapes.append(temp)
 
             # continue beam if reflection was found
             if min_len != 0:
