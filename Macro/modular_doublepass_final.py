@@ -19,20 +19,20 @@ aom_dy = 70
 base_split = INCH/4
 
 gap = 0.5*INCH
-base_dx = 5.0*INCH-gap
-base_dy = 8.0*INCH+10-gap #MAX size of resin printer
+base_dx = 8.0*INCH+10-gap #MAX size of resin printer
+base_dy = 5.0*INCH-gap
 base_dz = INCH
 
-input_y = base_dy-3.0*INCH+gap/2+5
+input_x = base_dx-3.0*INCH+gap/2+5
 
 ''' 'Cardinal' beam directions'''
-down = 0 
+down = -90 
 up = down+ 180
 left = down - 90
 right = left + 180
 
 # Turns
-up_right = 45
+up_right = -45
 right_up = up_right-180
 left_down = up_right
 down_left = right_up
@@ -55,11 +55,7 @@ layout.create_baseplate(base_dx, base_dy, base_dz, name=name, label=label)
 '''
 Add Beam(s)
 '''
-beam = layout.add_beam_path(base_dx, input_y, -180)
-
-#AOM_location_x = 18.3
-#aom_beam_minus1 = layout.add_beam_path(AOM_location_x, input_y-7, left+0.026*180/pi)  #https://isomet.com/PDF%20acousto-optics_modulators/data%20sheets-moduvblue/M1250-T250L-0.45.pdf
-
+beam = layout.add_beam_path(input_x, 0, up)
 
 """
 Add Optical Elements
@@ -77,10 +73,9 @@ layout.place_element_along_beam("Iris", optomech.pinhole_ida12, beam, 0b110, rig
 layout.place_element_along_beam("Retro_Mirror", mirror_mounts, beam, 0b110, right, 7)
 
 layout.place_element_along_beam("Output_Mirror_1", mirror_mounts, beam, 0b11000, right_down, 20)
-# layout.place_element_along_beam("Iris", optomech.pinhole_ida12, beam, 0b110, down, 25)
 layout.place_element_along_beam("Output_Mirror_2", mirror_mounts, beam, 0b11000, down_left, 55)
 layout.place_element_along_beam("Half_waveplate_Out", optomech.rotation_stage_rsp05, beam, 0b11000, left, 100, wave_plate_part_num = '') #421nm custom waveplates from CASIX
-layout.place_element_along_beam("Output_Fiberport", optomech.fiberport_holder, beam, 0b11000, right, y=0)
+layout.place_element_along_beam("Output_Fiberport", optomech.fiberport_holder, beam, 0b11000, right, x=0)
 
 
 """
@@ -88,11 +83,11 @@ Add holes to baseplate to mount to optical table
  >>> Make sure to align laser beam above bolt holes so plates line up together <<<
 """
 offset = -15/INCH # arbitrary shift to make sure laser is over bolt holes
-for i in [[2,1],[4,1],[3,4],[3,6],[2,7]]:
+for i in [[1,0],[3,3],[4,1],[7,2]]:
     layout.place_element("Mount_Hole", optomech.baseplate_mount, (i[0]-offset)*INCH-gap/2, (i[1]-offset)*INCH-gap/2, 0)
 
 """
 Set view and compute baseplate
 """
-Gui.runCommand('TopViewFit',0)
+#Gui.runCommand('TopViewFit',0)
 layout.redraw()

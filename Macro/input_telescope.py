@@ -51,27 +51,29 @@ beam = layout.add_beam_path(base_dx-ddy, 0, 90)
 
 # Lens Options:
 def f100cx_to_f030cx():
-    layout.place_element_along_beam("f100cx", optomech.lens_holder_l05g, beam, 0b1, -90, 15)
-    layout.place_element_along_beam("f030cx", optomech.lens_holder_l05g, beam, 0b1, 90, 130)
+    layout.place_element_along_beam("f100cx", optomech.lens_holder_l05g, beam, 0b1, 180, 15)
+    layout.place_element_along_beam("f030cx", optomech.lens_holder_l05g, beam, 0b1, 0, 130)
 
 def f75cx_to_f030cc():
-    layout.place_element_along_beam("f75cx", optomech.lens_holder_l05g, beam, 0b1, -90, 15)
-    layout.place_element_along_beam("f030cc", optomech.lens_holder_l05g, beam, 0b1, 90, 45)
+    layout.place_element_along_beam("f75cx", optomech.lens_holder_l05g, beam, 0b1, 180, 15)
+    layout.place_element_along_beam("f030cc", optomech.lens_holder_l05g, beam, 0b1, 0, 45)
 
 
 # Create Beam Path
 layout.place_element("Input_Fiberport", optomech.fiberport_holder, base_dx-ddy, 0, 90)
 
-layout.place_element_along_beam("Input_Mirror_1", optomech.mirror_mount_k05s2, beam, 0b1, -135, 1*INCH)
-layout.place_element_along_beam("Input_Mirror_2", optomech.mirror_mount_k05s2, beam, 0b1, 45, 1*INCH)
+layout.place_element_along_beam("Input_Mirror_1", optomech.mirror_mount_c05g, beam, 0b1, -135,1*INCH)
+layout.place_element_along_beam("Input_Mirror_2", optomech.mirror_mount_k05s2, beam, 0b1, 45, 2*INCH)
+layout.place_element_along_beam("Input_Mirror_3", optomech.mirror_mount_k05s1, beam, 0b1, -45, 30)
 
 #f100cx_to_f030cx()
 f75cx_to_f030cc()
 
-layout.place_element_along_beam("Output_Mirror_1", optomech.mirror_mount_k05s2, beam, 0b1, -45, 15)
-layout.place_element_along_beam("Output_Mirror_2", optomech.mirror_mount_k05s2, beam, 0b1, 135, 1*INCH)
+layout.place_element_along_beam("Output_Mirror_1", optomech.mirror_mount_k05s1, beam, 0b1, 135, 15)
+layout.place_element_along_beam("Output_Mirror_2", optomech.mirror_mount_k05s2, beam, 0b1, -135, 30)
+layout.place_element_along_beam("Output_Mirror_3", optomech.mirror_mount_c05g, beam, 0b1, 45, 75-2*INCH)
 
-layout.place_element("Output_Fiberport", optomech.fiberport_holder, base_dx-ddy, base_dy, 270)
+layout.place_element_along_beam("Output_Fiberport", optomech.fiberport_holder, beam, 0b1, -90, y=base_dy)
 
 
 
