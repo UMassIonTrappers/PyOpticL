@@ -218,10 +218,11 @@ class slide_mount:
         outer_thickness (float) : The thickness (in mm) of the walls around the bolt holes
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, mount_offset, slot_length, adapter_height=8, post_thickness=4, outer_thickness=2, drill=True):
+    def __init__(self, obj, mount_offset, slot_length, drill_offset=0, adapter_height=8, post_thickness=4, outer_thickness=2, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty('App::PropertyLength', 'SlotLength').SlotLength = slot_length
+        obj.addProperty('App::PropertyDistance', 'DrillOffset').DrillOffset = drill_offset
         obj.addProperty('App::PropertyLength', 'AdapterHeight').AdapterHeight = adapter_height
         obj.addProperty('App::PropertyLength', 'PostThickness').PostThickness = post_thickness
         obj.addProperty('App::PropertyLength', 'OuterThickness').OuterThickness = outer_thickness
@@ -232,7 +233,7 @@ class slide_mount:
 
     def get_drill(self, obj):
         bolt_dy = self.mount_offset[1]-obj.PostThickness.Value-(obj.SlotLength.Value+HEAD_DIA_8_32+obj.OuterThickness.Value*2)/2
-        part = _mount_hole(TAP_DIA_8_32, drill_depth, self.mount_offset[0], bolt_dy, -INCH/2)
+        part = _mount_hole(TAP_DIA_8_32, drill_depth, self.mount_offset[0], bolt_dy+obj.DrillOffset.Value, -INCH/2)
         return part
 
     def execute(self, obj):
@@ -590,7 +591,8 @@ class mirror_mount_km05:
 
     def get_drill(self, obj):
         part = _mount_hole(CLR_DIA_8_32, INCH, -13.4, 0, -INCH*3/2, HEAD_DIA_8_32, 0.92*INCH-self.bolt_len+5, dir=(0,0,1))
-        part = part.fuse(_custom_box(21, 29, 0.08*INCH, -10, 0, -INCH/2-0.08*INCH, 3))
+        part = part.fuse(_custom_box(18, 31, 0.08*INCH, -8.4, 0, -INCH/2-0.08*INCH, 3))
+        part = part.fuse(_custom_box(18, 9, 0.08*INCH, -12, -31/2+4.5, -INCH/2-0.08*INCH, 2))
         return part
 
     def execute(self, obj):
@@ -730,7 +732,7 @@ class pinhole_ida12:
         self.part_numbers = ['IDA12-P5']
         self.tran = True
         self.in_limit = 0
-        self.in_width = 10
+        self.in_width = 1
         self.slot_length=slot_length
         _add_linked_object(obj, obj.Name+"_Adapter", slide_mount, mount_offset=(-0.75, -12.85, 0), slot_length=slot_length, **adapter_args)
 
@@ -957,7 +959,6 @@ class ViewProvider:
 
     def attach(self, obj):
         return
-        
 
     def getDefaultDisplayMode(self):
         return "Shaded"

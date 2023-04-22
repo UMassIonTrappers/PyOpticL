@@ -20,10 +20,32 @@ def place_element_along_beam(obj_name, obj_class, beam_obj, beam_index, angle, d
     obj = App.ActiveDocument.addObject(obj_class.type, obj_name)
     obj_class(obj, **args)
     obj.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
-    while len(beam_obj.Proxy.components) <= beam_index:
-        beam_obj.Proxy.components.append([])
-    beam_obj.Proxy.components[beam_index].append((obj, [distance, x, y], pre_refs))
+    obj.setEditorMode('Placement', 2)
+    obj.addProperty("App::PropertyAngle","Angle").Angle = angle
+    if distance != None:
+        obj.addProperty("App::PropertyDistance","Distance").Distance = distance
+    if x != None:
+        obj.addProperty("App::PropertyDistance","xPos").xPos = x
+    if y != None:
+        obj.addProperty("App::PropertyDistance","yPos").yPos = y
+    obj.addProperty("App::PropertyInteger","BeamIndex").BeamIndex = beam_index
+    obj.addProperty("App::PropertyInteger","PreRefs").PreRefs = pre_refs
+    beam_obj.PathObjects += [obj]
     return obj
+
+def place_element_relative(obj_name, obj_class, rel_obj, angle, x_off=0, y_off=0, **args):
+    obj = App.ActiveDocument.addObject(obj_class.type, obj_name)
+    obj_class(obj, **args)
+    obj.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
+    obj.setEditorMode('Placement', 2)
+    obj.addProperty("App::PropertyAngle","Angle").Angle = angle
+    obj.addProperty("App::PropertyDistance","RelativeX").RelativeX = x_off
+    obj.addProperty("App::PropertyDistance","RelativeY").RelativeY = y_off
+    if not hasattr(rel_obj, "RelativeObjects"):
+        rel_obj.addProperty("App::PropertyLinkListChild","RelativeObjects").RelativeObjects
+    rel_obj.RelativeObjects += [obj]
+    return obj
+
 
 # Creates a new active baseplate
 def create_baseplate(dx, dy, dz, drill=True, name="Baseplate", x=0, y=0, label=""):
@@ -41,10 +63,17 @@ def add_beam_path(x, y, angle):
     obj.Placement = App.Placement(App.Vector(x, y, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
     laser.ViewProvider(obj.ViewObject)
     obj.ViewObject.ShapeColor=(1.0, 0.0, 0.0)
+    obj.addProperty("App::PropertyLinkListHidden","PathObjects").PathObjects
     return obj
 
 # Update function for dynamic elements
 def redraw():
+    for i in App.ActiveDocument.Objects:
+        if hasattr(i, "RelativeObjects"):
+            for obj in i.RelativeObjects:
+                x, y = i.Placement.Base[0]+obj.RelativeX.Value, i.Placement.Base[1]+obj.RelativeY.Value
+                obj.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(obj.Angle.Value, 0, 0), App.Vector(x, y, 0))
+                obj.Placement.Base = App.Vector(x+obj.RelativeX.Value, y+obj.RelativeY.Value, 0)
     for i in App.ActiveDocument.Objects:
         if isinstance(i.Proxy, laser.beam_path):
             i.touch()
