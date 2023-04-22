@@ -68,14 +68,14 @@ layout.place_element_along_beam("Beam_Splitter", optomech.pbs_on_skate_mount, be
 
 layout.place_element_along_beam("AOM", optomech.isomet_1205c_on_km100pm, beam, 0b11, right, 30,  diff_dir=(1,-1), exp=True)
 layout.place_element_along_beam("Quarter_waveplate", optomech.rotation_stage_rsp05, beam, 0b110, left, 70, wave_plate_part_num = '') #421nm custom waveplates from CASIX
-layout.place_element_along_beam("Lens_f_100mm_AB_coat", optomech.lens_holder_l05g, beam, 0b110, left, 30, foc_len=100, lens_part_num='LA1213-AB')
-layout.place_element_along_beam("Iris", optomech.pinhole_ida12, beam, 0b110, right, 7)
-layout.place_element_along_beam("Retro_Mirror", mirror_mounts, beam, 0b110, right, 7)
+lens = layout.place_element_along_beam("Lens_f_100mm_AB_coat", optomech.lens_holder_l05g, beam, 0b110, left, 30, foc_len=100, lens_part_num='LA1213-AB')
+layout.place_element_along_beam("Iris", optomech.pinhole_ida12, beam, 0b111, right, 7, pre_refs=2, drill_offset=2)
+layout.place_element_relative("Retro_Mirror", mirror_mounts, lens, right, -7)
 
-layout.place_element_along_beam("Output_Mirror_1", mirror_mounts, beam, 0b11000, right_down, 20)
-layout.place_element_along_beam("Output_Mirror_2", mirror_mounts, beam, 0b11000, down_left, 55)
-layout.place_element_along_beam("Half_waveplate_Out", optomech.rotation_stage_rsp05, beam, 0b11000, left, 100, wave_plate_part_num = '') #421nm custom waveplates from CASIX
-layout.place_element_along_beam("Output_Fiberport", optomech.fiberport_holder, beam, 0b11000, right, x=0)
+layout.place_element_along_beam("Output_Mirror_1", mirror_mounts, beam, 0b11110, right_down, 25)
+layout.place_element_along_beam("Output_Mirror_2", mirror_mounts, beam, 0b11110, down_left, 55)
+layout.place_element_along_beam("Half_waveplate_Out", optomech.rotation_stage_rsp05, beam, 0b11110, left, 100, wave_plate_part_num = '') #421nm custom waveplates from CASIX
+layout.place_element_along_beam("Output_Fiberport", optomech.fiberport_holder, beam, 0b11110, right, x=0)
 
 
 """
