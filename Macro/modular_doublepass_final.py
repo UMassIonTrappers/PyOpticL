@@ -73,7 +73,7 @@ layout.place_element_along_beam("Iris", optomech.pinhole_ida12, beam, 0b111, rig
 layout.place_element_relative("Retro_Mirror", mirror_mounts, lens, right, -7)
 
 layout.place_element_along_beam("Output_Mirror_1", mirror_mounts, beam, 0b11110, right_down, 25)
-layout.place_element_along_beam("Output_Mirror_2", mirror_mounts, beam, 0b11110, down_left, 55)
+layout.place_element_along_beam("Output_Mirror_2", mirror_mounts, beam, 0b11110, down_left, 56)
 layout.place_element_along_beam("Half_waveplate_Out", optomech.rotation_stage_rsp05, beam, 0b11110, left, 100, wave_plate_part_num = '') #421nm custom waveplates from CASIX
 layout.place_element_along_beam("Output_Fiberport", optomech.fiberport_holder, beam, 0b11110, right, x=0)
 
