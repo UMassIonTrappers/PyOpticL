@@ -64,7 +64,6 @@ class Top_View_Fit():
 
     def Activated(self):
         Gui.activeDocument().activeView().viewTop()
-        Gui.activeDocument().activeView().viewRotateRight()
         Gui.SendMsgToActiveView("ViewFit")
         Gui.runCommand('Std_ViewZoomIn',0)
         return
