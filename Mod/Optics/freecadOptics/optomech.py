@@ -759,8 +759,8 @@ class kinematic_mount_km100pm:
         self.mount_offset = mount_offset
 
     def get_drill(self, obj):
-        part = _custom_box(34, 53.5, 23.9, -19.27, -7.52, -23.9, 5)
-        part = part.fuse(_custom_box(40, 15.5, 26, -44.77, -26.52, 0, 5, (0,0,-1)))
+        part = _custom_box(34, 54.5, 23.9, -19.27, -8.02, -23.9, 5)
+        part = part.fuse(_custom_box(40, 17.5, 26, -44.77, -26.52, 0, 5, (0,0,-1)))
         part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, -29.27, -7.52, 0))
         return part
 
