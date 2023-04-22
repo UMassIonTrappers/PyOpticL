@@ -29,10 +29,10 @@ beam = layout.add_beam_path(100, 200, -90)
 #layout.place_element_along_beam("Input_Mirror_2", optomech.mirror_mount_k05s2, beam, 0b11, 45, 30)
 
 layout.place_element_along_beam("AOM", optomech.isomet_1205c_on_km100pm, beam, 0b1, 90, 30,  diff_dir=(1,-1), exp=True)
-layout.place_element_along_beam("Quarter_waveplate", optomech.rotation_stage_rsp05, beam, 0b10, -90, 70, wave_plate_part_num = '') #421nm custom waveplates from CASIX
-lens = layout.place_element_along_beam("Lens_f_100mm_AB_coat", optomech.lens_holder_l05g, beam, 0b10, -90, 30, foc_len=100, lens_part_num='LA1213-AB')
-layout.place_element_along_beam("Iris", optomech.pinhole_ida12, beam, 0b11, -90, 7, pre_refs=2)
-layout.place_element_relative("Retro_Mirror", optomech.mirror_mount_k05s2, lens, 90, y_off=-7)
+#layout.place_element_along_beam("Quarter_waveplate", optomech.rotation_stage_rsp05, beam, 0b10, -90, 70, wave_plate_part_num = '') #421nm custom waveplates from CASIX
+#lens = layout.place_element_along_beam("Lens_f_100mm_AB_coat", optomech.lens_holder_l05g, beam, 0b10, -90, 30, foc_len=100, lens_part_num='LA1213-AB')
+#layout.place_element_along_beam("Iris", optomech.pinhole_ida12, beam, 0b11, -90, 7, pre_refs=2)
+#layout.place_element_relative("Retro_Mirror", optomech.mirror_mount_k05s2, lens, 90, y_off=-7)
 
 
 #layout.place_element("AOM", optomech.isomet_1205c_on_km100pm, 50, 50, 0)
