@@ -83,7 +83,7 @@ Add holes to baseplate to mount to optical table
  >>> Make sure to align laser beam above bolt holes so plates line up together <<<
 """
 offset = -15/INCH # arbitrary shift to make sure laser is over bolt holes
-for i in [[1,0],[3,3],[4,1],[7,2]]:
+for i in [[0,0],[2,2],[4,1],[7,2]]:
     layout.place_element("Mount_Hole", optomech.baseplate_mount, (i[0]-offset)*INCH-gap/2, (i[1]-offset)*INCH-gap/2, 0)
 
 """

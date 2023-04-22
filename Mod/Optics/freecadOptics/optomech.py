@@ -97,7 +97,7 @@ class baseplate_mount:
 
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
-        bore_depth (float) : The depth (in mm) for the counterbore of the mount hole
+        bore_depth (float) : The depth for the counterbore of the mount hole
     '''
     type = 'Part::FeaturePython'
     def __init__(self, obj, bore_depth=10, drill=True):
@@ -121,10 +121,11 @@ class surface_adapter:
     Surface adapter for post-mounted parts
 
     Args:
+        mount_offset (float[3]) : The offset position of where the adapter mounts to the component
         drill (bool) : Whether baseplate mounting for this part should be drilled
-        mount_hole_dy (float) : The spacing (in mm) between the two mount holes of the adapter
-        adapter_height (float) : The height (in mm) of the suface adapter
-        outer_thickness (float) : The thickness (in mm) of the walls around the bolt holes
+        mount_hole_dy (float) : The spacing between the two mount holes of the adapter
+        adapter_height (float) : The height of the suface adapter
+        outer_thickness (float) : The thickness of the walls around the bolt holes
     '''
     type = 'Part::FeaturePython'
     def __init__(self, obj, mount_offset, mount_hole_dy, adapter_height=8, outer_thickness=2, drill=True):
@@ -167,11 +168,12 @@ class skate_mount:
     Skate mount for splitter cubes
 
     Args:
+        mount_offset (float[3]) : The offset position of where the adapter mounts to the component
         drill (bool) : Whether baseplate mounting for this part should be drilled
-        cube_size (float) : The side length (in mm) of the splitter cube
-        mount_hole_dy (float) : The spacing (in mm) between the two mount holes of the adapter
-        cube_depth (float) : The depth (in mm) of the recess for the cube
-        outer_thickness (float) : The thickness (in mm) of the walls around the bolt holes
+        cube_size (float) : The side length of the splitter cube
+        mount_hole_dy (float) : The spacing between the two mount holes of the adapter
+        cube_depth (float) : The depth of the recess for the cube
+        outer_thickness (float) : The thickness of the walls around the bolt holes
     '''
     type = 'Part::FeaturePython'
     def __init__(self, obj, cube_size, mount_hole_dy=20, cube_depth=1, outer_thickness=2, cube_tol=0.1, drill=True):
@@ -211,11 +213,13 @@ class slide_mount:
     Slide mount adapter for post-mounted parts
 
     Args:
+        mount_offset (float[3]) : The offset position of where the adapter mounts to the component
         drill (bool) : Whether baseplate mounting for this part should be drilled
-        slot_length (float) : The length (in mm) of the slot used for mounting to the baseplate
-        adapter_height (float) : The height (in mm) of the suface adapter
-        post_thickness (float) : The thickness (in mm) of the post that mounts to the element
-        outer_thickness (float) : The thickness (in mm) of the walls around the bolt holes
+        slot_length (float) : The length of the slot used for mounting to the baseplate
+        drill_offset (float) : The distance to offset the drill hole along the slot
+        adapter_height (float) : The height of the suface adapter
+        post_thickness (float) : The thickness of the post that mounts to the element
+        outer_thickness (float) : The thickness of the walls around the bolt holes
     '''
     type = 'Part::FeaturePython'
     def __init__(self, obj, mount_offset, slot_length, drill_offset=0, adapter_height=8, post_thickness=4, outer_thickness=2, drill=True):
@@ -257,13 +261,14 @@ class mount_for_km100pm:
     Adapter for mounting isomet AOMs to km100pm kinematic mount
 
     Args:
+        mount_offset (float[3]) : The offset position of where the adapter mounts to the component
         drill (bool) : Whether baseplate mounting for this part should be drilled
-        slot_length (float) : The length (in mm) of the slots used for mounting to the km100pm
-        countersink_depth (float) : The depth (in mm) of the countersinks for the AOM mount holes
-        arm_thickness (float) : The thickness (in mm) of the arm the mounts to the km100PM
-        arm_clearance (float) : The distance (in mm) between the bottom of the adapter arm and the bottom of the km100pm
-        stage_thickness (float) : The thickness (in mm) of the stage that mounts to the AOM
-        stage_length (float) : The length (in mm) of the stage that mounts to the AOM
+        slot_length (float) : The length of the slots used for mounting to the km100pm
+        countersink_depth (float) : The depth of the countersinks for the AOM mount holes
+        arm_thickness (float) : The thickness of the arm the mounts to the km100PM
+        arm_clearance (float) : The distance between the bottom of the adapter arm and the bottom of the km100pm
+        stage_thickness (float) : The thickness of the stage that mounts to the AOM
+        stage_length (float) : The length of the stage that mounts to the AOM
     '''
     type = 'Part::FeaturePython'
     def __init__(self, obj, mount_offset, slot_length=8, countersink_depth=0, arm_thickness=8, arm_clearance=2, stage_thickness=4, stage_length=21, drill=True):
@@ -305,6 +310,7 @@ class universal_mount:
     Universal adapter allowing for multiple mirror mounts to work on a single baseplate
 
     Args:
+        mount_offset (float[3]) : The offset position of where the adapter mounts to the component
         drill (bool) : Whether baseplate mounting for this part should be drilled
     '''
     type = 'Part::FeaturePython'
@@ -376,7 +382,7 @@ class pbs_on_skate_mount:
 
     Args:
         invert (bool) : Invert pick-off direction, false is left, true is right
-        cube_size (float) : The side length (in mm) of the splitter cube
+        cube_size (float) : The side length of the splitter cube
         cube_part_num (string) : The Thorlabs part number of the splitter cube being used
     '''
     type = 'Mesh::FeaturePython'
@@ -414,7 +420,7 @@ class rotation_stage_rsp05:
     Rotation stage, model RSP05
 
     Args:
-        mount_hole_dy (float) : The spacing (in mm) between the two mount holes of it's adapter
+        mount_hole_dy (float) : The spacing between the two mount holes of it's adapter
         wave_plate_part_num (string) : The Thorlabs part number of the wave plate being used
     '''
     type = 'Mesh::FeaturePython'
@@ -522,7 +528,7 @@ class mirror_mount_c05g:
 
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
-        mirror_thickness (float) : The thickness (in mm) of the mirror being used
+        mirror_thickness (float) : The thickness of the mirror being used
         mirror_part_num (string) : The Thorlabs part number of the mirror being used
         uMountParam (float[3], float[2]) : Universal mount parameters consisting of a tuple for the size of
             the mount in x,y,z and a tuple of the x,y offset of the mount
@@ -564,8 +570,8 @@ class mirror_mount_km05:
 
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
-        mirror_thickness (float) : The thickness (in mm) of the mirror being used
-        bolt_length (float) : The length (in mm) of the bolt used for mounting
+        mirror_thickness (float) : The thickness of the mirror being used
+        bolt_length (float) : The length of the bolt used for mounting
         mirror_part_num (string) : The Thorlabs part number of the mirror being used
         uMountParam (float[3], float[2]) : Universal mount parameters consisting of a tuple for the size of
             the mount in x,y,z and a tuple of the x,y offset of the mount
@@ -609,7 +615,7 @@ class mirror_mount_mk05:
 
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
-        mirror_thickness (float) : The thickness (in mm) of the mirror being used
+        mirror_thickness (float) : The thickness of the mirror being used
         mirror_part_num (string) : The Thorlabs part number of the mirror being used
         uMountParam (float[3], float[2]) : Universal mount parameters consisting of a tuple for the size of
             the mount in x,y,z and a tuple of the x,y offset of the mount
@@ -649,7 +655,7 @@ class splitter_mount_c05g:
 
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
-        plate_thickness (float) : The thickness (in mm) of the splitter plate being used
+        plate_thickness (float) : The thickness of the splitter plate being used
         plate_part_num (string) : The Thorlabs part number of the splitter plate being used
         uMountParam (float[3], float[2]) : Universal mount parameters consisting of a tuple for the size of
             the mount in x,y,z and a tuple of the x,y offset of the mount
@@ -687,7 +693,7 @@ class lens_holder_l05g:
 
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
-        foc_len (float) : The focal length (in mm) of the lens being used
+        foc_len (float) : The focal length of the lens being used
         lens_part_num (string) : The Thorlabs part number of the lens being used
     '''
     type = 'Mesh::FeaturePython'
@@ -759,8 +765,8 @@ class kinematic_mount_km100pm:
         self.mount_offset = mount_offset
 
     def get_drill(self, obj):
-        part = _custom_box(34, 54.5, 23.9, -19.27, -8.02, -23.9, 5)
-        part = part.fuse(_custom_box(40, 17.5, 26, -44.77, -26.52, 0, 5, (0,0,-1)))
+        part = _custom_box(34, 54.5, 24.27, -19.27, -8.02, 0, 5, (0,0,-1))
+        part = part.fuse(_custom_box(40, 17.5, 26.2, -44.77, -26.52, 0, 5, (0,0,-1)))
         part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, -29.27, -7.52, 0))
         return part
 
