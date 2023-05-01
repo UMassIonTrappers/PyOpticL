@@ -6,6 +6,19 @@ from . import laser
 
 INCH = 25.4
 
+cardinal = {"right":0,
+            "left":180,
+            "up":90,
+            "down":-90}
+turn = {"up-right":-45,
+        "right_up":45,
+        "up-left":-135,
+        "left-up":135,
+        "down-right":45,
+        "right-down":-45,
+        "down-left":135,
+        "left-down":-135}
+
 # Add an element to the active baseplate with position and angle
 # Obj class is the type of object, usually defined in another module
 def place_element(obj_name, obj_class, x, y, angle, **args):

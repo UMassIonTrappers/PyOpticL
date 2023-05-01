@@ -246,7 +246,7 @@ class slide_mount:
         dz = obj.AdapterHeight.Value
         part = _custom_box(dx, dy, dz, 0, -dy/2, -INCH/2, 4)
         part = part.cut(_custom_box(CLR_DIA_8_32, obj.SlotLength.Value+CLR_DIA_8_32, dz, 0, -dy/2-obj.PostThickness.Value/2, -INCH/2, CLR_DIA_8_32/2))
-        part = part.cut(_custom_box(HEAD_DIA_8_32, obj.SlotLength.Value+HEAD_DIA_8_32, 3, 0, -dy/2-obj.PostThickness.Value/2, -INCH/2+HEAD_DZ_8_32, HEAD_DIA_8_32/2))
+        part = part.cut(_custom_box(HEAD_DIA_8_32, obj.SlotLength.Value+HEAD_DIA_8_32, HEAD_DZ_8_32, 0, -dy/2-obj.PostThickness.Value/2, -INCH/2+HEAD_DZ_8_32, HEAD_DIA_8_32/2))
         part = part.fuse(_custom_box(dx, obj.PostThickness.Value, INCH/2+CLR_DIA_8_32, 0, -obj.PostThickness.Value/2, -INCH/2))
         part = part.cut(_mount_hole(CLR_DIA_8_32, obj.PostThickness.Value, 0, 0, 0, dir=(0, -1, 0)))
         part.translate(App.Vector(*self.mount_offset))
@@ -710,8 +710,10 @@ class lens_holder_l05g:
 
     def get_drill(self, obj):
         part = _mount_hole(TAP_DIA_8_32, drill_depth, -9.5, 0, -INCH/2)
-        part = part.fuse(_mount_hole(2, 2.2, -9.5, -5, -INCH/2))
-        part = part.fuse(_mount_hole(2, 2.2, -9.5, 5, -INCH/2))
+        #part = part.fuse(_mount_hole(2, 2.2, -9.5, -5, -INCH/2))
+        #part = part.fuse(_mount_hole(2, 2.2, -9.5, 5, -INCH/2))
+        for i in [-1,1]:
+            part = part.fuse(_custom_box(5, 2, 2.2, -9.5, i*5, -INCH/2, 1, (0,0,-1)))
         return part
 
     def execute(self, obj):

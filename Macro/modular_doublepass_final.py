@@ -19,11 +19,13 @@ aom_dy = 70
 base_split = INCH/4
 
 gap = 0.5*INCH
-base_dx = 8.0*INCH+10-gap #MAX size of resin printer
-base_dy = 5.0*INCH-gap
+base_dx = 9.0*INCH-gap #MAX size of resin printer
+base_dy = 5.15*INCH-gap
 base_dz = INCH
+split_dx = 79
 
-input_x = base_dx-3.0*INCH+gap/2+5
+grid_offset = 15
+input_x = 5*INCH+grid_offset
 
 ''' 'Cardinal' beam directions'''
 down = -90 
@@ -49,7 +51,9 @@ name = "Doublepass_Resin"
 date_time = datetime.now().strftime("%m/%d/%Y")
 label = name + " " +  date_time
 print("label name date and time:",label)
-layout.create_baseplate(base_dx, base_dy, base_dz, name=name, label=label)
+#layout.create_baseplate(base_dx, base_dy, base_dz, name=name, label=label) # Full plate
+layout.create_baseplate(split_dx-gap/4, base_dy, base_dz, name=name, label=label)
+layout.create_baseplate(base_dx-split_dx-gap/4, base_dy, base_dz, x=split_dx+gap/4, name=name, label=label)
 
 
 '''
@@ -61,7 +65,8 @@ beam = layout.add_beam_path(input_x, 0, up)
 Add Optical Elements
 """
 mirror_mounts = optomech.mirror_mount_km05
-layout.place_element_along_beam("Input_Mirror_1", mirror_mounts, beam, 0b1, up_right, 16)
+layout.place_element("Input_Fiberport", optomech.fiberport_holder, input_x, 0, up)
+layout.place_element_along_beam("Input_Mirror_1", mirror_mounts, beam, 0b1, up_right, 19)
 layout.place_element_along_beam("Input_Mirror_2", mirror_mounts, beam, 0b1, right_up,  INCH)
 layout.place_element_along_beam("Half_waveplate", optomech.rotation_stage_rsp05, beam, 0b1, up, 55, wave_plate_part_num = '') #421nm custom waveplates from CASIX
 layout.place_element_along_beam("Beam_Splitter", optomech.pbs_on_skate_mount, beam, 0b1, up, 25)
@@ -82,9 +87,8 @@ layout.place_element_along_beam("Output_Fiberport", optomech.fiberport_holder, b
 Add holes to baseplate to mount to optical table 
  >>> Make sure to align laser beam above bolt holes so plates line up together <<<
 """
-offset = -15/INCH # arbitrary shift to make sure laser is over bolt holes
-for i in [[0,0],[2,2],[4,1],[7,2]]:
-    layout.place_element("Mount_Hole", optomech.baseplate_mount, (i[0]-offset)*INCH-gap/2, (i[1]-offset)*INCH-gap/2, 0)
+for i in [[0,0],[0,2],[4,1],[7,2]]:
+    layout.place_element("Mount_Hole", optomech.baseplate_mount, (i[0])*INCH+grid_offset, (i[1])*INCH+grid_offset, 0)
 
 """
 Set view and compute baseplate
