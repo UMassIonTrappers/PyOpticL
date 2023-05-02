@@ -5,7 +5,22 @@ import csv
 import re
 import math
 from pathlib import Path
-from freecadOptics import layout
+from freecadOptics import laser, layout, optomech
+
+class Reload_Modules():
+
+    def GetResources(self):
+        return {"Pixmap"  : ":/icons/preferences-import-export.svg",
+                "Accel"   : "Shift+M",
+                "MenuText": "Reload Freecad Optics Modules"}
+
+    def Activated(self):
+        from importlib import reload
+        reload(optomech)
+        reload(layout)
+        reload(laser)
+        App.Console.PrintMessage("Freecad Optics Modules Reloaded\n")
+        return
 
 class Recompute_Beam():
 
@@ -115,6 +130,7 @@ class Export_Cart():
         return
     
 
+Gui.addCommand("ReloadModules", Reload_Modules())
 Gui.addCommand("RecomputeBeam", Recompute_Beam())
 Gui.addCommand("ShowComponents", Show_Components())
 Gui.addCommand("ExportSTLs", Export_STLs())
