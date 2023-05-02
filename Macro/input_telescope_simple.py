@@ -1,11 +1,4 @@
-import FreeCAD as App
-from freecadOptics import laser, layout, optomech
-
-from importlib import reload
-import math
-reload(optomech)
-reload(layout)
-reload(laser)
+from freecadOptics import layout, optomech
 
 INCH = 25.4
 
@@ -19,7 +12,6 @@ ddy = 1.5*INCH
 
 
 layout.create_baseplate(base_dx, base_dy, base_dz)
-
 beam = layout.add_beam_path(base_dx/2, 0, 90)
 
 layout.place_element_along_beam("f75cx", optomech.lens_holder_l05g, beam, 0b1, -90, (3*INCH-gap-45)/2)

@@ -1,4 +1,4 @@
-from freecadOptics import laser, layout, optomech
+from freecadOptics import layout, optomech
 
 layout.create_baseplate(200, 100, layout.INCH)
 
