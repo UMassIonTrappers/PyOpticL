@@ -11,13 +11,13 @@ cardinal = {"right":0,
             "up":90,
             "down":-90}
 turn = {"up-right":-45,
-        "right_up":45,
+        "right-up":135,
         "up-left":-135,
-        "left-up":135,
+        "left-up":45,
         "down-right":45,
-        "right-down":-45,
+        "right-down":-135,
         "down-left":135,
-        "left-down":-135}
+        "left-down":-45}
 
 # Add an element to the active baseplate with position and angle
 # Obj class is the type of object, usually defined in another module
