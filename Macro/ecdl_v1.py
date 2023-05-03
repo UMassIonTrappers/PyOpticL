@@ -1,17 +1,10 @@
-import FreeCAD as App
-from freecadOptics import laser, layout, optomech
+from freecadOptics import layout, optomech
 
-from importlib import reload
-import math
 from math import *
-import os
 import datetime
 from datetime import datetime
 import numpy as np
 
-reload(optomech)
-reload(layout)
-reload(laser)
 
 
 INCH = 25.4

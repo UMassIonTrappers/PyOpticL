@@ -264,18 +264,20 @@ class mount_for_km100pm:
         mount_offset (float[3]) : The offset position of where the adapter mounts to the component
         drill (bool) : Whether baseplate mounting for this part should be drilled
         slot_length (float) : The length of the slots used for mounting to the km100pm
-        countersink_depth (float) : The depth of the countersinks for the AOM mount holes
+        countersink (bool) : Whether to drill a countersink instead of a counterbore for the AOM mount holes
+        counter_depth (float) : The depth of the countersink/bores for the AOM mount holes
         arm_thickness (float) : The thickness of the arm the mounts to the km100PM
         arm_clearance (float) : The distance between the bottom of the adapter arm and the bottom of the km100pm
         stage_thickness (float) : The thickness of the stage that mounts to the AOM
         stage_length (float) : The length of the stage that mounts to the AOM
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, mount_offset, slot_length=8, countersink_depth=0, arm_thickness=8, arm_clearance=2, stage_thickness=4, stage_length=21, drill=True):
+    def __init__(self, obj, mount_offset, slot_length=8, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=4, stage_length=21, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty('App::PropertyLength', 'SlotLength').SlotLength = slot_length
-        obj.addProperty('App::PropertyLength', 'CountersinkDepth').CountersinkDepth = countersink_depth
+        obj.addProperty('App::PropertyBool', 'Countersink').Countersink = countersink
+        obj.addProperty('App::PropertyLength', 'CounterDepth').CounterDepth = counter_depth
         obj.addProperty('App::PropertyLength', 'ArmThickness').ArmThickness = arm_thickness
         obj.addProperty('App::PropertyLength', 'ArmClearance').ArmClearance = arm_clearance
         obj.addProperty('App::PropertyLength', 'StageThickness').StageThickness = stage_thickness
@@ -284,6 +286,10 @@ class mount_for_km100pm:
         obj.setEditorMode('Placement', 2)
         ViewProvider(obj.ViewObject)
         self.mount_offset = mount_offset
+
+    def get_drill(self, obj):
+        part = _custom_box(34, 54.5, 24.27, -19.27+15, -8.02, 0, 5, (0,0,-1))
+        return part
 
     def execute(self, obj):
         dx = obj.ArmThickness.Value
@@ -297,7 +303,7 @@ class mount_for_km100pm:
             part = part.cut(_custom_box(dx, obj.SlotLength.Value+CLR_DIA_4_40, CLR_DIA_4_40, dx/2, 25.4-ddy, 6.4, CLR_DIA_4_40/2, (-1,0,0)))
             part = part.cut(_custom_box(dx/2, obj.SlotLength.Value+HEAD_DIA_4_40, HEAD_DIA_4_40, dx/2, 25.4-ddy, 6.4, HEAD_DIA_4_40/2, (-1,0,0)))
         for ddy in [0, -11.42, -26.65, -38.07]:
-            part = part.cut(_mount_hole(CLR_DIA_4_40, stage_dz, 11.25, 18.9+ddy, dz-4, HEAD_DIA_4_40, obj.CountersinkDepth.Value, (0,0,1), True))
+            part = part.cut(_mount_hole(CLR_DIA_4_40, stage_dz, 11.25, 18.9+ddy, dz-4, HEAD_DIA_4_40, obj.CounterDepth.Value, (0,0,1), obj.Countersink))
         part.translate(App.Vector(*np.add((18, 0, -dz), self.mount_offset)))
         part = part.fuse(part)
         obj.Shape = part

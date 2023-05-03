@@ -23,7 +23,6 @@ label = name + " " +  date_time
 layout.create_baseplate(split_dx-gap/4, base_dy, base_dz, name=name+'1', label=label)
 layout.create_baseplate(base_dx-split_dx-gap/4, base_dy, base_dz, x=split_dx+gap/4, name=name+'2', label=label)
 
-
 beam = layout.add_beam_path(input_x, 0, layout.cardinal['up'])
 
 mirror_mounts = optomech.mirror_mount_km05
