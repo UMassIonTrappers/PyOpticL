@@ -87,10 +87,17 @@ def redraw():
                 x, y = i.Placement.Base[0]+obj.RelativeX.Value, i.Placement.Base[1]+obj.RelativeY.Value
                 obj.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(obj.Angle.Value, 0, 0), App.Vector(x, y, 0))
                 obj.Placement.Base = App.Vector(x+obj.RelativeX.Value, y+obj.RelativeY.Value, 0)
+
     for i in App.ActiveDocument.Objects:
         if isinstance(i.Proxy, laser.beam_path):
             i.touch()
     App.ActiveDocument.recompute()
+
+    for i in App.ActiveDocument.Objects:
+        if hasattr(i, "ChildObjects"):
+            for obj in i.ChildObjects:
+                obj.Placement = i.Placement
+
     for i in App.ActiveDocument.Objects:
         if isinstance(i.Proxy, baseplate):
             i.touch()

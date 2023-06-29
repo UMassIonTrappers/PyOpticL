@@ -46,10 +46,13 @@ def _orient_stl(stl, rotate, translate, scale=1, STL_PATH = STL_PATH_thorlabs ):
     mesh.translate(*translate)
     return mesh
 
-def _add_linked_object(obj, obj_name, obj_class, **args):
+def _add_linked_object(obj, obj_name, obj_class, childLink=False, **args):
     new_obj = App.ActiveDocument.addObject(obj_class.type, obj_name)
-    new_obj.addProperty("App::PropertyLinkChild","LinkToParent")
-    new_obj.LinkToParent=obj
+    if not hasattr(obj, "ChildObjects"):
+        obj.addProperty("App::PropertyLinkListChild","ChildObjects")
+    obj.ChildObjects += [new_obj]
+    if childLink:
+        obj.addProperty("App::PropertyLinkChild","LinkToParent").LinkToParent = obj
     obj_class(new_obj, **args)
     ViewProvider(new_obj.ViewObject)
     return new_obj
@@ -159,8 +162,6 @@ class surface_adapter:
         part.translate(App.Vector(*self.mount_offset))
         part = part.fuse(part)
         obj.Shape = part
-        parent = obj.LinkToParent
-        obj.Placement=parent.Mesh.Placement
         
 
 class skate_mount:
@@ -204,8 +205,6 @@ class skate_mount:
         part.translate(App.Vector(0, 0, -self.cube_size/2+1))
         part = part.fuse(part)
         obj.Shape = part
-        parent = obj.LinkToParent
-        obj.Placement=parent.Mesh.Placement
 
 
 class slide_mount:
@@ -252,8 +251,6 @@ class slide_mount:
         part.translate(App.Vector(*self.mount_offset))
         part = part.fuse(part)
         obj.Shape = part
-        parent = obj.LinkToParent
-        obj.Placement=parent.Mesh.Placement
 
 
 class mount_for_km100pm:
@@ -307,8 +304,6 @@ class mount_for_km100pm:
         part.translate(App.Vector(*np.add((18, 0, -dz), self.mount_offset)))
         part = part.fuse(part)
         obj.Shape = part
-        parent = obj.LinkToParent
-        obj.Placement=parent.Mesh.Placement
 
 
 class universal_mount:
@@ -350,7 +345,6 @@ class universal_mount:
         temp.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(0, 0, 0), App.Vector(0, 0, 0))
         part = part.cut(temp)
         obj.Shape = part
-        obj.Placement=parent.Mesh.Placement
 
 
 class fiberport_holder:
@@ -468,7 +462,7 @@ class mirror_mount_k05s2:
         self.in_width = INCH/2
 
         if uMountParam != None:
-            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, True, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
             obj.setEditorMode('Drill', 2)
             obj.Drill = False
 
@@ -509,7 +503,7 @@ class mirror_mount_k05s1:
         self.in_width = INCH/2
 
         if uMountParam != None:
-            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, True, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
             obj.setEditorMode('Drill', 2)
             obj.Drill = False
 
@@ -551,7 +545,7 @@ class mirror_mount_b05g:
         self.in_width = INCH/2
 
         if uMountParam != None:
-            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, True, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
             obj.setEditorMode('Drill', 2)
             obj.Drill = False
 
@@ -593,7 +587,7 @@ class mirror_mount_c05g:
         self.in_width = INCH/2
 
         if uMountParam != None:
-            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, True, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
             obj.setEditorMode('Drill', 2)
             obj.Drill = False
 
@@ -637,7 +631,7 @@ class mirror_mount_km05:
         self.in_width = INCH/2
 
         if uMountParam != None:
-            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-0.58*INCH)
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, True, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-0.58*INCH)
             obj.setEditorMode('Drill', 2)
             obj.Drill = False
             self.bolt_len = uMountParam[0][2]-0.08*INCH-HEAD_DZ_8_32+5
@@ -680,7 +674,7 @@ class mirror_mount_mk05:
         self.in_width = INCH/2
 
         if uMountParam != None:
-            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-10.2)
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, True, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-10.2)
             obj.setEditorMode('Drill', 2)
             obj.Drill = False
 
@@ -849,13 +843,12 @@ class isomet_1205c_on_km100pm:
         self.in_limit = 0
         self.in_width = 5
 
-        self.mount = _add_linked_object(obj, obj.Name+"_Mount", kinematic_mount_km100pm, mount_offset=(-(51.8-25.7-12+15.17), -(6.35+0.089*INCH/2), -6.98))
+        _add_linked_object(obj, obj.Name+"_Mount", kinematic_mount_km100pm, mount_offset=(-(51.8-25.7-12+15.17), -(6.35+0.089*INCH/2), -6.98))
         _add_linked_object(obj, obj.Name+"_Adapter", mount_for_km100pm, mount_offset=(-(51.8-25.7-12+15.17), -(6.35+0.089*INCH/2), -6.98), slot_length=5)
 
     def execute(self, obj):
         mesh = _orient_stl("isomet_1205c.stl", (0, 0, pi/2), (0, 0, 0))
         mesh.Placement = obj.Mesh.Placement
-        self.mount.Placement = obj.Placement
         obj.Mesh = mesh
 
 
@@ -1021,10 +1014,10 @@ class ViewProvider:
     def onDelete(self, feature, subelements):
         element = feature.Object.Proxy
         for i in App.ActiveDocument.Objects:
-            if hasattr(i, "LinkToParent"):
-                if i.LinkToParent == feature.Object:
-                    App.ActiveDocument.removeObject(i.Name)
-                    if hasattr(i.Proxy, "get_drill"):
+            if hasattr(i, "ChildObjects"):
+                for obj in i.ChildObjects:
+                    App.ActiveDocument.removeObject(obj.Name)
+                    if hasattr(obj.Proxy, "get_drill"):
                         layout.redraw()
         if hasattr(element, "get_drill"):
             layout.redraw()
