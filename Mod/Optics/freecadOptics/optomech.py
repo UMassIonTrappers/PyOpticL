@@ -527,6 +527,47 @@ class mirror_mount_k05s1:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
+class mirror_mount_b05g:
+    '''
+    Mirror mount, model B05G
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mirror_thickness (float) : The thickness of the mirror being used
+        mirror_part_num (string) : The Thorlabs part number of the mirror being used
+        uMountParam (float[3], float[2]) : Universal mount parameters consisting of a tuple for the size of
+            the mount in x,y,z and a tuple of the x,y offset of the mount
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, mirror_thickness=4, uMountParam=None, drill=True):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = mirror_thickness
+        obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
+        ViewProvider(obj.ViewObject)
+        self.part_numbers = ['POLARIS-B05G']
+        self.ref_angle = 0
+        self.in_limit = pi/2
+        self.in_width = INCH/2
+
+        if uMountParam != None:
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-INCH/2)
+            obj.setEditorMode('Drill', 2)
+            obj.Drill = False
+
+    def get_drill(self, obj):
+        part = _mount_hole(TAP_DIA_8_32, drill_depth, -4-obj.MirrorThickness, 0, -INCH/2)
+        part = part.fuse(_mount_hole(2, 2.2, -4-obj.MirrorThickness, -5, -INCH/2))
+        part = part.fuse(_mount_hole(2, 2.2, -4-obj.MirrorThickness, 5, -INCH/2))
+        return part
+
+    def execute(self, obj):
+        mesh = _orient_stl("POLARIS-B05G-Solidworks.STL", (pi/2, 0, pi/2), (-16.7-obj.MirrorThickness, -9.0, -18.2-1.05))
+        temp = Mesh.createCylinder(INCH/4, obj.MirrorThickness, True, 1, 50)
+        temp.rotate(0, 0, pi)
+        mesh.addMesh(temp)
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
 
 class mirror_mount_c05g:
     '''
