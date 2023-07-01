@@ -116,8 +116,6 @@ class baseplate:
     def __init__(self, obj, dx, dy, dz, drill, label):
         obj.Proxy = self
 
-        self.dy = dy
-
         obj.addProperty('App::PropertyLength', 'dx').dx = dx #define and set baseplate dimentions
         obj.addProperty('App::PropertyLength', 'dy').dy = dy
         obj.addProperty('App::PropertyLength', 'dz').dz = dz
@@ -138,7 +136,7 @@ class baseplate:
         if obj.CutLabel != "":
             face = Draft.make_shapestring(obj.CutLabel, "/usr/share/fonts/TTF/NotoSansNerdFont-Regular.ttf", 4)
             if obj.dy > obj.dx:
-                face.Placement.Base = App.Vector(0, (self.dy-5), -INCH-10)
+                face.Placement.Base = App.Vector(0, (obj.dy.Value-5), -INCH-10)
                 face.Placement.Rotation = App.Rotation(App.Vector(-0.5773503, 0.5773503, 0.5773503), 240)
                 text = face.Shape.extrude(App.Vector(0.5,0,0))
                 part = part.cut(text)
