@@ -663,15 +663,14 @@ class km05_50mm_laser:
             the mount in x,y,z and a tuple of the x,y offset of the mount
     '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, mirror_thickness=6, bolt_length=15, uMountParam=None, drill=True):
+    def __init__(self, obj, bolt_length=15, uMountParam=None, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
-        obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = mirror_thickness
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
         self.part_numbers = ['KM05']
         self.bolt_len = bolt_length
-        self.ref_angle = 0
+        self.tran = True
         self.in_limit = pi/2
         self.in_width = INCH/2
 
@@ -689,9 +688,9 @@ class km05_50mm_laser:
 
     def execute(self, obj):
         mesh = _orient_stl("KM05-Solidworks.stl", (0, 0, pi/2), ([-4.05, -1.2, 0.5]))
-        temp = Mesh.createCylinder(INCH/4, 50, True, 1, 50)
+        temp = Mesh.createCylinder(INCH/4, 40, True, 1, 50)
         temp.rotate(0, 0, pi)
-        temp.translate(20, 0, 0)
+        temp.translate(10, 0, 0)
         mesh.addMesh(temp)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
