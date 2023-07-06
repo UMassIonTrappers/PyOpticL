@@ -3,6 +3,7 @@ import Mesh
 import Part
 import Draft
 from . import laser
+from pathlib import Path
 
 INCH = 25.4
 
@@ -134,7 +135,7 @@ class baseplate:
                         temp.translate(App.Vector(-obj.Placement.Base))
                         part = part.cut(temp)
         if obj.CutLabel != "":
-            face = Draft.make_shapestring(obj.CutLabel, "/usr/share/fonts/TTF/NotoSansNerdFont-Regular.ttf", 4)
+            face = Draft.make_shapestring(obj.CutLabel, str(Path(__file__).parent.resolve()) + "/../../../font/OpenSans-Regular.ttf", 4)
             if obj.dy > obj.dx:
                 face.Placement.Base = App.Vector(0, (obj.dy.Value-5), -INCH-10)
                 face.Placement.Rotation = App.Rotation(App.Vector(-0.5773503, 0.5773503, 0.5773503), 240)
