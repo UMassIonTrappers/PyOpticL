@@ -639,7 +639,8 @@ class mirror_mount_km05:
     def get_drill(self, obj):
         part = _mount_hole(CLR_DIA_8_32, INCH, -13.4, 0, -INCH*3/2, HEAD_DIA_8_32, 0.92*INCH-self.bolt_len+5, dir=(0,0,1))
         part = part.fuse(_custom_box(18, 31, 0.08*INCH, -8.4, 0, -INCH/2-0.08*INCH, 3))
-        part = part.fuse(_custom_box(18, 9, 0.08*INCH, -12, -31/2+4.5, -INCH/2-0.08*INCH, 2))
+        part = part.fuse(_custom_box(18, 9, 0.08*INCH, -13.4, -31/2+4.5, -INCH/2-0.08*INCH, 2))
+        part = part.fuse(_custom_box(15, 20, (0.08*INCH)+4, -(15+13.4), -31/2+4.5, -INCH/2-0.08*INCH-4, 2))
         return part
 
     def execute(self, obj):
@@ -684,6 +685,7 @@ class transmit_mount_km05:
         part = _mount_hole(CLR_DIA_8_32, INCH, -13.4, 0, -INCH*3/2, HEAD_DIA_8_32, 0.92*INCH-self.bolt_len+5, dir=(0,0,1))
         part = part.fuse(_custom_box(18, 31, 0.08*INCH, -8.4, 0, -INCH/2-0.08*INCH, 3))
         part = part.fuse(_custom_box(18, 9, 0.08*INCH, -12, -31/2+4.5, -INCH/2-0.08*INCH, 2))
+        part = part.fuse(_custom_box(15, 20, (0.08*INCH)+4, -(15+13.4), -31/2+4.5, -INCH/2-0.08*INCH-4, 2))
         return part
 
     def execute(self, obj):
@@ -728,6 +730,7 @@ class km05_50mm_laser:
         part = _mount_hole(CLR_DIA_8_32, INCH, -13.4, 0, -INCH*3/2, HEAD_DIA_8_32, 0.92*INCH-self.bolt_len+5, dir=(0,0,1))
         part = part.fuse(_custom_box(18, 31, 0.08*INCH, -8.4, 0, -INCH/2-0.08*INCH, 3))
         part = part.fuse(_custom_box(18, 9, 0.08*INCH, -12, -31/2+4.5, -INCH/2-0.08*INCH, 2))
+        part = part.fuse(_custom_box(15, 20, (0.08*INCH)+4, -(15+13.4), -31/2+4.5, -INCH/2-0.08*INCH-4, 2))
         return part
 
     def execute(self, obj):
