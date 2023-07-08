@@ -651,7 +651,7 @@ class mirror_mount_km05:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
-class transmit_mount_km05:
+class fiberport_mount_km05:
     '''
     Mirror mount, model KM05, but transmits incoming beam
 
@@ -672,7 +672,7 @@ class transmit_mount_km05:
         self.part_numbers = ['KM05']
         self.bolt_len = bolt_length
         self.tran=True
-        self.in_limit = pi/2
+        self.in_limit = 0
         self.in_width = INCH/2
 
         if uMountParam != None:
@@ -690,8 +690,9 @@ class transmit_mount_km05:
 
     def execute(self, obj):
         mesh = _orient_stl("KM05-Solidworks.stl", (0, 0, pi/2), ([-4.05, -1.2, 0.5]))
-        temp = Mesh.createCylinder(INCH/4, 6, True, 1, 50)
+        temp = Mesh.createCylinder(INCH/4, 19.5, True, 1, 50)
         temp.rotate(0, 0, pi)
+        temp.translate(18.75, 0, 0)
         mesh.addMesh(temp)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
