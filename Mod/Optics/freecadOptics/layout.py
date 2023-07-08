@@ -3,6 +3,7 @@ import Mesh
 import Part
 import Draft
 from . import laser
+from pathlib import Path
 
 INCH = 25.4
 
@@ -134,11 +135,17 @@ class baseplate:
                         temp.translate(App.Vector(-obj.Placement.Base))
                         part = part.cut(temp)
         if obj.CutLabel != "":
-            face = Draft.make_shapestring(obj.CutLabel, "C:/Windows/Fonts/Arial.ttf", 4)
-            face.Placement.Base = App.Vector(5, 0, -INCH-10)
-            face.Placement.Rotation = App.Rotation(App.Vector(1, 0, 0), 90)
-            text = face.Shape.extrude(App.Vector(0,0.5,0))
-            part = part.cut(text)
+            face = Draft.make_shapestring(obj.CutLabel, str(Path(__file__).parent.resolve()) + "/../../../font/OpenSans-Regular.ttf", 4)
+            if obj.dy > obj.dx:
+                face.Placement.Base = App.Vector(0, (obj.dy.Value-5), -INCH-10)
+                face.Placement.Rotation = App.Rotation(App.Vector(-0.5773503, 0.5773503, 0.5773503), 240)
+                text = face.Shape.extrude(App.Vector(0.5,0,0))
+                part = part.cut(text)
+            else:
+                face.Placement.Base = App.Vector(5, 0, -INCH-10)
+                face.Placement.Rotation = App.Rotation(App.Vector(1, 0, 0), 90)
+                text = face.Shape.extrude(App.Vector(0,0.5,0))
+                part = part.cut(text)
             App.ActiveDocument.removeObject(face.Label)
         obj.Shape = part
 

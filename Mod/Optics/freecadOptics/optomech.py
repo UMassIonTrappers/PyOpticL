@@ -639,13 +639,104 @@ class mirror_mount_km05:
     def get_drill(self, obj):
         part = _mount_hole(CLR_DIA_8_32, INCH, -13.4, 0, -INCH*3/2, HEAD_DIA_8_32, 0.92*INCH-self.bolt_len+5, dir=(0,0,1))
         part = part.fuse(_custom_box(18, 31, 0.08*INCH, -8.4, 0, -INCH/2-0.08*INCH, 3))
-        part = part.fuse(_custom_box(18, 9, 0.08*INCH, -12, -31/2+4.5, -INCH/2-0.08*INCH, 2))
+        part = part.fuse(_custom_box(18, 9, 0.08*INCH, -13.4, -31/2+4.5, -INCH/2-0.08*INCH, 2))
+        part = part.fuse(_custom_box(17, 20, (0.08*INCH)+4, -(15+14.4), -31/2+4.5, -INCH/2-0.08*INCH-4, 2))
         return part
 
     def execute(self, obj):
         mesh = _orient_stl("KM05-Solidworks.stl", (0, 0, pi/2), ([-4.05, -1.2, 0.5]))
         temp = Mesh.createCylinder(INCH/4, 6, True, 1, 50)
         temp.rotate(0, 0, pi)
+        mesh.addMesh(temp)
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+class fiberport_mount_km05:
+    '''
+    Mirror mount, model KM05, adapted to use as fiberport mount
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mirror_thickness (float) : The thickness of the mirror being used
+        bolt_length (float) : The length of the bolt used for mounting
+        mirror_part_num (string) : The Thorlabs part number of the mirror being used
+        uMountParam (float[3], float[2]) : Universal mount parameters consisting of a tuple for the size of
+            the mount in x,y,z and a tuple of the x,y offset of the mount
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, bolt_length=15, uMountParam=None, drill=True):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
+        ViewProvider(obj.ViewObject)
+        self.part_numbers = ['KM05']
+        self.bolt_len = bolt_length
+        self.in_limit = pi-0.01
+        self.in_width = 1
+
+        if uMountParam != None:
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, True, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-0.58*INCH)
+            obj.setEditorMode('Drill', 2)
+            obj.Drill = False
+            self.bolt_len = uMountParam[0][2]-0.08*INCH-HEAD_DZ_8_32+5
+
+    def get_drill(self, obj):
+        part = _mount_hole(CLR_DIA_8_32, INCH, -13.4, 0, -INCH*3/2, HEAD_DIA_8_32, 0.92*INCH-self.bolt_len+5, dir=(0,0,1))
+        part = part.fuse(_custom_box(18, 31, 0.08*INCH, -8.4, 0, -INCH/2-0.08*INCH, 3))
+        part = part.fuse(_custom_box(18, 9, 0.08*INCH, -12, -31/2+4.5, -INCH/2-0.08*INCH, 2))
+        part = part.fuse(_custom_box(15, 20, (0.08*INCH)+4, -(15+13.4), -31/2+4.5, -INCH/2-0.08*INCH-4, 2))
+        return part
+
+    def execute(self, obj):
+        mesh = _orient_stl("KM05-Solidworks.stl", (0, 0, pi/2), ([-4.05, -1.2, 0.5]))
+        temp = Mesh.createCylinder(INCH/4, 19.5, True, 1, 50)
+        temp.rotate(0, 0, pi)
+        temp.translate(18.75, 0, 0)
+        mesh.addMesh(temp)
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+class km05_50mm_laser:
+    '''
+    Mirror mount, model KM05, adapted to use as laser mount
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mirror_thickness (float) : The thickness of the mirror being used
+        bolt_length (float) : The length of the bolt used for mounting
+        mirror_part_num (string) : The Thorlabs part number of the mirror being used
+        uMountParam (float[3], float[2]) : Universal mount parameters consisting of a tuple for the size of
+            the mount in x,y,z and a tuple of the x,y offset of the mount
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, bolt_length=15, uMountParam=None, drill=True):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
+        ViewProvider(obj.ViewObject)
+        self.part_numbers = ['KM05']
+        self.bolt_len = bolt_length
+        self.in_limit = pi-0.01
+        self.in_width = 1
+
+        if uMountParam != None:
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, True, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-0.58*INCH)
+            obj.setEditorMode('Drill', 2)
+            obj.Drill = False
+            self.bolt_len = uMountParam[0][2]-0.08*INCH-HEAD_DZ_8_32+5
+
+    def get_drill(self, obj):
+        part = _mount_hole(CLR_DIA_8_32, INCH, -13.4, 0, -INCH*3/2, HEAD_DIA_8_32, 0.92*INCH-self.bolt_len+5, dir=(0,0,1))
+        part = part.fuse(_custom_box(18, 31, 0.08*INCH, -8.4, 0, -INCH/2-0.08*INCH, 3))
+        part = part.fuse(_custom_box(18, 9, 0.08*INCH, -12, -31/2+4.5, -INCH/2-0.08*INCH, 2))
+        part = part.fuse(_custom_box(15, 20, (0.08*INCH)+4, -(15+13.4), -31/2+4.5, -INCH/2-0.08*INCH-4, 2))
+        return part
+
+    def execute(self, obj):
+        mesh = _orient_stl("KM05-Solidworks.stl", (0, 0, pi/2), ([-4.05, -1.2, 0.5]))
+        temp = Mesh.createCylinder(INCH/4, 40, True, 1, 50)
+        temp.rotate(0, 0, pi)
+        temp.translate(10, 0, 0)
         mesh.addMesh(temp)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
