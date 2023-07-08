@@ -653,7 +653,7 @@ class mirror_mount_km05:
 
 class fiberport_mount_km05:
     '''
-    Mirror mount, model KM05, but transmits incoming beam
+    Mirror mount, model KM05, adapted to use as fiberport mount
 
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
@@ -671,9 +671,8 @@ class fiberport_mount_km05:
         ViewProvider(obj.ViewObject)
         self.part_numbers = ['KM05']
         self.bolt_len = bolt_length
-        self.tran=True
-        self.in_limit = 0
-        self.in_width = INCH/2
+        self.in_limit = pi-0.01
+        self.in_width = 1
 
         if uMountParam != None:
             _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, True, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-0.58*INCH)
@@ -699,7 +698,7 @@ class fiberport_mount_km05:
 
 class km05_50mm_laser:
     '''
-    Laser mount, model KM05
+    Mirror mount, model KM05, adapted to use as laser mount
 
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
@@ -717,9 +716,8 @@ class km05_50mm_laser:
         ViewProvider(obj.ViewObject)
         self.part_numbers = ['KM05']
         self.bolt_len = bolt_length
-        self.tran = True
-        self.in_limit = pi/2
-        self.in_width = INCH/2
+        self.in_limit = pi-0.01
+        self.in_width = 1
 
         if uMountParam != None:
             _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, True, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-0.58*INCH)
