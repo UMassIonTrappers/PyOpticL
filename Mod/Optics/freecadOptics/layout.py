@@ -22,18 +22,22 @@ turn = {"up-right":-45,
 
 # Add an element to the active baseplate with position and angle
 # Obj class is the type of object, usually defined in another module
-def place_element(obj_name, obj_class, x, y, angle, **args):
+def place_element(obj_name, obj_class, x, y, angle, optional=False, **args):
     obj = App.ActiveDocument.addObject(obj_class.type, obj_name)
     obj_class(obj, **args)
     obj.Placement = App.Placement(App.Vector(x, y, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
+    if optional:
+        obj.Proxy.tran = True
     return obj
 
 # Add an element along a beampath with a set angle and an extra constraint of distance from last element, x position, or y position
 # Obj class is the type of object, usually defined in another module
-def place_element_along_beam(obj_name, obj_class, beam_obj, beam_index, angle, distance=None, x=None, y=None, pre_refs=0, **args):
+def place_element_along_beam(obj_name, obj_class, beam_obj, beam_index, angle, distance=None, x=None, y=None, pre_refs=0, optional=False, **args):
     obj = App.ActiveDocument.addObject(obj_class.type, obj_name)
     obj_class(obj, **args)
     obj.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
+    if optional:
+        obj.Proxy.tran = True
     obj.setEditorMode('Placement', 2)
     obj.addProperty("App::PropertyAngle","Angle").Angle = angle
     if distance != None:
@@ -47,10 +51,12 @@ def place_element_along_beam(obj_name, obj_class, beam_obj, beam_index, angle, d
     beam_obj.PathObjects += [obj]
     return obj
 
-def place_element_relative(obj_name, obj_class, rel_obj, angle, x_off=0, y_off=0, **args):
+def place_element_relative(obj_name, obj_class, rel_obj, angle, x_off=0, y_off=0, optional=False, **args):
     obj = App.ActiveDocument.addObject(obj_class.type, obj_name)
     obj_class(obj, **args)
     obj.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
+    if optional:
+        obj.Proxy.tran = True
     obj.setEditorMode('Placement', 2)
     obj.addProperty("App::PropertyAngle","Angle").Angle = angle
     obj.addProperty("App::PropertyDistance","RelativeX").RelativeX = x_off
