@@ -115,13 +115,34 @@ def find_interaction(x1, y1, a1, ref_obj, len=0):
 # beam path freecad object
 class beam_path:
 
-    def __init__(self, obj):
+    def __init__(self, obj, drill=True):
 
         obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         self.components = [[]]
 
     def __getstate__(self):
         return None
+
+    def get_drill(self, obj):
+        width = 40
+        part = Part.makeSphere(1)
+        for i in self.beams:
+            length = i[3]
+            if length == 0:
+                length = 50
+            temp = Part.makeBox(length+width, width, 100)
+            for x in temp.Edges:
+                if x.tangentAt(x.FirstParameter) == App.Vector(0, 0, 1):
+                    temp = temp.makeFillet(width/2-1e-3, [x])
+            temp.translate(App.Vector(-width/2, -width/2, -INCH/2+1e-3))
+            temp.rotate(App.Vector(0, 0, 0), App.Vector(0, 0, 1), degrees(i[2]))
+            temp.translate(App.Vector(i[0], i[1], 0))
+            part = part.fuse(temp)
+        part.translate(App.Vector(-self.x, -self.y, 0))
+        part.rotate(App.Vector(0, 0, 0),App.Vector(0, 0, 1), degrees(-self.a))
+        part = part.fuse(part)
+        return part
 
     def execute(self, obj):
         self.x, self.y, _ = obj.Placement.Base
@@ -132,10 +153,10 @@ class beam_path:
         self.calculate_beam_path(obj, self.x, self.y, self.a)
         shapes = []
         for i in self.beams:
-            len = i[3]
-            if len == 0:
-                len = 50
-            temp = Part.makeCylinder(0.5, len, App.Vector(i[0], i[1], 0), App.Vector(cos(i[2]), sin(i[2]), 0))
+            length = i[3]
+            if length == 0:
+                length = 50
+            temp = Part.makeCylinder(0.5, length, App.Vector(i[0], i[1], 0), App.Vector(cos(i[2]), sin(i[2]), 0))
             shapes.append(temp)
         comp = Part.Compound(shapes)
         comp.translate(App.Vector(-self.x, -self.y, 0))
