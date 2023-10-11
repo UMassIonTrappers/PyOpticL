@@ -59,19 +59,20 @@ def place_element_relative(obj_name, obj_class, rel_obj, angle, x_off=0, y_off=0
         obj.Proxy.tran = True
     obj.setEditorMode('Placement', 2)
     obj.addProperty("App::PropertyAngle","Angle").Angle = angle
-    obj.addProperty("App::PropertyDistance","RelativeX").RelativeX = x_off
-    obj.addProperty("App::PropertyDistance","RelativeY").RelativeY = y_off
-    if not hasattr(rel_obj, "RelativeObjects"):
-        rel_obj.addProperty("App::PropertyLinkListChild","RelativeObjects").RelativeObjects
-    rel_obj.RelativeObjects += [obj]
+    obj.addProperty("App::PropertyPlacement","RelativePlacement").RelativePlacement
+    obj.RelativePlacement.Base = App.Vector(x_off, y_off, 0)
+    if not hasattr(rel_obj, "ChildObjects"):
+        rel_obj.addProperty("App::PropertyLinkListChild","ChildObjects").ChildObjects
+    rel_obj.ChildObjects += [obj]
+    obj.addProperty("App::PropertyLinkHidden","ParentObject").ParentObject = rel_obj
     return obj
 
 
 # Creates a new active baseplate
-def create_baseplate(dx, dy, dz, drill=True, name="Baseplate", x=0, y=0, label=""):
+def create_baseplate(dx, dy, dz, optics_dz=INCH/2, drill=True, name="Baseplate", x=0, y=0, label="", **args):
     obj = App.ActiveDocument.addObject('Part::FeaturePython', name)
-    baseplate(obj, dx, dy, dz, drill, label)
-    obj.Placement = App.Placement(App.Vector(x, y, 0), App.Rotation(0, 0, 0), App.Vector(0, 0, 0))
+    baseplate(obj, dx, dy, dz, drill, label, **args)
+    obj.Placement = App.Placement(App.Vector(x, y, -optics_dz), App.Rotation(0, 0, 0), App.Vector(0, 0, 0))
     ViewProvider(obj.ViewObject)
     App.ActiveDocument.recompute()
     return obj
@@ -89,21 +90,23 @@ def add_beam_path(x, y, angle):
 # Update function for dynamic elements
 def redraw():
     for i in App.ActiveDocument.Objects:
-        if hasattr(i, "RelativeObjects"):
-            for obj in i.RelativeObjects:
-                x, y = i.Placement.Base[0]+obj.RelativeX.Value, i.Placement.Base[1]+obj.RelativeY.Value
-                obj.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(obj.Angle.Value, 0, 0), App.Vector(x, y, 0))
-                obj.Placement.Base = App.Vector(x+obj.RelativeX.Value, y+obj.RelativeY.Value, 0)
+        if hasattr(i, "ChildObjects"):
+            for obj in i.ChildObjects:
+                obj.Placement.Base = i.Placement.Base + obj.RelativePlacement.Base
+                if hasattr(obj, "Angle"):
+                    obj.Placement.Rotation = App.Rotation(App.Vector(0, 0, 1), obj.Angle)
+                else:
+                    obj.Placement = App.Placement(obj.Placement.Base, i.Placement.Rotation, -obj.RelativePlacement.Base)
+                    obj.Placement.Rotation = obj.Placement.Rotation.multiply(obj.RelativePlacement.Rotation)
+
+    for i in App.ActiveDocument.Objects:
+        if hasattr(i, "Angle"):
+            i.Placement.Rotation = App.Rotation(App.Vector(0, 0, 1), i.Angle)
 
     for i in App.ActiveDocument.Objects:
         if isinstance(i.Proxy, laser.beam_path):
             i.touch()
     App.ActiveDocument.recompute()
-
-    for i in App.ActiveDocument.Objects:
-        if hasattr(i, "ChildObjects"):
-            for obj in i.ChildObjects:
-                obj.Placement = i.Placement
 
     for i in App.ActiveDocument.Objects:
         if isinstance(i.Proxy, baseplate):
@@ -120,7 +123,7 @@ def show_components(state):
 
 class baseplate:
 
-    def __init__(self, obj, dx, dy, dz, drill, label):
+    def __init__(self, obj, dx, dy, dz, drill=True, label="", recess=0):
         obj.Proxy = self
 
         obj.addProperty('App::PropertyLength', 'dx').dx = dx #define and set baseplate dimentions
@@ -128,10 +131,11 @@ class baseplate:
         obj.addProperty('App::PropertyLength', 'dz').dz = dz
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty('App::PropertyString', 'CutLabel').CutLabel = label
+        obj.addProperty('App::PropertyLength', 'Recess').Recess = recess
 
 
     def execute(self, obj):
-        part = Part.makeBox(obj.dx, obj.dy, obj.dz, App.Vector(0, 0, -(obj.dz.Value+INCH/2)))
+        part = Part.makeBox(obj.dx, obj.dy, obj.dz.Value+obj.Recess.Value, App.Vector(0, 0, -obj.dz.Value))
         if obj.Drill:
             for i in App.ActiveDocument.Objects: #add drill holes for all necessary elements
                 if hasattr(i.Proxy, 'get_drill'):
