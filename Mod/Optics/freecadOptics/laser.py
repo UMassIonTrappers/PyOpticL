@@ -1,6 +1,7 @@
 import FreeCAD as App
 import Part
 from math import *
+import numpy as np
 
 INCH = 25.4
 
@@ -25,20 +26,21 @@ def find_interaction(x1, y1, a1, ref_obj, len=0):
     in_width = ref_obj.Proxy.in_width
 
     a_norm = a_comp
-    output = [None, None, [None, None], False]
+    angle1 = None
+    angle2 = None
 
     # transmitted beam
     if hasattr(ref_obj.Proxy, 'tran'):
         a_norm = (a_comp+pi)%(2*pi)
-        output[2][0] = a1
+        angle1 = a1
     # diffracted beam
     if hasattr(ref_obj.Proxy, 'diff_angle'):
         a_norm = (a_comp+pi)%(2*pi)
-        output[2][1] = a1+ref_obj.Proxy.diff_angle
+        angle2 = a1+ref_obj.Proxy.diff_angle
     # reflected beam
     if hasattr(ref_obj.Proxy, 'ref_angle'):
         a_norm = (a_comp+ref_obj.Proxy.ref_angle)%(2*pi)
-        output[2][1] = 2*a_norm-a1-pi
+        angle2 = 2*a_norm-a1-pi
 
     a2 = a_norm+pi/2 # tangent angle to reflection surface
     # relative angle between the beam and component input normal
@@ -54,11 +56,11 @@ def find_interaction(x1, y1, a1, ref_obj, len=0):
     if a_in < in_limit or a_rel > pi/2:
         return
     
-    if hasattr(ref_obj.Proxy, 'diff_dir') and output[2][1] != None:
+    if hasattr(ref_obj.Proxy, 'diff_dir') and angle2 != None:
         if a_in > pi/2:
-            output[2][1] = a1+ref_obj.Proxy.diff_angle*ref_obj.Proxy.diff_dir[0]
+            angle2 = a1+ref_obj.Proxy.diff_angle*ref_obj.Proxy.diff_dir[0]
         else:
-            output[2][1] = a1+ref_obj.Proxy.diff_angle*ref_obj.Proxy.diff_dir[1]
+            angle2 = a1+ref_obj.Proxy.diff_angle*ref_obj.Proxy.diff_dir[1]
 
     # check for edge cases
     a1_vert = is_mult(a1-pi/2, pi)
@@ -84,10 +86,11 @@ def find_interaction(x1, y1, a1, ref_obj, len=0):
         return
 
     # distance from optical center to intersection point
+    blocking = False
     ref_d = sqrt((x-x2)**2+(y-y2)**2)
     if ref_d > in_width/2:
         if ref_d < INCH/2:
-            output[3] = True
+            blocking = True
         else:
             return
         
@@ -107,10 +110,9 @@ def find_interaction(x1, y1, a1, ref_obj, len=0):
             offset *= -1
         if a_in > pi/2:
             offset *= -1
-        output[2][0] += offset
+        angle1 += offset
         
-    output[0], output[1] = x, y
-    return output
+    return ref_obj, x, y, [angle1, angle2], blocking
 
 # beam path freecad object
 class beam_path:
@@ -124,8 +126,8 @@ class beam_path:
     def __getstate__(self):
         return None
 
-    def get_drill(self, obj):
-        width = 40
+    def _get_drill(self, obj):
+        width = 50
         part = Part.makeSphere(1)
         for i in self.beams:
             length = i[3]
@@ -135,7 +137,7 @@ class beam_path:
             for x in temp.Edges:
                 if x.tangentAt(x.FirstParameter) == App.Vector(0, 0, 1):
                     temp = temp.makeFillet(width/2-1e-3, [x])
-            temp.translate(App.Vector(-width/2, -width/2, -INCH/2+1e-3))
+            temp.translate(App.Vector(-width/2, -width/2, -INCH/2))
             temp.rotate(App.Vector(0, 0, 0), App.Vector(0, 0, 1), degrees(i[2]))
             temp.translate(App.Vector(i[0], i[1], 0))
             part = part.fuse(temp)
@@ -168,121 +170,129 @@ class beam_path:
     def calculate_beam_path(self, selfobj, x1, y1, a1, beam_index=1):
         if beam_index > 200:
             return
+        
         count = 0 # number of reflections per beam
         comp_index = 0 # index of current inline component
         pre_count = 0 # current number of previous interactions for inline components
         pre_d = 0 # current previous interaction distance for inline components
         block = False # flag for a component obstructing a beam path
+
         while True:
-            beam_comps = []
+            inline_comps = []
             for obj in selfobj.PathObjects:
                 if obj.BeamIndex == beam_index:
-                    beam_comps.append(obj)
-            min_len = 0
-            for obj in App.ActiveDocument.Objects:
+                    inline_comps.append(obj)
+            
+            inline_obj = None
+            if len(inline_comps) > comp_index:
+                inline_obj = inline_comps[comp_index]
+                if pre_count >= inline_obj.PreRefs:
+                    self.comp_track.append(inline_obj)
 
-                # skip if unplaced inline component
-                comp_check = True
-                for comp_obj in selfobj.PathObjects:
-                    if obj == comp_obj and not obj in self.comp_track:
-                        comp_check = False
+                    # handle different constraint methods
+                    if hasattr(inline_obj, "Distance"):
+                        comp_d = inline_obj.Distance.Value
+                    if hasattr(inline_obj, "xPos"):
+                        comp_d = (inline_obj.xPos.Value-x1)/cos(a1)
+                    if hasattr(inline_obj, "yPos"):
+                        comp_d = (inline_obj.yPos.Value-y1)/sin(a1)
 
-                ref = find_interaction(x1, y1, a1, obj) # check for reflection
-                if ref != None and comp_check:
-                    x2, y2, a2_arr, comp_block = ref
-
-                    # check to find closest component
-                    comp_d = sqrt((x2-x1)**2+(y2-y1)**2)
-                    if comp_d < min_len or min_len == 0:
-                        min_len = comp_d
-                        ref_obj = obj
-                        xf, yf, af_arr = x2, y2, a2_arr
-                        block = comp_block
-
-            if len(beam_comps) > comp_index:
-                inline_ref=False
-                comp_obj = beam_comps[comp_index]
-
-                # handle different constraint methods
-                if hasattr(comp_obj, "Distance"):
-                    comp_d = comp_obj.Distance.Value
-                if hasattr(comp_obj, "xPos"):
-                    comp_d = (comp_obj.xPos.Value-x1)/cos(a1)
-                if hasattr(comp_obj, "yPos"):
-                    comp_d = (comp_obj.yPos.Value-y1)/sin(a1)
-
-                #comp_d -= pre_d
-
-                # check for closest component or satisfied pre_count
-                if (comp_d < min_len or min_len == 0) and pre_count >= comp_obj.PreRefs:
-                    if pre_count > comp_obj.PreRefs:
+                    if pre_count > inline_obj.PreRefs:
                         comp_d -= pre_d # account for previous distance
+
                     # inline placement
-                    x2 = x1+comp_d*cos(a1)
-                    y2 = y1+comp_d*sin(a1)
-                    comp_obj.Placement.Base = App.Vector(x2, y2, 0)
-                    # check for valid reflection
-                    ref = find_interaction(x1, y1, a1, comp_obj)
-                    if ref != None:
-                        ref_obj = comp_obj
-                        xf, yf, af_arr, _ = ref
-                        self.comp_track.append(comp_obj)
-                        min_len = comp_d
-                        # increment index and reset counters
-                        comp_index += 1
-                        pre_count = 0
-                        pre_d = 0
-                        inline_ref = True
-                        block = False
-                        # place any objects defined relative to the inline object
-                        if hasattr(comp_obj, "RelativeObjects"):
-                            for obj in comp_obj.RelativeObjects:
-                                x, y = comp_obj.Placement.Base[0]+obj.RelativeX.Value, comp_obj.Placement.Base[1]+obj.RelativeY.Value
-                                obj.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(obj.Angle.Value, 0, 0), App.Vector(x, y, 0))
-                                obj.Placement.Base = App.Vector(x+obj.RelativeX.Value, y+obj.RelativeY.Value, 0)
-                    else:
-                        comp_obj.Placement.Base = App.Vector(0, 0, 0)
-                # previous interaction info
-                if not inline_ref:
+                    inline_obj.Placement.Base = App.Vector(x1+comp_d*cos(a1), y1+comp_d*sin(a1), 0)
+
+            # get only valid objects
+            check_objs = []
+            for obj in App.ActiveDocument.Objects:
+                if obj in selfobj.PathObjects and not obj in self.comp_track:
+                    continue
+                if hasattr(obj, "ParentObject"):
+                    if obj.ParentObject in selfobj.PathObjects and not obj.ParentObject in self.comp_track:
+                        continue
+                check_objs.append(obj)
+
+            for obj in check_objs:
+                if hasattr(obj, "ChildObjects"):
+                    for child_obj in obj.ChildObjects:
+                        child_obj.Placement.Base = obj.Placement.Base + child_obj.RelativePlacement.Base
+                        if hasattr(child_obj, "Angle"):
+                            child_obj.Placement.Rotation = App.Rotation(App.Vector(0, 0, 1), child_obj.Angle)
+                        else:
+                            child_obj.Placement = App.Placement(child_obj.Placement.Base, obj.Placement.Rotation, -child_obj.RelativePlacement.Base)
+                            child_obj.Placement.Rotation = child_obj.Placement.Rotation.multiply(child_obj.RelativePlacement.Rotation)
+                
+            refs = []
+            comp_d =[]
+            for obj in check_objs:
+                ref = find_interaction(x1, y1, a1, obj) # check for reflection
+                if ref != None:
+                    refs.append(ref)
+                    comp_d.append(sqrt((ref[1]-x1)**2+(ref[2]-y1)**2))
+
+            inline_ref = False
+            if len(refs) > 0:
+                index = np.argmin(comp_d)
+                final_ref = refs[index]
+                min_len = comp_d[index]
+
+                if hasattr(final_ref[0], "ParentObject"):
+                    check_comp = final_ref[0].ParentObject
+                else:
+                    check_comp = final_ref[0]
+
+                if check_comp == inline_obj:
+                    inline_ref = True
+                    comp_index += 1
+                    pre_count = 0
+                    pre_d = 0
+                elif len(inline_comps) > comp_index:
+                    if self.comp_track[-1] == inline_obj:
+                        self.comp_track.pop()
                     pre_count += 1
-                    if pre_count > comp_obj.PreRefs:
+                    if pre_count > inline_obj.PreRefs:
                         pre_d += min_len
 
-            self.beams.append([x1, y1, a1, min_len, beam_index])
+                ref_obj, xf, yf, af_arr, block = final_ref
+                self.beams.append([x1, y1, a1, min_len, beam_index])
+            else:
+                self.beams.append([x1, y1, a1, 50, beam_index])
+                return
+            
+            if block:
+                return
 
-            # continue beam if reflection was found
-            if min_len != 0 and not block:
-                if "inline_ref" in locals() and inline_ref and ref_obj == self.comp_track[-1]:
-                    for i in self.beams[:]:
-                        if i[4] != beam_index:
-                            ref = find_interaction(i[0],i[1],i[2],ref_obj,i[3])
-                            if ref != None:
-                                for beam in self.beams[::-1]:
-                                    if beam[4]>>int(abs(log2(beam[4]/i[4]))) == i[4]:
-                                        last = beam[:]
-                                        self.beams.remove(beam)
-                                for comp in self.comp_track[:]:
-                                   if comp.BeamIndex>>int(abs(log2(comp.BeamIndex/i[4]))) == i[4]:
-                                        comp.Placement.Base = App.Vector(0, 0, 0)
-                                        self.comp_track.remove(comp)
-                                self.calculate_beam_path(selfobj, last[0], last[1], last[2], last[4])
-                                break
-                if af_arr[0] != None and af_arr[1] != None:
-                    self.calculate_beam_path(selfobj, xf, yf, af_arr[0], (beam_index<<1))
-                    beam_index = (beam_index<<1)+1
-                    beam_comps = []
-                    for obj in selfobj.PathObjects:
-                        if obj.BeamIndex == beam_index:
-                            beam_comps.append(obj)
-                    comp_index = 0
-                if af_arr[1] != None:
-                    x1, y1, a1 = xf, yf, af_arr[1]
-                    count += 1
-                elif af_arr[0] != None:
-                    x1, y1, a1 = xf, yf, af_arr[0]
-                    count += 1
-                else:
-                    return
+            if inline_ref and ref_obj == self.comp_track[-1]:
+                for i in self.beams[:]:
+                    if i[4] != beam_index:
+                        ref = find_interaction(i[0],i[1],i[2],ref_obj,i[3])
+                        if ref != None:
+                            for beam in self.beams[::-1]:
+                                if beam[4]>>int(abs(log2(beam[4]/i[4]))) == i[4]:
+                                    last = beam[:]
+                                    self.beams.remove(beam)
+                            for comp in self.comp_track[:]:
+                                if comp.BeamIndex>>int(abs(log2(comp.BeamIndex/i[4]))) == i[4]:
+                                    comp.Placement.Base = App.Vector(0, 0, 0)
+                                    self.comp_track.remove(comp)
+                            self.calculate_beam_path(selfobj, last[0], last[1], last[2], last[4])
+                            break
+
+            if af_arr[0] != None and af_arr[1] != None:
+                self.calculate_beam_path(selfobj, xf, yf, af_arr[0], (beam_index<<1))
+                beam_index = (beam_index<<1)+1
+                inline_comps = []
+                for obj in selfobj.PathObjects:
+                    if obj.BeamIndex == beam_index:
+                        inline_comps.append(obj)
+                comp_index = 0
+            if af_arr[1] != None:
+                x1, y1, a1 = xf, yf, af_arr[1]
+                count += 1
+            elif af_arr[0] != None:
+                x1, y1, a1 = xf, yf, af_arr[0]
+                count += 1
             else:
                 return
                     
