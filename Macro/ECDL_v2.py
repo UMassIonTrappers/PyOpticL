@@ -41,8 +41,8 @@ label = name + " " +  date_time
 print("label name date and time:",label)
 label = ''
 
-base_dx = 5*layout.INCH
-base_dy = 6*layout.INCH
+base_dx = 7*layout.INCH
+base_dy = 4.5*layout.INCH
 base_dz = layout.INCH
 
 layout.create_baseplate(base_dx, base_dy, base_dz, name=name, label=label)
@@ -51,7 +51,7 @@ layout.create_baseplate(base_dx, base_dy, base_dz, name=name, label=label)
 '''
 Add Beam(s)
 '''
-input_x = 20
+input_x = 40
 input_y = 30
 beam = layout.add_beam_path(input_x, input_y, layout.cardinal['right'])
 
@@ -60,18 +60,22 @@ beam = layout.add_beam_path(input_x, input_y, layout.cardinal['right'])
 Add Optical Elements
 """
 
-layout.place_element("Laser_diode_LT230P-B", optomech.laser_diode_mount, input_x, input_y, layout.cardinal['left'])
+layout.place_element("Laser_diode_LT230P-B", optomech.km05_50mm_laser, input_x, input_y, layout.cardinal['right'])
 
-layout.place_element_along_beam("Grating", optomech.grating_mount_on_mk05pm, beam, 0b1, layout.cardinal['left']-littrow_angle, 40)
+layout.place_element_along_beam("Grating", optomech.grating_mount_on_mk05pm, beam, 0b1, layout.cardinal['left'], 40, littrow=littrow_angle)
 
-layout.place_element_along_beam("Input_Mirror_1", optomech.mirror_mount_k05s2, beam, 0b1, layout.turn['right-up'], 40)
+layout.place_element_along_beam("Input_Mirror_1", optomech.mirror_mount_k05s2, beam, 0b1, layout.turn['right-up'], 80)
 
-layout.place_element_along_beam("Lens_f_100mm_AB_coat", optomech.lens_holder_l05g, beam, 0b1, layout.cardinal['up'], 30, foc_len=100)
-layout.place_element_along_beam("Lens_f_100mm_AB_coat", optomech.lens_holder_l05g, beam, 0b1, layout.cardinal['down'], 10, foc_len=100)
+#layout.place_element_along_beam("Lens_f_100mm_AB_coat", optomech.lens_holder_l05g, beam, 0b1, layout.cardinal['up'], 30, foc_len=100)
+#layout.place_element_along_beam("Lens_f_100mm_AB_coat", optomech.lens_holder_l05g, beam, 0b1, layout.cardinal['down'], 10, foc_len=100)
 
-layout.place_element_along_beam("Input_Mirror_2", optomech.mirror_mount_k05s2, beam, 0b1, layout.turn['up-left'], 30)
+layout.place_element_along_beam("Input_Mirror_2", optomech.mirror_mount_k05s2, beam, 0b1, layout.turn['up-left'], 40)
 
-layout.place_element_along_beam("Optical_Isolator", optomech.isolator_405, beam, 0b1, layout.cardinal['left'], 40)
+if wavelength == 422e-6:
+    layout.place_element_along_beam("Optical_Isolator", optomech.isolator_405, beam, 0b1, layout.cardinal['left'], 55, mount_hole_dy=45)
+elif wavelength == 674e-6:
+    layout.place_element_along_beam("Optical_Isolator", optomech.isolator_670, beam, 0b1, layout.cardinal['left'], 55, mount_hole_dy=45)
 
+layout.place_element_along_beam("Optical_Isolator", optomech.fiberport_mount_km05, beam, 0b1, layout.cardinal['right'], 70)
 
 layout.redraw()

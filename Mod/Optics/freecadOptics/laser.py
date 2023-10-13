@@ -90,7 +90,8 @@ def find_interaction(x1, y1, a1, ref_obj, len=0):
     ref_d = sqrt((x-x2)**2+(y-y2)**2)
     if ref_d > in_width/2:
         if ref_d < INCH/2:
-            blocking = True
+            #blocking = True
+            return
         else:
             return
         

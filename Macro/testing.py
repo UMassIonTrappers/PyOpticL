@@ -16,7 +16,7 @@ beam = layout.add_beam_path(100, 200, -90)
 #beam2 = layout.add_beam_path(104, 200, -90)
 #beam3 = layout.add_beam_path(96, 200, -90)
 
-layout.place_element_along_beam("Input_Mirror_1", optomech.grating_mount_on_mk05pm, beam, 0b1, 45, 30)
+layout.place_element_along_beam("MK05PM_Adapter_Plate", optomech.grating_mount_on_mk05pm, beam, 0b1, 45, 30)
 #layout.place_element_along_beam("Input_Mirror_2", optomech.mirror_mount_k05s2, beam, 0b1, -135, 30)
 #layout.place_element_along_beam("Beam_Splitter", optomech.pbs_on_skate_mount, beam, 0b1, -90, 25)
 
