@@ -86,12 +86,14 @@ def find_interaction(x1, y1, a1, ref_obj, len=0):
         return
 
     # distance from optical center to intersection point
-    blocking = False
+    block = False
     ref_d = sqrt((x-x2)**2+(y-y2)**2)
     if ref_d > in_width/2:
-        if ref_d < INCH/2:
-            #blocking = True
-            return
+        if hasattr(ref_obj.Proxy, "block_width"):
+            if ref_d < ref_obj.Proxy.block_width/2:
+                block = True
+            else:
+                return
         else:
             return
         
@@ -113,7 +115,7 @@ def find_interaction(x1, y1, a1, ref_obj, len=0):
             offset *= -1
         angle1 += offset
         
-    return ref_obj, x, y, [angle1, angle2], blocking
+    return ref_obj, x, y, [angle1, angle2], block
 
 # beam path freecad object
 class beam_path:

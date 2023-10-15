@@ -967,6 +967,7 @@ class pinhole_ida12:
         self.tran = True
         self.in_limit = 0
         self.in_width = 1
+        self.block_width=INCH/2
         self.slot_length=slot_length
         _add_linked_object(obj, obj.Name+"_Adapter", slide_mount, mount_offset=(-0.75, -12.85, 0), slot_length=slot_length, **adapter_args)
 
