@@ -18,7 +18,7 @@ PZT - Thorlabs AE0505D08F
 
 """
 
-wavelength = 674e-6 #wavelength in mm (not nm)
+wavelength = 422e-6 #wavelength in mm (not nm)
 grating_pitch_d = 1/2400
 print(wavelength/(2*grating_pitch_d))
 littrow_angle = np.arcsin(wavelength/(2*grating_pitch_d))*180/np.pi
