@@ -41,8 +41,10 @@ label = name + " " +  date_time
 print("label name date and time:",label)
 label = ''
 
-base_dx = 7*layout.INCH
-base_dy = 4.5*layout.INCH
+grid_offset = layout.INCH/2
+gap = layout.INCH/2
+base_dx = 7*layout.INCH-gap
+base_dy = 4.5*layout.INCH-gap
 base_dz = layout.INCH
 
 layout.create_baseplate(base_dx, base_dy, base_dz, name=name, label=label)
@@ -72,10 +74,13 @@ layout.place_element_along_beam("Input_Mirror_1", optomech.mirror_mount_k05s2, b
 layout.place_element_along_beam("Input_Mirror_2", optomech.mirror_mount_k05s2, beam, 0b1, layout.turn['up-left'], 40)
 
 if wavelength == 422e-6:
-    layout.place_element_along_beam("Optical_Isolator", optomech.isolator_405, beam, 0b1, layout.cardinal['left'], 55, mount_hole_dy=45)
+    layout.place_element_along_beam("Optical_Isolator", optomech.isolator_405, beam, 0b1, layout.cardinal['left'], 45, mount_hole_dy=45)
 elif wavelength == 674e-6:
     layout.place_element_along_beam("Optical_Isolator", optomech.isolator_670, beam, 0b1, layout.cardinal['left'], 55, mount_hole_dy=45)
 
 layout.place_element_along_beam("Optical_Isolator", optomech.fiberport_mount_km05, beam, 0b1, layout.cardinal['right'], 70)
+
+for i in [[2,0],[2,3],[5,0],[4,3]]:
+    layout.place_element("Mount_Hole%s"%(str(i)), optomech.baseplate_mount, (i[0])*layout.INCH+grid_offset, (i[1])*layout.INCH+grid_offset, 0)
 
 layout.redraw()

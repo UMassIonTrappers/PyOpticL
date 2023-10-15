@@ -12,7 +12,7 @@ base_dx = 10.0*INCH-gap
 base_dy = 5.15*INCH-gap
 base_dz = INCH
 split_dx = 86
-grid_offset = 15
+grid_offset = INCH/2
 input_x = 6*INCH+grid_offset
 
 name = "Doublepass_Resin"
@@ -32,7 +32,7 @@ layout.place_element_along_beam("Input_Mirror_2", mirror_mounts, beam, 0b1, layo
 layout.place_element_along_beam("Half_waveplate", optomech.rotation_stage_rsp05, beam, 0b1, layout.cardinal['up'], 55, wave_plate_part_num = '') #421nm custom waveplates from CASIX
 layout.place_element_along_beam("Beam_Splitter", optomech.pbs_on_skate_mount, beam, 0b1, layout.cardinal['right'], 27, invert=True)
 
-layout.place_element_along_beam("Lens_f_30mm", optomech.lens_holder_l05g, beam, 0b11, layout.cardinal['right'], 15, foc_len=30)
+layout.place_element_along_beam("Lens_f_30mm", optomech.lens_holder_l05g, beam, 0b11, layout.cardinal['right'], 10, foc_len=30)
 layout.place_element_along_beam("AOM", optomech.isomet_1205c_on_km100pm, beam, 0b11, layout.cardinal['right'], 30,  diff_dir=(-1,1), exp=True)
 layout.place_element_along_beam("Quarter_waveplate", optomech.rotation_stage_rsp05, beam, 0b110, layout.cardinal['left'], 74, wave_plate_part_num = '') #421nm custom waveplates from CASIX
 lens = layout.place_element_along_beam("Lens_f_100mm_AB_coat", optomech.lens_holder_l05g, beam, 0b110, layout.cardinal['left'], 26, foc_len=100, lens_part_num='LA1213-AB')
@@ -45,7 +45,10 @@ layout.place_element_along_beam("Output_Mirror_2", mirror_mounts, beam, 0b11110,
 layout.place_element_along_beam("Half_waveplate_Out", optomech.rotation_stage_rsp05, beam, 0b11110, layout.cardinal['left'], 100, wave_plate_part_num = '') #421nm custom waveplates from CASIX
 layout.place_element_along_beam("Output_Fiberport", optomech.fiberport_holder, beam, 0b11110, layout.cardinal['right'], x=0)
 
-for i in [[0,0],[0,2],[4,1],[7,2]]:
+for i in [[0,0],[0,2],[7,1],[8,3]]:
+    layout.place_element("Mount_Hole%s"%(str(i)), optomech.baseplate_mount, (i[0])*INCH+grid_offset, (i[1])*INCH+grid_offset, 0)
+
+for i in [[2,0],[2,2],[4,0],[5,1]]:
     layout.place_element("Mount_Hole%s"%(str(i)), optomech.baseplate_mount, (i[0])*INCH+grid_offset, (i[1])*INCH+grid_offset, 0)
 
 layout.redraw()
