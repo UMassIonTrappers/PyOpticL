@@ -18,7 +18,7 @@ PZT - Thorlabs AE0505D08F
 
 """
 
-wavelength = 422e-6 #wavelength in mm (not nm)
+wavelength = 674e-6 #wavelength in mm (not nm)
 grating_pitch_d = 1/2400
 print(wavelength/(2*grating_pitch_d))
 littrow_angle = np.arcsin(wavelength/(2*grating_pitch_d))*180/np.pi
@@ -75,7 +75,7 @@ elif wavelength == 674e-6:
     layout.place_element_along_beam("Input_Mirror_2", optomech.mirror_mount_k05s2, beam, 0b1, layout.turn['up-left'], 40)
     layout.place_element_along_beam("Optical_Isolator", optomech.isolator_670, beam, 0b1, layout.cardinal['left'], 55, mount_hole_dy=45)
 
-layout.place_element_along_beam("Optical_Isolator", optomech.fiberport_mount_km05, beam, 0b1, layout.cardinal['right'], 70)
+layout.place_element_along_beam("Fiber Coupler", optomech.fiberport_mount_km05, beam, 0b1, layout.cardinal['right'], 65)
 
 for i in [[2,0],[2,3],[5,0],[4,3]]:
     layout.place_element("Mount_Hole%s"%(str(i)), optomech.baseplate_mount, (i[0])*layout.INCH+grid_offset, (i[1])*layout.INCH+grid_offset, 0)
