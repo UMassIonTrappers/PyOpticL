@@ -66,16 +66,13 @@ layout.place_element("Laser_diode_LT230P-B", optomech.km05_50mm_laser, input_x, 
 
 layout.place_element_along_beam("Grating", optomech.grating_mount_on_mk05pm, beam, 0b1, layout.cardinal['left'], 40, littrow=littrow_angle)
 
-layout.place_element_along_beam("Input_Mirror_1", optomech.mirror_mount_k05s2, beam, 0b1, layout.turn['right-up'], 80)
-
-#layout.place_element_along_beam("Lens_f_100mm_AB_coat", optomech.lens_holder_l05g, beam, 0b1, layout.cardinal['up'], 30, foc_len=100)
-#layout.place_element_along_beam("Lens_f_100mm_AB_coat", optomech.lens_holder_l05g, beam, 0b1, layout.cardinal['down'], 10, foc_len=100)
-
-layout.place_element_along_beam("Input_Mirror_2", optomech.mirror_mount_k05s2, beam, 0b1, layout.turn['up-left'], 40)
-
 if wavelength == 422e-6:
-    layout.place_element_along_beam("Optical_Isolator", optomech.isolator_405, beam, 0b1, layout.cardinal['left'], 45, mount_hole_dy=45)
+    layout.place_element_along_beam("Input_Mirror_1", optomech.mirror_mount_k05s2, beam, 0b1, layout.turn['right-up'], 80)
+    layout.place_element_along_beam("Input_Mirror_2", optomech.mirror_mount_k05s2, beam, 0b1, layout.turn['up-left'], 40)
+    layout.place_element_along_beam("Optical_Isolator", optomech.isolator_405, beam, 0b1, layout.cardinal['left'], 55, mount_hole_dy=45)
 elif wavelength == 674e-6:
+    layout.place_element_along_beam("Input_Mirror_1", optomech.mirror_mount_k05s2, beam, 0b1, layout.turn['right-up'], 70)
+    layout.place_element_along_beam("Input_Mirror_2", optomech.mirror_mount_k05s2, beam, 0b1, layout.turn['up-left'], 40)
     layout.place_element_along_beam("Optical_Isolator", optomech.isolator_670, beam, 0b1, layout.cardinal['left'], 55, mount_hole_dy=45)
 
 layout.place_element_along_beam("Optical_Isolator", optomech.fiberport_mount_km05, beam, 0b1, layout.cardinal['right'], 70)
