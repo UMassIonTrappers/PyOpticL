@@ -41,6 +41,7 @@ layout.place_element_relative("Retro_Mirror", mirror_mounts, lens, layout.cardin
 layout.place_element_along_beam("Output_Mirror_1", mirror_mounts, beam, 0b11110, layout.turn['right-down'], 25)
 layout.place_element_along_beam("Output_Mirror_2", mirror_mounts, beam, 0b11110, layout.turn['down-left'], 56)
 layout.place_element_along_beam("Half_waveplate_Out", optomech.rotation_stage_rsp05, beam, 0b11110, layout.cardinal['left'], 100, wave_plate_part_num = '') #421nm custom waveplates from CASIX
+layout.place_element_along_beam("Optional_Fiberport", optomech.fiberport_mount_km05, beam, 0b11110, layout.cardinal['right'], x=25, optional=True)
 layout.place_element_along_beam("Output_Fiberport", optomech.fiberport_holder, beam, 0b11110, layout.cardinal['right'], x=0)
 
 for i in [[0,0],[0,2],[4,1],[7,2]]:
