@@ -732,7 +732,7 @@ class km05_50mm_laser:
 
     def get_drill(self, obj):
         part = _mount_hole(CLR_DIA_8_32, INCH, -13.4, 0, -INCH*3/2, HEAD_DIA_8_32, 0.92*INCH-self.bolt_len+5, dir=(0,0,1))
-        part = part.fuse(_custom_box(50, 50, 0.08*INCH+17, -8.4, 0, -INCH/2, 3, dir=(0, 0, -1)))
+        part = part.fuse(_custom_box(1.5*INCH+5, 1.5*INCH+5, 0.08*INCH+INCH/4+4+INCH/4, -10, 0, -INCH/2, 3, dir=(0, 0, -1)))
         return part
 
     def execute(self, obj):
@@ -754,17 +754,23 @@ class km05_tec_mount:
         self.part_numbers = []
 
     def get_drill(self, obj):
+        bottom_dx = 1.5*INCH
         part = Part.makeSphere(0)
-        for x, y in [(15,15), (15,-15), (-15,15), (-15,-15)]:
-            part = part.fuse(_mount_hole(TAP_DIA_4_40, drill_depth, x, y, 0, dir=(0, 0, -1)))
+        for x, y in [(1,1), (1,-1), (-1,1), (-1,-1)]:
+            part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, (bottom_dx/2-4)*x, (bottom_dx/2-4)*y, 0, dir=(0, 0, -1)))
         return part
 
     def execute(self, obj):
-        part = _custom_box(20, 20, 8, 0, 0, -INCH/2, dir=(0, 0, -1))
-        part = part.cut(_mount_hole(CLR_DIA_8_32, 8, -3.4, 0, -INCH/2-8, HEAD_DIA_8_32, 5, dir=(0,0,1)))
-        part = part.fuse(_custom_box(40, 40, 5, 0, 0, -INCH/2-8-4, dir=(0, 0, -1)))
-        for x, y in [(15,15), (15,-15), (-15,15), (-15,-15)]:
-            part = part.cut(_mount_hole(CLR_DIA_4_40, 5, x, y, -INCH/2-8-4, dir=(0, 0, -1)))
+        top_dx = INCH
+        top_dz = INCH/4
+        bottom_dx = 1.5*INCH
+        bottom_dz = INCH/4
+        tec_dz = 4
+        part = _custom_box(top_dx, top_dx, top_dz, 0, 0, -INCH/2, dir=(0, 0, -1))
+        part = part.cut(_mount_hole(CLR_DIA_8_32, top_dz, -3.4, 0, -INCH/2-top_dz, HEAD_DIA_8_32, HEAD_DZ_8_32, dir=(0,0,1)))
+        part = part.fuse(_custom_box(bottom_dx, bottom_dx, bottom_dz, 0, 0, -INCH/2-top_dz-tec_dz, dir=(0, 0, -1)))
+        for x, y in [(1,1), (1,-1), (-1,1), (-1,-1)]:
+            part = part.cut(_mount_hole(CLR_DIA_8_32, bottom_dz, (bottom_dx/2-4)*x, (bottom_dx/2-4)*y, -INCH/2-top_dz-tec_dz, dir=(0, 0, -1)))
         part = part.fuse(part)
         obj.Shape = part
 
