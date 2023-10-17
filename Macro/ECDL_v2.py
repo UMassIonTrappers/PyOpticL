@@ -18,7 +18,7 @@ PZT - Thorlabs AE0505D08F
 
 """
 
-wavelength = 674e-6 #wavelength in mm (not nm)
+wavelength = 422e-6 #wavelength in mm (not nm)
 grating_pitch_d = 1/2400
 print(wavelength/(2*grating_pitch_d))
 littrow_angle = np.arcsin(wavelength/(2*grating_pitch_d))*180/np.pi
@@ -44,7 +44,7 @@ label = ''
 grid_offset = layout.INCH/2
 gap = layout.INCH/2
 base_dx = 7*layout.INCH-gap
-base_dy = 4.5*layout.INCH-gap
+base_dy = 5*layout.INCH-gap
 base_dz = layout.INCH
 
 layout.create_baseplate(base_dx, base_dy, base_dz, name=name, label=label)
