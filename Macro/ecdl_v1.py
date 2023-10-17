@@ -67,7 +67,7 @@ date_time = datetime.now().strftime("%m/%d/%Y")
 label = name + " " +  date_time
 print("label name date and time:",label)
 label = ''
-layout.create_baseplate(base_dx, base_dy, base_dz, name=name, label=label)
+layout.create_baseplate(base_dx, base_dy, base_dz, name=name, label=label, recess=40)
 
 
 '''
@@ -96,62 +96,4 @@ layout.place_element_along_beam("Parallel_Mirror", optomech.mirror_mount_k05s1, 
 layout.place_element_along_beam("Optical_Isolator", optomech.isolator_670, beam, 0b1, right, 2*INCH)
 
 
-# layout.place_element_along_beam("Half_waveplate", optomech.rotation_stage_rsp05, beam, 0b1, right, 50, wave_plate_part_num = '') #421nm custom waveplates from CASIX
-
-
-# layout.place_element("Laser_diode_LT230P-B", optomech.laser_diode_mount, beam, 0b1, left, 10) #Mounted in LT230P-B (but check wavelength coating! B is red, A is blue)
-
-
-
-
-
-# layout.place_element_along_beam("Input_Mirror_1", mirror_mounts, beam, 0b1, up_right, 16)
-# layout.place_element_along_beam("Input_Mirror_2", mirror_mounts, beam, 0b1, right_up,  INCH)
-# layout.place_element_along_beam("Half_waveplate", optomech.rotation_stage_rsp05, beam, 0b1, up, 55, wave_plate_part_num = '') #421nm custom waveplates from CASIX
-# layout.place_element_along_beam("Beam_Splitter", optomech.pbs_on_skate_mount, beam, 0b1, up, 25)
-
-# layout.place_element_along_beam("AOM", optomech.isomet_1205c_on_km100pm, beam, 0b11, right, 30, diff_angle=0)
-# layout.place_element_along_beam("Quarter_waveplate", optomech.rotation_stage_rsp05, beam, 0b11, left, 70, wave_plate_part_num = '') #421nm custom waveplates from CASIX
-# layout.place_element_along_beam("Lens_f_100mm_AB_coat", optomech.lens_holder_l05g, beam, 0b11, left, 30, foc_len=100, lens_part_num='LA1213-AB')
-# layout.place_element_along_beam("Iris", optomech.pinhole_ida12, beam, 0b11, right, 7)
-# layout.place_element_along_beam("Retro_Mirror", mirror_mounts, beam, 0b11, right, 7)
-
-# layout.place_element_along_beam("Output_Mirror_1", mirror_mounts, beam, 0b110, right_down, 20)
-# # layout.place_element_along_beam("Iris", optomech.pinhole_ida12, beam, 0b110, down, 25)
-# layout.place_element_along_beam("Output_Mirror_2", mirror_mounts, beam, 0b110, down_left, 55)
-# layout.place_element_along_beam("Half_waveplate_Out", optomech.rotation_stage_rsp05, beam, 0b110, left, 100, wave_plate_part_num = '') #421nm custom waveplates from CASIX
-# layout.place_element_along_beam("Output_Fiberport", optomech.fiberport_holder, beam, 0b110, right, y=0)
-
-
-"""
-Add holes to baseplate to mount to optical table 
- >>> Make sure to align laser beam above bolt holes so plates line up together <<<
-"""
-offset = -15/INCH # arbitrary shift to make sure laser is over bolt holes
-# layout.place_element("Mount_Hole", optomech.baseplate_mount, (2-offset)*INCH-gap/2, (1-offset)*INCH-gap/2, 0)
-# layout.place_element("Mount_Hole", optomech.baseplate_mount, (4-offset)*INCH-gap/2, (1-offset)*INCH-gap/2, 0)
-# layout.place_element("Mount_Hole", optomech.baseplate_mount, (3-offset)*INCH-gap/2, (4-offset)*INCH-gap/2, 0)
-# layout.place_element("Mount_Hole", optomech.baseplate_mount, (3-offset)*INCH-gap/2, (6-offset)*INCH-gap/2, 0)
-# layout.place_element("Mount_Hole", optomech.baseplate_mount, (2-offset)*INCH-gap/2, (7-offset)*INCH-gap/2, 0)
-
-
-#set view
-Gui.activeDocument().activeView().viewTop()
-Gui.activeDocument().activeView().viewRotateRight()
-Gui.SendMsgToActiveView("ViewFit")
-Gui.runCommand('Std_ViewZoomIn',0)
-
-#'compile the baseplate'
 layout.redraw()
-
-# #prepare for export
-# import Mesh
-
-# filename = App.getUserMacroDir(True) + "stl/" + name + ".stl" #Filename for model
-# print(filename)
-# obj = App.ActiveDocument.getObject(name) 	# get baseplate object
-# Gui.Selection.addSelection(obj) 			# select baseplate
-# __objs__ = Gui.Selection.getSelection() 	# get selection for meshing
-# Mesh.export(__objs__, filename) 			#Mesh and export (as .stl given filename)
-
-print('Done!')

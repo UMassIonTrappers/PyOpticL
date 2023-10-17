@@ -46,13 +46,16 @@ def _orient_stl(stl, rotate, translate, scale=1, STL_PATH = STL_PATH_thorlabs ):
     mesh.translate(*translate)
     return mesh
 
-def _add_linked_object(obj, obj_name, obj_class, childLink=False, **args):
+def _add_linked_object(obj, obj_name, obj_class, pos_offset=(0, 0, 0), rot_offset= (0, 0, 0), **args):
     new_obj = App.ActiveDocument.addObject(obj_class.type, obj_name)
+    new_obj.setEditorMode('Placement', 2)
     if not hasattr(obj, "ChildObjects"):
         obj.addProperty("App::PropertyLinkListChild","ChildObjects")
     obj.ChildObjects += [new_obj]
-    if childLink:
-        obj.addProperty("App::PropertyLinkChild","LinkToParent").LinkToParent = obj
+    new_obj.addProperty("App::PropertyLinkHidden","ParentObject").ParentObject = obj
+    new_obj.addProperty("App::PropertyPlacement","RelativePlacement").RelativePlacement
+    new_obj.RelativePlacement.Base = App.Vector(*pos_offset)
+    new_obj.RelativePlacement.Rotation = App.Rotation(*rot_offset)
     obj_class(new_obj, **args)
     ViewProvider(new_obj.ViewObject)
     return new_obj
@@ -145,10 +148,10 @@ class surface_adapter:
     def get_drill(self, obj):
         dx = HEAD_DIA_8_32+obj.OuterThickness.Value*2+1
         dy = obj.MountHoleDistance.Value+HEAD_DIA_8_32+obj.OuterThickness.Value*2+1
-        dz = obj.AdapterHeight.Value-self.mount_offset[2]-INCH/2
-        part = _custom_box(dx, dy, dz, 0, 0, -INCH/2, 5, (0,0,-1))
+        dz = obj.AdapterHeight.Value-self.mount_offset[2]
+        part = _custom_box(dx, dy, drill_depth, 0, 0, -dz, 5, (0,0,1))
         for i in [-1, 1]:
-            part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, 0, i*obj.MountHoleDistance.Value/2, -dz-INCH/2))
+            part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, 0, i*obj.MountHoleDistance.Value/2, -dz))
         return part
 
     def execute(self, obj):
@@ -709,7 +712,7 @@ class km05_50mm_laser:
             the mount in x,y,z and a tuple of the x,y offset of the mount
     '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, bolt_length=15, uMountParam=None, drill=True):
+    def __init__(self, obj, bolt_length=2, uMountParam=None, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
@@ -725,11 +728,11 @@ class km05_50mm_laser:
             obj.Drill = False
             self.bolt_len = uMountParam[0][2]-0.08*INCH-HEAD_DZ_8_32+5
 
+        _add_linked_object(obj, obj.Name+"_TEC_Mount", km05_tec_mount, pos_offset=(-10, 0, -0.08*INCH))
+
     def get_drill(self, obj):
         part = _mount_hole(CLR_DIA_8_32, INCH, -13.4, 0, -INCH*3/2, HEAD_DIA_8_32, 0.92*INCH-self.bolt_len+5, dir=(0,0,1))
-        part = part.fuse(_custom_box(18, 31, 0.08*INCH, -8.4, 0, -INCH/2-0.08*INCH, 3))
-        part = part.fuse(_custom_box(18, 9, 0.08*INCH, -12, -31/2+4.5, -INCH/2-0.08*INCH, 2))
-        part = part.fuse(_custom_box(15, 20, (0.08*INCH)+4, -(15+13.4), -31/2+4.5, -INCH/2-0.08*INCH-4, 2))
+        part = part.fuse(_custom_box(1.5*INCH+5, 1.5*INCH+5, 0.08*INCH+INCH/4+4+INCH/4, -10, 0, -INCH/2, 3, dir=(0, 0, -1)))
         return part
 
     def execute(self, obj):
@@ -740,6 +743,36 @@ class km05_50mm_laser:
         mesh.addMesh(temp)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
+
+class km05_tec_mount:
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
+        ViewProvider(obj.ViewObject)
+        self.part_numbers = []
+
+    def get_drill(self, obj):
+        bottom_dx = 1.5*INCH
+        part = Part.makeSphere(0)
+        for x, y in [(1,1), (1,-1), (-1,1), (-1,-1)]:
+            part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, (bottom_dx/2-4)*x, (bottom_dx/2-4)*y, 0, dir=(0, 0, -1)))
+        return part
+
+    def execute(self, obj):
+        top_dx = INCH
+        top_dz = INCH/4
+        bottom_dx = 1.5*INCH
+        bottom_dz = INCH/4
+        tec_dz = 4
+        part = _custom_box(top_dx, top_dx, top_dz, 0, 0, -INCH/2, dir=(0, 0, -1))
+        part = part.cut(_mount_hole(CLR_DIA_8_32, top_dz, -3.4, 0, -INCH/2-top_dz, HEAD_DIA_8_32, HEAD_DZ_8_32, dir=(0,0,1)))
+        part = part.fuse(_custom_box(bottom_dx, bottom_dx, bottom_dz, 0, 0, -INCH/2-top_dz-tec_dz, dir=(0, 0, -1)))
+        for x, y in [(1,1), (1,-1), (-1,1), (-1,-1)]:
+            part = part.cut(_mount_hole(CLR_DIA_8_32, bottom_dz, (bottom_dx/2-4)*x, (bottom_dx/2-4)*y, -INCH/2-top_dz-tec_dz, dir=(0, 0, -1)))
+        part = part.fuse(part)
+        obj.Shape = part
 
 class mirror_mount_mk05:
     '''
@@ -753,7 +786,7 @@ class mirror_mount_mk05:
             the mount in x,y,z and a tuple of the x,y offset of the mount
     '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, mirror_thickness=6, uMountParam=[(20, 28, 10), (-10, 0)], drill=True):
+    def __init__(self, obj, mirror_thickness=6, uMountParam=None, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = mirror_thickness
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
@@ -770,7 +803,7 @@ class mirror_mount_mk05:
             obj.Drill = False
 
     def get_drill(self, obj):
-        part = _mount_hole(TAP_DIA_4_40, drill_depth, -10.2, 0, -10.2)
+        part = _mount_hole(TAP_DIA_4_40, drill_depth, -10.2, 0, -10.2-drill_depth, HEAD_DIA_4_40, drill_depth-10, dir=(0,0,1))
         return part
 
     def execute(self, obj):
@@ -780,6 +813,73 @@ class mirror_mount_mk05:
         mesh.addMesh(temp)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
+
+class mount_mk05pm:
+    '''
+    Mount, model MK05
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        uMountParam (float[3], float[2]) : Universal mount parameters consisting of a tuple for the size of
+            the mount in x,y,z and a tuple of the x,y offset of the mount
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, uMountParam=None, drill=True):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
+        ViewProvider(obj.ViewObject)
+        self.part_numbers = ['MK05PM']
+
+        if uMountParam != None:
+            _add_linked_object(obj, obj.Name+"_Adapter", universal_mount, True, mount_offset=uMountParam[1], size=uMountParam[0], zOff=-10.2)
+            obj.setEditorMode('Drill', 2)
+            obj.Drill = False
+
+    def get_drill(self, obj):
+        part = _mount_hole(TAP_DIA_4_40, drill_depth, -15, 0, -10.2-drill_depth, HEAD_DIA_4_40, drill_depth-10, dir=(0,0,1))
+        part = part.fuse(_custom_box(30, 25, 5, -3, 0, -11.3, 2))
+        part = part.fuse(part)
+        #part = _mount_hole(TAP_DIA_4_40, drill_depth, -15, 0, -10.2)
+        return part
+
+    def execute(self, obj):
+        mesh = _orient_stl("MK05PM.stl", (0, pi/2, pi), ([-15, 0, 0]))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+class grating_mount_on_mk05pm:
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, diff_angle=-0.026, diff_dir=(1,1), exp=False, littrow=45):
+        obj.Proxy = self
+        obj.ViewObject.ShapeColor=(0.6, 0.9, 0.6)
+        ViewProvider(obj.ViewObject)
+        self.part_numbers = []
+        self.littrow = littrow
+
+        self.dx = 10/tan(radians(2*littrow))
+
+        _add_linked_object(obj, obj.Name+"_mount", mount_mk05pm, pos_offset=(1.4-4, 2, -3.5))
+        _add_linked_object(obj, obj.Name+"_grating", laser_grating_mount, pos_offset=(0, 0, 4-3.5), rot_offset=(-littrow, 0, 0))
+        _add_linked_object(obj, obj.Name+"_mirror", laser_grating_mount, pos_offset=(self.dx, -10, 4-3.5), rot_offset=(-littrow+180, 0, 0))
+
+    def execute(self, obj):
+        part = _custom_box(25+self.dx, 35, 2, 0, 0, 0, dir=(1, -1, 1))
+        part = part.cut(_custom_box(6, 8, 2, 0, 0, 0, dir=(1, -1, 1)))
+        #part = part.fuse(_custom_box(2, 10, 10, -dx/2+7, 5, 2))
+        #part = part.fuse(_custom_box(2, 10, 10, dx/2-1, -5, 2))
+        part = part.cut(_mount_hole(CLR_DIA_4_40, 2, 3.1, -18.2, 0, dir=(0, 0, 1)))
+        part = part.cut(_mount_hole(CLR_DIA_4_40, 2, 16.4, -2.6, 0, dir=(0, 0, 1)))
+        part.translate(App.Vector(-10.4, 10.5, -4.5))
+        part.translate(App.Vector(1.4-4, 2, -3.5))
+        temp = _custom_box(2, 12, 12, -6, 0, -6, dir=(-1, 0, 1))
+        temp.rotate(App.Vector(0, 0, 0), App.Vector(0, 0, 1), -self.littrow)
+        part = part.fuse(temp)
+        temp = _custom_box(2, 12, 12, self.dx+6, -10, -6, dir=(1, 0, 1))
+        temp.rotate(App.Vector(self.dx, -10, 0), App.Vector(0, 0, 1), -self.littrow)
+        part = part.fuse(temp)
+        part = part.fuse(part)
+        obj.Shape = part
 
 class splitter_mount_c05g:
     '''
@@ -873,6 +973,7 @@ class pinhole_ida12:
         self.tran = True
         self.in_limit = 0
         self.in_width = 1
+        self.block_width=INCH/2
         self.slot_length=slot_length
         _add_linked_object(obj, obj.Name+"_Adapter", slide_mount, mount_offset=(-0.75, -12.85, 0), slot_length=slot_length, **adapter_args)
 
@@ -1013,7 +1114,7 @@ class periscope:
 
 class isolator_670:
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, mount_hole_dy=50, drill=True):
+    def __init__(self, obj, mount_hole_dy=45, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.ViewObject.ShapeColor=(0.2, 0.2, 0.2)
@@ -1038,6 +1139,33 @@ class isolator_670:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
+class isolator_405:
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, mount_hole_dy=36, drill=True):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.ViewObject.ShapeColor=(0.2, 0.2, 0.2)
+        ViewProvider(obj.ViewObject)
+        self.part_numbers = ['IOT-5-670-VLP']
+        self.tran = True
+        self.in_limit = pi/2
+        self.in_width = INCH/2
+        _add_linked_object(obj, obj.Name+"_Adapter", surface_adapter, mount_offset=(0, 0, -17.15), mount_hole_dy=mount_hole_dy)
+
+    def get_drill(self, obj):
+        part = _custom_box(25, 15, drill_depth, 0, 0, -INCH/2, 5, (0,0,1))
+        return part
+
+    def execute(self, obj):
+        # mesh = _orient_stl("ISO-04-650-LP.stl", (pi/2, 0, 0), (0, 0, 0), 1, STL_PATH = STL_PATH_newport) #Newport ISO-04-650-LP
+        mesh = _orient_stl("IO-3D-405-PBS.stl", (pi/2, 0, pi/2), (9.45, 0, 0), 1) #Thorlabs 670 (better for injection?)
+        # if self.newport:
+            # mesh = _orient_stl("ISO-04-650-LP.stl", (pi/2, 0, 0), (19, 0, 0), 1, STL_PATH = STL_PATH_newport) #Newport ISO-04-650-LP
+        # else:
+            # mesh = _orient_stl("IOT-5-670-VLP.stl", (pi/2, 0, pi/2), (19, 0, 0), 1) #Thorlabs 670
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
 
 
 class laser_diode_mount:
@@ -1051,10 +1179,6 @@ class laser_diode_mount:
         self.ref_angle = 0
         self.in_limit = pi/2
         self.in_width = INCH/2
-
-    def get_drill(self, obj):
-        part = _mount_hole(TAP_DIA_8_32, drill_depth, -13.4*0, 0, -INCH/2)
-        return part
 
     def execute(self, obj):
         mesh = _orient_stl("LT230P-B.stl", (0, pi/2, 0 ), ([0, 0, 0]))
@@ -1077,11 +1201,7 @@ class laser_grating_mount:
         self.part_numbers = ['GH13-24V']
         self.ref_angle = 0
         self.in_limit = pi/2
-        self.in_width = INCH/2
-
-    def get_drill(self, obj):
-        part = _mount_hole(TAP_DIA_8_32, drill_depth, 0, 0, -INCH/2)
-        return part
+        self.in_width = INCH/8
 
     def execute(self, obj):
         mesh = _orient_stl("GH13-24V.stl", (0, pi/2, 0), ([-3, 0, 0]))
