@@ -857,26 +857,26 @@ class grating_mount_on_mk05pm:
         self.part_numbers = []
         self.littrow = littrow
 
-        self.dx = 10/tan(radians(2*littrow))
+        self.dx = 12/tan(radians(2*littrow))
 
-        _add_linked_object(obj, obj.Name+"_mount", mount_mk05pm, pos_offset=(1.4-4, 2, -3.5))
-        _add_linked_object(obj, obj.Name+"_grating", laser_grating_mount, pos_offset=(0, 0, 4-3.5), rot_offset=(-littrow, 0, 0))
-        _add_linked_object(obj, obj.Name+"_mirror", laser_grating_mount, pos_offset=(self.dx, -10, 4-3.5), rot_offset=(-littrow+180, 0, 0))
+        _add_linked_object(obj, obj.Name+"_mount", mount_mk05pm, pos_offset=(1.4-6, 2, -3.5))
+        _add_linked_object(obj, obj.Name+"_grating", laser_grating, pos_offset=(0, 0, 6-3.5), rot_offset=(-littrow, 0, 0))
+        _add_linked_object(obj, obj.Name+"_mirror", square_mirror, pos_offset=(self.dx, -12, 6-3.5), rot_offset=(-littrow+180, 0, 0))
 
     def execute(self, obj):
-        part = _custom_box(25+self.dx, 35, 2, 0, 0, 0, dir=(1, -1, 1))
-        part = part.cut(_custom_box(6, 8, 2, 0, 0, 0, dir=(1, -1, 1)))
+        part = _custom_box(25+self.dx, 35, 4, 0, 0, 0, dir=(1, -1, 1))
+        part = part.cut(_custom_box(6, 8, 4, 0, 0, 0, dir=(1, -1, 1)))
         #part = part.fuse(_custom_box(2, 10, 10, -dx/2+7, 5, 2))
         #part = part.fuse(_custom_box(2, 10, 10, dx/2-1, -5, 2))
-        part = part.cut(_mount_hole(CLR_DIA_4_40, 2, 3.1, -18.2, 0, dir=(0, 0, 1)))
-        part = part.cut(_mount_hole(CLR_DIA_4_40, 2, 16.4, -2.6, 0, dir=(0, 0, 1)))
+        part = part.cut(_mount_hole(CLR_DIA_4_40, 4, 3.1, -18.2, 0, dir=(0, 0, 1)))
+        part = part.cut(_mount_hole(CLR_DIA_4_40, 4, 16.4, -2.6, 0, dir=(0, 0, 1)))
         part.translate(App.Vector(-10.4, 10.5, -4.5))
-        part.translate(App.Vector(1.4-4, 2, -3.5))
-        temp = _custom_box(2, 12, 12, -6, 0, -6, dir=(-1, 0, 1))
+        part.translate(App.Vector(1.4-6, 2, -3.5))
+        temp = _custom_box(4, 12, 12, -6, 0, -4, dir=(-1, 0, 1))
         temp.rotate(App.Vector(0, 0, 0), App.Vector(0, 0, 1), -self.littrow)
         part = part.fuse(temp)
-        temp = _custom_box(2, 12, 12, self.dx+6, -10, -6, dir=(1, 0, 1))
-        temp.rotate(App.Vector(self.dx, -10, 0), App.Vector(0, 0, 1), -self.littrow)
+        temp = _custom_box(4, 12, 12, self.dx+3.2, -12, -4, dir=(1, 0, 1))
+        temp.rotate(App.Vector(self.dx, -12, 0), App.Vector(0, 0, 1), -self.littrow)
         part = part.fuse(temp)
         part = part.fuse(part)
         obj.Shape = part
@@ -1190,26 +1190,43 @@ class laser_diode_mount:
 
 
 
-class laser_grating_mount:
-    type = 'Mesh::FeaturePython'
-    def __init__(self, obj, mirror_thickness=6, drill=True):
+class laser_grating:
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, thickness=6, width=12.7, hight=12.7, drill=True):
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
-        obj.addProperty('App::PropertyLength', 'MirrorThickness').MirrorThickness = mirror_thickness
+        obj.addProperty('App::PropertyLength', 'Thickness').Thickness = thickness
+        obj.addProperty('App::PropertyLength', 'Width').Width = width
+        obj.addProperty('App::PropertyLength', 'Height').Height = hight
         obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
         ViewProvider(obj.ViewObject)
-        self.part_numbers = ['GH13-24V']
+        self.part_numbers = []
         self.ref_angle = 0
         self.in_limit = pi/2
-        self.in_width = INCH/8
+        self.in_width = width
 
     def execute(self, obj):
-        mesh = _orient_stl("GH13-24V.stl", (0, pi/2, 0), ([-3, 0, 0]))
-        # temp = Mesh.createCylinder(INCH/4, 6, True, 1, 50)
-        # temp.rotate(0, 0, pi)
-        # mesh.addMesh(temp)
-        mesh.Placement = obj.Mesh.Placement
-        obj.Mesh = mesh
+        part = _custom_box(obj.Thickness.Value, obj.Width.Value, obj.Height.Value, 0, 0, 0, dir=(-1, 0, 0))
+        obj.Shape = part
+
+class square_mirror:
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, thickness=3.2, width=12.7, hight=12.7, drill=True):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'Thickness').Thickness = thickness
+        obj.addProperty('App::PropertyLength', 'Width').Width = width
+        obj.addProperty('App::PropertyLength', 'Height').Height = hight
+        obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
+        ViewProvider(obj.ViewObject)
+        self.part_numbers = []
+        self.ref_angle = 0
+        self.in_limit = pi/2
+        self.in_width = width
+
+    def execute(self, obj):
+        part = _custom_box(obj.Thickness.Value, obj.Width.Value, obj.Height.Value, 0, 0, 0, dir=(-1, 0, 0))
+        obj.Shape = part
 
 
 class ViewProvider:
