@@ -674,7 +674,7 @@ class fiberport_mount_km05:
         ViewProvider(obj.ViewObject)
         self.part_numbers = ['KM05']
         self.bolt_len = bolt_length
-        self.in_limit = pi-0.01
+        self.in_limit = 0
         self.in_width = 1
 
         if uMountParam != None:
