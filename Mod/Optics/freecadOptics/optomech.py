@@ -837,7 +837,7 @@ class mount_mk05pm:
             obj.Drill = False
 
     def get_drill(self, obj):
-        part = _mount_hole(TAP_DIA_4_40, drill_depth, -15, 0, -10.2-drill_depth, HEAD_DIA_4_40, drill_depth-10, dir=(0,0,1))
+        part = _mount_hole(TAP_DIA_4_40, drill_depth, -15, 0, -10.2-drill_depth, HEAD_DIA_4_40, drill_depth-5, dir=(0,0,1))
         part = part.fuse(_custom_box(30, 25, 5, -3, 0, -11.3, 2))
         part = part.fuse(part)
         #part = _mount_hole(TAP_DIA_4_40, drill_depth, -15, 0, -10.2)
@@ -866,8 +866,6 @@ class grating_mount_on_mk05pm:
     def execute(self, obj):
         part = _custom_box(25+self.dx, 35, 4, 0, 0, 0, dir=(1, -1, 1))
         part = part.cut(_custom_box(6, 8, 4, 0, 0, 0, dir=(1, -1, 1)))
-        #part = part.fuse(_custom_box(2, 10, 10, -dx/2+7, 5, 2))
-        #part = part.fuse(_custom_box(2, 10, 10, dx/2-1, -5, 2))
         part = part.cut(_mount_hole(CLR_DIA_4_40, 4, 3.1, -18.2, 0, dir=(0, 0, 1)))
         part = part.cut(_mount_hole(CLR_DIA_4_40, 4, 16.4, -2.6, 0, dir=(0, 0, 1)))
         part.translate(App.Vector(-10.4, 10.5, -4.5))
