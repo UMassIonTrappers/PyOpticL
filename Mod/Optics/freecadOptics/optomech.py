@@ -46,7 +46,7 @@ def _orient_stl(stl, rotate, translate, scale=1, STL_PATH = STL_PATH_thorlabs ):
     mesh.translate(*translate)
     return mesh
 
-def _add_linked_object(obj, obj_name, obj_class, pos_offset=(0, 0, 0), rot_offset= (0, 0, 0), **args):
+def _add_linked_object(obj, obj_name, obj_class, pos_offset=(0, 0, 0), rot_offset=(0, 0, 0), **args):
     new_obj = App.ActiveDocument.addObject(obj_class.type, obj_name)
     new_obj.setEditorMode('Placement', 2)
     if not hasattr(obj, "ChildObjects"):
@@ -55,7 +55,10 @@ def _add_linked_object(obj, obj_name, obj_class, pos_offset=(0, 0, 0), rot_offse
     new_obj.addProperty("App::PropertyLinkHidden","ParentObject").ParentObject = obj
     new_obj.addProperty("App::PropertyPlacement","RelativePlacement").RelativePlacement
     new_obj.RelativePlacement.Base = App.Vector(*pos_offset)
-    new_obj.RelativePlacement.Rotation = App.Rotation(*rot_offset)
+    rotx = App.Rotation(App.Vector(1,0,0), rot_offset[0])
+    roty = App.Rotation(App.Vector(0,1,0), rot_offset[1])
+    rotz = App.Rotation(App.Vector(0,0,1), rot_offset[2])
+    new_obj.RelativePlacement.Rotation = App.Rotation(rotx*roty*rotz)
     obj_class(new_obj, **args)
     ViewProvider(new_obj.ViewObject)
     return new_obj
@@ -860,8 +863,8 @@ class grating_mount_on_mk05pm:
         self.dx = 12/tan(radians(2*littrow))
 
         _add_linked_object(obj, obj.Name+"_mount", mount_mk05pm, pos_offset=(1.4-6, 2, -3.5))
-        _add_linked_object(obj, obj.Name+"_grating", laser_grating, pos_offset=(0, 0, 6-3.5), rot_offset=(-littrow, 0, 0))
-        _add_linked_object(obj, obj.Name+"_mirror", square_mirror, pos_offset=(self.dx, -12, 6-3.5), rot_offset=(-littrow+180, 0, 0))
+        _add_linked_object(obj, obj.Name+"_grating", laser_grating, pos_offset=(0, 0, 6-3.5), rot_offset=(0, 0, -littrow))
+        _add_linked_object(obj, obj.Name+"_mirror", square_mirror, pos_offset=(self.dx, -12, 6-3.5), rot_offset=(0, 0, -littrow+180))
 
     def execute(self, obj):
         part = _custom_box(25+self.dx, 35, 4, 0, 0, 0, dir=(1, -1, 1))
@@ -1071,8 +1074,8 @@ class periscope:
         else:
             self.z_off = -INCH/2
 
-        self.lower_obj = _add_linked_object(obj, obj.Name+"_Lower_Mirror", lower_mirror)
-        self.upper_obj = _add_linked_object(obj, obj.Name+"_Upper_Mirror", upper_mirror)
+        self.lower_obj = _add_linked_object(obj, obj.Name+"_Lower_Mirror", lower_mirror, pos_offset=(0, 0, obj.Lower_dz.Value+self.z_off), rot_offset=(-1*left_handed*pi/2, -pi/4, 0))
+        self.upper_obj = _add_linked_object(obj, obj.Name+"_Upper_Mirror", upper_mirror, pos_offset=(0, 0, obj.Upper_dz.Value+self.z_off), rot_offset=(-1*left_handed*pi/2, 3*pi/4, 0))
         self.left_handed = left_handed
 
     def get_drill(self, obj):

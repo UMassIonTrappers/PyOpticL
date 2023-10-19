@@ -111,7 +111,6 @@ def redraw():
     for i in App.ActiveDocument.Objects:
         if isinstance(i.Proxy, baseplate):
             i.touch()
-    App.ActiveDocument.recompute()
 
 def show_components(state):
     for i in App.ActiveDocument.Objects:
