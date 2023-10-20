@@ -1229,6 +1229,31 @@ class square_mirror:
         part = _custom_box(obj.Thickness.Value, obj.Width.Value, obj.Height.Value, 0, 0, 0, dir=(-1, 0, 0))
         obj.Shape = part
 
+class rb_cell:
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
+        ViewProvider(obj.ViewObject)
+        self.part_numbers = []
+        self.tran = True
+        self.in_limit = 0
+        self.in_width = 1
+
+    def get_drill(self, obj):
+        part = _custom_box(110, 62, 25.4-INCH/2, 0, 5, -INCH/2, 3, (0,0,-1))
+        for x, y in [(1,1), (-1,1), (1,-1), (-1,-1)]:
+            part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, x*45, y*15.7, -INCH/2))
+        part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, 45, -15.7, -INCH/2))
+        for x in [1,-1]:
+            part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, x*45, 25.7, -INCH/2))
+        return part
+
+    def execute(self, obj):
+        mesh = _orient_stl("rb_cell_holder_middle.stl", (0, 0, 0), ([0, 5, 0]))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
 
 class ViewProvider:
     def __init__(self, obj):
