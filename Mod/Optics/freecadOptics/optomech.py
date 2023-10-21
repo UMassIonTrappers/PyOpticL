@@ -1281,8 +1281,8 @@ class periscope:
             part = part.cut(_custom_box(dx=fillet*2+4, dy=width, dz=obj.Upper_dz.Value+20,
                                         x=i*(35+fillet), y=0, z=20, fillet=15,
                                         dir=(-i,0,1), fillet_dir=(0,1,0)))
-            part = part.cut(_mount_hole(dx=CLR_DIA_14_20+0.5, dy=INCH+5, dz=i*INCH,
-                                        x=0, y=25, z=HEAD_DIA_14_20+0.5,
+            part = part.cut(_mount_hole(dx=bolt_14_20['clear_dia']+0.5, dy=INCH+5, dz=i*INCH,
+                                        x=0, y=25, z=bolt_14_20['head_dia']+0.5,
                                         fillet=10, dir=(0,0,-1)))
         part.translate(App.Vector(0, -inv*(width/2+INCH/2), self.z_off))
         part = part.fuse(part)
@@ -1440,10 +1440,10 @@ class rb_cell:
     def get_drill(self, obj):
         part = _custom_box(110, 62, 25.4-INCH/2, 0, 5, -INCH/2, 3, (0,0,-1))
         for x, y in [(1,1), (-1,1), (1,-1), (-1,-1)]:
-            part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, x*45, y*15.7, -INCH/2))
-        part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, 45, -15.7, -INCH/2))
+            part = part.fuse(_mount_hole(bolt_8_32['tap_dia'], drill_depth, x*45, y*15.7, -INCH/2))
+        part = part.fuse(_mount_hole(bolt_8_32['tap_dia'], drill_depth, 45, -15.7, -INCH/2))
         for x in [1,-1]:
-            part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, x*45, 25.7, -INCH/2))
+            part = part.fuse(_mount_hole(bolt_8_32['tap_dia'], drill_depth, x*45, 25.7, -INCH/2))
         return part
 
     def execute(self, obj):
