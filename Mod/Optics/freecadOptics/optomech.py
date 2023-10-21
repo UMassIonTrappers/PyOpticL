@@ -52,7 +52,7 @@ def _orient_stl(stl, rotate, translate, scale=1, STL_PATH = STL_PATH_thorlabs ):
     mesh.translate(*translate)
     return mesh
 
-def _add_linked_object(obj, obj_name, obj_class, pos_offset=(0, 0, 0), rot_offset= (0, 0, 0), **args):
+def _add_linked_object(obj, obj_name, obj_class, pos_offset=(0, 0, 0), rot_offset=(0, 0, 0), **args):
     new_obj = App.ActiveDocument.addObject(obj_class.type, obj_name)
     new_obj.setEditorMode('Placement', 2)
     if not hasattr(obj, "ChildObjects"):
@@ -61,7 +61,10 @@ def _add_linked_object(obj, obj_name, obj_class, pos_offset=(0, 0, 0), rot_offse
     new_obj.addProperty("App::PropertyLinkHidden","ParentObject").ParentObject = obj
     new_obj.addProperty("App::PropertyPlacement","RelativePlacement").RelativePlacement
     new_obj.RelativePlacement.Base = App.Vector(*pos_offset)
-    new_obj.RelativePlacement.Rotation = App.Rotation(*rot_offset)
+    rotx = App.Rotation(App.Vector(1,0,0), rot_offset[0])
+    roty = App.Rotation(App.Vector(0,1,0), rot_offset[1])
+    rotz = App.Rotation(App.Vector(0,0,1), rot_offset[2])
+    new_obj.RelativePlacement.Rotation = App.Rotation(rotx*roty*rotz)
     obj_class(new_obj, **args)
     ViewProvider(new_obj.ViewObject)
     return new_obj
@@ -1011,8 +1014,8 @@ class grating_mount_on_mk05pm:
         self.dx = 12/tan(radians(2*obj.LittrowAngle))
 
         _add_linked_object(obj, obj.Name+"_mount", mount_mk05pm, pos_offset=(1.4-6, 2, -3.5))
-        _add_linked_object(obj, obj.Name+"_grating", laser_grating, pos_offset=(0, 0, 6-3.5), rot_offset=(-obj.LittrowAngle.Value, 0, 0))
-        _add_linked_object(obj, obj.Name+"_mirror", square_mirror, pos_offset=(self.dx, -12, 6-3.5), rot_offset=(-obj.LittrowAngle.Value+180, 0, 0))
+        _add_linked_object(obj, obj.Name+"_grating", laser_grating, pos_offset=(0, 0, 6-3.5), rot_offset=(0, 0, -obj.LittrowAngle.Value))
+        _add_linked_object(obj, obj.Name+"_mirror", square_mirror, pos_offset=(self.dx, -12, 6-3.5), rot_offset=(0, 0, -obj.LittrowAngle.Value+180))
 
     def execute(self, obj):
         # TODO add some variables to make this cleaner
@@ -1422,6 +1425,31 @@ class square_mirror:
                            x=0, y=0, z=0, dir=(-1, 0, 0))
         obj.Shape = part
 
+class rb_cell:
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True):
+        obj.Proxy = self
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.ViewObject.ShapeColor=(0.6, 0.6, 0.65)
+        ViewProvider(obj.ViewObject)
+        self.part_numbers = []
+        self.tran = True
+        self.in_limit = 0
+        self.in_width = 1
+
+    def get_drill(self, obj):
+        part = _custom_box(110, 62, 25.4-INCH/2, 0, 5, -INCH/2, 3, (0,0,-1))
+        for x, y in [(1,1), (-1,1), (1,-1), (-1,-1)]:
+            part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, x*45, y*15.7, -INCH/2))
+        part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, 45, -15.7, -INCH/2))
+        for x in [1,-1]:
+            part = part.fuse(_mount_hole(TAP_DIA_8_32, drill_depth, x*45, 25.7, -INCH/2))
+        return part
+
+    def execute(self, obj):
+        mesh = _orient_stl("rb_cell_holder_middle.stl", (0, 0, 0), ([0, 5, 0]))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
 
 class ViewProvider:
     def __init__(self, obj):
