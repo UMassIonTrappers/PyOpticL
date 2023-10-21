@@ -64,7 +64,7 @@ Add Optical Elements
 
 layout.place_element("Laser_diode_LT230P-B", optomech.km05_50mm_laser, input_x, input_y, layout.cardinal['right'])
 
-layout.place_element_along_beam("Grating", optomech.grating_mount_on_mk05pm, beam, 0b1, layout.cardinal['left'], 40, littrow=littrow_angle)
+layout.place_element_along_beam("Grating", optomech.grating_mount_on_mk05pm, beam, 0b1, layout.cardinal['left'], 40, littrow_angle=littrow_angle)
 
 if wavelength == 422e-6:
     layout.place_element_along_beam("Input_Mirror_1", optomech.mirror_mount_km05, beam, 0b1, layout.turn['right-up'], 80)
