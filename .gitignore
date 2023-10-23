@@ -1,5 +1,9 @@
 .env
 *.cfg
 *.pyc
+*.backup
+*.dmp
+*.log
 .DS_Store
+SavedPreferencePacks
 webdata/

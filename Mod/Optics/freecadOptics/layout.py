@@ -24,6 +24,7 @@ turn = {"up-right":-45,
 # Obj class is the type of object, usually defined in another module
 def place_element(obj_name, obj_class, x, y, angle, optional=False, **args):
     obj = App.ActiveDocument.addObject(obj_class.type, obj_name)
+    obj.Label = obj_name
     obj_class(obj, **args)
     obj.Placement = App.Placement(App.Vector(x, y, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
     if optional:
@@ -34,10 +35,13 @@ def place_element(obj_name, obj_class, x, y, angle, optional=False, **args):
 # Obj class is the type of object, usually defined in another module
 def place_element_along_beam(obj_name, obj_class, beam_obj, beam_index, angle, distance=None, x=None, y=None, pre_refs=0, optional=False, **args):
     obj = App.ActiveDocument.addObject(obj_class.type, obj_name)
+    obj.Label = obj_name
     obj_class(obj, **args)
     obj.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
     if optional:
         obj.Proxy.tran = True
+        for i in obj.ChildObjects:
+            i.Proxy.tran = True
     obj.setEditorMode('Placement', 2)
     obj.addProperty("App::PropertyAngle","Angle").Angle = angle
     if distance != None:
@@ -53,6 +57,7 @@ def place_element_along_beam(obj_name, obj_class, beam_obj, beam_index, angle, d
 
 def place_element_relative(obj_name, obj_class, rel_obj, angle, x_off=0, y_off=0, optional=False, **args):
     obj = App.ActiveDocument.addObject(obj_class.type, obj_name)
+    obj.Label = obj_name
     obj_class(obj, **args)
     obj.Placement = App.Placement(App.Vector(0, 0, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
     if optional:
@@ -92,12 +97,13 @@ def redraw():
     for i in App.ActiveDocument.Objects:
         if hasattr(i, "ChildObjects"):
             for obj in i.ChildObjects:
-                obj.Placement.Base = i.Placement.Base + obj.RelativePlacement.Base
-                if hasattr(obj, "Angle"):
-                    obj.Placement.Rotation = App.Rotation(App.Vector(0, 0, 1), obj.Angle)
-                else:
-                    obj.Placement = App.Placement(obj.Placement.Base, i.Placement.Rotation, -obj.RelativePlacement.Base)
-                    obj.Placement.Rotation = obj.Placement.Rotation.multiply(obj.RelativePlacement.Rotation)
+                if hasattr(obj, "RelativePlacement"):
+                    obj.Placement.Base = i.Placement.Base + obj.RelativePlacement.Base
+                    if hasattr(obj, "Angle"):
+                        obj.Placement.Rotation = App.Rotation(App.Vector(0, 0, 1), obj.Angle)
+                    else:
+                        obj.Placement = App.Placement(obj.Placement.Base, i.Placement.Rotation, -obj.RelativePlacement.Base)
+                        obj.Placement.Rotation = obj.Placement.Rotation.multiply(obj.RelativePlacement.Rotation)
 
     for i in App.ActiveDocument.Objects:
         if hasattr(i, "Angle"):
@@ -111,6 +117,7 @@ def redraw():
     for i in App.ActiveDocument.Objects:
         if isinstance(i.Proxy, baseplate):
             i.touch()
+    App.ActiveDocument.recompute()
 
 def show_components(state):
     for i in App.ActiveDocument.Objects:

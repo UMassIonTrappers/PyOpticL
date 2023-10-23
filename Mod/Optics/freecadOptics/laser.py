@@ -219,12 +219,13 @@ class beam_path:
             for obj in check_objs:
                 if hasattr(obj, "ChildObjects"):
                     for child_obj in obj.ChildObjects:
-                        child_obj.Placement.Base = obj.Placement.Base + child_obj.RelativePlacement.Base
-                        if hasattr(child_obj, "Angle"):
-                            child_obj.Placement.Rotation = App.Rotation(App.Vector(0, 0, 1), child_obj.Angle)
-                        else:
-                            child_obj.Placement = App.Placement(child_obj.Placement.Base, obj.Placement.Rotation, -child_obj.RelativePlacement.Base)
-                            child_obj.Placement.Rotation = child_obj.Placement.Rotation.multiply(child_obj.RelativePlacement.Rotation)
+                        if hasattr(child_obj, "RelativePlacement"):
+                            child_obj.Placement.Base = obj.Placement.Base + child_obj.RelativePlacement.Base
+                            if hasattr(child_obj, "Angle"):
+                                child_obj.Placement.Rotation = App.Rotation(App.Vector(0, 0, 1), child_obj.Angle)
+                            else:
+                                child_obj.Placement = App.Placement(child_obj.Placement.Base, obj.Placement.Rotation, -child_obj.RelativePlacement.Base)
+                                child_obj.Placement.Rotation = child_obj.Placement.Rotation.multiply(child_obj.RelativePlacement.Rotation)
                 
             refs = []
             comp_d =[]

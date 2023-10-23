@@ -35,8 +35,8 @@ layout.place_element_along_beam("Beam_Splitter", optomech.pbs_on_skate_mount, be
 #layout.place_element_along_beam("Lens_f_30mm", optomech.lens_holder_l05g, beam, 0b11, layout.cardinal['right'], 10, foc_len=30)
 layout.place_element_along_beam("AOM", optomech.isomet_1205c_on_km100pm, beam, 0b11, layout.cardinal['right'], 40,  forward_direction=-1, backward_direction=1)
 layout.place_element_along_beam("Quarter_waveplate", optomech.rotation_stage_rsp05, beam, 0b110, layout.cardinal['left'], 74, wave_plate_part_num = '') #421nm custom waveplates from CASIX
-lens = layout.place_element_along_beam("Lens_f_100mm_AB_coat", optomech.lens_holder_l05g, beam, 0b110, layout.cardinal['left'], 26, focal_length=100, part_number='LA1213-AB')
-layout.place_element_along_beam("Iris", optomech.pinhole_ida12, beam, 0b111, layout.cardinal['right'], 7, pre_refs=2, drill_offset=-2)
+lens = layout.place_element_along_beam("Lens_f_100mm_AB_coat", optomech.lens_holder_l05g, beam, 0b110, layout.cardinal['left'], 26, lens_args=dict(focal_length=100, part_number='LA1213-AB'))
+layout.place_element_along_beam("Iris", optomech.pinhole_ida12, beam, 0b111, layout.cardinal['right'], 7, pre_refs=2, adapter_args=dict(drill_offset=-2))
 layout.place_element_relative("Retro_Mirror", mirror_mounts, lens, layout.cardinal['right'], -30)
 
 layout.place_element_along_beam("Output_Mirror_1", mirror_mounts, beam, 0b11110, layout.turn['right-down'], 25)

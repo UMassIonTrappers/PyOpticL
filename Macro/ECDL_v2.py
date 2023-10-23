@@ -69,11 +69,11 @@ layout.place_element_along_beam("Grating", optomech.grating_mount_on_mk05pm, bea
 if wavelength == 422e-6:
     layout.place_element_along_beam("Input_Mirror_1", optomech.mirror_mount_km05, beam, 0b1, layout.turn['right-up'], 80)
     layout.place_element_along_beam("Input_Mirror_2", optomech.mirror_mount_km05, beam, 0b1, layout.turn['up-left'], 40)
-    layout.place_element_along_beam("Optical_Isolator", optomech.isolator_405, beam, 0b1, layout.cardinal['left'], 55, mount_hole_dy=45)
+    layout.place_element_along_beam("Optical_Isolator", optomech.isolator_405, beam, 0b1, layout.cardinal['left'], 55, adapter_args=dict(mount_hole_dy=45))
 elif wavelength == 674e-6:
     layout.place_element_along_beam("Input_Mirror_1", optomech.mirror_mount_km05, beam, 0b1, layout.turn['right-up'], 70)
     layout.place_element_along_beam("Input_Mirror_2", optomech.mirror_mount_km05, beam, 0b1, layout.turn['up-left'], 40)
-    layout.place_element_along_beam("Optical_Isolator", optomech.isolator_670, beam, 0b1, layout.cardinal['left'], 55, mount_hole_dy=45)
+    layout.place_element_along_beam("Optical_Isolator", optomech.isolator_670, beam, 0b1, layout.cardinal['left'], 55, adapter_args=dict(mount_hole_dy=45))
 
 layout.place_element_along_beam("Fiber Coupler", optomech.fiberport_mount_km05, beam, 0b1, layout.cardinal['right'], 65)
 
