@@ -1,4 +1,4 @@
-# FreeCAD Mini Optics
+# PyOptix - A FreeCAD Workbench and Python Library for Creating Optical Layouts
 
 ### Based on MIT QUANTA LAB repo - C4PO ('CAD for Precision Optics') which is written for OpenSCAD
 
