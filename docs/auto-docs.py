@@ -12,7 +12,7 @@ Testing
 
 for i in matches:
     class_name = i[0]
-    docstring = i[1].replace("\n", "  \n").replace("\n    ", "\n")
+    docstring = i[1].replace("\n", "  \n")
     optomech_docs.write("### %s\n"%(class_name))
     optomech_docs.write("%s\n"%(docstring))
 
