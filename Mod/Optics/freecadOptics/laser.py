@@ -325,7 +325,7 @@ class ViewProvider:
         "X c #ED9092",
         "o c #EDBDBD",
         "O c #EDDFDF",
-        "+ c white",
+        "+ c None",
         /* pixels */
         "+++++++++..XooOO",
         "++++++..+..XXooO",
