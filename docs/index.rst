@@ -10,7 +10,12 @@ Welcome to PyOptic's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   Mod/Optics/freecadOptics/optomech
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+   :recursive:
+
+   ../Mod/Optics/freecadOptics
 
 Indices and tables
 ==================

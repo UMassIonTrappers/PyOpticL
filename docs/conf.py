@@ -13,7 +13,11 @@ author = 'Jacob Myers'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
+extensions = [
+    'sphinx.ext.autodoc',  # Core library for html generation from docstrings
+    'sphinx.ext.autosummary',  # Create neat summary tables
+]
+autosummary_generate = True  # Turn on sphinx.ext.autosummary
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
