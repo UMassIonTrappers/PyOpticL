@@ -14,6 +14,9 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: "3.10"
-        
-    - name: Install dependencies
+    - name: Run Script
       run: python docs/auto-docs.py
+    - name: Commit & Push Changes
+      uses: Andro999b/push@v1.3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
