@@ -233,6 +233,7 @@ class skate_mount:
         mount_hole_dy (float) : The spacing between the two mount holes of the adapter
         cube_depth (float) : The depth of the recess for the cube
         outer_thickness (float) : The thickness of the walls around the bolt holes
+        cube_tol (float) : The tolerance for size of the recess in the skate mount
     '''
     type = 'Part::FeaturePython'
     def __init__(self, obj, drill=True, cube_size=10, mount_hole_dy=20, cube_depth=1, outer_thickness=2, cube_tol=0.1):
