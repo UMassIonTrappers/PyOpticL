@@ -16,4 +16,4 @@ jobs:
         python-version: "3.10"
         
     - name: Install dependencies
-      run: ls
+      run: python docs/auto-docs.py
