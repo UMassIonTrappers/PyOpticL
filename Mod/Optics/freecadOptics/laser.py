@@ -9,7 +9,7 @@ def is_mult(x, factor, tol=1e-5):
     return isclose((abs(x)+tol/2)%factor, 0, abs_tol=tol)
 
 # calculate intersection between two lines given the origin and angle of both
-def find_interaction(x1, y1, a1, ref_obj, len=0):
+def check_interaction(x1, y1, a1, ref_obj, len=0):
 
     # check if object is an optical component
     if not (hasattr(ref_obj.Proxy, 'in_limit') and hasattr(ref_obj.Proxy, 'in_width')):
@@ -230,7 +230,7 @@ class beam_path:
             refs = []
             comp_d =[]
             for obj in check_objs:
-                ref = find_interaction(x1, y1, a1, obj) # check for reflection
+                ref = check_interaction(x1, y1, a1, obj) # check for reflection
                 if ref != None:
                     refs.append(ref)
                     comp_d.append(sqrt((ref[1]-x1)**2+(ref[2]-y1)**2))
@@ -270,7 +270,7 @@ class beam_path:
             if inline_ref and ref_obj == self.comp_track[-1]:
                 for i in self.beams[:]:
                     if i[4] != beam_index:
-                        ref = find_interaction(i[0],i[1],i[2],ref_obj,i[3])
+                        ref = check_interaction(i[0],i[1],i[2],ref_obj,i[3])
                         if ref != None:
                             for beam in self.beams[::-1]:
                                 if beam[4]>>int(abs(log2(beam[4]/i[4]))) == i[4]:
