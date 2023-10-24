@@ -1,4 +1,4 @@
-# FreeCAD Mini Optics
+## PyOptix - A FreeCAD Workbench and Python Library for Creating Optical Layouts
 
 ### Based on MIT QUANTA LAB repo - C4PO ('CAD for Precision Optics') which is written for OpenSCAD
 
@@ -69,7 +69,7 @@ There are a few important things to ensure before you can use the FreeCAD for op
 	To do this on windows, run the following in a terminal:  
 	```cd "C:\Users\<username goes here>\AppData\Roaming\FreeCAD"```  
 	```git init -b main```  
-	```git remote add origin "https://github.com/UMassIonTrappers/FreeCAD.git"```  
+	```git remote add origin "https://github.com/UMassIonTrappers/PyOptix.git"```  
 	```git config --global --add safe.directory "C:/Users/<username goes here>/AppData/Roaming/FreeCAD"```  
 	```git pull origin main```  
 		
