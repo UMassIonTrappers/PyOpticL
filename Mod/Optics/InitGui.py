@@ -2,7 +2,7 @@ import FreeCADGui as Gui
 
 class OpticsWorkbench (Workbench):
 
-    MenuText = "Optics"
+    MenuText = "PyOptix"
     ToolTip = "A workbench for designing baseplates for optical layouts"
     Icon =  """
             /* XPM */
@@ -41,8 +41,8 @@ class OpticsWorkbench (Workbench):
         """
         import guiCommands
         self.toolbar = ["ReloadModules","RecomputeBeam", "ShowComponents", "ExportSTLs", "TopViewFit", "ExportCart"] # A list of command names created in the line above
-        self.appendToolbar("Optics Commands",self.toolbar) # creates a new toolbar with your commands
-        self.appendMenu(["Optics"],self.toolbar) # appends a submenu to an existing menu
+        self.appendToolbar("PyOptix Commands",self.toolbar) # creates a new toolbar with your commands
+        self.appendMenu(["PyOptix"],self.toolbar) # appends a submenu to an existing menu
 
     def Activated(self):
         """This function is executed whenever the workbench is activated"""
@@ -55,7 +55,7 @@ class OpticsWorkbench (Workbench):
     def ContextMenu(self, recipient):
         """This function is executed whenever the user right-clicks on screen"""
         # "recipient" will be either "view" or "tree"
-        self.appendContextMenu("Optics Commands",self.toolbar) # add commands to the context menu
+        self.appendContextMenu("PyOptix Commands",self.toolbar) # add commands to the context menu
 
     def GetClassName(self): 
         # This function is mandatory if this is a full Python workbench
