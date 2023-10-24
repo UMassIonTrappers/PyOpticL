@@ -6,9 +6,7 @@ matches = re.findall("class ([^ ]*?):\n +\'\'\'(.*?)\'\'\'", optomech_file, re.D
 
 optomech_docs = open("docs/README.md", 'w')
 
-optomech_docs.write('''
-Testing
-''')
+optomech_docs.write('''## Auto-Generated Optomech Library Documentation''')
 
 for i in matches:
     class_name = i[0]
