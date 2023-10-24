@@ -10,7 +10,7 @@ Welcome to PyOptic's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
+   Mod/Optics/freecadOptics/optomech
 
 Indices and tables
 ==================
