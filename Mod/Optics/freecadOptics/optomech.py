@@ -138,7 +138,7 @@ class example_component:
 class baseplate_mount:
     '''
     Mount holes for attaching to an optical table
-    Currently uses 14_20 bolts
+    Uses 14_20 bolts with washers
 
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
