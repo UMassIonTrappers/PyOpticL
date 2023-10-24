@@ -1,4 +1,5 @@
-## Auto-Generated Optomech Library Documentation### example_component
+## Auto-Generated Optomech Library Documentation  
+### example_component
   
     An example component class for reference on importing new components  
     creates a simple cube which mounts using a single bolt  
