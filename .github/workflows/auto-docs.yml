@@ -16,7 +16,13 @@ jobs:
         python-version: "3.10"
     - name: Run Script
       run: python docs/auto-docs.py
-    - name: Commit & Push Changes
-      uses: Andro999b/push@v1.3
+    - name: Commit Changes
+      run: |
+        git config --local user.email "bot@github.actions.com"
+        git config --local user.name "Github-Actions"
+        git commit -a -m "Update Auto-Docs"
+    - name: Push changes
+      uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
