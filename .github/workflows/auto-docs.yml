@@ -1,0 +1,28 @@
+name: Generate Optomech Documentation
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+    - name: Run Script
+      run: python docs/auto-docs.py
+    - name: Commit Changes
+      run: |
+        git config --local user.email "bot@github.actions.com"
+        git config --local user.name "Github-Actions"
+        git commit -a -m "Update Auto-Docs"
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
