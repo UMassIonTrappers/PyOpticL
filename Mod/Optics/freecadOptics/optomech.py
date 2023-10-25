@@ -529,15 +529,15 @@ class mirror_mount_k05s2:
 
     def get_drill(self, obj):
         part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                           x=-8-self.x_offset, y=0, z=-INCH/2)
+                           x=-8+self.x_offset, y=0, z=-INCH/2)
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-8-self.x_offset, y=-5, z=-INCH/2))
+                                     x=-8+self.x_offset, y=-5, z=-INCH/2))
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-8-self.x_offset, y=5, z=-INCH/2))
+                                     x=-8+self.x_offset, y=5, z=-INCH/2))
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/POLARIS-K05S2-Solidworks.stl", (0, -pi/2, 0), (-4.5-self.x_offset, -0.3, -0.25), 1000)
+        mesh = _orient_stl("thorlabs/POLARIS-K05S2-Solidworks.stl", (0, -pi/2, 0), (-4.5+self.x_offset, -0.3, -0.25), 1000)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -571,15 +571,15 @@ class mirror_mount_k05s1:
 
     def get_drill(self, obj):
         part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                           x=-8-self.x_offset, y=0, z=-INCH/2)
+                           x=-8+self.x_offset, y=0, z=-INCH/2)
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-8-self.x_offset, y=-5, z=-INCH/2))
+                                     x=-8+self.x_offset, y=-5, z=-INCH/2))
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-8-self.x_offset, y=5, z=-INCH/2))
+                                     x=-8+self.x_offset, y=5, z=-INCH/2))
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/POLARIS-K05S1-Solidworks.stl", (0, 0, -pi/2), (-4.5-self.x_offset, -0.3+0.5, -0.25), 1)
+        mesh = _orient_stl("thorlabs/POLARIS-K05S1-Solidworks.stl", (0, 0, -pi/2), (-4.5+self.x_offset, -0.3+0.5, -0.25), 1)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -613,15 +613,15 @@ class mirror_mount_b05g:
 
     def get_drill(self, obj):
         part = _custom_cylinder(dia=bolt_8_32['tap_dia'],
-                           dz=drill_depth, x=-4-self.x_offset, y=0, z=-INCH/2)
+                           dz=drill_depth, x=-4+self.x_offset, y=0, z=-INCH/2)
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-4-self.x_offset, y=-5, z=-INCH/2))
+                                     x=-4+self.x_offset, y=-5, z=-INCH/2))
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-4-self.x_offset, y=5, z=-INCH/2))
+                                     x=-4+self.x_offset, y=5, z=-INCH/2))
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/POLARIS-B05G-Solidworks.stl", (pi/2, 0, pi/2), (-16.7-self.x_offset, -9.0, -18.2-1.05))
+        mesh = _orient_stl("thorlabs/POLARIS-B05G-Solidworks.stl", (pi/2, 0, pi/2), (-16.7+self.x_offset, -9.0, -18.2-1.05))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -655,15 +655,15 @@ class mirror_mount_c05g:
 
     def get_drill(self, obj):
         part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                           x=-6.4-self.x_offset, y=0, z=-INCH/2)
+                           x=-6.4+self.x_offset, y=0, z=-INCH/2)
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-6.4-self.x_offset, y=-5, z=-INCH/2))
+                                     x=-6.4+self.x_offset, y=-5, z=-INCH/2))
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-6.4-self.x_offset, y=5, z=-INCH/2))
+                                     x=-6.4+self.x_offset, y=5, z=-INCH/2))
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/POLARIS-C05G-Solidworks.stl", (pi/2, 0, pi/2), (-19-self.x_offset, -4.3, -15.2), 1000)
+        mesh = _orient_stl("thorlabs/POLARIS-C05G-Solidworks.stl", (pi/2, 0, pi/2), (-19+self.x_offset, -4.3, -15.2), 1000)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
