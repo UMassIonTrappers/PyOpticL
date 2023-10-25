@@ -52,8 +52,8 @@ def check_interaction(x1, y1, a1, ref_obj, len=0):
     if a_rel > pi:
         a_rel = 2*pi-a_rel
 
-    # check if placement is suitable for reflection
-    if a_in < in_limit or a_rel > pi/2:
+    # check beam direction
+    if a_rel > pi/2:
         return
     
     if hasattr(ref_obj.Proxy, 'diff_dir') and angle2 != None:
@@ -96,6 +96,10 @@ def check_interaction(x1, y1, a1, ref_obj, len=0):
                 return
         else:
             return
+        
+    # check component angle
+    if a_in < in_limit:
+        block = True
         
     # distance from beam start to intersection point
     beam_d = sqrt((x2-x1)**2+(y2-y1)**2)

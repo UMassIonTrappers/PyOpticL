@@ -977,15 +977,15 @@ class splitter_mount_c05g:
 
     def get_drill(self, obj):
         part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                           x=-6.4-self.x_offset, y=0, z=-INCH/2)
+                           x=-6.4+self.x_offset, y=0, z=-INCH/2)
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-6.4-self.x_offset, y=-5, z=-INCH/2))
+                                     x=-6.4+self.x_offset, y=-5, z=-INCH/2))
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-6.4-self.x_offset, y=5, z=-INCH/2))
+                                     x=-6.4+self.x_offset, y=5, z=-INCH/2))
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/POLARIS-C05G-Solidworks.stl", (pi/2, 0, pi/2), (-19-self.x_offset, -4.3, -15.2), 1000)
+        mesh = _orient_stl("thorlabs/POLARIS-C05G-Solidworks.stl", (pi/2, 0, pi/2), (-19+self.x_offset, -4.3, -15.2), 1000)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1271,7 +1271,7 @@ class circular_splitter:
         part_number (string) : The part number of the plate being used
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, thickness=6, diameter=INCH/2, part_number=''):
+    def __init__(self, obj, drill=True, thickness=2, diameter=INCH/2, part_number=''):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
