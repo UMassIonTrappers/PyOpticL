@@ -84,7 +84,8 @@ def create_baseplate(dx, dy, dz, optics_dz=INCH/2, drill=True, name="Baseplate",
 
 # Create a new dynamic beam path
 def add_beam_path(x, y, angle):
-    obj = App.ActiveDocument.addObject('Part::FeaturePython', "Beam_Path")
+    obj = App.ActiveDocument.addObject('Part::FeaturePython', "Beam Path")
+    obj.Label = "Beam Path"
     laser.beam_path(obj)
     obj.Placement = App.Placement(App.Vector(x, y, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
     laser.ViewProvider(obj.ViewObject)

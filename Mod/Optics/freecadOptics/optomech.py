@@ -492,7 +492,7 @@ class rotation_stage_rsp05:
         self.in_limit = pi/2
         self.in_width = INCH/2
 
-        _add_linked_object(obj, "Surface_Adapter", surface_adapter, pos_offset=(0, 0, -14), **adapter_args)
+        _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(0, 0, -14), **adapter_args)
 
     def execute(self, obj):
         mesh = _orient_stl("thorlabs/RSP05-Solidworks.stl", (pi/2, 0, pi/2), (0.6, 0, 0), 1000)
@@ -773,8 +773,8 @@ class km05_50mm_laser:
         self.in_width = 1
 
         mount = _add_linked_object(obj, "Mount", mirror_mount_km05, pos_offset=(-6, 0, 0), drill=False, mirror=False, **mount_args)
-        upper_plate = _add_linked_object(obj, "Upper_Plate", km05_tec_upper_plate, pos_offset=(-10, 0, -0.08*INCH), drill_obj=mount, **upper_plate_args)
-        _add_linked_object(obj, "Lower_Plate", km05_tec_lower_plate, pos_offset=(-10, 0, -0.08*INCH-tec_thickness-upper_plate.Thickness.Value), **lower_plate_args)
+        upper_plate = _add_linked_object(obj, "Upper Plate", km05_tec_upper_plate, pos_offset=(-10, 0, -0.08*INCH), drill_obj=mount, **upper_plate_args)
+        _add_linked_object(obj, "Lower Plate", km05_tec_lower_plate, pos_offset=(-10, 0, -0.08*INCH-tec_thickness-upper_plate.Thickness.Value), **lower_plate_args)
 
     def execute(self, obj):
         part = _custom_cylinder(dia=INCH/2, dz=40,
@@ -816,7 +816,7 @@ class km05_tec_lower_plate:
         self.part_numbers = []
 
     def get_drill(self, obj):
-        part = _custom_box(1.5*INCH+5, 1.5*INCH+5, drill_depth, 0, 0, -INCH/2-obj.Thickness.Value, 3, dir=(0, 0, 1))
+        part = _custom_box(obj.Width.Value+5, obj.Width.Value+5, drill_depth, 0, 0, -INCH/2-obj.Thickness.Value, 3, dir=(0, 0, 1))
         for x, y in [(1,1), (1,-1), (-1,1), (-1,-1)]:
             part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
                                               x=(obj.Width.Value/2-4)*x, y=(obj.Width.Value/2-4)*y, z=0, dir=(0, 0, -1)))
@@ -923,7 +923,7 @@ class grating_mount_on_mk05pm:
         self.part_numbers = []
         self.dx = 12/tan(radians(2*obj.LittrowAngle))
 
-        _add_linked_object(obj, "Mount_MK05PM", mount_mk05pm, pos_offset=(1.4-6, 2, -3.5), **mount_args)
+        _add_linked_object(obj, "Mount MK05PM", mount_mk05pm, pos_offset=(1.4-6, 2, -3.5), **mount_args)
         _add_linked_object(obj, "Grating", square_grating, pos_offset=(0, 0, 6-3.5), rot_offset=(0, 0, -obj.LittrowAngle.Value), **grating_args)
         _add_linked_object(obj, "Mirror", square_mirror, pos_offset=(self.dx, -12, 6-3.5), rot_offset=(0, 0, -obj.LittrowAngle.Value+180), **mirror_args)
 
@@ -963,7 +963,7 @@ class splitter_mount_c05g:
         circular_splitter (splitter_args)
     '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, drill=True, splitter_args=dict()):
+    def __init__(self, obj, drill=True, plate_args=dict()):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -972,19 +972,20 @@ class splitter_mount_c05g:
         obj.ViewObject.ShapeColor = mount_color
         self.part_numbers = ['POLARIS-C05G']
 
-        _add_linked_object(obj, "Splitter_Plate", circular_splitter, **splitter_args)
+        _add_linked_object(obj, "Splitter Plate", circular_splitter, **plate_args)
+        self.x_offset = -obj.ChildObjects[0].Thickness.Value
 
     def get_drill(self, obj):
         part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                           x=-6.4-obj.PlateThickness.Value, y=0, z=-INCH/2)
+                           x=-6.4-self.x_offset, y=0, z=-INCH/2)
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-6.4-obj.PlateThickness.Value, y=-5, z=-INCH/2))
+                                     x=-6.4-self.x_offset, y=-5, z=-INCH/2))
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-6.4-obj.PlateThickness.Value, y=5, z=-INCH/2))
+                                     x=-6.4-self.x_offset, y=5, z=-INCH/2))
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/POLARIS-C05G-Solidworks.stl", (pi/2, 0, pi/2), (-19-obj.PlateThickness.Value, -4.3, -15.2), 1000)
+        mesh = _orient_stl("thorlabs/POLARIS-C05G-Solidworks.stl", (pi/2, 0, pi/2), (-19-self.x_offset, -4.3, -15.2), 1000)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1052,7 +1053,7 @@ class pinhole_ida12:
         self.block_width=INCH/2
         self.slot_length=adapter_args['slot_length']
 
-        _add_linked_object(obj, "Slide_Mount", slide_mount,
+        _add_linked_object(obj, "Slide Mount", slide_mount,
                            pos_offset=(-0.75, -12.85, 0), **adapter_args)
 
     def get_drill(self, obj):
@@ -1137,9 +1138,9 @@ class isomet_1205c_on_km100pm:
         self.in_width = 5
 
         # TODO fix these parts to remove arbitrary translations
-        _add_linked_object(obj, "Mount_KM100PM", prism_mount_km100pm,
+        _add_linked_object(obj, "Mount KM100PM", prism_mount_km100pm,
                            pos_offset=(-(51.8-25.7-12+15.17), -(6.35+0.089*INCH/2), -6.98), **mount_args)
-        _add_linked_object(obj, "Adapter_Bracket", mount_for_km100pm,
+        _add_linked_object(obj, "Adapter Bracket", mount_for_km100pm,
                            pos_offset=(-(51.8-25.7-12+15.17), -(6.35+0.089*INCH/2), -6.98), **adapter_args)
 
     def execute(self, obj):
@@ -1172,7 +1173,7 @@ class isolator_670:
         self.in_limit = pi/2
         self.in_width = INCH/2
 
-        _add_linked_object(obj, "Surface_Adapter", surface_adapter,
+        _add_linked_object(obj, "Surface Adapter", surface_adapter,
                            pos_offset=(0, 0, -22.1), **adapter_args)
 
     def get_drill(self, obj):
@@ -1211,7 +1212,7 @@ class isolator_405:
         self.in_limit = pi/2
         self.in_width = INCH/2
 
-        _add_linked_object(obj, "Surface_Adapter", surface_adapter,
+        _add_linked_object(obj, "Surface Adapter", surface_adapter,
                            pos_offset=(0, 0, -17.15), **adapter_args)
 
     def get_drill(self, obj):
@@ -1463,8 +1464,8 @@ class periscope:
         self.in_width = 1
         self.z_off = -INCH/2-obj.TableMount*INCH
 
-        _add_linked_object(obj, "Lower_Mirror", mirror_type, rot_offset=((-1)**invert*90, -45, 0), pos_offset=(0, 0, obj.LowerHeight.Value+self.z_off))
-        _add_linked_object(obj, "Upper_Mirror", mirror_type, rot_offset=((-1)**invert*90, 135, 0), pos_offset=(0, 0, obj.UpperHeight.Value+self.z_off))
+        _add_linked_object(obj, "Lower Mirror", mirror_type, rot_offset=((-1)**invert*90, -45, 0), pos_offset=(0, 0, obj.LowerHeight.Value+self.z_off))
+        _add_linked_object(obj, "Upper Mirror", mirror_type, rot_offset=((-1)**invert*90, 135, 0), pos_offset=(0, 0, obj.UpperHeight.Value+self.z_off))
 
     def get_drill(self, obj):
         part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=INCH,
