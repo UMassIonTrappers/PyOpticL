@@ -584,31 +584,31 @@ class mirror_mount_k05s1:
         obj.Mesh = mesh
 
 
-class mirror_mount_b05g:
+class splitter_mount_b05g:
     '''
-    Mirror mount, model B05G
+    Splitter mount, model B05G
 
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
-        mirror (bool) : Whether to add a mirror component to the mount
+        splitter (bool) : Whether to add a splitter plate component to the mount
 
     Sub-Parts:
-        circular_mirror (mirror_args)
+        circular_splitter (mirror_args)
     '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, drill=True, mirror=True, mirror_args=dict()):
+    def __init__(self, obj, drill=True, splitter=True, splitter_args=dict()):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
-        obj.addProperty('App::PropertyBool', 'Mirror').Mirror = mirror
+        obj.addProperty('App::PropertyBool', 'Splitter').Splitter = splitter
 
         obj.ViewObject.ShapeColor = mount_color
         self.part_numbers = ['POLARIS-B05G']
         self.x_offset = 0
 
-        if mirror:
-            _add_linked_object(obj, "Mirror", circular_mirror, **mirror_args)
+        if splitter:
+            _add_linked_object(obj, "Splitter Plate", circular_splitter, **splitter_args)
             self.x_offset = -obj.ChildObjects[0].Thickness.Value
 
     def get_drill(self, obj):
@@ -621,7 +621,7 @@ class mirror_mount_b05g:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/POLARIS-B05G-Solidworks.stl", (pi/2, 0, pi/2), (-16.7+self.x_offset, -9.0, -18.2-1.05))
+        mesh = _orient_stl("thorlabs/POLARIS-B05G-Solidworks.stl", (pi/2, 0, pi/2), (-17.54+self.x_offset, -9.0, -18.2-1.05))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -952,44 +952,6 @@ class grating_mount_on_mk05pm:
         obj.Shape = part
 
 
-class splitter_mount_c05g:
-    '''
-    Splitter mount, model C05G
-
-    Args:
-        drill (bool) : Whether baseplate mounting for this part should be drilled
-
-    Sub_Parts:
-        circular_splitter (splitter_args)
-    '''
-    type = 'Mesh::FeaturePython'
-    def __init__(self, obj, drill=True, plate_args=dict()):
-        obj.Proxy = self
-        ViewProvider(obj.ViewObject)
-
-        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
-
-        obj.ViewObject.ShapeColor = mount_color
-        self.part_numbers = ['POLARIS-C05G']
-
-        _add_linked_object(obj, "Splitter Plate", circular_splitter, **plate_args)
-        self.x_offset = -obj.ChildObjects[0].Thickness.Value
-
-    def get_drill(self, obj):
-        part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                           x=-6.4+self.x_offset, y=0, z=-INCH/2)
-        part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-6.4+self.x_offset, y=-5, z=-INCH/2))
-        part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-6.4+self.x_offset, y=5, z=-INCH/2))
-        return part
-
-    def execute(self, obj):
-        mesh = _orient_stl("thorlabs/POLARIS-C05G-Solidworks.stl", (pi/2, 0, pi/2), (-19+self.x_offset, -4.3, -15.2), 1000)
-        mesh.Placement = obj.Mesh.Placement
-        obj.Mesh = mesh
-
-
 class lens_holder_l05g:
     '''
     Lens Holder, Model L05G
@@ -1271,7 +1233,7 @@ class circular_splitter:
         part_number (string) : The part number of the plate being used
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, thickness=2, diameter=INCH/2, part_number=''):
+    def __init__(self, obj, drill=True, thickness=3, diameter=INCH/2, part_number=''):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 

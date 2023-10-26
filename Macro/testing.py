@@ -17,7 +17,7 @@ beam = layout.add_beam_path(100, 200, -90)
 #beam3 = layout.add_beam_path(96, 200, -90)
 
 layout.place_element_along_beam("RB_Cell", optomech.rb_cell, beam, 0b1, -90, 80)
-layout.place_element_along_beam("Mirror", optomech.mirror_mount_k05s2, beam, 0b1, 45, 80)
+layout.place_element_along_beam("Mirror", optomech.splitter_mount_b05g, beam, 0b1, 45, 80)
 #layout.place_element_along_beam("Beam_Splitter", optomech.pbs_on_skate_mount, beam, 0b1, -90, 25)
 
 #ayout.place_element_along_beam("Input_Mirror_1", optomech.mirror_mount_k05s2, beam, 0b11, -135, 30)
