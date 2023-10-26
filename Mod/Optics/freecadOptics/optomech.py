@@ -1381,7 +1381,7 @@ class rb_cell:
         dy = 52
 
         part = _custom_box(dx=dx+20, dy=dy+20, dz=25.4-INCH/2,
-                           x=0, y=5, z=-INCH/2,
+                           x=0, y=10, z=-INCH/2,
                            fillet=3, dir=(0,0,-1))
         for x, y in [(1,1), (-1,1), (1,-1), (-1,-1)]:
             part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
@@ -1395,6 +1395,39 @@ class rb_cell:
 
     def execute(self, obj):
         mesh = _orient_stl("thorlabs/rb_cell_holder_middle.stl", (0, 0, 0), ([0, 5, 0]))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+
+class photodetector_pda10a2:
+    '''
+    Photodetector, model pda10a2
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+    
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+
+        obj.ViewObject.ShapeColor = misc_color
+        self.in_limit = 0
+        self.in_width = 1
+
+        _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(-12.68, 0, -25))
+
+    def get_drill(self, obj):
+        part = _custom_box(dx=30, dy=55, dz=25-INCH/2,
+                           x=-12.68, y=0, z=-INCH/2,
+                           fillet=3, dir=(0,0,-1))
+        return part
+
+    def execute(self, obj):
+        mesh = _orient_stl("thorlabs/PDA10A2.stl", (pi/2, 0, -pi/2), ([-22, 0, 0]))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
