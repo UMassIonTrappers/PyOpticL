@@ -115,16 +115,16 @@
     Sub-Parts:  
         circular_mirror (mirror_args)  
     
-### mirror_mount_b05g
+### splitter_mount_b05g
   
-    Mirror mount, model B05G  
+    Splitter mount, model B05G  
   
     Args:  
         drill (bool) : Whether baseplate mounting for this part should be drilled  
-        mirror (bool) : Whether to add a mirror component to the mount  
+        splitter (bool) : Whether to add a splitter plate component to the mount  
   
     Sub-Parts:  
-        circular_mirror (mirror_args)  
+        circular_splitter (mirror_args)  
     
 ### mirror_mount_c05g
   
@@ -201,16 +201,6 @@
         mount_mk05pm (mount_args)  
         square_grating (grating_args)  
         square_mirror (mirror_args)  
-    
-### splitter_mount_c05g
-  
-    Splitter mount, model C05G  
-  
-    Args:  
-        drill (bool) : Whether baseplate mounting for this part should be drilled  
-  
-    Sub_Parts:  
-        circular_splitter (splitter_args)  
     
 ### lens_holder_l05g
   
