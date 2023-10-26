@@ -324,6 +324,14 @@
     Args:  
         drill (bool) : Whether baseplate mounting for this part should be drilled  
     
+### photodetector_pda10a2
+  
+    Photodetector, model pda10a2  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+      
+    
 ### periscope
   
     Custom periscope mount  
