@@ -474,6 +474,7 @@ class rotation_stage_rsp05:
     Rotation stage, model RSP05
 
     Args:
+        invert (bool) : Whether the mount should be offset 90 degrees from the component
         mount_hole_dy (float) : The spacing between the two mount holes of it's adapter
         wave_plate_part_num (string) : The Thorlabs part number of the wave plate being used
 
@@ -481,10 +482,12 @@ class rotation_stage_rsp05:
         surface_adapter (adapter_args)
     '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, wave_plate_part_num='', adapter_args=dict()):
+    def __init__(self, obj, invert=False, wave_plate_part_num='', adapter_args=dict()):
         adapter_args.setdefault("mount_hole_dy", 25)
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Invert').Invert = invert
 
         obj.ViewObject.ShapeColor = misc_color
         self.part_numbers = ['RSP05', wave_plate_part_num]
@@ -492,7 +495,7 @@ class rotation_stage_rsp05:
         self.in_limit = pi/2
         self.in_width = INCH/2
 
-        _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(0, 0, -14), **adapter_args)
+        _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(0, 0, -14), rot_offset=(0, 0, 90*obj.Invert), **adapter_args)
 
     def execute(self, obj):
         mesh = _orient_stl("thorlabs/RSP05-Solidworks.stl", (pi/2, 0, pi/2), (0.6, 0, 0), 1000)
