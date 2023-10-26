@@ -87,6 +87,7 @@
     Rotation stage, model RSP05  
   
     Args:  
+        invert (bool) : Whether the mount should be offset 90 degrees from the component  
         mount_hole_dy (float) : The spacing between the two mount holes of it's adapter  
         wave_plate_part_num (string) : The Thorlabs part number of the wave plate being used  
   
