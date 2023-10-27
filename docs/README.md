@@ -1,4 +1,79 @@
-## Auto-Generated Optomech Library Documentation  
+# Auto-Generated Documentation  
+## Layout  
+### baseplate
+  
+    A class for defining new baseplates  
+  
+    Args:  
+        dx, dy, dz (float): The footprint of the baseplate including the gaps  
+        x, y (float): The coordinates the baseplate (and all elements) should be placed at (in inches)  
+        gap (float): The amount of material to remove around the edge of the baseplate  
+        name (string): Name of the baseplate object  
+        drill (bool): Whether or not the baseplate should be drilled  
+        mount_holes (tuple[]): An array representing the x and y coordinates of each mount point (in inches)  
+        label (string): The label to be embossed into the side of the baseplate  
+        x_offset, y_offset (float): Additional offset from the grid in the x and y directions  
+        optics_dz (float): The optical height of baseplate  
+    
+### table_grid
+  
+    Add an optical table mounting grid  
+  
+    Args:  
+        dx, yy (float): The dimentions of the table grid (in inches)  
+        z_off (float): The z offset of the top of the grid surface  
+    
+### baseplate.place_element
+  
+        Place an element at a fixed coordinate on the baseplate  
+  
+        Args:  
+            name (string): Label for the object  
+            obj_class (class): The object class associated with the part to be placed  
+            x, y (float): The coordinates the object should be placed at  
+            angle (float): The rotation of the object about the z axis  
+            optional (bool): If this is true the object will also transmit beams  
+            args (any): Additional args to be passed to the object (see object class docs)  
+        
+### baseplate.place_element_along_beam
+  
+        Place an element at along a given beam path  
+  
+        Args:  
+            name (string): Label for the object  
+            obj_class (class): The object class associated with the part to be placed  
+            beam_obj (beam_path): The beam path object to be associated with this object  
+            beam_index (int): The beam index the object should be placed along (binary format recommended)  
+            angle (float): The rotation of the object about the z axis  
+            distance, x, y (float): The constraint of the placement, either a distance from the last object or a single coordinate value  
+            pre_refs (int): The number of interactions which must take place before this object can be placed along the beam  
+            optional (bool): If this is true the object will also transmit beams  
+            args (any): Additional args to be passed to the object (see object class docs)  
+        
+### baseplate.place_element_relative
+  
+        Place an element relative to another object  
+  
+        Args:  
+            name (string): Label for the object  
+            obj_class (class): The object class associated with the part to be placed  
+            rel_obj (obj): The parent object which this object will be relative to  
+            angle (float): The rotation of the object about the z axis  
+            x_off, y_off (float): The offset between the parent object and this object  
+            optional (bool): If this is true the object will also transmit beams  
+            args (any): Additional args to be passed to the object (see object class docs)  
+        
+### baseplate.add_beam_path
+  
+        Add a new dynamic beam path  
+  
+        Args:  
+            x, y (float): The coordinate the beam should enter at  
+            angle (float): The angle the beam should enter at  
+            name (string): Label for the beam path object  
+            color (float[3]): Color of the beam path object in RGB format  
+        
+## Optomech  
 ### example_component
   
     An example component class for reference on importing new components  
