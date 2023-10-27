@@ -34,8 +34,9 @@ class baseplate:
         label (string): The label to be embossed into the side of the baseplate
         x_offset, y_offset (float): Additional offset from the grid in the x and y directions
         optics_dz (float): The optical height of baseplate
+        invert_label (bool): Wheather to switch the face the label is embossed on
     '''
-    def __init__(self, dx, dy, dz, x=0, y=0, gap=0, name="Baseplate", drill=True, mount_holes=[], label="", x_offset=0, y_offset=0, optics_dz=inch/2, x_split=0, y_split=0):
+    def __init__(self, dx, dy, dz, x=0, y=0, gap=0, name="Baseplate", drill=True, mount_holes=[], label="", x_offset=0, y_offset=0, optics_dz=inch/2, x_split=0, y_split=0, invert_label=False):
         obj = App.ActiveDocument.addObject('Part::FeaturePython', name)
         ViewProvider(obj.ViewObject)
         obj.Proxy = self
@@ -51,6 +52,7 @@ class baseplate:
         obj.addProperty('App::PropertyLength', 'OpticsDz').OpticsDz = optics_dz
         obj.addProperty('App::PropertyLength', 'xSplit').xSplit = x_split
         obj.addProperty('App::PropertyLength', 'ySplit').ySplit = y_split
+        obj.addProperty('App::PropertyLength', 'InvertLabel').InvertLabel = invert_label
 
         obj.Placement = App.Placement(App.Vector(x*inch, y*inch, 0), App.Rotation(0, 0, 0), App.Vector(0, 0, 0))
         self.active_baseplate = obj.Name
@@ -198,17 +200,16 @@ class baseplate:
                         temp.translate(App.Vector(-obj.Placement.Base))
                         part = part.cut(temp)
         if obj.CutLabel != "":
-            face = Draft.make_shapestring(obj.CutLabel, str(Path(__file__).parent.resolve()) + "/font/OpenSans-Regular.ttf", 4)
-            if obj.dy > obj.dx:
-                face.Placement.Base = App.Vector(0, (obj.dy.Value-5), -inch-10)
-                face.Placement.Rotation = App.Rotation(App.Vector(-0.5773503, 0.5773503, 0.5773503), 240)
-                text = face.Shape.extrude(App.Vector(0.5,0,0))
-                part = part.cut(text)
+            face = Draft.make_shapestring(obj.CutLabel, str(Path(__file__).parent.resolve()) + "/font/OpenSans-Regular.ttf", 5)
+            if obj.InvertLabel:
+                face.Placement.Base = App.Vector(obj.Gap.Value, obj.dy.Value-5, -obj.OpticsDz.Value-6)
+                face.Placement.Rotation = App.Rotation(App.Vector(0, 0, 1), -90)*App.Rotation(App.Vector(1, 0, 0), 90)
+                text = face.Shape.extrude(App.Vector(0.5, 0, 0))
             else:
-                face.Placement.Base = App.Vector(5, 0, -inch-10)
+                face.Placement.Base = App.Vector(5, obj.Gap.Value, -obj.OpticsDz.Value-6)
                 face.Placement.Rotation = App.Rotation(App.Vector(1, 0, 0), 90)
-                text = face.Shape.extrude(App.Vector(0,0.5,0))
-                part = part.cut(text)
+                text = face.Shape.extrude(App.Vector(0, 0.5, 0))
+            part = part.cut(text)
             App.ActiveDocument.removeObject(face.Label)
         obj.Shape = part
 
