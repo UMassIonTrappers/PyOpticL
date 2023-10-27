@@ -200,9 +200,11 @@ class beam_path:
                     if hasattr(inline_obj, "Distance"):
                         comp_d = inline_obj.Distance.Value
                     if hasattr(inline_obj, "xPos"):
-                        comp_d = (inline_obj.xPos.Value-x1)/cos(a1)
+                        x_pos = inline_obj.xPos.Value+inline_obj.Baseplate.Placement.Base[0]
+                        comp_d = (x_pos-x1)/cos(a1)
                     if hasattr(inline_obj, "yPos"):
-                        comp_d = (inline_obj.yPos.Value-y1)/sin(a1)
+                        y_pos = inline_obj.yPos.Value+inline_obj.Baseplate.Placement.Base[1]
+                        comp_d = (y_pos-y1)/sin(a1)
 
                     if pre_count > inline_obj.PreRefs:
                         comp_d -= pre_d # account for previous distance
@@ -221,15 +223,18 @@ class beam_path:
                 check_objs.append(obj)
 
             for obj in check_objs:
-                if hasattr(obj, "ChildObjects"):
-                    for child_obj in obj.ChildObjects:
-                        if hasattr(child_obj, "RelativePlacement"):
-                            child_obj.Placement.Base = obj.Placement.Base + child_obj.RelativePlacement.Base
-                            if hasattr(child_obj, "Angle"):
-                                child_obj.Placement.Rotation = App.Rotation(App.Vector(0, 0, 1), child_obj.Angle)
-                            else:
-                                child_obj.Placement = App.Placement(child_obj.Placement.Base, obj.Placement.Rotation, -child_obj.RelativePlacement.Base)
-                                child_obj.Placement.Rotation = child_obj.Placement.Rotation.multiply(child_obj.RelativePlacement.Rotation)
+                parent_objs = [obj]
+                while hasattr(obj, "ParentObject"):
+                    obj = obj.ParentObject
+                    parent_objs.append(obj)
+                for child in reversed(parent_objs):
+                    if hasattr(child, "Angle"):
+                        child.Placement.Rotation = App.Rotation(App.Vector(0, 0, 1), child.Angle)
+                    if hasattr(child, "RelativePlacement"):
+                        child.Placement.Base = child.ParentObject.Placement.Base + child.RelativePlacement.Base
+                        if not hasattr(child, "Angle"):
+                            child.Placement = App.Placement(child.Placement.Base, child.ParentObject.Placement.Rotation, -child.RelativePlacement.Base)
+                            child.Placement.Rotation = child.Placement.Rotation.multiply(child.RelativePlacement.Rotation)
                 
             refs = []
             comp_d =[]
@@ -271,7 +276,7 @@ class beam_path:
             if block:
                 return
 
-            if inline_ref and ref_obj == self.comp_track[-1]:
+            if inline_ref:
                 for i in self.beams[:]:
                     if i[4] != beam_index:
                         ref = check_interaction(i[0],i[1],i[2],ref_obj,i[3])

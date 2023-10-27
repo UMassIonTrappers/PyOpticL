@@ -492,7 +492,7 @@ class rotation_stage_rsp05:
         obj.ViewObject.ShapeColor = misc_color
         self.part_numbers = ['RSP05', wave_plate_part_num]
         self.tran = True
-        self.in_limit = pi/2
+        self.in_limit = 0
         self.in_width = INCH/2
 
         _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(0, 0, -14), rot_offset=(0, 0, 90*obj.Invert), **adapter_args)
@@ -616,11 +616,11 @@ class splitter_mount_b05g:
 
     def get_drill(self, obj):
         part = _custom_cylinder(dia=bolt_8_32['tap_dia'],
-                           dz=drill_depth, x=-4+self.x_offset, y=0, z=-INCH/2)
+                           dz=drill_depth, x=-5+self.x_offset, y=0, z=-INCH/2)
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-4+self.x_offset, y=-5, z=-INCH/2))
+                                     x=-5+self.x_offset, y=-5, z=-INCH/2))
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-4+self.x_offset, y=5, z=-INCH/2))
+                                     x=-5+self.x_offset, y=5, z=-INCH/2))
         return part
 
     def execute(self, obj):
