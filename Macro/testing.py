@@ -1,18 +1,19 @@
-import FreeCAD as App
-from freecadOptics import laser, layout, optomech
+from freecadOptics import layout, optomech
 
-from importlib import reload
-import math
+base_dx = 5*layout.inch
+base_dy = 5*layout.inch
+base_dz = layout.inch
+gap = layout.inch/8
 
-reload(optomech)
-reload(layout)
-reload(laser)
+def example_baseplate(x, y):
 
-baseplate = layout.create_baseplate(100, 200, layout.inch)
+    baseplate = layout.baseplate(base_dx, base_dy, base_dz, gap=gap, x=x, y=y)
 
-beam = baseplate.add_beam_path(0, 50, layout.cardinal['right'])
+    beam = baseplate.add_beam_path(0, 50, layout.cardinal['right'])
 
-baseplate.place_element_along_beam("Rotation Stage", optomech.rotation_stage_rsp05, beam, 0b1, layout.cardinal['right'], 30)
-baseplate.place_element_along_beam("Splitter", optomech.splitter_mount_b05g, beam, 0b1, layout.turn['right-up'], 30)
+    baseplate.place_element_along_beam("Rotation Stage", optomech.rotation_stage_rsp05, beam, 0b1, layout.cardinal['right'], 30)
+    baseplate.place_element_along_beam("Splitter", optomech.splitter_mount_b05g, beam, 0b1, layout.turn['right-up'], 30)
 
-layout.redraw()
+if __name__ == "__main__":
+    example_baseplate()
+    layout.redraw()
