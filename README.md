@@ -70,7 +70,6 @@ There are a few important things to ensure before you can use the FreeCAD for op
 	```cd "C:/Users/<username goes here>/AppData/Roaming/FreeCAD/Mod"```   
 	```git clone "https://github.com/UMassIonTrappers/PyOptic.git"```  
 	```git config --global --add safe.directory "C:/Users/<username goes here>/AppData/Roaming/FreeCAD/Mod/PyOptic"```  
-	```git pull origin main```
 		
 To check everything is setup correctly, you should now be able to re-launch FreeCAD and see the "Optics" workbench in the dropdown  
 ![image](https://user-images.githubusercontent.com/103533593/226724665-77b05f5b-1faa-43ca-9329-f6a0894ec1fc.png)
