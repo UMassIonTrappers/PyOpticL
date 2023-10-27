@@ -15,5 +15,5 @@ def example_baseplate(x, y):
     baseplate.place_element_along_beam("Splitter", optomech.splitter_mount_b05g, beam, 0b1, layout.turn['right-up'], 30)
 
 if __name__ == "__main__":
-    example_baseplate()
+    example_baseplate(0, 0)
     layout.redraw()

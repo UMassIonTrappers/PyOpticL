@@ -215,7 +215,7 @@ class baseplate:
 
 class table_grid:
     '''
-    Add a new dynamic beam path
+    Add an optical table mounting grid
 
     Args:
         dx, yy (float): The dimentions of the table grid (in inches)

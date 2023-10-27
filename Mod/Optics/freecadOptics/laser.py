@@ -266,11 +266,39 @@ class beam_path:
                     pre_count += 1
                     if pre_count > inline_obj.PreRefs:
                         pre_d += min_len
-
+                
                 ref_obj, xf, yf, af_arr, block = final_ref
+                intersect = []
+                x_min, y_min, _ = selfobj.Baseplate.Placement.Base
+                x_max = selfobj.Baseplate.dx.Value+x_min
+                y_max = selfobj.Baseplate.dy.Value+y_min
+                if x_max < xf:
+                    intersect.append((x_max-x1)/cos(a1))
+                if y_max < yf:
+                    intersect.append((y_max-y1)/sin(a1))
+                if xf < x_min:
+                    intersect.append((x_min-x1)/cos(a1))
+                if yf < y_min:
+                    intersect.append((y_min-y1)/sin(a1))
+                if len(intersect) > 0 and min_len > min(intersect):
+                    min_len = min(intersect)
+                    block = True
                 self.beams.append([x1, y1, a1, min_len, beam_index])
             else:
-                self.beams.append([x1, y1, a1, 50, beam_index])
+                intersect = []
+                xf, yf = x1+500*cos(a1), y1+500*sin(a1) # TODO find a better way than this
+                x_min, y_min, _ = selfobj.Baseplate.Placement.Base
+                x_max = selfobj.Baseplate.dx.Value+x_min
+                y_max = selfobj.Baseplate.dy.Value+y_min
+                if x_max < xf:
+                    intersect.append((x_max-x1)/cos(a1))
+                if y_max < yf:
+                    intersect.append((y_max-y1)/sin(a1))
+                if xf < x_min:
+                    intersect.append(-(x1-x_min)/cos(a1))
+                if yf < y_min:
+                    intersect.append(-(y1-y_min)/sin(a1))
+                self.beams.append([x1, y1, a1, min(intersect), beam_index])
                 return
             
             if block:
