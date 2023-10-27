@@ -5,7 +5,7 @@ import csv
 import re
 import math
 from pathlib import Path
-from freecadOptics import laser, layout, optomech
+from PyOptic import laser, layout, optomech
 
 class Reload_Modules():
 
