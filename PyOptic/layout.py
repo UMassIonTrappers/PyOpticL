@@ -36,7 +36,7 @@ class baseplate:
         optics_dz (float): The optical height of baseplate
         invert_label (bool): Wheather to switch the face the label is embossed on
     '''
-    def __init__(self, dx, dy, dz, x=0, y=0, gap=0, name="Baseplate", drill=True, mount_holes=[], label="", x_offset=0, y_offset=0, optics_dz=inch/2, x_split=0, y_split=0, invert_label=False):
+    def __init__(self, dx, dy, dz, x=0, y=0, angle=0, gap=0, name="Baseplate", drill=True, mount_holes=[], label="", x_offset=0, y_offset=0, optics_dz=inch/2, x_split=0, y_split=0, invert_label=False):
         obj = App.ActiveDocument.addObject('Part::FeaturePython', name)
         ViewProvider(obj.ViewObject)
         obj.Proxy = self
@@ -54,9 +54,9 @@ class baseplate:
         obj.addProperty('App::PropertyLength', 'ySplit').ySplit = y_split
         obj.addProperty('App::PropertyLength', 'InvertLabel').InvertLabel = invert_label
 
-        obj.Placement = App.Placement(App.Vector(x*inch, y*inch, 0), App.Rotation(0, 0, 0), App.Vector(0, 0, 0))
+        obj.Placement = App.Placement(App.Vector(x*inch, y*inch, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
         self.active_baseplate = obj.Name
-        obj.addProperty("App::PropertyLinkListChild","ChildObjects")
+        obj.addProperty("App::PropertyLinkListHidden","ChildObjects")
         for x, y in mount_holes:
             mount = self.place_element("Mount Hole (%d, %d)"%(x, y), optomech.baseplate_mount, (x+0.5)*inch, (y+0.5)*inch, 0)
             obj.ChildObjects += [mount]
@@ -74,12 +74,12 @@ class baseplate:
             args (any): Additional args to be passed to the object (see object class docs)
         '''
         obj = App.ActiveDocument.addObject(obj_class.type, name)
+        obj.addProperty("App::PropertyLinkHidden","Baseplate").Baseplate = getattr(App.ActiveDocument, self.active_baseplate)
         obj.Label = name
         obj_class(obj, **args)
-
+        
         obj.addProperty("App::PropertyPlacement","BasePlacement")
         obj.BasePlacement = App.Placement(App.Vector(x, y, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
-        obj.addProperty("App::PropertyLinkHidden","Baseplate").Baseplate = getattr(App.ActiveDocument, self.active_baseplate)
 
         if optional:
             obj.Proxy.tran = True
@@ -104,6 +104,7 @@ class baseplate:
             args (any): Additional args to be passed to the object (see object class docs)
         '''
         obj = App.ActiveDocument.addObject(obj_class.type, name)
+        obj.addProperty("App::PropertyLinkHidden","Baseplate").Baseplate = getattr(App.ActiveDocument, self.active_baseplate)
         obj.Label = name
         obj_class(obj, **args)
         beam_obj.PathObjects += [obj]
@@ -119,7 +120,6 @@ class baseplate:
             obj.addProperty("App::PropertyDistance","yPos").yPos = y
         obj.addProperty("App::PropertyInteger","BeamIndex").BeamIndex = beam_index
         obj.addProperty("App::PropertyInteger","PreRefs").PreRefs = pre_refs
-        obj.addProperty("App::PropertyLinkHidden","Baseplate").Baseplate = getattr(App.ActiveDocument, self.active_baseplate)
 
         if optional:
             obj.Proxy.tran = True
@@ -142,6 +142,7 @@ class baseplate:
             args (any): Additional args to be passed to the object (see object class docs)
         '''
         obj = App.ActiveDocument.addObject(obj_class.type, name)
+        obj.addProperty("App::PropertyLinkHidden","Baseplate").Baseplate = getattr(App.ActiveDocument, self.active_baseplate)
         obj.Label = name
         obj_class(obj, **args)
 
@@ -151,7 +152,9 @@ class baseplate:
         obj.addProperty("App::PropertyPlacement","RelativePlacement").RelativePlacement
         obj.RelativePlacement.Base = App.Vector(x_off, y_off, 0)
         obj.addProperty("App::PropertyLinkHidden","ParentObject").ParentObject = rel_obj
-        obj.addProperty("App::PropertyLinkHidden","Baseplate").Baseplate = getattr(App.ActiveDocument, self.active_baseplate)
+        if not hasattr(obj, "RelativeObjects"):
+            rel_obj.addProperty("App::PropertyLinkListChild","RelativeObjects")
+        rel_obj.RelativeObjects += [obj]
 
         if optional:
             obj.Proxy.tran = True
@@ -175,10 +178,10 @@ class baseplate:
         laser.ViewProvider(obj.ViewObject)
         laser.beam_path(obj)
 
+        obj.addProperty("App::PropertyLinkHidden","Baseplate").Baseplate = getattr(App.ActiveDocument, self.active_baseplate) 
         obj.addProperty("App::PropertyPlacement","BasePlacement")
         obj.BasePlacement = App.Placement(App.Vector(x, y, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
         obj.addProperty("App::PropertyLinkListHidden","PathObjects").PathObjects
-        obj.addProperty("App::PropertyLinkHidden","Baseplate").Baseplate = getattr(App.ActiveDocument, self.active_baseplate) 
         obj.ViewObject.ShapeColor = color
         return obj
     
@@ -194,19 +197,18 @@ class baseplate:
         if obj.Drill:
             for i in App.ActiveDocument.Objects:
                 if hasattr(i.Proxy, 'get_drill'):
-                    if i.Drill:
+                    if i.Drill and i.Baseplate == obj:
                         temp = i.Proxy.get_drill(i)
-                        temp.Placement = i.Placement
-                        temp.translate(App.Vector(-obj.Placement.Base))
+                        temp.Placement = i.BasePlacement
                         part = part.cut(temp)
         if obj.CutLabel != "":
             face = Draft.make_shapestring(obj.CutLabel, str(Path(__file__).parent.resolve()) + "/font/OpenSans-Regular.ttf", 5)
             if obj.InvertLabel:
-                face.Placement.Base = App.Vector(obj.Gap.Value, obj.dy.Value-5, -obj.OpticsDz.Value-6)
+                face.Placement.Base = App.Vector(obj.Gap.Value, obj.dy.Value-obj.Gap.Value-2, -obj.OpticsDz.Value-6)
                 face.Placement.Rotation = App.Rotation(App.Vector(0, 0, 1), -90)*App.Rotation(App.Vector(1, 0, 0), 90)
                 text = face.Shape.extrude(App.Vector(0.5, 0, 0))
             else:
-                face.Placement.Base = App.Vector(5, obj.Gap.Value, -obj.OpticsDz.Value-6)
+                face.Placement.Base = App.Vector(obj.Gap.Value+2, obj.Gap.Value, -obj.OpticsDz.Value-6)
                 face.Placement.Rotation = App.Rotation(App.Vector(1, 0, 0), 90)
                 text = face.Shape.extrude(App.Vector(0, 0.5, 0))
             part = part.cut(text)
@@ -242,18 +244,6 @@ class table_grid:
             
 # Update function for dynamic elements
 def redraw():
-    for obj in App.ActiveDocument.Objects:
-        if hasattr(obj, "Angle"):
-            obj.BasePlacement.Rotation = App.Rotation(App.Vector(0, 0, 1), obj.Angle)
-        if hasattr(obj, "BasePlacement"):
-            if hasattr(obj, "RelativePlacement"):
-                obj.BasePlacement.Base = obj.ParentObject.Placement.Base + obj.RelativePlacement.Base
-                if not hasattr(obj, "Angle"):
-                    obj.BasePlacement = App.Placement(obj.BasePlacement.Base, obj.ParentObject.Placement.Rotation, -obj.RelativePlacement.Base)
-                    obj.BasePlacement.Rotation = obj.BasePlacement.Rotation.multiply(obj.RelativePlacement.Rotation)
-            obj.Placement.Base = obj.BasePlacement.Base + obj.Baseplate.Placement.Base
-            obj.Placement.Rotation = obj.BasePlacement.Rotation
-
     for i in App.ActiveDocument.Objects:
         if isinstance(i.Proxy, laser.beam_path):
             i.touch()
@@ -284,6 +274,13 @@ class ViewProvider:
     
     def getDefaultDisplayMode(self):
         return "Shaded"
+        
+    def updateData(self, base_obj, prop):
+        for obj in App.ActiveDocument.Objects:
+            if hasattr(obj, "BasePlacement"):
+                obj.Placement.Base = obj.BasePlacement.Base + obj.Baseplate.Placement.Base
+                obj.Placement = App.Placement(obj.Placement.Base, obj.Baseplate.Placement.Rotation, -obj.BasePlacement.Base)
+                obj.Placement.Rotation = obj.Placement.Rotation.multiply(obj.BasePlacement.Rotation)
 
     def onDelete(self, feature, subelements):
         # delete all elements when baseplate is deleted

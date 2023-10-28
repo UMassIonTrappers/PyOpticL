@@ -16,9 +16,9 @@ def check_interaction(x1, y1, a1, ref_obj, len=0):
         return
     
     # get object placement
-    x2, y2, _ = ref_obj.Placement.Base
-    a_comp = ref_obj.Placement.Rotation.Angle
-    a_comp *= ref_obj.Placement.Rotation.Axis[2]
+    x2, y2, _ = ref_obj.BasePlacement.Base
+    a_comp = ref_obj.BasePlacement.Rotation.Angle
+    a_comp *= ref_obj.BasePlacement.Rotation.Axis[2]
     a1 %= 2*pi
 
     # limits on incomming beam
@@ -154,9 +154,9 @@ class beam_path:
         return part
 
     def execute(self, obj):
-        self.x, self.y, _ = obj.Placement.Base
-        self.a = obj.Placement.Rotation.Angle
-        self.a *= obj.Placement.Rotation.Axis[2]
+        self.x, self.y, _ = obj.BasePlacement.Base
+        self.a = obj.BasePlacement.Rotation.Angle
+        self.a *= obj.BasePlacement.Rotation.Axis[2]
         self.beams = []
         self.comp_track = []
         self.calculate_beam_path(obj, self.x, self.y, self.a)
@@ -200,17 +200,17 @@ class beam_path:
                     if hasattr(inline_obj, "Distance"):
                         comp_d = inline_obj.Distance.Value
                     if hasattr(inline_obj, "xPos"):
-                        x_pos = inline_obj.xPos.Value+inline_obj.Baseplate.Placement.Base[0]
+                        x_pos = inline_obj.xPos.Value
                         comp_d = (x_pos-x1)/cos(a1)
                     if hasattr(inline_obj, "yPos"):
-                        y_pos = inline_obj.yPos.Value+inline_obj.Baseplate.Placement.Base[1]
+                        y_pos = inline_obj.yPos.Value
                         comp_d = (y_pos-y1)/sin(a1)
 
                     if pre_count > inline_obj.PreRefs:
                         comp_d -= pre_d # account for previous distance
 
                     # inline placement
-                    inline_obj.Placement.Base = App.Vector(x1+comp_d*cos(a1), y1+comp_d*sin(a1), 0)
+                    inline_obj.BasePlacement.Base = App.Vector(x1+comp_d*cos(a1), y1+comp_d*sin(a1), 0)
 
             # get only valid objects
             check_objs = []
@@ -220,21 +220,10 @@ class beam_path:
                 if hasattr(obj, "ParentObject"):
                     if obj.ParentObject in selfobj.PathObjects and not obj.ParentObject in self.comp_track:
                         continue
+                if hasattr(obj, "Baseplate"):
+                    if obj.Baseplate != selfobj.Baseplate:
+                        continue
                 check_objs.append(obj)
-
-            for obj in check_objs:
-                parent_objs = [obj]
-                while hasattr(obj, "ParentObject"):
-                    obj = obj.ParentObject
-                    parent_objs.append(obj)
-                for child in reversed(parent_objs):
-                    if hasattr(child, "Angle"):
-                        child.Placement.Rotation = App.Rotation(App.Vector(0, 0, 1), child.Angle)
-                    if hasattr(child, "RelativePlacement"):
-                        child.Placement.Base = child.ParentObject.Placement.Base + child.RelativePlacement.Base
-                        if not hasattr(child, "Angle"):
-                            child.Placement = App.Placement(child.Placement.Base, child.ParentObject.Placement.Rotation, -child.RelativePlacement.Base)
-                            child.Placement.Rotation = child.Placement.Rotation.multiply(child.RelativePlacement.Rotation)
                 
             refs = []
             comp_d =[]
@@ -269,17 +258,16 @@ class beam_path:
                 
                 ref_obj, xf, yf, af_arr, block = final_ref
                 intersect = []
-                x_min, y_min, _ = selfobj.Baseplate.Placement.Base
-                x_max = selfobj.Baseplate.dx.Value+x_min
-                y_max = selfobj.Baseplate.dy.Value+y_min
+                x_max = selfobj.Baseplate.dx.Value
+                y_max = selfobj.Baseplate.dy.Value
                 if x_max < xf:
                     intersect.append((x_max-x1)/cos(a1))
                 if y_max < yf:
                     intersect.append((y_max-y1)/sin(a1))
-                if xf < x_min:
-                    intersect.append((x_min-x1)/cos(a1))
-                if yf < y_min:
-                    intersect.append((y_min-y1)/sin(a1))
+                if xf < 0:
+                    intersect.append((0-x1)/cos(a1))
+                if yf < 0:
+                    intersect.append((0-y1)/sin(a1))
                 if len(intersect) > 0 and min_len > min(intersect):
                     min_len = min(intersect)
                     block = True
@@ -287,17 +275,16 @@ class beam_path:
             else:
                 intersect = []
                 xf, yf = x1+500*cos(a1), y1+500*sin(a1) # TODO find a better way than this
-                x_min, y_min, _ = selfobj.Baseplate.Placement.Base
-                x_max = selfobj.Baseplate.dx.Value+x_min
-                y_max = selfobj.Baseplate.dy.Value+y_min
+                x_max = selfobj.Baseplate.dx.Value
+                y_max = selfobj.Baseplate.dy.Value
                 if x_max < xf:
                     intersect.append((x_max-x1)/cos(a1))
                 if y_max < yf:
                     intersect.append((y_max-y1)/sin(a1))
-                if xf < x_min:
-                    intersect.append(-(x1-x_min)/cos(a1))
-                if yf < y_min:
-                    intersect.append(-(y1-y_min)/sin(a1))
+                if xf < 0:
+                    intersect.append(-(x1-0)/cos(a1))
+                if yf < 0:
+                    intersect.append(-(y1-0)/sin(a1))
                 self.beams.append([x1, y1, a1, min(intersect), beam_index])
                 return
             
@@ -315,7 +302,7 @@ class beam_path:
                                     self.beams.remove(beam)
                             for comp in self.comp_track[:]:
                                 if comp.BeamIndex>>int(abs(log2(comp.BeamIndex/i[4]))) == i[4]:
-                                    comp.Placement.Base = App.Vector(0, 0, 0)
+                                    comp.BasePlacement.Base = App.Vector(0, 0, 0)
                                     self.comp_track.remove(comp)
                             self.calculate_beam_path(selfobj, last[0], last[1], last[2], last[4])
                             break
@@ -347,6 +334,13 @@ class ViewProvider:
     
     def getDefaultDisplayMode(self):
         return "Shaded"
+    
+    def updateData(self, obj, prop):
+        if str(prop) == "BasePlacement":
+            obj.Placement.Base = obj.BasePlacement.Base + obj.Baseplate.Placement.Base
+            obj.Placement = App.Placement(obj.Placement.Base, obj.Baseplate.Placement.Rotation, -obj.BasePlacement.Base)
+            obj.Placement.Rotation = obj.Placement.Rotation.multiply(obj.BasePlacement.Rotation)
+        return
 
     def onDelete(self, feature, subelements):
         return True

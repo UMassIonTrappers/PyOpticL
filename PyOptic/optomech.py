@@ -53,6 +53,8 @@ def _add_linked_object(obj, obj_name, obj_class, pos_offset=(0, 0, 0), rot_offse
     new_obj.Label = obj_name
     obj_class(new_obj, **args)
     new_obj.setEditorMode('Placement', 2)
+    new_obj.addProperty("App::PropertyLinkHidden","Baseplate").Baseplate = obj.Baseplate
+    new_obj.addProperty("App::PropertyPlacement","BasePlacement")
     if not hasattr(obj, "ChildObjects"):
         obj.addProperty("App::PropertyLinkListChild","ChildObjects")
     obj.ChildObjects += [new_obj]
@@ -67,8 +69,8 @@ def _add_linked_object(obj, obj_name, obj_class, pos_offset=(0, 0, 0), rot_offse
 
 def _drill_part(part, obj, drill_obj):
     drill = drill_obj.Proxy.get_drill(drill_obj)
-    drill.Placement = drill_obj.Placement
-    drill.translate(App.Vector(-obj.Placement.Base))
+    drill.Placement = drill_obj.BasePlacement
+    drill.translate(App.Vector(-obj.BasePlacement.Base))
     return part.cut(drill)
 
 def _custom_box(dx, dy, dz, x, y, z, fillet=0, dir=(0,0,1), fillet_dir=None):
@@ -1533,6 +1535,26 @@ class ViewProvider:
             for obj in feature.Object.ChildObjects:
                 App.ActiveDocument.removeObject(obj.Name)
         return True
+    
+    def updateData(self, obj, prop):
+        if str(prop) == "BasePlacement":
+            obj.Placement.Base = obj.BasePlacement.Base + obj.Baseplate.Placement.Base
+            obj.Placement = App.Placement(obj.Placement.Base, obj.Baseplate.Placement.Rotation, -obj.BasePlacement.Base)
+            obj.Placement.Rotation = obj.Placement.Rotation.multiply(obj.BasePlacement.Rotation)
+            if hasattr(obj, "ChildObjects"):
+                for child in obj.ChildObjects:
+                    child.BasePlacement.Base = obj.BasePlacement.Base + child.RelativePlacement.Base
+                    if hasattr(child, "Angle"):
+                        obj.BasePlacement.Rotation = App.Rotation(App.Vector(0, 0, 1), obj.Angle)
+                    else:
+                        child.BasePlacement = App.Placement(child.BasePlacement.Base, obj.BasePlacement.Rotation, -child.RelativePlacement.Base)
+                        child.BasePlacement.Rotation = child.BasePlacement.Rotation.multiply(child.RelativePlacement.Rotation)
+            if hasattr(obj, "RelativeObjects"):
+                for child in obj.RelativeObjects:
+                    child.BasePlacement.Base = obj.BasePlacement.Base + child.RelativePlacement.Base
+        if str(prop) == "Angle":
+            obj.BasePlacement.Rotation = App.Rotation(App.Vector(0, 0, 1), obj.Angle)
+        return
     
     def claimChildren(self):
         if hasattr(self.Object, "ChildObjects"):
