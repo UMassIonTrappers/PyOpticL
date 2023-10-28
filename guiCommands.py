@@ -4,6 +4,7 @@ import FreeCADGui as Gui
 import csv
 import re
 import math
+import numpy as np
 from pathlib import Path
 from PyOptic import laser, layout, optomech
 
@@ -65,8 +66,8 @@ class Export_STLs():
         path.mkdir()
         doc = App.activeDocument()
         for obj in doc.Objects:
-            if isinstance(obj.Proxy, layout.baseplate) or "Adapter" in obj.Name:
-                obj.Shape.exportStl(str(path / obj.Name) + ".stl")
+            if isinstance(obj.Proxy, layout.baseplate) or all(np.isclose(obj.ViewObject.ShapeColor[:3], optomech.adapter_color)):
+                obj.Shape.exportStl(str(path / obj.Label) + ".stl")
         App.Console.PrintMessage("STLs Exported to '%s'\n"%(str(path)))
         return
     
@@ -87,7 +88,7 @@ class Export_Cart():
 
     def GetResources(self):
         return {"Pixmap"  : ":/icons/edit-paste.svg",
-                "Accel"   : "Shift+T",
+                "Accel"   : "Shift+O",
                 "MenuText": "Export Optomech Parts to Order List"}
 
     def Activated(self):
@@ -125,7 +126,7 @@ class Export_Cart():
                 list_w.writerow([type(objs[i[0]].Proxy).__name__, i[1], math.ceil(parts.count(i[1])/pack)])
         for i in enumerate(parts):
             if i[1] == '':
-                list_w.writerow([objs[i[0]].Name, "Unknown", 1])
+                list_w.writerow([objs[i[0]].Label, "Unknown", 1])
             
         return
     
