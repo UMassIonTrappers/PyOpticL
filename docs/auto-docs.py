@@ -1,7 +1,7 @@
 import re
 
-layout_file = "".join(open("PyOptic/freecadOptics/layout.py", 'r').readlines())
-optomech_file = "".join(open("PyOptic/freecadOptics/optomech.py", 'r').readlines())
+layout_file = "".join(open("PyOptic/PyOptic/layout.py", 'r').readlines())
+optomech_file = "".join(open("PyOptic/PyOptic/optomech.py", 'r').readlines())
 docs = open("docs/README.md", 'w')
 
 docs.write('''# Auto-Generated Documentation  \n''')
