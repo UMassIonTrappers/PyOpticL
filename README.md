@@ -44,4 +44,4 @@ There are a few important things to ensure before you can use PyOptic:
    You should now be able to re-launch FreeCAD and see the "PyOptic" workbench in the dropdown  
 <img width="250" alt="Screenshot 2023-10-27 225345" src="https://github.com/UMassIonTrappers/PyOptic/assets/103533593/6eeec81a-e7de-4bde-8509-0c30bda0b9b7">
 
-5. **Check out the [wiki](https://github.com/UMassIonTrappers/PyOptic/wiki) for examples and guides**
+5. **Check out the [wiki](https://github.com/UMassIonTrappers/PyOptic/wiki) or the [docs](https://github.com/UMassIonTrappers/PyOptic/tree/main/docs) for guides, examples, and library documentation**
