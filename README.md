@@ -4,7 +4,7 @@
 
 ### Based on MIT QUANTA LAB repo - C4PO ('CAD for Precision Optics') which is written for OpenSCAD
 
-FreeCAD has a few clear benifits for this purpose:
+FreeCAD has a few clear benefits for this purpose:
 * Based on python with built-in support for python scripts
 * Support for custom workbenches and python libraries
 * Fully featured and customizable GUI
