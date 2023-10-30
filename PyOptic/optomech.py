@@ -989,7 +989,7 @@ class lens_holder_l05g:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/POLARIS-L05G-Solidworks.stl", (pi/2, 0, pi/2), (-25.07-obj.ChildObjects[0].Thickness.Value, -13.3, -18.4), 1000)
+        mesh = _orient_stl("thorlabs/POLARIS-L05G-Solidworks.stl", (pi/2, 0, pi/2), (-26.57-obj.ChildObjects[0].Thickness.Value/2, -13.3, -18.4), 1000)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
