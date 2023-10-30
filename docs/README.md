@@ -14,6 +14,7 @@
         label (string): The label to be embossed into the side of the baseplate  
         x_offset, y_offset (float): Additional offset from the grid in the x and y directions  
         optics_dz (float): The optical height of baseplate  
+        invert_label (bool): Wheather to switch the face the label is embossed on  
     
 ### table_grid
   
