@@ -226,6 +226,18 @@
     Sub-Parts:  
         circular_mirror (mirror_args)  
     
+### mirror_mount_ks1t
+  
+    Mirror mount, model KM05  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+        mirror (bool) : Whether to add a mirror component to the mount  
+        bolt_length (float) : The length of the bolt used for mounting  
+  
+    Sub-Parts:  
+        circular_mirror (mirror_args)  
+    
 ### fiberport_mount_km05
   
     Mirror mount, model KM05, adapted to use as fiberport mount  
