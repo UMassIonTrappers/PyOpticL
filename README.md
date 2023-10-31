@@ -4,8 +4,7 @@
 
 ### Based on MIT QUANTA LAB repo - C4PO ('CAD for Precision Optics') which is written for OpenSCAD
 
-FreeCAD has a few clear benefits for this purpose:
-* Based on python with built-in support for python scripts
+FreeCAD is based on python with built-in support for python scripts etc. It also has:
 * Support for custom workbenches and python libraries
 * Fully featured and customizable GUI
 * Ability to work with various object formats
@@ -14,7 +13,7 @@ FreeCAD has a few clear benefits for this purpose:
 
 ### Beam Simulation
 * Beam paths are automatically calculated based on component placement
-* Compnent placement can be defined "along beam" to remove the need for hard-coded coordinates
+* Component placement can be defined "along beam" to remove the need for hard-coded coordinates
 * Beam calculations include reflection, transmission, refraction, and diffraction (limited)
 
 ### Workbench Functions
