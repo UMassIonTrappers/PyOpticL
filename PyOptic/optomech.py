@@ -720,6 +720,51 @@ class mirror_mount_km05:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
+
+class mirror_mount_ks1t:
+    '''
+    Mirror mount, model KM05
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mirror (bool) : Whether to add a mirror component to the mount
+        bolt_length (float) : The length of the bolt used for mounting
+
+    Sub-Parts:
+        circular_mirror (mirror_args)
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True, mirror=False, bolt_length=15, mirror_args=dict()):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyBool', 'Mirror').Mirror = mirror
+        obj.addProperty('App::PropertyLength', 'BoltLength').BoltLength = bolt_length
+
+        obj.ViewObject.ShapeColor = mount_color
+        self.part_numbers = ['KM1T']
+        self.x_offset = 0
+
+        if mirror:
+            _add_linked_object(obj, "Mirror", circular_mirror, **mirror_args)
+            self.x_offset = -obj.ChildObjects[0].Thickness.Value
+
+    def get_drill(self, obj):
+        part = _custom_cylinder(dia=bolt_8_32['clear_dia'], dz=INCH,
+                           head_dia=bolt_8_32['head_dia'], head_dz=0.92*INCH-obj.BoltLength.Value,
+                           x=-16.94+self.x_offset, y=0, z=-INCH*3/2, dir=(0,0,1))
+        if obj.Drill:
+            part = part.fuse(_custom_box(dx=55, dy=60, dz=0.5*INCH,
+                                        x=-25+self.x_offset, y=0, z=-INCH/2-0.5*INCH, fillet=3))
+        return part
+
+    def execute(self, obj):
+        mesh = _orient_stl("KS1T-Step.stl", (90, -0, -90), (22.06, 13.37, -30.35))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+
 class fiberport_mount_km05:
     '''
     Mirror mount, model KM05, adapted to use as fiberport mount
