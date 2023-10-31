@@ -1,5 +1,6 @@
 import FreeCAD as App
 import FreeCADGui as Gui
+import Mesh
 
 import csv
 import re
@@ -127,9 +128,83 @@ class Export_Cart():
         for i in enumerate(parts):
             if i[1] == '':
                 list_w.writerow([objs[i[0]].Label, "Unknown", 1])
-            
         return
     
+class Get_Orientation():
+
+    def GetResources(self):
+        return {"Pixmap"  : ":/icons/Std_DemoMode.svg",
+                "Accel"   : "Shift+G",
+                "MenuText": "Get Orientation Parameters for Part"}
+
+    def Activated(self):
+        for obj in App.ActiveDocument.Objects:
+            if obj.TypeId == "App::Part":
+                break
+
+        Mesh.export([obj], "%sMod/PyOptic/PyOptic/stl/%s.stl"%(App.getUserAppDataDir(), obj.Label))
+
+        view_rot = Gui.ActiveDocument.ActiveView.viewPosition().Rotation
+        rot1 = view_rot.inverted()
+        rot2 = App.Rotation(App.Vector(0, 0, 1), 90)
+        rot3 = App.Rotation(App.Vector(0, 1, 0), 90)
+        final_rot = rot3*rot2*rot1
+        obj.Placement.Rotation = final_rot
+
+        rot_xyz = np.round(final_rot.getYawPitchRoll()[::-1])
+
+        selection = Gui.Selection.getSelectionEx()[0].SubObjects
+        translate = np.zeros(3)
+        for feature in selection:
+            if hasattr(feature, "Curve"):
+                if hasattr(feature.Curve, "Center"):
+                    translate += feature.Curve.Center
+                else:
+                    translate += feature.CenterOfMass
+            elif hasattr(feature, "Point"):
+                translate += feature.Point
+        translate /= len(selection)
+
+        center = App.Placement(-App.Vector(*translate), App.Rotation(0, 0, 0), App.Vector(0, 0, 0))
+        final_placement = obj.Placement*center
+        obj.Placement = final_placement
+
+        translate = np.round(final_placement.Base, 3)
+
+        print('_orient_stl("%s.stl", (%.4g, %.4g, %.4g), (%.4g, %.4g, %.4g))'%(obj.Label, *rot_xyz, *translate))
+        return
+    
+class Get_Position():
+
+    def GetResources(self):
+        return {"Pixmap"  : ":/icons/view-measurement.svg",
+                "Accel"   : "Shift+P",
+                "MenuText": "Get Position of Part Features"}
+
+    def Activated(self):
+        for obj in App.ActiveDocument.Objects:
+            if obj.TypeId == "App::Part":
+                break
+
+        selection = Gui.Selection.getSelectionEx()[0].SubObjects
+        translate = np.zeros(3)
+        for feature in selection:
+            if hasattr(feature, "Curve"):
+                if hasattr(feature.Curve, "Center"):
+                    translate += feature.Curve.Center
+                else:
+                    translate += feature.CenterOfMass
+            elif hasattr(feature, "Point"):
+                translate += feature.Point
+        translate /= len(selection)
+
+        center = App.Placement(App.Vector(*translate), App.Rotation(0, 0, 0), App.Vector(0, 0, 0))
+        final_placement = obj.Placement*center
+
+        translate = np.round(final_placement.Base, 3)
+
+        print("(%.4g, %.4g, %.4g)"%(translate[0], translate[1], translate[2]))
+        return
 
 Gui.addCommand("ReloadModules", Reload_Modules())
 Gui.addCommand("RecomputeBeam", Recompute_Beam())
@@ -137,3 +212,5 @@ Gui.addCommand("ShowComponents", Show_Components())
 Gui.addCommand("ExportSTLs", Export_STLs())
 Gui.addCommand("TopViewFit", Top_View_Fit())
 Gui.addCommand("ExportCart", Export_Cart())
+Gui.addCommand("GetOrientation", Get_Orientation())
+Gui.addCommand("GetPosition", Get_Position())

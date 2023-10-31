@@ -40,7 +40,7 @@ class OpticsWorkbench (Workbench):
         It is executed once in a FreeCAD session followed by the Activated function.
         """
         import guiCommands
-        self.toolbar = ["RecomputeBeam", "ShowComponents", "TopViewFit", "ExportSTLs", "ExportCart", "ReloadModules"] # A list of command names created in the line above
+        self.toolbar = ["RecomputeBeam", "ShowComponents", "TopViewFit", "ExportSTLs", "ExportCart", "ReloadModules", "GetOrientation", "GetPosition"] # A list of command names created in the line above
         self.appendToolbar("PyOptic Commands",self.toolbar) # creates a new toolbar with your commands
         self.appendMenu(["PyOptic"],self.toolbar) # appends a submenu to an existing menu
 

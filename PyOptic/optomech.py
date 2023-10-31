@@ -44,7 +44,7 @@ def _orient_stl(stl_name, rotate, translate, scale=1):
     mat = App.Matrix()
     mat.scale(App.Vector(scale, scale, scale))
     mesh.transform(mat)
-    mesh.rotate(*rotate)
+    mesh.rotate(*np.deg2rad(rotate))
     mesh.translate(*translate)
     return mesh
 
@@ -425,7 +425,7 @@ class fiberport_holder:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/HCA3-Solidworks.stl", (-pi/2, pi, -pi/2), (-6.35, -38.1/2, -26.9))
+        mesh = _orient_stl("thorlabs/HCA3-Solidworks.stl", (-90, 180, -90), (-6.35, -38.1/2, -26.9))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
         
@@ -500,7 +500,7 @@ class rotation_stage_rsp05:
         _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(0, 0, -14), rot_offset=(0, 0, 90*obj.Invert), **adapter_args)
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/RSP05-Solidworks.stl", (pi/2, 0, pi/2), (0.6, 0, 0), 1000)
+        mesh = _orient_stl("thorlabs/RSP05-Solidworks.stl", (90, 0, 90), (0.6, 0, 0), 1000)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -542,7 +542,7 @@ class mirror_mount_k05s2:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/POLARIS-K05S2-Solidworks.stl", (0, -pi/2, 0), (-4.5+self.x_offset, -0.3, -0.25), 1000)
+        mesh = _orient_stl("thorlabs/POLARIS-K05S2-Solidworks.stl", (0, -90, 0), (-4.5+self.x_offset, -0.3, -0.25), 1000)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -584,7 +584,7 @@ class mirror_mount_k05s1:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/POLARIS-K05S1-Solidworks.stl", (0, 0, -pi/2), (-4.5+self.x_offset, -0.3+0.5, -0.25), 1)
+        mesh = _orient_stl("thorlabs/POLARIS-K05S1-Solidworks.stl", (0, 0, -90), (-4.5+self.x_offset, -0.3+0.5, -0.25), 1)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -626,7 +626,7 @@ class splitter_mount_b05g:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/POLARIS-B05G-Solidworks.stl", (pi/2, 0, pi/2), (-17.54+self.x_offset, -9.0, -18.2-1.05))
+        mesh = _orient_stl("thorlabs/POLARIS-B05G-Solidworks.stl", (90, 0, 90), (-17.54+self.x_offset, -9.0, -18.2-1.05))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -668,7 +668,7 @@ class mirror_mount_c05g:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/POLARIS-C05G-Solidworks.stl", (pi/2, 0, pi/2), (-19+self.x_offset, -4.3, -15.2), 1000)
+        mesh = _orient_stl("thorlabs/POLARIS-C05G-Solidworks.stl", (90, 0, 90), (-19+self.x_offset, -4.3, -15.2), 1000)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -716,7 +716,7 @@ class mirror_mount_km05:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/KM05-Solidworks.stl", (0, 0, pi/2), ([1.95+self.x_offset, -1.2, 0.5]))
+        mesh = _orient_stl("thorlabs/KM05-Solidworks.stl", (0, 0, 90), ([1.95+self.x_offset, -1.2, 0.5]))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -868,7 +868,7 @@ class mirror_mount_mk05:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/MK05-Solidworks.stl", (0, -pi/2, 0), ([-27.5-obj.ChildObjects[0].Thickness.Value, -5.6, -26.0]), 1000)
+        mesh = _orient_stl("thorlabs/MK05-Solidworks.stl", (0, -90, 0), ([-27.5-obj.ChildObjects[0].Thickness.Value, -5.6, -26.0]), 1000)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -899,7 +899,7 @@ class mount_mk05pm:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/MK05PM.stl", (0, pi/2, pi), ([-15, 0, 0]))
+        mesh = _orient_stl("thorlabs/MK05PM.stl", (0, 90, 180), ([-15, 0, 0]))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -989,7 +989,7 @@ class lens_holder_l05g:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/POLARIS-L05G-Solidworks.stl", (pi/2, 0, pi/2), (-26.57-obj.ChildObjects[0].Thickness.Value/2, -13.3, -18.4), 1000)
+        mesh = _orient_stl("thorlabs/POLARIS-L05G-Solidworks.stl", (90, 0, 90), (-26.57-obj.ChildObjects[0].Thickness.Value/2, -13.3, -18.4), 1000)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1030,7 +1030,7 @@ class pinhole_ida12:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/IDA12-P5-Solidworks.stl", (-pi/2, 0, -pi/2), (-0.35, 0.05, 0), 1000)
+        mesh = _orient_stl("thorlabs/IDA12-P5-Solidworks.stl", (-90, 0, -90), (-0.35, 0.05, 0), 1000)
         mesh.rotate(pi/2, 0, 0)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
@@ -1067,7 +1067,7 @@ class prism_mount_km100pm:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/KM100PM-Solidworks-modified.stl", (pi/2, 0, -pi/2), (14.2, 26.0, -17.92))
+        mesh = _orient_stl("thorlabs/KM100PM-Solidworks-modified.stl", (90, 0, -90), (14.2, 26.0, -17.92))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
         
@@ -1111,7 +1111,7 @@ class isomet_1205c_on_km100pm:
                            pos_offset=(-(51.8-25.7-12+15.17), -(6.35+0.089*INCH/2), -6.98), **adapter_args)
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/isomet_1205c.stl", (0, 0, pi/2), (0, 0, 0))
+        mesh = _orient_stl("thorlabs/isomet_1205c.stl", (0, 0, 90), (0, 0, 0))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1150,7 +1150,7 @@ class isolator_670:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/IOT-5-670-VLP.stl", (pi/2, 0, pi/2), (19, 0, 0), 1) #Thorlabs 670 (better for injection?)
+        mesh = _orient_stl("thorlabs/IOT-5-670-VLP.stl", (90, 0, 90), (19, 0, 0), 1) #Thorlabs 670 (better for injection?)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1189,7 +1189,7 @@ class isolator_405:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/IO-3D-405-PBS.stl", (pi/2, 0, pi/2), (9.45, 0, 0), 1)
+        mesh = _orient_stl("thorlabs/IO-3D-405-PBS.stl", (90, 0, 90), (9.45, 0, 0), 1)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1429,7 +1429,7 @@ class photodetector_pda10a2:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/PDA10A2.stl", (pi/2, 0, -pi/2), ([-22, 0, 0]))
+        mesh = _orient_stl("thorlabs/PDA10A2.stl", (90, 0, -90), ([-22, 0, 0]))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1511,7 +1511,7 @@ class laser_diode_mount:
         self.in_width = INCH/2
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/LT230P-B.stl", (0, pi/2, 0 ), ([0, 0, 0]))
+        mesh = _orient_stl("thorlabs/LT230P-B.stl", (0, 90, 0 ), ([0, 0, 0]))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
