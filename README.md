@@ -5,7 +5,7 @@
 ## Useful Links
 
 ### ReadMe
-* [Library Features and Information](https://github.com/UMassIonTrappers/PyOptic/edit/main/README.md#based-on-mit-quanta-lab-repo---c4po-cad-for-precision-optics-which-is-written-for-openscad)
+* [Library Features and Information](https://github.com/UMassIonTrappers/PyOptic#based-on-mit-quanta-lab-repo---c4po-cad-for-precision-optics-which-is-written-for-openscad)
 * [Installation Guide](https://github.com/UMassIonTrappers/PyOptic#getting-setup)
 * [Example Pictures](https://github.com/UMassIonTrappers/PyOptic#examples)
 ### Wiki
