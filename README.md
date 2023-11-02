@@ -2,14 +2,25 @@
 
 <img width="624" alt="Screenshot 2023-10-27 221107" src="https://github.com/UMassIonTrappers/PyOptic/assets/103533593/bb37373c-c2fe-4d69-8a45-c3edd08fe944">
 
+## Useful Links
+
+### ReadMe
+* [Library Features and Information](https://github.com/UMassIonTrappers/PyOptic/edit/main/README.md#based-on-mit-quanta-lab-repo---c4po-cad-for-precision-optics-which-is-written-for-openscad)
+* [Installation Guide](https://github.com/UMassIonTrappers/PyOptic#getting-setup)
+* [Example Pictures](https://github.com/UMassIonTrappers/PyOptic#examples)
+### Wiki
+* [Quickstart Guide](https://github.com/UMassIonTrappers/PyOptic#getting-setup)
+* [ECDL Baseplate](https://github.com/UMassIonTrappers/PyOptic/wiki/ECDL-Baseplate)
+* [Modular Doublepass Baseplate](https://github.com/UMassIonTrappers/PyOptic/wiki/Modular-Doublepass-Baseplate)
+* [Rb SAS Baseplate](https://github.com/UMassIonTrappers/PyOptic/wiki/Rb-SAS-Baseplate)
+
+
 ### Based on MIT QUANTA LAB repo - C4PO ('CAD for Precision Optics') which is written for OpenSCAD
 
 FreeCAD is based on python with built-in support for python scripts etc. It also has:
 * Support for custom workbenches and python libraries
 * Fully featured and customizable GUI
 * Ability to work with various object formats
-
-## Features
 
 ### Beam Simulation
 * Beam paths are automatically calculated based on component placement
