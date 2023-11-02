@@ -5,7 +5,7 @@
 ## Useful Links
 
 ### ReadMe
-* [Library Features and Information](https://github.com/UMassIonTrappers/PyOptic#based-on-mit-quanta-lab-repo---c4po-cad-for-precision-optics-which-is-written-for-openscad)
+* [Library Features and Information](https://github.com/UMassIonTrappers/PyOptic#about-pyoptic)
 * [Installation Guide](https://github.com/UMassIonTrappers/PyOptic#getting-setup)
 * [Example Pictures](https://github.com/UMassIonTrappers/PyOptic#examples)
 ### Wiki
@@ -14,9 +14,8 @@
 * [Modular Doublepass Baseplate](https://github.com/UMassIonTrappers/PyOptic/wiki/Modular-Doublepass-Baseplate)
 * [Rb SAS Baseplate](https://github.com/UMassIonTrappers/PyOptic/wiki/Rb-SAS-Baseplate)
 
-
+## About PyOptic
 ### Based on MIT QUANTA LAB repo - C4PO ('CAD for Precision Optics') which is written for OpenSCAD
-
 FreeCAD is based on python with built-in support for python scripts etc. It also has:
 * Support for custom workbenches and python libraries
 * Fully featured and customizable GUI
