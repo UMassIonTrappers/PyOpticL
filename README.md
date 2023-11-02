@@ -9,7 +9,7 @@
 * [Installation Guide](https://github.com/UMassIonTrappers/PyOptic#getting-setup)
 * [Example Pictures](https://github.com/UMassIonTrappers/PyOptic#examples)
 ### Wiki
-* [Quickstart Guide](https://github.com/UMassIonTrappers/PyOptic#getting-setup)
+* [Quickstart Guide](https://github.com/UMassIonTrappers/PyOptic/wiki#quickstart-guide)
 * [ECDL Baseplate](https://github.com/UMassIonTrappers/PyOptic/wiki/ECDL-Baseplate)
 * [Modular Doublepass Baseplate](https://github.com/UMassIonTrappers/PyOptic/wiki/Modular-Doublepass-Baseplate)
 * [Rb SAS Baseplate](https://github.com/UMassIonTrappers/PyOptic/wiki/Rb-SAS-Baseplate)
