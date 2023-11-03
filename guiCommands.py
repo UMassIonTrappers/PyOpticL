@@ -1,5 +1,6 @@
 import FreeCAD as App
 import FreeCADGui as Gui
+from PySide import QtGui
 import Mesh
 
 import csv
@@ -9,27 +10,24 @@ import numpy as np
 from pathlib import Path
 from PyOptic import laser, layout, optomech
 
-class Reload_Modules():
-
-    def GetResources(self):
-        return {"Pixmap"  : ":/icons/preferences-import-export.svg",
-                "Accel"   : "Shift+M",
-                "MenuText": "Reload Freecad Optics Modules"}
-
-    def Activated(self):
-        from importlib import reload
-        reload(optomech)
-        reload(layout)
-        reload(laser)
-        App.Console.PrintMessage("Freecad Optics Modules Reloaded\n")
-        return
-
-class Recompute_Beam():
-
+class Rerun_Macro():
     def GetResources(self):
         return {"Pixmap"  : ":/icons/view-refresh.svg",
-                "Accel"   : "Shift+R",
-                "MenuText": "Recompute Beam Path"}
+                "Accel"   : "Ctrl+Shift+R",
+                "MenuText": "Clear Document and Re-run Last Macro"}
+
+    def Activated(self):
+        for i in App.ActiveDocument.Objects:
+            App.ActiveDocument.removeObject(i.Name)
+        Gui.runCommand('Std_RecentMacros',0)
+        return
+
+class Redraw_Baseplate():
+
+    def GetResources(self):
+        return {"Pixmap"  : ":/icons/tree-sync-pla.svg",
+                "Accel"   : "Shift+B",
+                "MenuText": "Redraw Baseplate After Editing Parameters in GUI"}
 
     def Activated(self):
         layout.redraw()
@@ -48,6 +46,36 @@ class Show_Components():
     def Activated(self):
         self.state = not self.state
         layout.show_components(self.state)
+        return
+    
+class Top_View_Fit():
+
+    def GetResources(self):
+        return {"Pixmap"  : ":/icons/view-top.svg",
+                "Accel"   : "Shift+T",
+                "MenuText": "Switch to Auto-Fit Top View"}
+
+    def Activated(self):
+        Gui.activeDocument().activeView().viewTop()
+        Gui.SendMsgToActiveView("ViewFit")
+        Gui.runCommand('Std_ViewZoomIn',0)
+        return
+    
+class Toggle_Draw_Style():
+
+    def GetResources(self):
+        return {"Pixmap"  : ":/icons/DrawStyleWireFrame.svg",
+                "Accel"   : "Shift+D",
+                "MenuText": "Toggle Between Wireframe and As-Is Draw Styles"}
+
+    def Activated(self):
+        mw = Gui.getMainWindow()
+        asis = mw.findChild(QtGui.QAction, "Std_DrawStyleAsIs")
+        wire = mw.findChild(QtGui.QAction, "Std_DrawStyleWireframe")
+        if asis.isChecked():
+            wire.trigger()
+        else:
+            asis.trigger()
         return
     
 class Export_STLs():
@@ -72,18 +100,6 @@ class Export_STLs():
         App.Console.PrintMessage("STLs Exported to '%s'\n"%(str(path)))
         return
     
-class Top_View_Fit():
-
-    def GetResources(self):
-        return {"Pixmap"  : ":/icons/view-top.svg",
-                "Accel"   : "Shift+T",
-                "MenuText": "Switch to Auto-Fit Top View"}
-
-    def Activated(self):
-        Gui.activeDocument().activeView().viewTop()
-        Gui.SendMsgToActiveView("ViewFit")
-        Gui.runCommand('Std_ViewZoomIn',0)
-        return
     
 class Export_Cart():
 
@@ -130,6 +146,21 @@ class Export_Cart():
                 list_w.writerow([objs[i[0]].Label, "Unknown", 1])
         return
     
+class Reload_Modules():
+
+    def GetResources(self):
+        return {"Pixmap"  : ":/icons/preferences-import-export.svg",
+                "Accel"   : "Shift+M",
+                "MenuText": "Reload Freecad Optics Modules"}
+
+    def Activated(self):
+        from importlib import reload
+        reload(optomech)
+        reload(layout)
+        reload(laser)
+        App.Console.PrintMessage("Freecad Optics Modules Reloaded\n")
+        return
+    
 class Get_Orientation():
 
     def GetResources(self):
@@ -171,7 +202,7 @@ class Get_Orientation():
 
         translate = np.round(final_placement.Base, 3)
 
-        print('_orient_stl("%s.stl", (%.4g, %.4g, %.4g), (%.4g, %.4g, %.4g))'%(obj.Label, *rot_xyz, *translate))
+        print('_import_stl("%s.stl", (%.4g, %.4g, %.4g), (%.4g, %.4g, %.4g))'%(obj.Label, *rot_xyz, *translate))
         return
     
 class Get_Position():
@@ -206,11 +237,13 @@ class Get_Position():
         print("(%.4g, %.4g, %.4g)"%(translate[0], translate[1], translate[2]))
         return
 
-Gui.addCommand("ReloadModules", Reload_Modules())
-Gui.addCommand("RecomputeBeam", Recompute_Beam())
+Gui.addCommand("RerunMacro", Rerun_Macro())
+Gui.addCommand("RedrawBaseplate", Redraw_Baseplate())
 Gui.addCommand("ShowComponents", Show_Components())
-Gui.addCommand("ExportSTLs", Export_STLs())
 Gui.addCommand("TopViewFit", Top_View_Fit())
+Gui.addCommand("ToggleDrawStyle", Toggle_Draw_Style())
+Gui.addCommand("ExportSTLs", Export_STLs())
 Gui.addCommand("ExportCart", Export_Cart())
+Gui.addCommand("ReloadModules", Reload_Modules())
 Gui.addCommand("GetOrientation", Get_Orientation())
 Gui.addCommand("GetPosition", Get_Position())

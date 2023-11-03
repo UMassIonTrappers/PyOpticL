@@ -9,28 +9,28 @@ from pathlib import Path
 
 stl_path = str(Path(__file__).parent.resolve()) + "/stl/"
 drill_depth = 100
-INCH = 25.4
+inch = 25.4
 
 bolt_4_40 = {
-    "clear_dia":0.120*INCH,
-    "tap_dia":0.089*INCH,
+    "clear_dia":0.120*inch,
+    "tap_dia":0.089*inch,
     "head_dia":5.50,
     "head_dz":2.5 # TODO measure this
 }
 
 bolt_8_32 = {
-    "clear_dia":0.172*INCH,
-    "tap_dia":0.136*INCH,
+    "clear_dia":0.172*inch,
+    "tap_dia":0.136*inch,
     "head_dia":7,
     "head_dz":4.4
 }
 
 bolt_14_20 = {
-    "clear_dia":0.260*INCH,
-    "tap_dia":0.201*INCH,
+    "clear_dia":0.260*inch,
+    "tap_dia":0.201*inch,
     "head_dia":9.8,
     "head_dz":8,
-    "washer_dia":9/16*INCH
+    "washer_dia":9/16*inch
 }
 
 adapter_color = (0.6, 0.9, 0.6)
@@ -39,7 +39,7 @@ glass_color = (0.5, 0.5, 0.8)
 misc_color = (0.2, 0.2, 0.2)
 
 # Used to tranform an STL such that it's placement matches the optical center
-def _orient_stl(stl_name, rotate, translate, scale=1):
+def _import_stl(stl_name, rotate, translate, scale=1):
     mesh = Mesh.read(stl_path+stl_name)
     mat = App.Matrix()
     mat.scale(App.Vector(scale, scale, scale))
@@ -119,7 +119,7 @@ class example_component:
         # additional parameters (ie color, constants, etc)
         obj.ViewObject.ShapeColor = adapter_color
         self.mount_bolt = bolt_8_32
-        self.mount_dz = -INCH/2
+        self.mount_dz = -inch/2
 
     # function which returns the drilling required to mount component
     def get_drill(self, obj):
@@ -159,15 +159,15 @@ class baseplate_mount:
     def get_drill(self, obj):
         part = _custom_cylinder(dia=bolt_14_20['clear_dia'], dz=drill_depth,
                            head_dia=bolt_14_20["washer_dia"], head_dz=obj.BoreDepth.Value,
-                           x=0, y=0, z=-INCH/2)
+                           x=0, y=0, z=-inch/2)
         return part
 
     def execute(self, obj):
-        bolt_len = INCH-(obj.BoreDepth.Value-bolt_14_20['head_dz'])
+        bolt_len = inch-(obj.BoreDepth.Value-bolt_14_20['head_dz'])
 
         part = _custom_cylinder(dia=bolt_14_20['tap_dia'], dz=bolt_len,
                            head_dia=bolt_14_20['head_dia'], head_dz=bolt_14_20['head_dz'],
-                           x=0, y=0, z=-INCH*3/2+bolt_len)
+                           x=0, y=0, z=-inch*3/2+bolt_len)
         obj.Shape = part
 
 
@@ -254,25 +254,25 @@ class skate_mount:
 
     def get_drill(self, obj):
         part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                           x=0, y=-obj.MountHoleDistance.Value/2, z=-INCH/2)
+                           x=0, y=-obj.MountHoleDistance.Value/2, z=-inch/2)
         part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                                     x=0, y=obj.MountHoleDistance.Value/2, z=-INCH/2))
+                                     x=0, y=obj.MountHoleDistance.Value/2, z=-inch/2))
         return part
 
     def execute(self, obj):
         dx = bolt_8_32['head_dia']+obj.OuterThickness.Value*2
         dy = dx+obj.MountHoleDistance.Value
-        dz = INCH/2-obj.CubeSize.Value/2+obj.CubeDepth.Value
+        dz = inch/2-obj.CubeSize.Value/2+obj.CubeDepth.Value
         cut_dx = obj.CubeSize.Value+obj.CubeTolerance.Value
 
         part = _custom_box(dx=dx, dy=dy, dz=dz,
-                           x=0, y=0, z=-INCH/2, fillet=5)
+                           x=0, y=0, z=-inch/2, fillet=5)
         part = part.cut(_custom_box(dx=cut_dx, dy=cut_dx, dz=obj.CubeDepth.Value,
                                     x=0, y=0, z=-obj.CubeSize.Value/2))
         for i in [-1, 1]:
             part = part.cut(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=dz,
                                         head_dia=bolt_8_32['head_dia'], head_dz=bolt_8_32['head_dia'],
-                                        x=0, y=i*obj.MountHoleDistance.Value/2, z=-INCH/2+dz))
+                                        x=0, y=i*obj.MountHoleDistance.Value/2, z=-inch/2+dz))
         obj.Shape = part
 
 
@@ -307,7 +307,7 @@ class slide_mount:
         bolt_dy = -obj.PostThickness.Value-(obj.SlotLength.Value+bolt_8_32['head_dia']+obj.OuterThickness.Value*2)/2
 
         part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                           x=0, y=bolt_dy+obj.DrillOffset.Value, z=-INCH/2)
+                           x=0, y=bolt_dy+obj.DrillOffset.Value, z=-inch/2)
         return part
 
     def execute(self, obj):
@@ -316,13 +316,13 @@ class slide_mount:
         dz = obj.AdapterHeight.Value
 
         part = _custom_box(dx=dx, dy=dy, dz=dz,
-                           x=0, y=-dy/2, z=-INCH/2, fillet=4)
+                           x=0, y=-dy/2, z=-inch/2, fillet=4)
         part = part.cut(_custom_box(dx=bolt_8_32['clear_dia'], dy=obj.SlotLength.Value+bolt_8_32['clear_dia'], dz=dz,
-                                    x=0, y=-dy/2-obj.PostThickness.Value/2, z=-INCH/2, fillet=bolt_8_32['clear_dia']/2))
+                                    x=0, y=-dy/2-obj.PostThickness.Value/2, z=-inch/2, fillet=bolt_8_32['clear_dia']/2))
         part = part.cut(_custom_box(dx=bolt_8_32['head_dia'], dy=obj.SlotLength.Value+bolt_8_32['head_dia'], dz=bolt_8_32['head_dia'],
-                                    x=0, y=-dy/2-obj.PostThickness.Value/2, z=-INCH/2+bolt_8_32['head_dia'], fillet=bolt_8_32['head_dia']/2))
-        part = part.fuse(_custom_box(dx=dx, dy=obj.PostThickness.Value, dz=INCH/2+bolt_8_32['clear_dia'],
-                                     x=0, y=-obj.PostThickness.Value/2, z=-INCH/2))
+                                    x=0, y=-dy/2-obj.PostThickness.Value/2, z=-inch/2+bolt_8_32['head_dia'], fillet=bolt_8_32['head_dia']/2))
+        part = part.fuse(_custom_box(dx=dx, dy=obj.PostThickness.Value, dz=inch/2+bolt_8_32['clear_dia'],
+                                     x=0, y=-obj.PostThickness.Value/2, z=-inch/2))
         part = part.cut(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=obj.PostThickness.Value,
                                     x=0, y=0, z=0, dir=(0, -1, 0)))
         obj.Shape = part
@@ -365,7 +365,7 @@ class mount_for_km100pm:
         part = _custom_box(dx=34, dy=54.5, dz=24.27,
                            x=-19.27+15, y=-8.02, z=0,
                            fillet=5, dir=(0, 0, -1))
-        part.translate(App.Vector((51.8-25.7-12+15.17), (6.35+0.089*INCH/2), 6.98))
+        part.translate(App.Vector((51.8-25.7-12+15.17), (6.35+0.089*inch/2), 6.98))
         part = part.fuse(part)
         return part
 
@@ -416,16 +416,16 @@ class fiberport_holder:
         self.in_width = 1
 
     def get_drill(self, obj):
-        part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=INCH,
+        part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=inch,
                            x=0, y=0, z=-20.7, dir=(1,0,0))
-        part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=INCH,
+        part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=inch,
                                      x=0, y=-12.7, z=-20.7, dir=(1,0,0)))
-        part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=INCH,
+        part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=inch,
                                      x=0, y=12.7, z=-20.7, dir=(1,0,0)))
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/HCA3-Solidworks.stl", (-90, 180, -90), (-6.35, -38.1/2, -26.9))
+        mesh = _import_stl("thorlabs/HCA3-Solidworks.stl", (-90, 180, -90), (-6.35, -38.1/2, -26.9))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
         
@@ -495,12 +495,12 @@ class rotation_stage_rsp05:
         self.part_numbers = ['RSP05', wave_plate_part_num]
         self.tran = True
         self.in_limit = 0
-        self.in_width = INCH/2
+        self.in_width = inch/2
 
         _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(0, 0, -14), rot_offset=(0, 0, 90*obj.Invert), **adapter_args)
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/RSP05-Solidworks.stl", (90, 0, 90), (0.6, 0, 0), 1000)
+        mesh = _import_stl("thorlabs/RSP05-Solidworks.stl", (90, 0, 90), (0.6, 0, 0), 1000)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -534,15 +534,15 @@ class mirror_mount_k05s2:
 
     def get_drill(self, obj):
         part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                           x=-8+self.x_offset, y=0, z=-INCH/2)
+                           x=-8+self.x_offset, y=0, z=-inch/2)
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-8+self.x_offset, y=-5, z=-INCH/2))
+                                     x=-8+self.x_offset, y=-5, z=-inch/2))
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-8+self.x_offset, y=5, z=-INCH/2))
+                                     x=-8+self.x_offset, y=5, z=-inch/2))
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/POLARIS-K05S2-Solidworks.stl", (0, -90, 0), (-4.5+self.x_offset, -0.3, -0.25), 1000)
+        mesh = _import_stl("thorlabs/POLARIS-K05S2-Solidworks.stl", (0, -90, 0), (-4.5+self.x_offset, -0.3, -0.25), 1000)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -576,15 +576,15 @@ class mirror_mount_k05s1:
 
     def get_drill(self, obj):
         part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                           x=-8+self.x_offset, y=0, z=-INCH/2)
+                           x=-8+self.x_offset, y=0, z=-inch/2)
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-8+self.x_offset, y=-5, z=-INCH/2))
+                                     x=-8+self.x_offset, y=-5, z=-inch/2))
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-8+self.x_offset, y=5, z=-INCH/2))
+                                     x=-8+self.x_offset, y=5, z=-inch/2))
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/POLARIS-K05S1-Solidworks.stl", (0, 0, -90), (-4.5+self.x_offset, -0.3+0.5, -0.25), 1)
+        mesh = _import_stl("POLARIS-K05S1-Step.stl", (90, 0, -90), (-4.514+self.x_offset, 0.254, -0.254))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -618,15 +618,15 @@ class splitter_mount_b05g:
 
     def get_drill(self, obj):
         part = _custom_cylinder(dia=bolt_8_32['tap_dia'],
-                           dz=drill_depth, x=-5+self.x_offset, y=0, z=-INCH/2)
+                           dz=drill_depth, x=-5+self.x_offset, y=0, z=-inch/2)
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-5+self.x_offset, y=-5, z=-INCH/2))
+                                     x=-5+self.x_offset, y=-5, z=-inch/2))
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-5+self.x_offset, y=5, z=-INCH/2))
+                                     x=-5+self.x_offset, y=5, z=-inch/2))
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/POLARIS-B05G-Solidworks.stl", (90, 0, 90), (-17.54+self.x_offset, -9.0, -18.2-1.05))
+        mesh = _import_stl("thorlabs/POLARIS-B05G-Solidworks.stl", (90, 0, 90), (-17.54+self.x_offset, -9.0, -18.2-1.05))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -660,15 +660,15 @@ class mirror_mount_c05g:
 
     def get_drill(self, obj):
         part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                           x=-6.4+self.x_offset, y=0, z=-INCH/2)
+                           x=-6.4+self.x_offset, y=0, z=-inch/2)
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-6.4+self.x_offset, y=-5, z=-INCH/2))
+                                     x=-6.4+self.x_offset, y=-5, z=-inch/2))
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                     x=-6.4+self.x_offset, y=5, z=-INCH/2))
+                                     x=-6.4+self.x_offset, y=5, z=-inch/2))
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/POLARIS-C05G-Solidworks.stl", (90, 0, 90), (-19+self.x_offset, -4.3, -15.2), 1000)
+        mesh = _import_stl("thorlabs/POLARIS-C05G-Solidworks.stl", (90, 0, 90), (-19+self.x_offset, -4.3, -15.2), 1000)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -703,20 +703,20 @@ class mirror_mount_km05:
             self.x_offset = -obj.ChildObjects[0].Thickness.Value
 
     def get_drill(self, obj):
-        part = _custom_cylinder(dia=bolt_8_32['clear_dia'], dz=INCH,
-                           head_dia=bolt_8_32['head_dia'], head_dz=0.92*INCH-obj.BoltLength.Value,
-                           x=-7.4+self.x_offset, y=0, z=-INCH*3/2, dir=(0,0,1))
+        part = _custom_cylinder(dia=bolt_8_32['clear_dia'], dz=inch,
+                           head_dia=bolt_8_32['head_dia'], head_dz=0.92*inch-obj.BoltLength.Value,
+                           x=-7.4+self.x_offset, y=0, z=-inch*3/2, dir=(0,0,1))
         if obj.Drill:
-            part = part.fuse(_custom_box(dx=18, dy=31, dz=0.08*INCH,
-                                        x=-2.4+self.x_offset, y=0, z=-INCH/2-0.08*INCH, fillet=3))
-            part = part.fuse(_custom_box(dx=18, dy=9, dz=0.08*INCH,
-                                        x=-7.4+self.x_offset, y=-31/2+4.5, z=-INCH/2-0.08*INCH, fillet=2))
-            part = part.fuse(_custom_box(dx=17, dy=20, dz=(0.08*INCH)+4,
-                                        x=-(15+8.4)+self.x_offset, y=-31/2+4.5, z=-INCH/2-0.08*INCH-4, fillet=2))
+            part = part.fuse(_custom_box(dx=18, dy=31, dz=0.08*inch,
+                                        x=-2.4+self.x_offset, y=0, z=-inch/2-0.08*inch, fillet=3))
+            part = part.fuse(_custom_box(dx=18, dy=9, dz=0.08*inch,
+                                        x=-7.4+self.x_offset, y=-31/2+4.5, z=-inch/2-0.08*inch, fillet=2))
+            part = part.fuse(_custom_box(dx=17, dy=20, dz=(0.08*inch)+4,
+                                        x=-(15+8.4)+self.x_offset, y=-31/2+4.5, z=-inch/2-0.08*inch-4, fillet=2))
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/KM05-Solidworks.stl", (0, 0, 90), ([1.95+self.x_offset, -1.2, 0.5]))
+        mesh = _import_stl("thorlabs/KM05-Solidworks.stl", (0, 0, 90), ([1.95+self.x_offset, -1.2, 0.5]))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -751,16 +751,21 @@ class mirror_mount_ks1t:
             self.x_offset = -obj.ChildObjects[0].Thickness.Value
 
     def get_drill(self, obj):
-        part = _custom_cylinder(dia=bolt_8_32['clear_dia'], dz=INCH,
-                           head_dia=bolt_8_32['head_dia'], head_dz=0.92*INCH-obj.BoltLength.Value,
-                           x=-16.94+self.x_offset, y=0, z=-INCH*3/2, dir=(0,0,1))
-        if obj.Drill:
-            part = part.fuse(_custom_box(dx=55, dy=60, dz=0.5*INCH,
-                                        x=-25+self.x_offset, y=0, z=-INCH/2-0.5*INCH, fillet=3))
+        dx, dy, dz = 55, 60, inch/2
+        x, y, z = -25, 0, -inch/2
+        part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
+                                x=-16.94+self.x_offset, y=0, z=-inch/2, dir=(0,0,-1))
+        part = part.fuse(_custom_box(dx=dx, dy=dy, dz=dz,
+                                     x=x+self.x_offset, y=y, z=z,
+                                     fillet=3, dir=(0, 0, -1)))
+        part = part.fuse(_custom_box(dx=dx/2, dy=dy, dz=dz+2,
+                                     x=-25+self.x_offset, y=0, z=z,
+                                     fillet=3, fillet_dir=(0, 0, 1),
+                                     dir=(-1, 0, -1)))
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("KS1T-Step.stl", (90, -0, -90), (22.06, 13.37, -30.35))
+        mesh = _import_stl("KS1T-Step.stl", (90, -0, -90), (22.06, 13.37, -30.35))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -790,7 +795,7 @@ class fiberport_mount_km05:
         _add_linked_object(obj, "Mount", mirror_mount_km05, pos_offset=(0, 0, 0), mirror=False, **mount_args)
 
     def execute(self, obj):
-        part = _custom_cylinder(dia=INCH/2, dz=25.5,
+        part = _custom_cylinder(dia=inch/2, dz=25.5,
                            x=0, y=0, z=0, dir=(1, 0, 0))
         obj.Shape = part
 
@@ -823,18 +828,18 @@ class km05_50mm_laser:
         self.in_width = 1
 
         mount = _add_linked_object(obj, "Mount", mirror_mount_km05, pos_offset=(-6, 0, 0), drill=False, mirror=False, **mount_args)
-        upper_plate = _add_linked_object(obj, "Upper Plate", km05_tec_upper_plate, pos_offset=(-10, 0, -0.08*INCH), drill_obj=mount, **upper_plate_args)
-        _add_linked_object(obj, "Lower Plate", km05_tec_lower_plate, pos_offset=(-10, 0, -0.08*INCH-tec_thickness-upper_plate.Thickness.Value), **lower_plate_args)
+        upper_plate = _add_linked_object(obj, "Upper Plate", km05_tec_upper_plate, pos_offset=(-10, 0, -0.08*inch), drill_obj=mount, **upper_plate_args)
+        _add_linked_object(obj, "Lower Plate", km05_tec_lower_plate, pos_offset=(-10, 0, -0.08*inch-tec_thickness-upper_plate.Thickness.Value), **lower_plate_args)
 
     def execute(self, obj):
-        part = _custom_cylinder(dia=INCH/2, dz=40,
+        part = _custom_cylinder(dia=inch/2, dz=40,
                            x=10, y=0, z=0, dir=(-1, 0, 0))
         obj.Shape = part
 
 
 class km05_tec_upper_plate:
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill_obj, width=INCH, thickness=0.25*INCH):
+    def __init__(self, obj, drill_obj, width=inch, thickness=0.25*inch):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -847,14 +852,14 @@ class km05_tec_upper_plate:
 
     def execute(self, obj):
         part = _custom_box(dx=obj.Width.Value, dy=obj.Width.Value, dz=obj.Thickness.Value,
-                           x=0, y=0, z=-INCH/2, dir=(0, 0, -1))
+                           x=0, y=0, z=-inch/2, dir=(0, 0, -1))
         part = _drill_part(part, obj, obj.DrillObject)
         obj.Shape = part
 
 
 class km05_tec_lower_plate:
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, width=1.5*INCH, thickness=0.25*INCH):
+    def __init__(self, obj, drill=True, width=1.5*inch, thickness=0.25*inch):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -866,7 +871,7 @@ class km05_tec_lower_plate:
         self.part_numbers = []
 
     def get_drill(self, obj):
-        part = _custom_box(obj.Width.Value+5, obj.Width.Value+5, drill_depth, 0, 0, -INCH/2-obj.Thickness.Value, 3, dir=(0, 0, 1))
+        part = _custom_box(obj.Width.Value+5, obj.Width.Value+5, drill_depth, 0, 0, -inch/2-obj.Thickness.Value, 3, dir=(0, 0, 1))
         for x, y in [(1,1), (1,-1), (-1,1), (-1,-1)]:
             part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
                                               x=(obj.Width.Value/2-4)*x, y=(obj.Width.Value/2-4)*y, z=0, dir=(0, 0, -1)))
@@ -874,10 +879,10 @@ class km05_tec_lower_plate:
 
     def execute(self, obj):
         part = _custom_box(dx=obj.Width.Value, dy=obj.Width.Value, dz=obj.Thickness.Value,
-                                     x=0, y=0, z=-INCH/2, dir=(0, 0, -1))
+                                     x=0, y=0, z=-inch/2, dir=(0, 0, -1))
         for x, y in [(1,1), (1,-1), (-1,1), (-1,-1)]:
             part = part.cut(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=obj.Thickness.Value,
-                                        x=(obj.Width.Value/2-4)*x, y=(obj.Width.Value/2-4)*y, z=-INCH/2, dir=(0, 0, -1)))
+                                        x=(obj.Width.Value/2-4)*x, y=(obj.Width.Value/2-4)*y, z=-inch/2, dir=(0, 0, -1)))
         obj.Shape = part
 
 
@@ -902,7 +907,7 @@ class mirror_mount_mk05:
         self.part_numbers = ['MK05']
         self.ref_angle = 0
         self.in_limit = pi/2
-        self.in_width = INCH/2
+        self.in_width = inch/2
 
         _add_linked_object(obj, "Mirror", circular_mirror, **mirror_args)
 
@@ -913,7 +918,7 @@ class mirror_mount_mk05:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/MK05-Solidworks.stl", (0, -90, 0), ([-27.5-obj.ChildObjects[0].Thickness.Value, -5.6, -26.0]), 1000)
+        mesh = _import_stl("thorlabs/MK05-Solidworks.stl", (0, -90, 0), ([-27.5-obj.ChildObjects[0].Thickness.Value, -5.6, -26.0]), 1000)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -944,7 +949,7 @@ class mount_mk05pm:
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/MK05PM.stl", (0, 90, 180), ([-15, 0, 0]))
+        mesh = _import_stl("thorlabs/MK05PM.stl", (0, 90, 180), ([-15, 0, 0]))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1026,15 +1031,15 @@ class lens_holder_l05g:
 
     def get_drill(self, obj):
         part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                           x=-9.5, y=0, z=-INCH/2)
+                           x=-9.5, y=0, z=-inch/2)
         for i in [-1,1]:
             part = part.fuse(_custom_box(dx=5, dy=2, dz=2.2,
-                                         x=-9.5, y=i*5, z=-INCH/2,
+                                         x=-9.5, y=i*5, z=-inch/2,
                                          fillet=1, dir=(0, 0, -1)))
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/POLARIS-L05G-Solidworks.stl", (90, 0, 90), (-26.57-obj.ChildObjects[0].Thickness.Value/2, -13.3, -18.4), 1000)
+        mesh = _import_stl("thorlabs/POLARIS-L05G-Solidworks.stl", (90, 0, 90), (-26.57-obj.ChildObjects[0].Thickness.Value/2, -13.3, -18.4), 1000)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1062,7 +1067,7 @@ class pinhole_ida12:
         self.tran = True
         self.in_limit = 0
         self.in_width = 1
-        self.block_width=INCH/2
+        self.block_width=inch/2
         self.slot_length=adapter_args['slot_length']
 
         _add_linked_object(obj, "Slide Mount", slide_mount,
@@ -1070,12 +1075,12 @@ class pinhole_ida12:
 
     def get_drill(self, obj):
         part = _custom_box(dx=6.5, dy=10+obj.ChildObjects[0].SlotLength.Value, dz=1,
-                           x=-0.75, y=0, z=-INCH/2,
+                           x=-0.75, y=0, z=-inch/2,
                            fillet=2, dir=(0,0,-1))
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/IDA12-P5-Solidworks.stl", (-90, 0, -90), (-0.35, 0.05, 0), 1000)
+        mesh = _import_stl("thorlabs/IDA12-P5-Solidworks.stl", (-90, 0, -90), (-0.35, 0.05, 0), 1000)
         mesh.rotate(pi/2, 0, 0)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
@@ -1107,12 +1112,12 @@ class prism_mount_km100pm:
                                      fillet=5, dir=(0, 0, -1)))
         part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
                                      x=-29.27, y=-7.52, z=0))
-        part.translate(App.Vector((51.8-25.7-12+15.17), (6.35+0.089*INCH/2), 6.98))
+        part.translate(App.Vector((51.8-25.7-12+15.17), (6.35+0.089*inch/2), 6.98))
         part = part.fuse(part)
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/KM100PM-Solidworks-modified.stl", (90, 0, -90), (14.2, 26.0, -17.92))
+        mesh = _import_stl("thorlabs/KM100PM-Solidworks-modified.stl", (90, 0, -90), (14.2, 26.0, -17.92))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
         
@@ -1151,12 +1156,12 @@ class isomet_1205c_on_km100pm:
 
         # TODO fix these parts to remove arbitrary translations
         _add_linked_object(obj, "Mount KM100PM", prism_mount_km100pm,
-                           pos_offset=(-(51.8-25.7-12+15.17), -(6.35+0.089*INCH/2), -6.98), **mount_args)
+                           pos_offset=(-(51.8-25.7-12+15.17), -(6.35+0.089*inch/2), -6.98), **mount_args)
         _add_linked_object(obj, "Adapter Bracket", mount_for_km100pm,
-                           pos_offset=(-(51.8-25.7-12+15.17), -(6.35+0.089*INCH/2), -6.98), **adapter_args)
+                           pos_offset=(-(51.8-25.7-12+15.17), -(6.35+0.089*inch/2), -6.98), **adapter_args)
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/isomet_1205c.stl", (0, 0, 90), (0, 0, 0))
+        mesh = _import_stl("thorlabs/isomet_1205c.stl", (0, 0, 90), (0, 0, 0))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1183,19 +1188,19 @@ class isolator_670:
         self.part_numbers = ['IOT-5-670-VLP']
         self.tran = True
         self.in_limit = pi/2
-        self.in_width = INCH/2
+        self.in_width = inch/2
 
         _add_linked_object(obj, "Surface Adapter", surface_adapter,
                            pos_offset=(0, 0, -22.1), **adapter_args)
 
     def get_drill(self, obj):
         part = _custom_box(dx=80, dy=25, dz=5,
-                           x=0, y= 0, z=-INCH/2,
+                           x=0, y= 0, z=-inch/2,
                            fillet=5, dir=(0, 0, -1))
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/IOT-5-670-VLP.stl", (90, 0, 90), (19, 0, 0), 1) #Thorlabs 670 (better for injection?)
+        mesh = _import_stl("thorlabs/IOT-5-670-VLP.stl", (90, 0, 90), (19, 0, 0), 1) #Thorlabs 670 (better for injection?)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1222,19 +1227,19 @@ class isolator_405:
         self.part_numbers = ['IOT-5-670-VLP']
         self.tran = True
         self.in_limit = pi/2
-        self.in_width = INCH/2
+        self.in_width = inch/2
 
         _add_linked_object(obj, "Surface Adapter", surface_adapter,
                            pos_offset=(0, 0, -17.15), **adapter_args)
 
     def get_drill(self, obj):
         part = _custom_box(dx=25, dy=15, dz=drill_depth,
-                           x=0, y=0, z=-INCH/2,
+                           x=0, y=0, z=-inch/2,
                            fillet=5, dir=(0, 0, 1))
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/IO-3D-405-PBS.stl", (90, 0, 90), (9.45, 0, 0), 1)
+        mesh = _import_stl("thorlabs/IO-3D-405-PBS.stl", (90, 0, 90), (9.45, 0, 0), 1)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1283,7 +1288,7 @@ class circular_splitter:
         part_number (string) : The part number of the plate being used
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, thickness=3, diameter=INCH/2, part_number=''):
+    def __init__(self, obj, drill=True, thickness=3, diameter=inch/2, part_number=''):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -1297,7 +1302,7 @@ class circular_splitter:
         self.tran = True
         self.ref_angle = 0
         self.in_limit = 0
-        self.in_width = INCH/2
+        self.in_width = inch/2
 
     def execute(self, obj):
         part = _custom_cylinder(dia=obj.Diameter.Value, dz=obj.Thickness.Value,
@@ -1317,7 +1322,7 @@ class circular_lens:
         part_number (string) : The part number of the lens being used
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, focal_length=50, thickness=3, diameter=INCH/2, part_number=''):
+    def __init__(self, obj, drill=True, focal_length=50, thickness=3, diameter=inch/2, part_number=''):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -1332,7 +1337,7 @@ class circular_lens:
         self.tran = True
         self.foc_len = obj.FocalLength.Value
         self.in_limit = 0
-        self.in_width = INCH/2
+        self.in_width = inch/2
 
     def execute(self, obj):
         part = _custom_cylinder(dia=obj.Diameter.Value, dz=obj.Thickness.Value,
@@ -1351,7 +1356,7 @@ class circular_mirror:
         part_number (string) : The part number of the mirror being used
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, thickness=6, diameter=INCH/2, part_num=''):
+    def __init__(self, obj, drill=True, thickness=6, diameter=inch/2, part_num=''):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -1427,21 +1432,21 @@ class rb_cell:
         dx = 90
         dy = 52
 
-        part = _custom_box(dx=dx+20, dy=dy+20, dz=25.4-INCH/2,
-                           x=0, y=10, z=-INCH/2,
+        part = _custom_box(dx=dx+20, dy=dy+20, dz=25.4-inch/2,
+                           x=0, y=10, z=-inch/2,
                            fillet=3, dir=(0,0,-1))
         for x, y in [(1,1), (-1,1), (1,-1), (-1,-1)]:
             part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                                         x=x*dx/2, y=y*15.7, z=-INCH/2))
+                                         x=x*dx/2, y=y*15.7, z=-inch/2))
         part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                                     x=45, y=-15.7, z=-INCH/2))
+                                     x=45, y=-15.7, z=-inch/2))
         for x in [1,-1]:
             part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                                         x=x*dx/2, y=25.7, z=-INCH/2))
+                                         x=x*dx/2, y=25.7, z=-inch/2))
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/rb_cell_holder_middle.stl", (0, 0, 0), ([0, 5, 0]))
+        mesh = _import_stl("thorlabs/rb_cell_holder_middle.stl", (0, 0, 0), ([0, 5, 0]))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1468,13 +1473,13 @@ class photodetector_pda10a2:
         _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(-12.68, 0, -25))
 
     def get_drill(self, obj):
-        part = _custom_box(dx=30, dy=55, dz=25-INCH/2,
-                           x=-12.68, y=0, z=-INCH/2,
+        part = _custom_box(dx=30, dy=55, dz=25-inch/2,
+                           x=-12.68, y=0, z=-inch/2,
                            fillet=3, dir=(0,0,-1))
         return part
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/PDA10A2.stl", (90, 0, -90), ([-22, 0, 0]))
+        mesh = _import_stl("thorlabs/PDA10A2.stl", (90, 0, -90), ([-22, 0, 0]))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1494,7 +1499,7 @@ class periscope:
         mirror_type x2
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, lower_dz=INCH/2, upper_dz=2*INCH, mirror_type=mirror_mount_k05s2, invert=False, table_mount=False):
+    def __init__(self, obj, drill=True, lower_dz=inch/2, upper_dz=2*inch, mirror_type=mirror_mount_k05s2, invert=False, table_mount=False):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -1507,22 +1512,22 @@ class periscope:
         obj.ViewObject.ShapeColor = adapter_color
         self.in_limit = pi-0.01
         self.in_width = 1
-        self.z_off = -INCH/2-obj.TableMount*INCH
+        self.z_off = -inch/2-obj.TableMount*inch
 
         _add_linked_object(obj, "Lower Mirror", mirror_type, rot_offset=((-1)**invert*90, -45, 0), pos_offset=(0, 0, obj.LowerHeight.Value+self.z_off))
         _add_linked_object(obj, "Upper Mirror", mirror_type, rot_offset=((-1)**invert*90, 135, 0), pos_offset=(0, 0, obj.UpperHeight.Value+self.z_off))
 
     def get_drill(self, obj):
-        part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=INCH,
+        part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=inch,
                            x=0, y=0, z=-20.7, dir=(1,0,0))
-        part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=INCH,
+        part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=inch,
                                      x=0, y=-12.7, z=-20.7, dir=(1,0,0)))
-        part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=INCH,
+        part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=inch,
                                      x=0, y=12.7, z=-20.7, dir=(1,0,0)))
         return part
 
     def execute(self, obj):
-        width = INCH #Must be INCH wide to keep periscope mirrors 1 inch from mount holes. 
+        width = inch #Must be inch wide to keep periscope mirrors 1 inch from mount holes. 
         fillet = 15
         part = _custom_box(dx=70, dy=width, dz=obj.UpperHeight.Value+20,
                            x=0, y=0, z=0)
@@ -1530,10 +1535,10 @@ class periscope:
             part = part.cut(_custom_box(dx=fillet*2+4, dy=width, dz=obj.UpperHeight.Value+20,
                                         x=i*(35+fillet), y=0, z=20, fillet=15,
                                         dir=(-i,0,1), fillet_dir=(0,1,0)))
-            part = part.cut(_custom_cylinder(dia=bolt_14_20['clear_dia']+0.5, dz=INCH+5,
+            part = part.cut(_custom_cylinder(dia=bolt_14_20['clear_dia']+0.5, dz=inch+5,
                                         head_dia=bolt_14_20['head_dia']+0.5, head_dz=10,
-                                        x=i*INCH, y=0, z=25, dir=(0,0,-1)))
-        part.translate(App.Vector(0, (-1)**obj.Invert*(width/2+INCH/2), self.z_off))
+                                        x=i*inch, y=0, z=25, dir=(0,0,-1)))
+        part.translate(App.Vector(0, (-1)**obj.Invert*(width/2+inch/2), self.z_off))
         part = part.fuse(part)
         for i in obj.ChildObjects:
             part = _drill_part(part, obj, i)
@@ -1553,10 +1558,10 @@ class laser_diode_mount:
         self.part_numbers = ['LT230P-B','AD15NT']
         self.ref_angle = 0
         self.in_limit = pi/2
-        self.in_width = INCH/2
+        self.in_width = inch/2
 
     def execute(self, obj):
-        mesh = _orient_stl("thorlabs/LT230P-B.stl", (0, 90, 0 ), ([0, 0, 0]))
+        mesh = _import_stl("thorlabs/LT230P-B.stl", (0, 90, 0 ), ([0, 0, 0]))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
