@@ -173,6 +173,14 @@ class Get_Orientation():
             if obj.TypeId == "App::Part":
                 break
 
+        mw = Gui.getMainWindow()
+        actions = mw.findChildren(QtGui.QAction)
+        for action in actions:
+            text = action.text()
+            if "1" in text and ".step" in text:
+                break
+        obj.Label = text[2:-5]
+
         Mesh.export([obj], "%sMod/PyOptic/PyOptic/stl/%s.stl"%(App.getUserAppDataDir(), obj.Label))
 
         view_rot = Gui.ActiveDocument.ActiveView.viewPosition().Rotation
@@ -180,7 +188,6 @@ class Get_Orientation():
         rot2 = App.Rotation(App.Vector(0, 0, 1), 90)
         rot3 = App.Rotation(App.Vector(0, 1, 0), 90)
         final_rot = rot3*rot2*rot1
-        obj.Placement.Rotation = final_rot
 
         rot_xyz = np.round(final_rot.getYawPitchRoll()[::-1])
 
@@ -195,9 +202,9 @@ class Get_Orientation():
             elif hasattr(feature, "Point"):
                 translate += feature.Point
         translate /= len(selection)
+        final_translate = final_rot.multVec(-App.Vector(*translate))
 
-        center = App.Placement(-App.Vector(*translate), App.Rotation(0, 0, 0), App.Vector(0, 0, 0))
-        final_placement = obj.Placement*center
+        final_placement = App.Placement(final_translate, final_rot, App.Vector(0, 0, 0))
         obj.Placement = final_placement
 
         translate = np.round(final_placement.Base, 3)
