@@ -189,19 +189,22 @@ class Get_Orientation():
         rot3 = App.Rotation(App.Vector(0, 1, 0), 90)
         final_rot = rot3*rot2*rot1
 
-        rot_xyz = np.round(final_rot.getYawPitchRoll()[::-1])
+        rot_xyz = np.round(final_rot.getYawPitchRoll()[::-1], 3)
 
-        selection = Gui.Selection.getSelectionEx()[0].SubObjects
+        selection = Gui.Selection.getSelectionEx()
         translate = np.zeros(3)
-        for feature in selection:
-            if hasattr(feature, "Curve"):
-                if hasattr(feature.Curve, "Center"):
-                    translate += feature.Curve.Center
-                else:
-                    translate += feature.CenterOfMass
-            elif hasattr(feature, "Point"):
-                translate += feature.Point
-        translate /= len(selection)
+        count = 0
+        for element in selection:
+            for feature in element.SubObjects:
+                if hasattr(feature, "Curve"):
+                    if hasattr(feature.Curve, "Center"):
+                        translate += feature.Curve.Center
+                    else:
+                        translate += feature.CenterOfMass
+                elif hasattr(feature, "Point"):
+                    translate += feature.Point
+                count += 1
+        translate /= count
         final_translate = final_rot.multVec(-App.Vector(*translate))
 
         final_placement = App.Placement(final_translate, final_rot, App.Vector(0, 0, 0))
@@ -224,17 +227,20 @@ class Get_Position():
             if obj.TypeId == "App::Part":
                 break
 
-        selection = Gui.Selection.getSelectionEx()[0].SubObjects
+        selection = Gui.Selection.getSelectionEx()
         translate = np.zeros(3)
-        for feature in selection:
-            if hasattr(feature, "Curve"):
-                if hasattr(feature.Curve, "Center"):
-                    translate += feature.Curve.Center
-                else:
-                    translate += feature.CenterOfMass
-            elif hasattr(feature, "Point"):
-                translate += feature.Point
-        translate /= len(selection)
+        count = 0
+        for element in selection:
+            for feature in element.SubObjects:
+                if hasattr(feature, "Curve"):
+                    if hasattr(feature.Curve, "Center"):
+                        translate += feature.Curve.Center
+                    else:
+                        translate += feature.CenterOfMass
+                elif hasattr(feature, "Point"):
+                    translate += feature.Point
+                count += 1
+        translate /= count
 
         center = App.Placement(App.Vector(*translate), App.Rotation(0, 0, 0), App.Vector(0, 0, 0))
         final_placement = obj.Placement*center

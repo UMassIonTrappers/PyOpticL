@@ -328,74 +328,6 @@ class slide_mount:
         obj.Shape = part
 
 
-class mount_for_km100pm:
-    '''
-    Adapter for mounting isomet AOMs to km100pm kinematic mount
-
-    Args:
-        mount_offset (float[3]) : The offset position of where the adapter mounts to the component
-        drill (bool) : Whether baseplate mounting for this part should be drilled
-        slot_length (float) : The length of the slots used for mounting to the km100pm
-        countersink (bool) : Whether to drill a countersink instead of a counterbore for the AOM mount holes
-        counter_depth (float) : The depth of the countersink/bores for the AOM mount holes
-        arm_thickness (float) : The thickness of the arm the mounts to the km100PM
-        arm_clearance (float) : The distance between the bottom of the adapter arm and the bottom of the km100pm
-        stage_thickness (float) : The thickness of the stage that mounts to the AOM
-        stage_length (float) : The length of the stage that mounts to the AOM
-    '''
-    type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, slot_length=5, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=4, stage_length=21):
-        obj.Proxy = self
-        ViewProvider(obj.ViewObject)
-
-        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
-        obj.addProperty('App::PropertyLength', 'SlotLength').SlotLength = slot_length
-        obj.addProperty('App::PropertyBool', 'Countersink').Countersink = countersink
-        obj.addProperty('App::PropertyLength', 'CounterDepth').CounterDepth = counter_depth
-        obj.addProperty('App::PropertyLength', 'ArmThickness').ArmThickness = arm_thickness
-        obj.addProperty('App::PropertyLength', 'ArmClearance').ArmClearance = arm_clearance
-        obj.addProperty('App::PropertyLength', 'StageThickness').StageThickness = stage_thickness
-        obj.addProperty('App::PropertyLength', 'StageLength').StageLength = stage_length
-
-        obj.ViewObject.ShapeColor = mount_color
-        obj.setEditorMode('Placement', 2)
-        
-
-    def get_drill(self, obj):
-        part = _custom_box(dx=34, dy=54.5, dz=24.27,
-                           x=-19.27+15, y=-8.02, z=0,
-                           fillet=5, dir=(0, 0, -1))
-        part.translate(App.Vector((51.8-25.7-12+15.17), (6.35+0.089*inch/2), 6.98))
-        part = part.fuse(part)
-        return part
-
-    def execute(self, obj):
-        dx = obj.ArmThickness.Value
-        dy = 47.5
-        dz = 16.92
-        stage_dx = obj.StageLength.Value
-        stage_dz = obj.StageThickness.Value
-
-        part = _custom_box(dx=dx, dy=dy, dz=dz-obj.ArmClearance.Value,
-                           x=0, y=0, z=obj.ArmClearance.Value)
-        part = part.fuse(_custom_box(dx=stage_dx, dy=dy, dz=stage_dz,
-                                     x=0, y=0, z=dz, dir=(1, 0, -1)))
-        for ddy in [15.2, 38.1]:
-            part = part.cut(_custom_box(dx=dx, dy=obj.SlotLength.Value+bolt_4_40['clear_dia'], dz=bolt_4_40['clear_dia'],
-                                        x=dx/2, y=25.4-ddy, z=6.4,
-                                        fillet=bolt_4_40['clear_dia']/2, dir=(-1, 0, 0)))
-            part = part.cut(_custom_box(dx=dx/2, dy=obj.SlotLength.Value+bolt_4_40['head_dia'], dz=bolt_4_40['head_dia'],
-                                        x=dx/2, y=25.4-ddy, z=6.4,
-                                        fillet=bolt_4_40['head_dia']/2, dir=(-1, 0, 0)))
-        for ddy in [0, -11.42, -26.65, -38.07]:
-            part = part.cut(_custom_cylinder(dia=bolt_4_40['clear_dia'], dz=stage_dz, head_dia=bolt_4_40['head_dia'],
-                                        head_dz=obj.CounterDepth.Value, countersink=obj.Countersink,
-                                        x=11.25, y=18.9+ddy, z=dz-4, dir=(0,0,1)))
-        part.translate(App.Vector(18, 0, -dz))
-        part = part.fuse(part)
-        obj.Shape = part
-
-
 class fiberport_holder:
     '''
     Part for mounting an HCA3 fiberport coupler to the side of a baseplate
@@ -425,7 +357,7 @@ class fiberport_holder:
         return part
 
     def execute(self, obj):
-        mesh = _import_stl("thorlabs/HCA3-Solidworks.stl", (-90, 180, -90), (-6.35, -38.1/2, -26.9))
+        mesh = _import_stl("HCA3-Step.stl", (90, -0, 90), (-6.35, 19.05, -26.87))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
         
@@ -497,10 +429,10 @@ class rotation_stage_rsp05:
         self.in_limit = 0
         self.in_width = inch/2
 
-        _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(0, 0, -14), rot_offset=(0, 0, 90*obj.Invert), **adapter_args)
+        _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(-6.35, 0, -13.97), rot_offset=(0, 0, 90*obj.Invert), **adapter_args)
 
     def execute(self, obj):
-        mesh = _import_stl("thorlabs/RSP05-Solidworks.stl", (90, 0, 90), (0.6, 0, 0), 1000)
+        mesh = _import_stl("RSP05-Step.stl", (90, -0, 90), (-5.715, -0, 0))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -542,7 +474,7 @@ class mirror_mount_k05s2:
         return part
 
     def execute(self, obj):
-        mesh = _import_stl("thorlabs/POLARIS-K05S2-Solidworks.stl", (0, -90, 0), (-4.5+self.x_offset, -0.3, -0.25), 1000)
+        mesh = _import_stl("POLARIS-K05S2-Step.stl", (90, -0, -90), (-4.514+self.x_offset, 0.254, -0.254))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -626,7 +558,7 @@ class splitter_mount_b05g:
         return part
 
     def execute(self, obj):
-        mesh = _import_stl("thorlabs/POLARIS-B05G-Solidworks.stl", (90, 0, 90), (-17.54+self.x_offset, -9.0, -18.2-1.05))
+        mesh = _import_stl("POLARIS-B05G-Step.stl", (90, -0, 90), (-17.54+self.x_offset, -5.313, -19.26))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -668,7 +600,7 @@ class mirror_mount_c05g:
         return part
 
     def execute(self, obj):
-        mesh = _import_stl("thorlabs/POLARIS-C05G-Solidworks.stl", (90, 0, 90), (-19+self.x_offset, -4.3, -15.2), 1000)
+        mesh = _import_stl("POLARIS-C05G-Step.stl", (90, -0, 90), (-18.94+self.x_offset, -4.246, -15.2))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -716,7 +648,7 @@ class mirror_mount_km05:
         return part
 
     def execute(self, obj):
-        mesh = _import_stl("thorlabs/KM05-Solidworks.stl", (0, 0, 90), ([1.95+self.x_offset, -1.2, 0.5]))
+        mesh = _import_stl("KM05-Step.stl", (90, -0, 90), (2.084+self.x_offset, -1.148, 0.498))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -918,7 +850,7 @@ class mirror_mount_mk05:
         return part
 
     def execute(self, obj):
-        mesh = _import_stl("thorlabs/MK05-Solidworks.stl", (0, -90, 0), ([-27.5-obj.ChildObjects[0].Thickness.Value, -5.6, -26.0]), 1000)
+        mesh = _import_stl("MK05-Step.stl", (90, -0, -90), (-22.91-obj.ChildObjects[0].Thickness.Value, 26, -5.629))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -943,13 +875,13 @@ class mount_mk05pm:
     def get_drill(self, obj):
         part = _custom_cylinder(dia=bolt_4_40['tap_dia'], dz=drill_depth,
                            head_dia=bolt_4_40['head_dia'], head_dz=drill_depth-5,
-                           x=-15, y=0, z=-10.2-drill_depth, dir=(0,0,1))
-        part = part.fuse(_custom_box(dx=30, dy=25, dz=5,
-                                     x=-3, y=0, z=-11.3, fillet=2))
+                           x=-7.675, y=7.699, z=4.493-10.2-drill_depth, dir=(0,0,1))
+        part = part.fuse(_custom_box(dx=32, dy=25, dz=5,
+                                     x=-7.675+10, y=7.699, z=4.493-11.3, fillet=2))
         return part
 
     def execute(self, obj):
-        mesh = _import_stl("thorlabs/MK05PM.stl", (0, 90, 180), ([-15, 0, 0]))
+        mesh = _import_stl("MK05PM-Step.stl", (180, 90, 0), (-7.675, 7.699, 4.493))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -978,31 +910,32 @@ class grating_mount_on_mk05pm:
         self.part_numbers = []
         self.dx = 12/tan(radians(2*obj.LittrowAngle))
 
-        _add_linked_object(obj, "Mount MK05PM", mount_mk05pm, pos_offset=(1.4-6, 2, -3.5), **mount_args)
-        _add_linked_object(obj, "Grating", square_grating, pos_offset=(0, 0, 6-3.5), rot_offset=(0, 0, -obj.LittrowAngle.Value), **grating_args)
-        _add_linked_object(obj, "Mirror", square_mirror, pos_offset=(self.dx, -12, 6-3.5), rot_offset=(0, 0, -obj.LittrowAngle.Value+180), **mirror_args)
+        _add_linked_object(obj, "Mount MK05PM", mount_mk05pm, pos_offset=(-12, -4, -4-12.7/2+2), **mount_args)
+        _add_linked_object(obj, "Grating", square_grating, pos_offset=(0, 0, 2), rot_offset=(0, 0, -obj.LittrowAngle.Value), **grating_args)
+        _add_linked_object(obj, "Mirror", square_mirror, pos_offset=(self.dx, -12, 2), rot_offset=(0, 0, -obj.LittrowAngle.Value+180), **mirror_args)
 
     def execute(self, obj):
         # TODO add some variables to make this cleaner
         part = _custom_box(dx=25+self.dx, dy=35, dz=4,
-                           x=0, y=0, z=0, dir=(1, -1, 1))
+                           x=-3.048, y=17.91, z=0, dir=(1, -1, 1))
         
-        part = part.cut(_custom_box(dx=6, dy=8, dz=4,
-                                    x=0, y=0, z=0, dir=(1, -1, 1)))
+        part = part.cut(_custom_box(dx=6, dy=8.1, dz=4,
+                                    x=-3.048, y=17.91, z=0, dir=(1, -1, 1)))
         part = part.cut(_custom_cylinder(dia=bolt_4_40['clear_dia'], dz=4,
-                                    x=3.1, y=-18.2, z=0, dir=(0, 0, 1)))
+                                    x=0, y=0, z=0, dir=(0, 0, 1)))
         part = part.cut(_custom_cylinder(dia=bolt_4_40['clear_dia'], dz=4,
-                                    x=16.4, y=-2.6, z=0, dir=(0, 0, 1)))
-        part.translate(App.Vector(-10.4, 10.5, -4.5))
-        part.translate(App.Vector(1.4-6, 2, -3.5))
+                                    x=13.34, y=15.62, z=0, dir=(0, 0, 1)))
+        part.translate(App.Vector(-12, -4, -4))
+
         temp = _custom_box(dx=4, dy=12, dz=12,
-                           x=-6, y=0, z=-4, dir=(-1, 0, 1))
+                           x=-6, y=0, z=0, dir=(-1, 0, 1))
         temp.rotate(App.Vector(0, 0, 0), App.Vector(0, 0, 1), -obj.LittrowAngle.Value)
         part = part.fuse(temp)
         temp = _custom_box(dx=4, dy=12, dz=12,
-                           x=self.dx+3.2, y=-12, z=-4, dir=(1, 0, 1))
+                           x=self.dx+3.2, y=-12, z=0, dir=(1, 0, 1))
         temp.rotate(App.Vector(self.dx, -12, 0), App.Vector(0, 0, 1), -obj.LittrowAngle.Value)
         part = part.fuse(temp)
+        part.translate(App.Vector(0, 0, -12.7/2+2))
         part = part.fuse(part)
         obj.Shape = part
 
@@ -1039,7 +972,7 @@ class lens_holder_l05g:
         return part
 
     def execute(self, obj):
-        mesh = _import_stl("thorlabs/POLARIS-L05G-Solidworks.stl", (90, 0, 90), (-26.57-obj.ChildObjects[0].Thickness.Value/2, -13.3, -18.4), 1000)
+        mesh = _import_stl("POLARIS-L05G-Step.stl", (90, -0, 90), (-26.57-obj.ChildObjects[0].Thickness.Value/2, -13.29, -18.44))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1071,17 +1004,17 @@ class pinhole_ida12:
         self.slot_length=adapter_args['slot_length']
 
         _add_linked_object(obj, "Slide Mount", slide_mount,
-                           pos_offset=(-0.75, -12.85, 0), **adapter_args)
+                           pos_offset=(1.956, -12.83, 0), **adapter_args)
 
     def get_drill(self, obj):
         part = _custom_box(dx=6.5, dy=10+obj.ChildObjects[0].SlotLength.Value, dz=1,
-                           x=-0.75, y=0, z=-inch/2,
+                           x=1.956, y=0, z=-inch/2,
                            fillet=2, dir=(0,0,-1))
         return part
 
     def execute(self, obj):
-        mesh = _import_stl("thorlabs/IDA12-P5-Solidworks.stl", (-90, 0, -90), (-0.35, 0.05, 0), 1000)
-        mesh.rotate(pi/2, 0, 0)
+        mesh = _import_stl("IDA12-P5-Step.stl", (90, 0, -90), (1.549, 0, -0))
+        mesh.rotate(-pi/2, 0, 0)
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1112,14 +1045,82 @@ class prism_mount_km100pm:
                                      fillet=5, dir=(0, 0, -1)))
         part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
                                      x=-29.27, y=-7.52, z=0))
-        part.translate(App.Vector((51.8-25.7-12+15.17), (6.35+0.089*inch/2), 6.98))
+        part.translate(App.Vector((15.25, 20.15, 17.50)))
         part = part.fuse(part)
         return part
 
     def execute(self, obj):
-        mesh = _import_stl("thorlabs/KM100PM-Solidworks-modified.stl", (90, 0, -90), (14.2, 26.0, -17.92))
+        mesh = _import_stl("KM100PM-Step.stl", (90, -0, -90), (-8.877, 38.1, -6.731))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
+
+
+class mount_for_km100pm:
+    '''
+    Adapter for mounting isomet AOMs to km100pm kinematic mount
+
+    Args:
+        mount_offset (float[3]) : The offset position of where the adapter mounts to the component
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        slot_length (float) : The length of the slots used for mounting to the km100pm
+        countersink (bool) : Whether to drill a countersink instead of a counterbore for the AOM mount holes
+        counter_depth (float) : The depth of the countersink/bores for the AOM mount holes
+        arm_thickness (float) : The thickness of the arm the mounts to the km100PM
+        arm_clearance (float) : The distance between the bottom of the adapter arm and the bottom of the km100pm
+        stage_thickness (float) : The thickness of the stage that mounts to the AOM
+        stage_length (float) : The length of the stage that mounts to the AOM
+    '''
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True, slot_length=5, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=4, stage_length=21):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'SlotLength').SlotLength = slot_length
+        obj.addProperty('App::PropertyBool', 'Countersink').Countersink = countersink
+        obj.addProperty('App::PropertyLength', 'CounterDepth').CounterDepth = counter_depth
+        obj.addProperty('App::PropertyLength', 'ArmThickness').ArmThickness = arm_thickness
+        obj.addProperty('App::PropertyLength', 'ArmClearance').ArmClearance = arm_clearance
+        obj.addProperty('App::PropertyLength', 'StageThickness').StageThickness = stage_thickness
+        obj.addProperty('App::PropertyLength', 'StageLength').StageLength = stage_length
+
+        obj.ViewObject.ShapeColor = mount_color
+        obj.setEditorMode('Placement', 2)
+        
+
+    def get_drill(self, obj):
+        part = _custom_box(dx=34, dy=54.5, dz=24.27,
+                           x=-19.27+15, y=-8.02, z=0,
+                           fillet=5, dir=(0, 0, -1))
+        part.translate(App.Vector((15.25, 20.15, 17.50)))
+        part = part.fuse(part)
+        return part
+
+    def execute(self, obj):
+        dx = obj.ArmThickness.Value
+        dy = 47.5
+        dz = 16.92
+        stage_dx = obj.StageLength.Value
+        stage_dz = obj.StageThickness.Value
+
+        part = _custom_box(dx=dx, dy=dy, dz=dz-obj.ArmClearance.Value,
+                           x=0, y=0, z=obj.ArmClearance.Value)
+        part = part.fuse(_custom_box(dx=stage_dx, dy=dy, dz=stage_dz,
+                                     x=0, y=0, z=dz, dir=(1, 0, -1)))
+        for ddy in [15.2, 38.1]:
+            part = part.cut(_custom_box(dx=dx, dy=obj.SlotLength.Value+bolt_4_40['clear_dia'], dz=bolt_4_40['clear_dia'],
+                                        x=dx/2, y=25.4-ddy, z=6.4,
+                                        fillet=bolt_4_40['clear_dia']/2, dir=(-1, 0, 0)))
+            part = part.cut(_custom_box(dx=dx/2, dy=obj.SlotLength.Value+bolt_4_40['head_dia'], dz=bolt_4_40['head_dia'],
+                                        x=dx/2, y=25.4-ddy, z=6.4,
+                                        fillet=bolt_4_40['head_dia']/2, dir=(-1, 0, 0)))
+        for ddy in [0, -11.42, -26.65, -38.07]:
+            part = part.cut(_custom_cylinder(dia=bolt_4_40['clear_dia'], dz=stage_dz, head_dia=bolt_4_40['head_dia'],
+                                        head_dz=obj.CounterDepth.Value, countersink=obj.Countersink,
+                                        x=11.25, y=18.9+ddy, z=dz-4, dir=(0,0,1)))
+        part.translate(App.Vector(dx/2, 25.4-15.2+obj.SlotLength.Value/2, -6.4))
+        part = part.fuse(part)
+        obj.Shape = part
         
 
 class isomet_1205c_on_km100pm:
@@ -1156,12 +1157,12 @@ class isomet_1205c_on_km100pm:
 
         # TODO fix these parts to remove arbitrary translations
         _add_linked_object(obj, "Mount KM100PM", prism_mount_km100pm,
-                           pos_offset=(-(51.8-25.7-12+15.17), -(6.35+0.089*inch/2), -6.98), **mount_args)
+                           pos_offset=(-15.25, -20.15, -17.50), **mount_args)
         _add_linked_object(obj, "Adapter Bracket", mount_for_km100pm,
-                           pos_offset=(-(51.8-25.7-12+15.17), -(6.35+0.089*inch/2), -6.98), **adapter_args)
+                           pos_offset=(-15.25, -20.15, -17.50), **adapter_args)
 
     def execute(self, obj):
-        mesh = _import_stl("thorlabs/isomet_1205c.stl", (0, 0, 90), (0, 0, 0))
+        mesh = _import_stl("isomet_1205c.stl", (0, 0, 90), (0, 0, 0))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1200,14 +1201,14 @@ class isolator_670:
         return part
 
     def execute(self, obj):
-        mesh = _import_stl("thorlabs/IOT-5-670-VLP.stl", (90, 0, 90), (19, 0, 0), 1) #Thorlabs 670 (better for injection?)
+        mesh = _import_stl("IOT-5-670-VLP-Step.stl", (90, 0, -90), (-19.05, -0, 0))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
 
 class isolator_405:
     '''
-    Isolator Optimized for 405nm, Model IOT-5-670-VLP
+    Isolator Optimized for 405nm, Model IO-3D-405-PBS
 
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
@@ -1224,7 +1225,7 @@ class isolator_405:
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
 
         obj.ViewObject.ShapeColor = misc_color
-        self.part_numbers = ['IOT-5-670-VLP']
+        self.part_numbers = ['IO-3D-405-PBS']
         self.tran = True
         self.in_limit = pi/2
         self.in_width = inch/2
@@ -1239,7 +1240,7 @@ class isolator_405:
         return part
 
     def execute(self, obj):
-        mesh = _import_stl("thorlabs/IO-3D-405-PBS.stl", (90, 0, 90), (9.45, 0, 0), 1)
+        mesh = _import_stl("IO-3D-405-PBS-Step.stl", (90, 0, -90), (-9.461, 0, 0))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1446,7 +1447,7 @@ class rb_cell:
         return part
 
     def execute(self, obj):
-        mesh = _import_stl("thorlabs/rb_cell_holder_middle.stl", (0, 0, 0), ([0, 5, 0]))
+        mesh = _import_stl("rb_cell_holder_middle.stl", (0, 0, 0), ([0, 5, 0]))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1470,16 +1471,16 @@ class photodetector_pda10a2:
         self.in_limit = 0
         self.in_width = 1
 
-        _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(-12.68, 0, -25))
+        _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(-10.54, 0, -25))
 
     def get_drill(self, obj):
         part = _custom_box(dx=30, dy=55, dz=25-inch/2,
-                           x=-12.68, y=0, z=-inch/2,
+                           x=-10.54, y=0, z=-inch/2,
                            fillet=3, dir=(0,0,-1))
         return part
 
     def execute(self, obj):
-        mesh = _import_stl("thorlabs/PDA10A2.stl", (90, 0, -90), ([-22, 0, 0]))
+        mesh = _import_stl("PDA10A2-Step.stl", (90, 0, -90), (-19.87, -0, -0))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1543,27 +1544,6 @@ class periscope:
         for i in obj.ChildObjects:
             part = _drill_part(part, obj, i)
         obj.Shape = part
-
-
-# TODO do we need this?
-class laser_diode_mount:
-    type = 'Mesh::FeaturePython'
-    def __init__(self, obj, drill=True):
-        obj.Proxy = self
-        ViewProvider(obj.ViewObject)
-
-        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
-
-        obj.ViewObject.ShapeColor = mount_color
-        self.part_numbers = ['LT230P-B','AD15NT']
-        self.ref_angle = 0
-        self.in_limit = pi/2
-        self.in_width = inch/2
-
-    def execute(self, obj):
-        mesh = _import_stl("thorlabs/LT230P-B.stl", (0, 90, 0 ), ([0, 0, 0]))
-        mesh.Placement = obj.Mesh.Placement
-        obj.Mesh = mesh
 
 
 class ViewProvider:
