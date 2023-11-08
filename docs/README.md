@@ -127,21 +127,6 @@
         post_thickness (float) : The thickness of the post that mounts to the element  
         outer_thickness (float) : The thickness of the walls around the bolt holes  
     
-### mount_for_km100pm
-  
-    Adapter for mounting isomet AOMs to km100pm kinematic mount  
-  
-    Args:  
-        mount_offset (float[3]) : The offset position of where the adapter mounts to the component  
-        drill (bool) : Whether baseplate mounting for this part should be drilled  
-        slot_length (float) : The length of the slots used for mounting to the km100pm  
-        countersink (bool) : Whether to drill a countersink instead of a counterbore for the AOM mount holes  
-        counter_depth (float) : The depth of the countersink/bores for the AOM mount holes  
-        arm_thickness (float) : The thickness of the arm the mounts to the km100PM  
-        arm_clearance (float) : The distance between the bottom of the adapter arm and the bottom of the km100pm  
-        stage_thickness (float) : The thickness of the stage that mounts to the AOM  
-        stage_length (float) : The length of the stage that mounts to the AOM  
-    
 ### fiberport_holder
   
     Part for mounting an HCA3 fiberport coupler to the side of a baseplate  
@@ -318,6 +303,21 @@
     Args:  
         drill (bool) : Whether baseplate mounting for this part should be drilled  
     
+### mount_for_km100pm
+  
+    Adapter for mounting isomet AOMs to km100pm kinematic mount  
+  
+    Args:  
+        mount_offset (float[3]) : The offset position of where the adapter mounts to the component  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+        slot_length (float) : The length of the slots used for mounting to the km100pm  
+        countersink (bool) : Whether to drill a countersink instead of a counterbore for the AOM mount holes  
+        counter_depth (float) : The depth of the countersink/bores for the AOM mount holes  
+        arm_thickness (float) : The thickness of the arm the mounts to the km100PM  
+        arm_clearance (float) : The distance between the bottom of the adapter arm and the bottom of the km100pm  
+        stage_thickness (float) : The thickness of the stage that mounts to the AOM  
+        stage_length (float) : The length of the stage that mounts to the AOM  
+    
 ### isomet_1205c_on_km100pm
   
     Isomet 1205C AOM on KM100PM Mount  
@@ -344,7 +344,7 @@
     
 ### isolator_405
   
-    Isolator Optimized for 405nm, Model IOT-5-670-VLP  
+    Isolator Optimized for 405nm, Model IO-3D-405-PBS  
   
     Args:  
         drill (bool) : Whether baseplate mounting for this part should be drilled  
