@@ -96,7 +96,15 @@ class Export_STLs():
         doc = App.activeDocument()
         for obj in doc.Objects:
             if isinstance(obj.Proxy, layout.baseplate) or all(np.isclose(obj.ViewObject.ShapeColor[:3], optomech.adapter_color)):
-                obj.Shape.exportStl(str(path / obj.Label) + ".stl")
+                if hasattr(obj, "Shape"):
+                    exploded = obj.Shape.Solids
+                    for i, shape in enumerate(exploded):
+                        name = str(path / obj.Name)
+                        if len(exploded) > 1:
+                            name += "_" + str(i)
+                        shape.exportStl(name + ".stl")
+                else:
+                    Mesh.export([obj], str(path / obj.Name) + ".stl")
         App.Console.PrintMessage("STLs Exported to '%s'\n"%(str(path)))
         return
     
