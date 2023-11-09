@@ -50,10 +50,10 @@ def _import_stl(stl_name, rotate, translate, scale=1):
 
 def _add_linked_object(obj, obj_name, obj_class, pos_offset=(0, 0, 0), rot_offset=(0, 0, 0), **args):
     new_obj = App.ActiveDocument.addObject(obj_class.type, obj_name)
+    new_obj.addProperty("App::PropertyLinkHidden","Baseplate").Baseplate = obj.Baseplate
     new_obj.Label = obj_name
     obj_class(new_obj, **args)
     new_obj.setEditorMode('Placement', 2)
-    new_obj.addProperty("App::PropertyLinkHidden","Baseplate").Baseplate = obj.Baseplate
     new_obj.addProperty("App::PropertyPlacement","BasePlacement")
     if not hasattr(obj, "ChildObjects"):
         obj.addProperty("App::PropertyLinkListChild","ChildObjects")
@@ -471,6 +471,8 @@ class mirror_mount_k05s2:
                                      x=-8+self.x_offset, y=-5, z=-inch/2))
         part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
                                      x=-8+self.x_offset, y=5, z=-inch/2))
+        part = part.fuse(_custom_box(dx=17, dy=20, dz=(0.08*inch)+4,
+                                     x=-(15+15)+self.x_offset, y=-31/2+6, z=-inch/2-0.08*inch-4, fillet=2))
         return part
 
     def execute(self, obj):
@@ -1500,7 +1502,7 @@ class periscope:
         mirror_type x2
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, lower_dz=inch/2, upper_dz=2*inch, mirror_type=mirror_mount_k05s2, invert=False, table_mount=False):
+    def __init__(self, obj, drill=True, lower_dz=inch, upper_dz=3*inch, mirror_type=mirror_mount_k05s2, invert=False, table_mount=True):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -1518,17 +1520,8 @@ class periscope:
         _add_linked_object(obj, "Lower Mirror", mirror_type, rot_offset=((-1)**invert*90, -45, 0), pos_offset=(0, 0, obj.LowerHeight.Value+self.z_off))
         _add_linked_object(obj, "Upper Mirror", mirror_type, rot_offset=((-1)**invert*90, 135, 0), pos_offset=(0, 0, obj.UpperHeight.Value+self.z_off))
 
-    def get_drill(self, obj):
-        part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=inch,
-                           x=0, y=0, z=-20.7, dir=(1,0,0))
-        part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=inch,
-                                     x=0, y=-12.7, z=-20.7, dir=(1,0,0)))
-        part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=inch,
-                                     x=0, y=12.7, z=-20.7, dir=(1,0,0)))
-        return part
-
     def execute(self, obj):
-        width = inch #Must be inch wide to keep periscope mirrors 1 inch from mount holes. 
+        width = 2*inch #Must be inch wide to keep periscope mirrors 1 inch from mount holes. 
         fillet = 15
         part = _custom_box(dx=70, dy=width, dz=obj.UpperHeight.Value+20,
                            x=0, y=0, z=0)
@@ -1536,9 +1529,10 @@ class periscope:
             part = part.cut(_custom_box(dx=fillet*2+4, dy=width, dz=obj.UpperHeight.Value+20,
                                         x=i*(35+fillet), y=0, z=20, fillet=15,
                                         dir=(-i,0,1), fillet_dir=(0,1,0)))
-            part = part.cut(_custom_cylinder(dia=bolt_14_20['clear_dia']+0.5, dz=inch+5,
-                                        head_dia=bolt_14_20['head_dia']+0.5, head_dz=10,
-                                        x=i*inch, y=0, z=25, dir=(0,0,-1)))
+            for y in [-inch/2, inch/2]:
+                part = part.cut(_custom_cylinder(dia=bolt_14_20['clear_dia']+0.5, dz=inch+5,
+                                            head_dia=bolt_14_20['head_dia']+0.5, head_dz=10,
+                                            x=i*inch, y=y, z=25, dir=(0,0,-1)))
         part.translate(App.Vector(0, (-1)**obj.Invert*(width/2+inch/2), self.z_off))
         part = part.fuse(part)
         for i in obj.ChildObjects:
