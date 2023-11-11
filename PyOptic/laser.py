@@ -3,71 +3,70 @@ import Part
 from math import *
 import numpy as np
 
-INCH = 25.4
+inch = 25.4
 
 def is_mult(x, factor, tol=1e-5):
     return isclose((abs(x)+tol/2)%factor, 0, abs_tol=tol)
 
-# calculate intersection between two lines given the origin and angle of both
-def check_interaction(x1, y1, a1, ref_obj, len=0):
+# calculate intersection between a beam and an optical component
+def check_interaction(x1, y1, a1, ref_obj):
 
     # check if object is an optical component
-    if not (hasattr(ref_obj.Proxy, 'in_limit') and hasattr(ref_obj.Proxy, 'in_width')):
+    if not (hasattr(ref_obj.Proxy, 'max_angle') and hasattr(ref_obj.Proxy, 'max_width')):
         return
     
     # get object placement
     x2, y2, _ = ref_obj.BasePlacement.Base
-    a_comp = ref_obj.BasePlacement.Rotation.Angle
-    a_comp *= ref_obj.BasePlacement.Rotation.Axis[2]
-    a1 %= 2*pi
+    a_norm = ref_obj.BasePlacement.Rotation.Angle
+    a_norm *= ref_obj.BasePlacement.Rotation.Axis[2]
+
+    # check if component is on the correct side of the beam
+    a_rel = abs(a1-atan2(y2-y1, x2-x1))%(2*pi)
+    if a_rel > pi:
+        a_rel = 2*pi-a_rel
+    if a_rel > pi/2:
+        return
 
     # limits on incomming beam
-    in_limit = ref_obj.Proxy.in_limit
-    in_width = ref_obj.Proxy.in_width
+    max_angle = radians(ref_obj.Proxy.max_angle)
+    max_width = ref_obj.Proxy.max_width
 
-    a_norm = a_comp
+    # two possible output beam angles
     angle1 = None
     angle2 = None
 
     # transmitted beam
-    if hasattr(ref_obj.Proxy, 'tran'):
-        a_norm = (a_comp+pi)%(2*pi)
+    if hasattr(ref_obj.Proxy, 'transmission'):
+        a_norm = (a_norm+pi)%(2*pi)
         angle1 = a1
     # diffracted beam
-    if hasattr(ref_obj.Proxy, 'diff_angle'):
-        a_norm = (a_comp+pi)%(2*pi)
-        angle2 = a1+ref_obj.Proxy.diff_angle
+    if hasattr(ref_obj.Proxy, 'diffraction_angle'):
+        a_norm = (a_norm+pi)%(2*pi)
+        angle2 = a1+ref_obj.Proxy.diffraction_angle
     # reflected beam
-    if hasattr(ref_obj.Proxy, 'ref_angle'):
-        a_norm = (a_comp+ref_obj.Proxy.ref_angle)%(2*pi)
+    if hasattr(ref_obj.Proxy, 'reflection_angle'):
+        a_norm = (a_norm+ref_obj.Proxy.reflection_angle)%(2*pi)
         angle2 = 2*a_norm-a1-pi
 
-    a2 = a_norm+pi/2 # tangent angle to reflection surface
+    a2 = a_norm+pi/2 # angle of interaction surface
+
     # relative angle between the beam and component input normal
-    a_in = abs(a1-a_norm)%(2*pi)
+    a_in = abs(a1-a_norm+pi)%(2*pi)
     if a_in > pi:
         a_in = 2*pi-a_in
-    # relative angle between beam angle and direction of the component from the beam
-    a_rel = abs(a1-atan2(y2-y1, x2-x1))%(2*pi)
-    if a_rel > pi:
-        a_rel = 2*pi-a_rel
-
-    # check beam direction
-    if a_rel > pi/2:
-        return
     
-    if hasattr(ref_obj.Proxy, 'diff_dir') and angle2 != None:
-        if a_in > pi/2:
-            angle2 = a1+ref_obj.Proxy.diff_angle*ref_obj.Proxy.diff_dir[0]
+    if hasattr(ref_obj.Proxy, 'diffraction_dir'):
+        if a_in < pi/2:
+            angle2 = a1+ref_obj.Proxy.diffraction_angle*ref_obj.Proxy.diffraction_dir[0]
         else:
-            angle2 = a1+ref_obj.Proxy.diff_angle*ref_obj.Proxy.diff_dir[1]
+            angle2 = a1+ref_obj.Proxy.diffraction_angle*ref_obj.Proxy.diffraction_dir[1]
 
     # check for edge cases
     a1_vert = is_mult(a1-pi/2, pi)
     a2_vert = is_mult(a2-pi/2, pi)
     a12_hor = is_mult(a1, pi) and is_mult(a2, pi) or is_mult(a1-a2, pi)
 
-    # calculate position and angle of reflection
+    # calculate intersection of the beam and the surface
     if a1_vert:
         x = x1
     elif a2_vert or a12_hor:
@@ -81,14 +80,26 @@ def check_interaction(x1, y1, a1, ref_obj, len=0):
     else:
         y = y2
 
+    # total distance to interaction
+    ref_d = sqrt((x-x2)**2+(y-y2)**2)
+
+    # refracted beam
+    if hasattr(ref_obj.Proxy, 'focal_length'):
+        a_rel = abs(a2-atan2(y-y2, x-x2))%(2*pi)
+        offset = pi/2-atan2(ref_obj.Proxy.focal_length, ref_d)
+        if is_mult(a_rel, 2*pi):
+            offset *= -1
+        if a_in < pi/2:
+            offset *= -1
+        angle1 += offset
+
     # check if beam is from current object
     if isclose(x1, x, abs_tol=1e-5) and isclose(y1, y, abs_tol=1e-5):
         return
 
-    # distance from optical center to intersection point
+    # check against max width and blocking width
     block = False
-    ref_d = sqrt((x-x2)**2+(y-y2)**2)
-    if ref_d > in_width/2:
+    if ref_d > max_width/2:
         if hasattr(ref_obj.Proxy, "block_width"):
             if ref_d < ref_obj.Proxy.block_width/2:
                 block = True
@@ -97,27 +108,13 @@ def check_interaction(x1, y1, a1, ref_obj, len=0):
         else:
             return
         
-    # check component angle
-    if a_in < in_limit:
-        block = True
-        
-    # distance from beam start to intersection point
-    beam_d = sqrt((x2-x1)**2+(y2-y1)**2)
-    if len != 0:
-        if beam_d > len:
-            return
-        if isclose(beam_d, len, rel_tol=1e-3):
-            return
-
-    # transmitted beam
-    if hasattr(ref_obj.Proxy, 'foc_len'):
-        a_rel = abs(a2-atan2(y-y2, x-x2))%(2*pi)
-        offset = pi/2-atan2(ref_obj.Proxy.foc_len, ref_d)
-        if is_mult(a_rel, 2*pi):
-            offset *= -1
-        if a_in > pi/2:
-            offset *= -1
-        angle1 += offset
+    # check against max angle
+    if hasattr(ref_obj.Proxy, 'transmission'):
+        if a_in > max_angle and pi-a_in > max_angle:
+            block = True
+    else:
+        if a_in > max_angle:
+            block = True
         
     return ref_obj, x, y, [angle1, angle2], block
 
@@ -133,6 +130,7 @@ class beam_path:
     def __getstate__(self):
         return None
 
+    # TODO clean and implement this for baseplate covers
     def _get_drill(self, obj):
         width = 50
         part = Part.makeSphere(1)
@@ -144,7 +142,7 @@ class beam_path:
             for x in temp.Edges:
                 if x.tangentAt(x.FirstParameter) == App.Vector(0, 0, 1):
                     temp = temp.makeFillet(width/2-1e-3, [x])
-            temp.translate(App.Vector(-width/2, -width/2, -INCH/2))
+            temp.translate(App.Vector(-width/2, -width/2, -inch/2))
             temp.rotate(App.Vector(0, 0, 0), App.Vector(0, 0, 1), degrees(i[2]))
             temp.translate(App.Vector(i[0], i[1], 0))
             part = part.fuse(temp)
@@ -154,12 +152,17 @@ class beam_path:
         return part
 
     def execute(self, obj):
+        # get placement
         self.x, self.y, _ = obj.BasePlacement.Base
         self.a = obj.BasePlacement.Rotation.Angle
         self.a *= obj.BasePlacement.Rotation.Axis[2]
+
+        # calculate beam
         self.beams = []
         self.comp_track = []
         self.calculate_beam_path(obj, self.x, self.y, self.a)
+
+        # draw beam
         shapes = []
         for i in self.beams:
             length = i[3]
@@ -178,18 +181,20 @@ class beam_path:
         if beam_index > 200:
             return
         
-        count = 0 # number of reflections per beam
+        count = 0 # number of interactions per beam
         comp_index = 0 # index of current inline component
-        pre_count = 0 # current number of previous interactions for inline components
-        pre_d = 0 # current previous interaction distance for inline components
+        pre_count = 0 # current number interactions since last inline interaction
+        pre_d = 0 # previous interaction distance for inline components
         block = False # flag for a component obstructing a beam path
 
         while True:
+            # get all inline components
             inline_comps = []
             for obj in selfobj.PathObjects:
                 if obj.BeamIndex == beam_index:
                     inline_comps.append(obj)
             
+            # get next inline component
             inline_obj = None
             if len(inline_comps) > comp_index:
                 inline_obj = inline_comps[comp_index]
@@ -212,7 +217,7 @@ class beam_path:
                     # inline placement
                     inline_obj.BasePlacement.Base = App.Vector(x1+comp_d*cos(a1), y1+comp_d*sin(a1), 0)
 
-            # get only valid objects
+            # get all valid objects
             check_objs = []
             for obj in App.ActiveDocument.Objects:
                 if obj in selfobj.PathObjects and not obj in self.comp_track:
@@ -225,14 +230,16 @@ class beam_path:
                         continue
                 check_objs.append(obj)
                 
+            # find all interactions
             refs = []
             comp_d =[]
             for obj in check_objs:
-                ref = check_interaction(x1, y1, a1, obj) # check for reflection
+                ref = check_interaction(x1, y1, a1, obj)
                 if ref != None:
                     refs.append(ref)
                     comp_d.append(sqrt((ref[1]-x1)**2+(ref[2]-y1)**2))
-
+            
+            # pick nearest valid interaction
             inline_ref = False
             if len(refs) > 0:
                 index = np.argmin(comp_d)
@@ -257,6 +264,7 @@ class beam_path:
                         pre_d += min_len
                 
                 ref_obj, xf, yf, af_arr, block = final_ref
+                # restrict beam to baseplate
                 intersect = []
                 x_max = selfobj.Baseplate.dx.Value
                 y_max = selfobj.Baseplate.dy.Value
@@ -273,6 +281,7 @@ class beam_path:
                     block = True
                 self.beams.append([x1, y1, a1, min_len, beam_index])
             else:
+                # restrict beam to baseplate
                 intersect = []
                 xf, yf = x1+500*cos(a1), y1+500*sin(a1) # TODO find a better way than this
                 x_max = selfobj.Baseplate.dx.Value
@@ -291,11 +300,15 @@ class beam_path:
             if block:
                 return
 
+            # handle recursion issues caused by conflicting beam paths
             if inline_ref:
                 for i in self.beams[:]:
                     if i[4] != beam_index:
-                        ref = check_interaction(i[0],i[1],i[2],ref_obj,i[3])
+                        ref = check_interaction(i[0],i[1],i[2],ref_obj)
                         if ref != None:
+                            beam_d = sqrt((ref[1]-i[0])**2+(ref[2]-i[1])**2)
+                            if beam_d > i[3] or isclose(beam_d, i[3], rel_tol=1e-3):
+                                continue
                             for beam in self.beams[::-1]:
                                 if beam[4]>>int(abs(log2(beam[4]/i[4]))) == i[4]:
                                     last = beam[:]
@@ -306,7 +319,8 @@ class beam_path:
                                     self.comp_track.remove(comp)
                             self.calculate_beam_path(selfobj, last[0], last[1], last[2], last[4])
                             break
-
+            
+            # compute next beam and handle recursion for beam splits
             if af_arr[0] != None and af_arr[1] != None:
                 self.calculate_beam_path(selfobj, xf, yf, af_arr[0], (beam_index<<1))
                 beam_index = (beam_index<<1)+1

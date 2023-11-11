@@ -344,8 +344,8 @@ class fiberport_holder:
 
         obj.ViewObject.ShapeColor = mount_color
         self.part_numbers = ['HCA3','PAF2-5A']
-        self.in_limit = pi-0.01
-        self.in_width = 1
+        self.max_angle = 0
+        self.max_width = 1
 
     def get_drill(self, obj):
         part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=inch,
@@ -384,12 +384,12 @@ class pbs_on_skate_mount:
         self.part_numbers = [cube_part_num]
         
         if invert:
-            self.ref_angle = -3*pi/4
+            self.reflection_angle = -3*pi/4
         else:
-            self.ref_angle = 3*pi/4
-        self.tran = True
-        self.in_limit = 0
-        self.in_width = sqrt(200)
+            self.reflection_angle = 3*pi/4
+        self.transmission = True
+        self.max_angle = 90
+        self.max_width = sqrt(200)
 
         _add_linked_object(obj, "Adapter", skate_mount, cube_size=obj.CubeSize.Value)
 
@@ -398,7 +398,7 @@ class pbs_on_skate_mount:
                            x=0, y=0, z=0, dir=(0, 0, 0))
         temp = _custom_box(dx=sqrt(200)-0.25, dy=0.1, dz=obj.CubeSize.Value-0.25,
                            x=0, y=0, z=0, dir=(0, 0, 0))
-        temp.rotate(App.Vector(0, 0, 0), App.Vector(0, 0, 1), -degrees(self.ref_angle))
+        temp.rotate(App.Vector(0, 0, 0), App.Vector(0, 0, 1), -degrees(self.reflection_angle))
         part = part.cut(temp)
         obj.Shape = part
 
@@ -425,9 +425,9 @@ class rotation_stage_rsp05:
 
         obj.ViewObject.ShapeColor = misc_color
         self.part_numbers = ['RSP05', wave_plate_part_num]
-        self.tran = True
-        self.in_limit = 0
-        self.in_width = inch/2
+        self.transmission = True
+        self.max_angle = 90
+        self.max_width = inch/2
 
         _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(-6.35, 0, -13.97), rot_offset=(0, 0, 90*obj.Invert), **adapter_args)
 
@@ -723,8 +723,8 @@ class fiberport_mount_km05:
         obj.ViewObject.ShapeColor = misc_color
         
         self.part_numbers = []
-        self.in_limit = 0
-        self.in_width = 1
+        self.max_angle = 0
+        self.max_width = 1
 
         _add_linked_object(obj, "Mount", mirror_mount_km05, pos_offset=(0, 0, 0), mirror=False, **mount_args)
 
@@ -758,8 +758,8 @@ class km05_50mm_laser:
         obj.ViewObject.ShapeColor = misc_color
         
         self.part_numbers = []
-        self.in_limit = pi-0.01
-        self.in_width = 1
+        self.max_angle = 0
+        self.max_width = 1
 
         mount = _add_linked_object(obj, "Mount", mirror_mount_km05, pos_offset=(-6, 0, 0), drill=False, mirror=False, **mount_args)
         upper_plate = _add_linked_object(obj, "Upper Plate", km05_tec_upper_plate, pos_offset=(-10, 0, -0.08*inch), drill_obj=mount, **upper_plate_args)
@@ -839,9 +839,9 @@ class mirror_mount_mk05:
 
         obj.ViewObject.ShapeColor = mount_color
         self.part_numbers = ['MK05']
-        self.ref_angle = 0
-        self.in_limit = pi/2
-        self.in_width = inch/2
+        self.reflection_angle = 0
+        self.max_angle = 90
+        self.max_width = inch/2
 
         _add_linked_object(obj, "Mirror", circular_mirror, **mirror_args)
 
@@ -999,9 +999,9 @@ class pinhole_ida12:
 
         obj.ViewObject.ShapeColor = misc_color
         self.part_numbers = ['IDA12-P5']
-        self.tran = True
-        self.in_limit = 0
-        self.in_width = 1
+        self.transmission = True
+        self.max_angle = 90
+        self.max_width = 1
         self.block_width=inch/2
         self.slot_length=adapter_args['slot_length']
 
@@ -1140,7 +1140,7 @@ class isomet_1205c_on_km100pm:
         mount_for_km100pm (adapter_args)
     '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, drill=True, diffraction_angle=-0.026, forward_direction=True, backward_direction=True, mount_args=dict(), adapter_args=dict()):
+    def __init__(self, obj, drill=True, diffraction_angle=-0.026, forward_direction=1, backward_direction=1, mount_args=dict(), adapter_args=dict()):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -1151,11 +1151,11 @@ class isomet_1205c_on_km100pm:
 
         obj.ViewObject.ShapeColor = misc_color
         self.part_numbers = ['ISOMET_1205C']
-        self.diff_angle = diffraction_angle
-        self.diff_dir = (forward_direction, backward_direction)
-        self.tran = True
-        self.in_limit = 0
-        self.in_width = 5
+        self.diffraction_angle = diffraction_angle
+        self.diffraction_dir = (forward_direction, backward_direction)
+        self.transmission = True
+        self.max_angle = 10
+        self.max_width = 5
 
         # TODO fix these parts to remove arbitrary translations
         _add_linked_object(obj, "Mount KM100PM", prism_mount_km100pm,
@@ -1189,9 +1189,9 @@ class isolator_670:
 
         obj.ViewObject.ShapeColor = misc_color
         self.part_numbers = ['IOT-5-670-VLP']
-        self.tran = True
-        self.in_limit = pi/2
-        self.in_width = inch/2
+        self.transmission = True
+        self.max_angle = 10
+        self.max_width = 5
 
         _add_linked_object(obj, "Surface Adapter", surface_adapter,
                            pos_offset=(0, 0, -22.1), **adapter_args)
@@ -1228,9 +1228,9 @@ class isolator_405:
 
         obj.ViewObject.ShapeColor = misc_color
         self.part_numbers = ['IO-3D-405-PBS']
-        self.tran = True
-        self.in_limit = pi/2
-        self.in_width = inch/2
+        self.transmission = True
+        self.max_angle = 10
+        self.max_width = 5
 
         _add_linked_object(obj, "Surface Adapter", surface_adapter,
                            pos_offset=(0, 0, -17.15), **adapter_args)
@@ -1270,9 +1270,9 @@ class square_grating:
 
         obj.ViewObject.ShapeColor = glass_color
         self.part_numbers = [part_number]
-        self.ref_angle = 0
-        self.in_limit = pi/2
-        self.in_width = width
+        self.reflection_angle = 0
+        self.max_angle = 90
+        self.max_width = width
 
     def execute(self, obj):
         part = _custom_box(dx=obj.Thickness.Value, dy=obj.Width.Value, dz=obj.Height.Value,
@@ -1302,10 +1302,10 @@ class circular_splitter:
         obj.ViewObject.ShapeColor = glass_color
         obj.ViewObject.Transparency=50
         self.part_numbers = [part_number]
-        self.tran = True
-        self.ref_angle = 0
-        self.in_limit = 0
-        self.in_width = inch/2
+        self.transmission = True
+        self.reflection_angle = 0
+        self.max_angle = 90
+        self.max_width = inch/2
 
     def execute(self, obj):
         part = _custom_cylinder(dia=obj.Diameter.Value, dz=obj.Thickness.Value,
@@ -1337,10 +1337,10 @@ class circular_lens:
         obj.ViewObject.ShapeColor = glass_color
         obj.ViewObject.Transparency=50
         self.part_numbers = [part_number]
-        self.tran = True
-        self.foc_len = obj.FocalLength.Value
-        self.in_limit = 0
-        self.in_width = inch/2
+        self.transmission = True
+        self.focal_length = obj.FocalLength.Value
+        self.max_angle = 90
+        self.max_width = inch/2
 
     def execute(self, obj):
         part = _custom_cylinder(dia=obj.Diameter.Value, dz=obj.Thickness.Value,
@@ -1369,9 +1369,9 @@ class circular_mirror:
 
         obj.ViewObject.ShapeColor = glass_color
         self.part_numbers = [part_num]
-        self.ref_angle = 0
-        self.in_limit = pi/2
-        self.in_width = diameter
+        self.reflection_angle = 0
+        self.max_angle = 90
+        self.max_width = diameter
 
     def execute(self, obj):
         part = _custom_cylinder(dia=obj.Diameter.Value, dz=obj.Thickness.Value,
@@ -1402,9 +1402,9 @@ class square_mirror:
 
         obj.ViewObject.ShapeColor = glass_color
         self.part_numbers = [part_num]
-        self.ref_angle = 0
-        self.in_limit = pi/2
-        self.in_width = width
+        self.reflection_angle = 0
+        self.max_angle = 90
+        self.max_width = width
 
     def execute(self, obj):
         part = _custom_box(dx=obj.Thickness.Value, dy=obj.Width.Value, dz=obj.Height.Value,
@@ -1427,9 +1427,9 @@ class rb_cell:
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
 
         obj.ViewObject.ShapeColor = adapter_color
-        self.tran = True
-        self.in_limit = 0
-        self.in_width = 1
+        self.transmission = True
+        self.max_angle = 10
+        self.max_width = 1
 
     def get_drill(self, obj):
         dx = 90
@@ -1470,8 +1470,8 @@ class photodetector_pda10a2:
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
 
         obj.ViewObject.ShapeColor = misc_color
-        self.in_limit = 0
-        self.in_width = 1
+        self.max_angle = 80
+        self.max_width = 5
 
         _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(-10.54, 0, -25))
 
@@ -1513,8 +1513,6 @@ class periscope:
         obj.addProperty('App::PropertyBool', 'TableMount').TableMount = table_mount
 
         obj.ViewObject.ShapeColor = adapter_color
-        self.in_limit = pi-0.01
-        self.in_width = 1
         self.z_off = -inch/2-obj.TableMount*inch
 
         _add_linked_object(obj, "Lower Mirror", mirror_type, rot_offset=((-1)**invert*90, -45, 0), pos_offset=(0, 0, obj.LowerHeight.Value+self.z_off))

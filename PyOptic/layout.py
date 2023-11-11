@@ -82,10 +82,10 @@ class baseplate:
         obj.BasePlacement = App.Placement(App.Vector(x, y, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
 
         if optional:
-            obj.Proxy.tran = True
+            obj.Proxy.transmission = True
             if hasattr(obj, "ChildObjects"):
                 for child in obj.ChildObjects:
-                    child.Proxy.tran = True
+                    child.Proxy.transmission = True
         return obj
 
     def place_element_along_beam(self, name, obj_class, beam_obj, beam_index, angle, distance=None, x=None, y=None, pre_refs=0, optional=False, **args):
@@ -122,10 +122,10 @@ class baseplate:
         obj.addProperty("App::PropertyInteger","PreRefs").PreRefs = pre_refs
 
         if optional:
-            obj.Proxy.tran = True
+            obj.Proxy.transmission = True
             if hasattr(obj, "ChildObjects"):
                 for child in obj.ChildObjects:
-                    child.Proxy.tran = True
+                    child.Proxy.transmission = True
         return obj
 
     def place_element_relative(self, name, obj_class, rel_obj, angle, x_off=0, y_off=0, optional=False, **args):
@@ -157,10 +157,10 @@ class baseplate:
         rel_obj.RelativeObjects += [obj]
 
         if optional:
-            obj.Proxy.tran = True
+            obj.Proxy.transmission = True
             if hasattr(obj, "ChildObjects"):
                 for child in obj.ChildObjects:
-                    child.Proxy.tran = True
+                    child.Proxy.transmission = True
         return obj
 
     def add_beam_path(self, x, y, angle, name="Beam Path", color=(1.0, 0.0, 0.0)):
