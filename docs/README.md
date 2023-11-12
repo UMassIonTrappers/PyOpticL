@@ -141,7 +141,7 @@
     Args:  
         invert (bool) : Invert pick-off direction, false is left, true is right  
         cube_size (float) : The side length of the splitter cube  
-        cube_part_num (string) : The Thorlabs part number of the splitter cube being used  
+        cube_part_number (string) : The Thorlabs part number of the splitter cube being used  
     
 ### rotation_stage_rsp05
   
@@ -162,6 +162,7 @@
     Args:  
         drill (bool) : Whether baseplate mounting for this part should be drilled  
         mirror (bool) : Whether to add a mirror component to the mount  
+        thumbscrews (bool): Whether or not to add two HKTS 5-64 adjusters  
   
     Sub-Parts:  
         circular_mirror (mirror_args)  
@@ -173,6 +174,7 @@
     Args:  
         drill (bool) : Whether baseplate mounting for this part should be drilled  
         mirror (bool) : Whether to add a mirror component to the mount  
+        thumbscrews (bool): Whether or not to add two HKTS 5-64 adjusters  
   
     Sub-Parts:  
         circular_mirror (mirror_args)  
@@ -206,6 +208,7 @@
     Args:  
         drill (bool) : Whether baseplate mounting for this part should be drilled  
         mirror (bool) : Whether to add a mirror component to the mount  
+        thumbscrews (bool): Whether or not to add two HKTS 5-64 adjusters  
         bolt_length (float) : The length of the bolt used for mounting  
   
     Sub-Parts:  
@@ -213,7 +216,7 @@
     
 ### mirror_mount_ks1t
   
-    Mirror mount, model KM05  
+    Mirror mount, model KS1T  
   
     Args:  
         drill (bool) : Whether baseplate mounting for this part should be drilled  
@@ -324,7 +327,7 @@
   
     Args:  
         drill (bool) : Whether baseplate mounting for this part should be drilled  
-        diffraction_angle (float) : The diffraction angle (in radians) of the AOM  
+        diffraction_angle (float) : The diffraction angle (in degrees) of the AOM  
         forward_direction (integer) : The direction of diffraction on forward pass (1=right, -1=left)  
         backward_direction (integer) : The direction of diffraction on backward pass (1=right, -1=left)  
   
@@ -351,6 +354,42 @@
   
     Sub-Parts:  
         surface_adapter  
+    
+### rb_cell
+  
+    Rubidium Cell Holder  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+    
+### photodetector_pda10a2
+  
+    Photodetector, model pda10a2  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+      
+    
+### periscope
+  
+    Custom periscope mount  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+        lower_dz (float) : Distance from the bottom of the mount to the center of the lower mirror  
+        upper_dz (float) : Distance from the bottom of the mount to the center of the upper mirror  
+        mirror_type (obj class) : Object class of mirrors to be used  
+        table_mount (bool) : Whether the periscope is meant to be mounted directly to the optical table  
+  
+    Sub-Parts:  
+        mirror_type x2 (mirror_args)  
+    
+### thumbscrew_hkts_5_64
+  
+    Thumbscrew for 5-64 hex adjusters, model HKTS 5-64  
+  
+    Sub-Parts:  
+        slide_mount (adapter_args)  
     
 ### square_grating
   
@@ -404,33 +443,4 @@
         width (float) : The width of the mirror  
         height (float) : The height of the mirror  
         part_number (string) : The part number of the mirror being used  
-    
-### rb_cell
-  
-    Rubidium Cell Holder  
-  
-    Args:  
-        drill (bool) : Whether baseplate mounting for this part should be drilled  
-    
-### photodetector_pda10a2
-  
-    Photodetector, model pda10a2  
-  
-    Args:  
-        drill (bool) : Whether baseplate mounting for this part should be drilled  
-      
-    
-### periscope
-  
-    Custom periscope mount  
-  
-    Args:  
-        drill (bool) : Whether baseplate mounting for this part should be drilled  
-        lower_dz (float) : Distance from the bottom of the mount to the center of the lower mirror  
-        upper_dz (float) : Distance from the bottom of the mount to the center of the upper mirror  
-        mirror_type (obj class) : Object class of mirrors to be used  
-        table_mount (bool) : Whether the periscope is meant to be mounted directly to the optical table  
-  
-    Sub-Parts:  
-        mirror_type x2  
     
