@@ -48,19 +48,6 @@ class Show_Components():
         layout.show_components(self.state)
         return
     
-class Top_View_Fit():
-
-    def GetResources(self):
-        return {"Pixmap"  : ":/icons/view-top.svg",
-                "Accel"   : "Shift+T",
-                "MenuText": "Switch to Auto-Fit Top View"}
-
-    def Activated(self):
-        Gui.activeDocument().activeView().viewTop()
-        Gui.SendMsgToActiveView("ViewFit")
-        Gui.runCommand('Std_ViewZoomIn',0)
-        return
-    
 class Toggle_Draw_Style():
 
     def GetResources(self):
@@ -127,12 +114,23 @@ class Export_Cart():
 
         doc = App.activeDocument()
         parts = []
+        types = []
         objs = []
         for obj in doc.Objects:
             if hasattr(obj.Proxy, 'part_numbers'):
                 if '' in obj.Proxy.part_numbers:
-                    App.Console.PrintMessage(obj.Name + " is missing an auxiliary part number\n")
+                    name = obj.Label
+                    temp = obj
+                    while True:
+                        if hasattr(temp, "ParentObject"):
+                            name = temp.ParentObject.Label + " - " + name
+                            temp = temp.ParentObject
+                        else:
+                            break
+                    App.Console.PrintMessage(name + " is missing a part number\n")
                 parts.extend(obj.Proxy.part_numbers)
+                for num in obj.Proxy.part_numbers:
+                    types.append((type(obj.Proxy).__name__, num))
                 objs.extend([obj]*len(obj.Proxy.part_numbers))
 
         cart = open(str(path / "Thorlabs_Cart.csv"), 'w', newline='')
@@ -141,17 +139,42 @@ class Export_Cart():
         list_w= csv.writer(list)
         cart_w.writerow(["Part Number", "Qty"])
         list_w.writerow(["Part Class / Name", "Part Number", "Qty"])
-        for i in enumerate(set(parts)):
-            if i[1] != '':
-                test = re.match(".*-P([0-9]+)$", i[1])
+
+        for i in set(parts):
+            if i != '':
+                number = i
+                test1 = re.match(".*-P([0-9]+)$", i)
+                test2 = re.match(".*\(P([0-9]+)\)$", i)
                 pack = 1
-                if test != None:
-                    pack = int(test.group(1))
-                cart_w.writerow([i[1], math.ceil(parts.count(i[1])/pack)])
-                list_w.writerow([type(objs[i[0]].Proxy).__name__, i[1], math.ceil(parts.count(i[1])/pack)])
-        for i in enumerate(parts):
+                if test1 != None:
+                    pack = int(test1.group(1))
+                if test2 != None:
+                    pack = int(test2.group(1))
+                    number = number[:-(4+len(test2.group(1)))]
+                cart_w.writerow([number, math.ceil(parts.count(i)/pack)])
+        for i in set(types):
+            if i[1] != '':
+                number = i[1]
+                test1 = re.match(".*-P([0-9]+)$", i[1])
+                test2 = re.match(".*\(P([0-9]+)\)$", i[1])
+                pack = 1
+                if test1 != None:
+                    pack = int(test1.group(1))
+                if test2 != None:
+                    pack = int(test2.group(1))
+                    number = number[:-(4+len(test2.group(1)))]
+                list_w.writerow([i[0], number, math.ceil(parts.count(i[1])/pack)])
+        for i in enumerate(parts):    
             if i[1] == '':
-                list_w.writerow([objs[i[0]].Label, "Unknown", 1])
+                name = objs[i[0]].Label
+                temp = objs[i[0]]
+                while True:
+                    if hasattr(temp, "ParentObject"):
+                        name = temp.ParentObject.Label + " - " + name
+                        temp = temp.ParentObject
+                    else:
+                        break
+                list_w.writerow([name, "Unknown", 1])
         return
     
 class Reload_Modules():
@@ -249,11 +272,10 @@ class Get_Position():
                     translate += feature.Point
                 count += 1
         translate /= count
+        if hasattr(obj, "Group"):
+            translate = obj.Placement.multVec(App.Vector(*translate))
 
-        center = App.Placement(App.Vector(*translate), App.Rotation(0, 0, 0), App.Vector(0, 0, 0))
-        final_placement = obj.Placement*center
-
-        translate = np.round(final_placement.Base, 3)
+        translate = np.round(translate, 3)
 
         print("(%.4g, %.4g, %.4g)"%(translate[0], translate[1], translate[2]))
         return
@@ -261,7 +283,6 @@ class Get_Position():
 Gui.addCommand("RerunMacro", Rerun_Macro())
 Gui.addCommand("RedrawBaseplate", Redraw_Baseplate())
 Gui.addCommand("ShowComponents", Show_Components())
-Gui.addCommand("TopViewFit", Top_View_Fit())
 Gui.addCommand("ToggleDrawStyle", Toggle_Draw_Style())
 Gui.addCommand("ExportSTLs", Export_STLs())
 Gui.addCommand("ExportCart", Export_Cart())
