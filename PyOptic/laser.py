@@ -42,10 +42,10 @@ def check_interaction(x1, y1, a1, ref_obj):
     # diffracted beam
     if hasattr(ref_obj.Proxy, 'diffraction_angle'):
         a_norm = (a_norm+pi)%(2*pi)
-        angle2 = a1+ref_obj.Proxy.diffraction_angle
+        angle2 = a1+radians(ref_obj.Proxy.diffraction_angle)
     # reflected beam
     if hasattr(ref_obj.Proxy, 'reflection_angle'):
-        a_norm = (a_norm+ref_obj.Proxy.reflection_angle)%(2*pi)
+        a_norm = (a_norm+radians(ref_obj.Proxy.reflection_angle))%(2*pi)
         angle2 = 2*a_norm-a1-pi
 
     a2 = a_norm+pi/2 # angle of interaction surface
@@ -57,9 +57,9 @@ def check_interaction(x1, y1, a1, ref_obj):
     
     if hasattr(ref_obj.Proxy, 'diffraction_dir'):
         if a_in < pi/2:
-            angle2 = a1+ref_obj.Proxy.diffraction_angle*ref_obj.Proxy.diffraction_dir[0]
+            angle2 = a1+radians(ref_obj.Proxy.diffraction_angle)*ref_obj.Proxy.diffraction_dir[0]
         else:
-            angle2 = a1+ref_obj.Proxy.diffraction_angle*ref_obj.Proxy.diffraction_dir[1]
+            angle2 = a1+radians(ref_obj.Proxy.diffraction_angle)*ref_obj.Proxy.diffraction_dir[1]
 
     # check for edge cases
     a1_vert = is_mult(a1-pi/2, pi)

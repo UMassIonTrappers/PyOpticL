@@ -196,11 +196,9 @@ class baseplate:
                                          App.Vector(obj.Gap.Value+obj.xOffset.Value, obj.ySplit.Value-obj.Gap.Value/2+obj.yOffset.Value, -obj.dz.Value-obj.OpticsDz.Value)))
         if obj.Drill:
             for i in App.ActiveDocument.Objects:
-                if hasattr(i.Proxy, 'get_drill'):
+                if hasattr(i, 'DrillPart'):
                     if i.Drill and i.Baseplate == obj:
-                        temp = i.Proxy.get_drill(i)
-                        temp.Placement = i.BasePlacement
-                        part = part.cut(temp)
+                        part = part.cut(i.DrillPart)
         if obj.CutLabel != "":
             face = Draft.make_shapestring(obj.CutLabel, str(Path(__file__).parent.resolve()) + "/font/OpenSans-Regular.ttf", 5)
             if obj.InvertLabel:
