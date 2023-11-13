@@ -48,7 +48,7 @@ def _import_stl(stl_name, rotate, translate, scale=1):
     mesh.translate(*translate)
     return mesh
 
-def _get_bounding_box(obj_body, tol, fillet, x_tol=True, y_tol=True, z_tol=False, min_offset=(0, 0, 0), max_offset=(0, 0, 0)):
+def _bounding_box(obj_body, tol, fillet, x_tol=True, y_tol=True, z_tol=False, min_offset=(0, 0, 0), max_offset=(0, 0, 0)):
     obj_body = obj_body.copy()
     obj_body.Placement.Rotation = App.Rotation()
     global_bound = obj_body.BoundBox
@@ -250,7 +250,7 @@ class surface_adapter:
                                              x=0, y=i*obj.MountHoleDistance.Value/2, z=0))
         obj.Shape = part
 
-        part = _get_bounding_box(obj.Shape, self.drill_tolerance, 6)
+        part = _bounding_box(obj.Shape, self.drill_tolerance, 6)
         for i in [-1, 1]:
             part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
                                               x=0, y=i*obj.MountHoleDistance.Value/2, z=0))
@@ -690,8 +690,8 @@ class mirror_mount_km05:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
-        part = _get_bounding_box(obj.Mesh, 2, 3, min_offset=(4.35, 0, 0))
-        part = part.fuse(_get_bounding_box(obj.Mesh, 2, 3, max_offset=(0, -20, 0)))
+        part = _bounding_box(obj.Mesh, 2, 3, min_offset=(4.35, 0, 0))
+        part = part.fuse(_bounding_box(obj.Mesh, 2, 3, max_offset=(0, -20, 0)))
         part = _fillet_all(part, 3)
         part = part.fuse(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=inch,
                                           head_dia=bolt_8_32['head_dia'], head_dz=0.92*inch-obj.BoltLength.Value,
@@ -737,7 +737,7 @@ class mirror_mount_ks1t:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
-        part = _get_bounding_box(obj.Mesh, 3, 3, z_tol=True)
+        part = _bounding_box(obj.Mesh, 3, 3, z_tol=True)
         dy = part.BoundBox.YMax-part.BoundBox.YMin
         dz = -inch-part.BoundBox.ZMin
         part = part.cut(_custom_box(dx=28, dy=dy, dz=dz,
@@ -859,7 +859,7 @@ class km05_tec_lower_plate:
                                         x=(obj.Width.Value/2-4)*x, y=(obj.Width.Value/2-4)*y, z=-inch/2, dir=(0, 0, -1)))
         obj.Shape = part
 
-        part = _get_bounding_box(obj.Shape, 3, 3)
+        part = _bounding_box(obj.Shape, 3, 3)
         for x, y in [(1,1), (1,-1), (-1,1), (-1,-1)]:
             part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
                                               x=(obj.Width.Value/2-4)*x, y=(obj.Width.Value/2-4)*y, z=0, dir=(0, 0, -1)))
@@ -927,7 +927,7 @@ class mount_mk05pm:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
-        part = _get_bounding_box(obj.Mesh, 2, 2)
+        part = _bounding_box(obj.Mesh, 2, 2)
         part = part.cut(_custom_box(dx=4, dy=15, dz=-inch/2-obj.Mesh.BoundBox.ZMin,
                                     x=part.BoundBox.XMin, y=part.BoundBox.YMax, z=part.BoundBox.ZMin,
                                     dir=(1, -1, 1), fillet=2))
@@ -1097,8 +1097,8 @@ class prism_mount_km100pm:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
-        part = _get_bounding_box(obj.Mesh, 3, 4, max_offset=(-18, -38, 0), z_tol=True)
-        part = part.fuse(_get_bounding_box(obj.Mesh, 3, 4, min_offset=(17, 0, 0.63)))
+        part = _bounding_box(obj.Mesh, 3, 4, max_offset=(-18, -38, 0), z_tol=True)
+        part = part.fuse(_bounding_box(obj.Mesh, 3, 4, min_offset=(17, 0, 0.63)))
         part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
                                      x=-14.02, y=12.63, z=17.5))
         part.Placement = obj.Placement
@@ -1164,7 +1164,7 @@ class mount_for_km100pm:
         part = part.fuse(part)
         obj.Shape = part
 
-        part = _get_bounding_box(obj.Shape, 3, 4, z_tol=True, min_offset=(0, 0, 0.668))
+        part = _bounding_box(obj.Shape, 3, 4, z_tol=True, min_offset=(0, 0, 0.668))
         part.Placement = obj.Placement
         obj.DrillPart = part
         
@@ -1318,7 +1318,7 @@ class rb_cell:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
-        part = _get_bounding_box(obj.Mesh, 3, 3)
+        part = _bounding_box(obj.Mesh, 3, 3)
         dx = 90
         for x, y in [(1,1), (-1,1), (1,-1), (-1,-1)]:
             part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
@@ -1360,7 +1360,7 @@ class photodetector_pda10a2:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
-        part = _get_bounding_box(obj.Mesh, 3, 4)
+        part = _bounding_box(obj.Mesh, 3, 4)
         part.Placement = obj.Placement
         obj.DrillPart = part
 
@@ -1440,7 +1440,7 @@ class thumbscrew_hkts_5_64:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
-        part = _get_bounding_box(obj.Mesh, 2, 3, z_tol=True, max_offset=(-6, 0, 0))
+        part = _bounding_box(obj.Mesh, 2, 3, z_tol=True, max_offset=(-6, 0, 0))
         part.Placement = obj.Placement
         obj.DrillPart = part
 
