@@ -32,7 +32,7 @@ def example_baseplate(x=0, y=0, angle=0):
 
     # add rotation stage along the transmitted beam, 30 mm from the splitter cube
     baseplate.place_element_along_beam("Rotation Stage", optomech.rotation_stage_rsp05, beam,
-                                       beam_index=0b10, distance=30, angle=layout.cardinal['right'])
+                                       beam_index=0b10, distance=35, angle=layout.cardinal['right'])
 
     # add mirror along the reflected beam, 1 inch from the splitter cube
     baseplate.place_element_along_beam("Mirror", optomech.mirror_mount_k05s2, beam,
