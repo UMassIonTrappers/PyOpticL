@@ -211,7 +211,7 @@ class baseplate:
                 text = face.Shape.extrude(App.Vector(0, 0.5, 0))
             part = part.cut(text)
             App.ActiveDocument.removeObject(face.Label)
-        obj.Shape = part
+        obj.Shape = part.removeSplitter()
 
 
 class table_grid:
