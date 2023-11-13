@@ -235,6 +235,10 @@
   
     Sub-Parts:  
         mirror_mount_km05 (mount_args)  
+        fiber_adapter_sm05fca2  
+        lens_tube_sm05l05  
+        lens_adapter_s05tm09  
+        mounted_lens_c220tmda  
     
 ### km05_50mm_laser
   
@@ -390,6 +394,22 @@
   
     Sub-Parts:  
         slide_mount (adapter_args)  
+    
+### fiber_adapter_sm05fca2
+  
+    Fiber Adapter Plate, model SM05FCA2  
+    
+### lens_adapter_s05tm09
+  
+    SM05 to M9x0.5 Lens Cell Adapter, model S05TM09  
+    
+### lens_tube_sm05l05
+  
+    Lens Tube, model SM05L05  
+    
+### mounted_lens_c220tmda
+  
+    Mounted Aspheric Lens, model C220TMD-A  
     
 ### square_grating
   
