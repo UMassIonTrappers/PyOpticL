@@ -151,7 +151,7 @@ class baseplate:
         obj.addProperty("App::PropertyAngle","Angle").Angle = angle
         obj.addProperty("App::PropertyPlacement","RelativePlacement").RelativePlacement
         obj.RelativePlacement.Base = App.Vector(x_off, y_off, 0)
-        obj.addProperty("App::PropertyLinkHidden","ParentObject").ParentObject = rel_obj
+        obj.addProperty("App::PropertyLinkHidden","RelativeParent").RelativeParent = rel_obj
         if not hasattr(obj, "RelativeObjects"):
             rel_obj.addProperty("App::PropertyLinkListChild","RelativeObjects")
         rel_obj.RelativeObjects += [obj]
