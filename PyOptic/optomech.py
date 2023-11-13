@@ -759,6 +759,10 @@ class fiberport_mount_km05:
 
     Sub-Parts:
         mirror_mount_km05 (mount_args)
+        fiber_adapter_sm05fca2
+        lens_tube_sm05l05
+        lens_adapter_s05tm09
+        mounted_lens_c220tmda
     '''
     type = 'Part::FeaturePython'
     def __init__(self, obj, drill=True, mount_args=dict()):
@@ -768,16 +772,12 @@ class fiberport_mount_km05:
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
 
         obj.ViewObject.ShapeColor = misc_color
-        self.part_numbers = [] # TODO add part numbers
-        self.max_angle = 0
-        self.max_width = 1
 
         _add_linked_object(obj, "Mount", mirror_mount_km05, pos_offset=(0, 0, 0), mirror=False, **mount_args)
-
-    def execute(self, obj):
-        part = _custom_cylinder(dia=inch/2, dz=25.5,
-                           x=0, y=0, z=0, dir=(1, 0, 0))
-        obj.Shape = part
+        _add_linked_object(obj, "Fiber Adapter", fiber_adapter_sm05fca2, pos_offset=(0, 0, 0))
+        _add_linked_object(obj, "Lens Tube", lens_tube_sm05l05, pos_offset=(1.524+3.812, 0, 0))
+        _add_linked_object(obj, "Lens Adapter", lens_adapter_s05tm09, pos_offset=(1.524+5, 0, 0))
+        _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(1.524+3.167+5, 0, 0))
 
 
 class km05_50mm_laser:
@@ -1443,6 +1443,79 @@ class thumbscrew_hkts_5_64:
         part = _bounding_box(obj.Mesh, 2, 3, z_tol=True, max_offset=(-6, 0, 0))
         part.Placement = obj.Placement
         obj.DrillPart = part
+
+class fiber_adapter_sm05fca2:
+    '''
+    Fiber Adapter Plate, model SM05FCA2
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.ViewObject.ShapeColor = misc_color
+        self.part_numbers = ['SM05FCA2']
+        self.max_angle = 0
+        self.max_width = 1
+
+    def execute(self, obj):
+        mesh = _import_stl("SM05FCA2-Step.stl", (0, 90, 0), (-0.81, -3.643, -0.435))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+
+class lens_adapter_s05tm09:
+    '''
+    SM05 to M9x0.5 Lens Cell Adapter, model S05TM09
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.ViewObject.ShapeColor = misc_color
+        self.part_numbers = ['S05TM09']
+
+    def execute(self, obj):
+        mesh =  _import_stl("S05TM09-Step.stl", (90, 0, -90), (6.973, 0, -0))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+
+class lens_tube_sm05l05:
+    '''
+    Lens Tube, model SM05L05
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.ViewObject.ShapeColor = misc_color
+        self.part_numbers = ['SM05L05']
+
+    def execute(self, obj):
+        mesh = _import_stl("SM05L05-Step.stl", (90, 0, -90), (0, 0, -0))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+
+class mounted_lens_c220tmda:
+    '''
+    Mounted Aspheric Lens, model C220TMD-A
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.ViewObject.ShapeColor = glass_color
+        self.part_numbers = ['C220TMD-A']
+
+    def execute(self, obj):
+        mesh = _import_stl("C220TMD-A-Step.stl", (-90, 0, -180), (0.419, 0, 0))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
 
 
 class square_grating:
