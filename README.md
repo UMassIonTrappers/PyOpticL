@@ -30,12 +30,15 @@ FreeCAD is based on python with built-in support for python scripts etc. It also
 ### Workbench Functions
 
 Some GUI accessable functions have been implemented to perform various helpful actions:
+* **Re-Run Last Macro** - Clears and re-draws last baseplate, great for quickly checking changes
 * **Recalculate Beam Path** - Useful to check beam paths when applying in-editor modifications
-* **Toggle Component Visibility** - Easily hide all beams and components  
+* **Toggle Component Visibility** - Easily hide all beams and components
+* **Toggle Draw Style** - Toggle wire-frame draw style to easily check for hidden issues
 * **Export STLs** - Export all baseplates and adapter components to STL for fabrication
 * **Export Cart** - Export all parts to both a spreadsheet and a csv compatible with Thorlabs upload-a-cart system
-* **Auto-Fit Top View** - Quickly switch to a fitted top down view
 * **Reload Modules** - Reload all PyOptic modules, great for debugging new parts
+* **Get Orientation** - Automatic orientation and importing of new components from STEP files
+* **Get Position** - Measure offsets and mount locations from oriented STEP file
 
 These functions can also be scripted into macros if desired
 
