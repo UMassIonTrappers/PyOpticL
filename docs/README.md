@@ -436,6 +436,10 @@
   
     Mounted Aspheric Lens, model C220TMD-A  
     
+### diode_adapter_s05lm56
+  
+    Diode Mount Adapter, model S05LM56  
+    
 ### square_grating
   
     Square Grating  
