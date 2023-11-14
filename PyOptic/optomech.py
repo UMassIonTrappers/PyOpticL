@@ -1621,7 +1621,7 @@ class diode_adapter_s05lm56:
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
-        obj.ViewObject.ShapeColor = glass_color
+        obj.ViewObject.ShapeColor = misc_color
         self.part_numbers = ['S05LM56']
 
     def execute(self, obj):
