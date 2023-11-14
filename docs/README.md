@@ -221,12 +221,25 @@
     Args:  
         drill (bool) : Whether baseplate mounting for this part should be drilled  
         mirror (bool) : Whether to add a mirror component to the mount  
-        bolt_length (float) : The length of the bolt used for mounting  
   
     Sub-Parts:  
         circular_mirror (mirror_args)  
     
 ### fiberport_mount_km05
+  
+    Mirror mount, model KM05, adapted to use as fiberport mount  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+  
+    Sub-Parts:  
+        mirror_mount_km05 (mount_args)  
+        fiber_adapter_sm05fca2  
+        lens_tube_sm05l05  
+        lens_adapter_s05tm09  
+        mounted_lens_c220tmda  
+    
+### fiberport_mount_ks1t
   
     Mirror mount, model KM05, adapted to use as fiberport mount  
   
@@ -399,13 +412,25 @@
   
     Fiber Adapter Plate, model SM05FCA2  
     
+### fiber_adapter_sm1fca2
+  
+    Fiber Adapter Plate, model SM1FCA2  
+    
 ### lens_adapter_s05tm09
   
     SM05 to M9x0.5 Lens Cell Adapter, model S05TM09  
     
+### lens_adapter_s1tm09
+  
+    SM1 to M9x0.5 Lens Cell Adapter, model S1TM09  
+    
 ### lens_tube_sm05l05
   
     Lens Tube, model SM05L05  
+    
+### lens_tube_sm1l05
+  
+    Lens Tube, model SM1L05  
     
 ### mounted_lens_c220tmda
   
