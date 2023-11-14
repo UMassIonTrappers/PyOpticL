@@ -837,14 +837,15 @@ class km05_50mm_laser:
         self.max_angle = 0
         self.max_width = 1
 
-        mount = _add_linked_object(obj, "Mount", mirror_mount_km05, pos_offset=(-6, 0, 0), drill=False, mirror=False, **mount_args)
-        upper_plate = _add_linked_object(obj, "Upper Plate", km05_tec_upper_plate, pos_offset=(-10, 0, -0.08*inch), drill_obj=mount, **upper_plate_args)
-        _add_linked_object(obj, "Lower Plate", km05_tec_lower_plate, pos_offset=(-10, 0, -0.08*inch-tec_thickness-upper_plate.Thickness.Value), **lower_plate_args)
+        dx = -5.334+2.032
+        _add_linked_object(obj, "Diode Adapter", diode_adapter_s05lm56, pos_offset=(0, 0, 0))
+        _add_linked_object(obj, "Lens Tube", lens_tube_sm05l05, pos_offset=(dx+1.524+3.812, 0, 0))
+        _add_linked_object(obj, "Lens Adapter", lens_adapter_s05tm09, pos_offset=(dx+1.524+5, 0, 0))
+        _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(dx+1.524+3.167+5, 0, 0))
 
-    def execute(self, obj):
-        part = _custom_cylinder(dia=inch/2, dz=40,
-                           x=10, y=0, z=0, dir=(-1, 0, 0))
-        obj.Shape = part
+        mount = _add_linked_object(obj, "Mount", mirror_mount_km05, pos_offset=(dx, 0, 0), drill=False, mirror=False, **mount_args)
+        upper_plate = _add_linked_object(obj, "Upper Plate", km05_tec_upper_plate, pos_offset=(dx-4, 0, -0.08*inch), drill_obj=mount, **upper_plate_args)
+        _add_linked_object(obj, "Lower Plate", km05_tec_lower_plate, pos_offset=(dx-4, 0, -0.08*inch-tec_thickness-upper_plate.Thickness.Value), **lower_plate_args)
 
 
 class km05_tec_upper_plate:
@@ -1607,6 +1608,24 @@ class mounted_lens_c220tmda:
 
     def execute(self, obj):
         mesh = _import_stl("C220TMD-A-Step.stl", (-90, 0, -180), (0.419, 0, 0))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+
+class diode_adapter_s05lm56:
+    '''
+    Diode Mount Adapter, model S05LM56
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.ViewObject.ShapeColor = glass_color
+        self.part_numbers = ['S05LM56']
+
+    def execute(self, obj):
+        mesh = _import_stl("S05LM56-Step.stl", (90, 0, -90), (0, 0, -0))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
