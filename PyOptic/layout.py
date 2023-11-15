@@ -198,7 +198,9 @@ class baseplate:
             for i in App.ActiveDocument.Objects:
                 if hasattr(i, 'DrillPart'):
                     if i.Drill and i.Baseplate == obj:
-                        part = part.cut(i.DrillPart)
+                        drill = i.DrillPart.copy()
+                        drill.Placement = obj.Placement.inverse()*drill.Placement
+                        part = part.cut(drill)
         if obj.CutLabel != "":
             face = Draft.make_shapestring(obj.CutLabel, str(Path(__file__).parent.resolve()) + "/font/OpenSans-Regular.ttf", 5)
             if obj.InvertLabel:
