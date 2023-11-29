@@ -390,6 +390,10 @@
         surface_adapter (adapter_args)  
       
     
+### lens_tube_SM1L03
+  
+    SM1 Lens Tube, model SM1L03  
+    
 ### periscope
   
     Custom periscope mount  
