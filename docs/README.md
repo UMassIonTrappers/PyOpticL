@@ -385,6 +385,9 @@
   
     Args:  
         drill (bool) : Whether baseplate mounting for this part should be drilled  
+  
+    Sub-Parts:  
+        surface_adapter (adapter_args)  
       
     
 ### periscope
