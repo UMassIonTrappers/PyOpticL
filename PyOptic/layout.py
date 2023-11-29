@@ -36,7 +36,7 @@ class baseplate:
         optics_dz (float): The optical height of baseplate
         invert_label (bool): Wheather to switch the face the label is embossed on
     '''
-    def __init__(self, dx, dy, dz, x=0, y=0, angle=0, gap=0, name="Baseplate", drill=True, mount_holes=[], label="", x_offset=0, y_offset=0, optics_dz=inch/2, x_split=0, y_split=0, invert_label=False):
+    def __init__(self, dx, dy, dz, x=0, y=0, angle=0, gap=0, name="Baseplate", drill=True, mount_holes=[], label="", x_offset=0, y_offset=0, optics_dz=inch/2, x_splits=[], y_splits=[], invert_label=False):
         obj = App.ActiveDocument.addObject('Part::FeaturePython', name)
         ViewProvider(obj.ViewObject)
         obj.Proxy = self
@@ -50,8 +50,8 @@ class baseplate:
         obj.addProperty('App::PropertyLength', 'xOffset').xOffset = x_offset
         obj.addProperty('App::PropertyLength', 'yOffset').yOffset = y_offset
         obj.addProperty('App::PropertyLength', 'OpticsDz').OpticsDz = optics_dz
-        obj.addProperty('App::PropertyLength', 'xSplit').xSplit = x_split
-        obj.addProperty('App::PropertyLength', 'ySplit').ySplit = y_split
+        obj.addProperty('App::PropertyFloatList', 'xSplits').xSplits = x_splits
+        obj.addProperty('App::PropertyFloatList', 'ySplits').ySplits = y_splits
         obj.addProperty('App::PropertyLength', 'InvertLabel').InvertLabel = invert_label
 
         obj.Placement = App.Placement(App.Vector(x*inch, y*inch, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
@@ -188,12 +188,14 @@ class baseplate:
     def execute(self, obj):
         part = Part.makeBox(obj.dx.Value-2*obj.Gap.Value, obj.dy.Value-2*obj.Gap.Value, obj.dz.Value,
                             App.Vector(obj.Gap.Value+obj.xOffset.Value, obj.Gap.Value+obj.yOffset.Value, -obj.dz.Value-obj.OpticsDz.Value))
-        if obj.xSplit > 0:
-            part = part.cut(Part.makeBox(obj.Gap.Value, obj.dy.Value-2*obj.Gap.Value, obj.dz.Value, 
-                                         App.Vector(obj.xSplit.Value-obj.Gap.Value/2+obj.xOffset.Value, obj.Gap.Value+obj.yOffset.Value, -obj.dz.Value-obj.OpticsDz.Value)))
-        if obj.ySplit > 0:
-            part = part.cut(Part.makeBox(obj.dx.Value-2*obj.Gap.Value, obj.Gap.Value, obj.dz.Value, 
-                                         App.Vector(obj.Gap.Value+obj.xOffset.Value, obj.ySplit.Value-obj.Gap.Value/2+obj.yOffset.Value, -obj.dz.Value-obj.OpticsDz.Value)))
+        if len(obj.xSplits) > 0:
+            for i in obj.xSplits:
+                part = part.cut(Part.makeBox(2*obj.Gap.Value, obj.dy.Value-2*obj.Gap.Value, obj.dz.Value, 
+                                            App.Vector(i-obj.Gap.Value+obj.xOffset.Value, obj.Gap.Value+obj.yOffset.Value, -obj.dz.Value-obj.OpticsDz.Value)))
+        if len(obj.ySplits) > 0:
+            for i in obj.ySplits:
+                part = part.cut(Part.makeBox(obj.dx.Value-2*obj.Gap.Value, 2*obj.Gap.Value, obj.dz.Value, 
+                                            App.Vector(obj.Gap.Value+obj.xOffset.Value, i-obj.Gap.Value+obj.yOffset.Value, -obj.dz.Value-obj.OpticsDz.Value)))
         if obj.Drill:
             for i in App.ActiveDocument.Objects:
                 if hasattr(i, 'DrillPart'):

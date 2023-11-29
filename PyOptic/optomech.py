@@ -464,7 +464,7 @@ class rotation_stage_rsp05:
         obj.ViewObject.ShapeColor = misc_color
         self.part_numbers = ['RSP05', wave_plate_part_number]
         self.transmission = True
-        self.max_angle = 90
+        self.max_angle = 70
         self.max_width = inch/2
 
         _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(-6.35, 0, -13.97), rot_offset=(0, 0, 90*obj.Invert), **adapter_args)
@@ -1349,7 +1349,7 @@ class rb_cell:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
-        part = _bounding_box(obj, 3, 3)
+        part = _bounding_box(obj, 8, 3)
         dx = 90
         for x, y in [(1,1), (-1,1), (1,-1), (-1,-1)]:
             part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
@@ -1369,10 +1369,14 @@ class photodetector_pda10a2:
 
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
+
+    Sub-Parts:
+        surface_adapter (adapter_args)
     
     '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, drill=True):
+    def __init__(self, obj, drill=True, adapter_args=dict()):
+        adapter_args.setdefault("mount_hole_dy", 60)
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -1384,7 +1388,7 @@ class photodetector_pda10a2:
         self.max_angle = 80
         self.max_width = 5
 
-        _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(-10.54, 0, -25))
+        _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(-10.54, 0, -25), **adapter_args)
 
     def execute(self, obj):
         mesh = _import_stl("PDA10A2-Step.stl", (90, 0, -90), (-19.87, -0, -0))
