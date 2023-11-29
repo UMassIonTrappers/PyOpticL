@@ -1389,6 +1389,7 @@ class photodetector_pda10a2:
         self.max_width = 5
 
         _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(-10.54, 0, -25), **adapter_args)
+        _add_linked_object(obj, "Lens Tube", lens_tube_SM1L03, pos_offset=(-0.124, 0, -0))
 
     def execute(self, obj):
         mesh = _import_stl("PDA10A2-Step.stl", (90, 0, -90), (-19.87, -0, -0))
@@ -1396,6 +1397,33 @@ class photodetector_pda10a2:
         obj.Mesh = mesh
 
         part = _bounding_box(obj, 3, 4)
+        part.Placement = obj.Placement
+        obj.DrillPart = part
+
+
+class lens_tube_SM1L03:
+    '''
+    SM1 Lens Tube, model SM1L03
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = misc_color
+        self.part_numbers = ['SM1L03']
+        self.max_angle = 0
+        self.max_width = 1
+
+    def execute(self, obj):
+        mesh = _import_stl("SM1L03-Step.stl", (90, -0, 0), (8.382, 0, 0))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+        part = _bounding_box(obj, 2, 3, z_tol=True, min_offset=(0, 4, 0), max_offset=(0, -4, 0))
         part.Placement = obj.Placement
         obj.DrillPart = part
 
