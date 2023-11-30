@@ -304,7 +304,7 @@ class skate_mount:
                                     x=0, y=0, z=-obj.CubeSize.Value/2-1e-3))
         for i in [-1, 1]:
             part = part.cut(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=dz,
-                                             head_dia=bolt_8_32['head_dia'], head_dz=bolt_8_32['head_dia'],
+                                             head_dia=bolt_8_32['head_dia'], head_dz=bolt_8_32['head_dz'],
                                              x=0, y=i*obj.MountHoleDistance.Value/2, z=-inch/2+dz))
         obj.Shape = part
 
@@ -353,9 +353,9 @@ class slide_mount:
                            x=0, y=-dy/2, z=-inch/2, fillet=4)
         part = part.cut(_custom_box(dx=bolt_8_32['clear_dia'], dy=obj.SlotLength.Value+bolt_8_32['clear_dia'], dz=dz,
                                     x=0, y=-dy/2-obj.PostThickness.Value/2, z=-inch/2, fillet=bolt_8_32['clear_dia']/2))
-        part = part.cut(_custom_box(dx=bolt_8_32['head_dia'], dy=obj.SlotLength.Value+bolt_8_32['head_dia'], dz=bolt_8_32['head_dia'],
-                                    x=0, y=-dy/2-obj.PostThickness.Value/2, z=-inch/2+bolt_8_32['head_dia'], fillet=bolt_8_32['head_dia']/2))
-        part = part.fuse(_custom_box(dx=dx, dy=obj.PostThickness.Value, dz=inch/2+bolt_8_32['clear_dia'],
+        part = part.cut(_custom_box(dx=bolt_8_32['head_dia'], dy=obj.SlotLength.Value+bolt_8_32['head_dia'], dz=bolt_8_32['head_dz'],
+                                    x=0, y=-dy/2-obj.PostThickness.Value/2, z=-inch/2+bolt_8_32['head_dz'], fillet=bolt_8_32['head_dia']/2))
+        part = part.fuse(_custom_box(dx=dx, dy=obj.PostThickness.Value, dz=inch/2+bolt_8_32['head_dz'],
                                      x=0, y=-obj.PostThickness.Value/2, z=-inch/2))
         part = part.cut(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=obj.PostThickness.Value,
                                     x=0, y=0, z=0, dir=(0, -1, 0)))
@@ -1166,7 +1166,7 @@ class mount_for_km100pm:
         obj.addProperty('App::PropertyLength', 'StageLength').StageLength = stage_length
         obj.addProperty('Part::PropertyPartShape', 'DrillPart')
 
-        obj.ViewObject.ShapeColor = mount_color
+        obj.ViewObject.ShapeColor = adapter_color
         obj.setEditorMode('Placement', 2)
 
     def execute(self, obj):
