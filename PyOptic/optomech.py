@@ -772,34 +772,36 @@ class grating_mount_on_km05pm:
         obj.ViewObject.ShapeColor = adapter_color
         self.dx = 12/tan(radians(2*obj.LittrowAngle))
 
-        gap = 15
-        lit_angle = radians(obj.LittrowAngle.Value)
-        beam_angle = radians(90-obj.LittrowAngle.Value)
+        gap = 10
+        lit_angle = radians(90-obj.LittrowAngle.Value)
+        beam_angle = radians(obj.LittrowAngle.Value)
         ref_len = gap/sin(2*beam_angle)
         ref_x = ref_len*cos(2*beam_angle)
-        grating_dx = -(6*sin(lit_angle)+12.7/2*cos(lit_angle))
+        grating_dx = -(6*sin(lit_angle)+12.7/2*cos(lit_angle))-5
         mirror_dx = grating_dx-ref_x
         _add_linked_object(obj, "Mount MK05PM", mount_km05pm, pos_offset=(-3.175, 8, -10), rot_offset=(0, 0, 180), **mount_args)
-        _add_linked_object(obj, "Grating", square_grating, pos_offset=(grating_dx, 0, 0), rot_offset=(0, 0, obj.LittrowAngle.Value+90), **grating_args)
-        _add_linked_object(obj, "Mirror", square_mirror, pos_offset=(mirror_dx, gap, 0), rot_offset=(0, 0, obj.LittrowAngle.Value-90), **mirror_args)
+        _add_linked_object(obj, "Grating", square_grating, pos_offset=(grating_dx, 0, 0), rot_offset=(0, 0, 180-obj.LittrowAngle.Value), **grating_args)
+        _add_linked_object(obj, "Mirror", square_mirror, pos_offset=(mirror_dx, gap, 0), rot_offset=(0, 0, -obj.LittrowAngle.Value), **mirror_args)
 
     def execute(self, obj):
-        gap = 15
-        lit_angle = radians(obj.LittrowAngle.Value)
-        beam_angle = radians(90-obj.LittrowAngle.Value)
+        gap = 10
+        lit_angle = radians(90-obj.LittrowAngle.Value)
+        beam_angle = radians(obj.LittrowAngle.Value)
         ref_len = gap/sin(2*beam_angle)
         ref_x = ref_len*cos(2*beam_angle)
         dx = ref_x+12.7*cos(lit_angle)+(6+3.2)*sin(lit_angle)
         dy = gap+12.7*sin(lit_angle)+(6+3.2)*cos(lit_angle)
         dz = inch/2
         cut_x = 12.7*cos(lit_angle)
-        part = _custom_box(dx=dx, dy=dy, dz=dz,
-                           x=0, y=0, z=-10, dir=(-1, 1, 1))
-        temp = _custom_box(dx=ref_len*cos(beam_angle)+6+3.2, dy=dy/sin(lit_angle), dz=dz,
+        part = _custom_box(dx=dx+5, dy=dy+5, dz=dz,
+                           x=5, y=0, z=-10, dir=(-1, 1, 1))
+        temp = _custom_box(dx=ref_len*cos(beam_angle)+6+3.2, dy=dy/sin(lit_angle)+10, dz=dz,
                            x=-cut_x, y=-(dx-cut_x)*cos(lit_angle), z=-6, dir=(-1, 1, 1))
-        temp.rotate(App.Vector(-cut_x, 0, 0), App.Vector(0, 0, 1), obj.LittrowAngle.Value-90)
+        temp.rotate(App.Vector(-cut_x, 0, 0), App.Vector(0, 0, 1), -obj.LittrowAngle.Value)
         part = part.cut(temp)
-        part.translate(App.Vector(0, -12.7/2*sin(lit_angle)-6*cos(lit_angle), 0))
+        part = part.cut(_custom_box(dx=5, dy=20, dz=dz,
+                           x=5, y=dy, z=-10, dir=(-1, -1, 1)))
+        part.translate(App.Vector(-5, -12.7/2*sin(lit_angle)-6*cos(lit_angle), 0))
         part = part.fuse(part)
         part = part.cut(_custom_cylinder(dia=bolt_4_40['clear_dia'], dz=4,
                                          head_dia=bolt_4_40['head_dia'], head_dz=2,
