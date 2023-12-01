@@ -214,6 +214,26 @@
     Sub-Parts:  
         circular_mirror (mirror_args)  
     
+### mount_km05pm
+  
+    Mount, model KM05PM  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+    
+### grating_mount_on_km05pm
+  
+    Grating and Parallel Mirror Mounted on MK05PM  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+        littrow_angle (float) : The angle of the grating and parallel mirror  
+  
+    Sub_Parts:  
+        mount_mk05pm (mount_args)  
+        square_grating (grating_args)  
+        square_mirror (mirror_args)  
+    
 ### mirror_mount_ks1t
   
     Mirror mount, model KS1T  
@@ -278,7 +298,7 @@
     
 ### mount_mk05pm
   
-    Mount, model MK05  
+    Mount, model MK05PM  
   
     Args:  
         drill (bool) : Whether baseplate mounting for this part should be drilled  
