@@ -739,8 +739,9 @@ class mount_km05pm:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
-        part = _bounding_box(obj, 2, 3, min_offset=(4.35, 0, 0))
-        part = part.fuse(_bounding_box(obj, 2, 3, max_offset=(0, -20, 0)))
+        part = _bounding_box(obj, 3, 3, min_offset=(4.35, 0, 0))
+        part = part.fuse(_bounding_box(obj, 3, 3, max_offset=(0, -20, 0)))
+        part = part.fuse(_bounding_box(obj, 3, 3, min_offset=(14, 0, 0), z_tol=True))
         part = _fillet_all(part, 3)
         part = part.fuse(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=drill_depth,
                                           head_dia=bolt_8_32['head_dia'], head_dz=drill_depth-obj.BoltLength.Value,
@@ -772,18 +773,21 @@ class grating_mount_on_km05pm:
         obj.ViewObject.ShapeColor = adapter_color
         self.dx = 12/tan(radians(2*obj.LittrowAngle))
 
+        extra_x = 1
         gap = 10
         lit_angle = radians(90-obj.LittrowAngle.Value)
         beam_angle = radians(obj.LittrowAngle.Value)
         ref_len = gap/sin(2*beam_angle)
         ref_x = ref_len*cos(2*beam_angle)
-        grating_dx = -(6*sin(lit_angle)+12.7/2*cos(lit_angle))-5
+        grating_dx = -(6*sin(lit_angle)+12.7/2*cos(lit_angle))-extra_x
         mirror_dx = grating_dx-ref_x
         _add_linked_object(obj, "Mount MK05PM", mount_km05pm, pos_offset=(-3.175, 8, -10), rot_offset=(0, 0, 180), **mount_args)
         _add_linked_object(obj, "Grating", square_grating, pos_offset=(grating_dx, 0, 0), rot_offset=(0, 0, 180-obj.LittrowAngle.Value), **grating_args)
         _add_linked_object(obj, "Mirror", square_mirror, pos_offset=(mirror_dx, gap, 0), rot_offset=(0, 0, -obj.LittrowAngle.Value), **mirror_args)
 
     def execute(self, obj):
+        extra_x = 1
+        extra_y = 2
         gap = 10
         lit_angle = radians(90-obj.LittrowAngle.Value)
         beam_angle = radians(obj.LittrowAngle.Value)
@@ -793,15 +797,15 @@ class grating_mount_on_km05pm:
         dy = gap+12.7*sin(lit_angle)+(6+3.2)*cos(lit_angle)
         dz = inch/2
         cut_x = 12.7*cos(lit_angle)
-        part = _custom_box(dx=dx+5, dy=dy+5, dz=dz,
-                           x=5, y=0, z=-10, dir=(-1, 1, 1))
+        part = _custom_box(dx=dx+extra_x, dy=dy+extra_y, dz=dz,
+                           x=extra_x, y=0, z=-10, dir=(-1, 1, 1))
         temp = _custom_box(dx=ref_len*cos(beam_angle)+6+3.2, dy=dy/sin(lit_angle)+10, dz=dz,
                            x=-cut_x, y=-(dx-cut_x)*cos(lit_angle), z=-6, dir=(-1, 1, 1))
         temp.rotate(App.Vector(-cut_x, 0, 0), App.Vector(0, 0, 1), -obj.LittrowAngle.Value)
         part = part.cut(temp)
-        part = part.cut(_custom_box(dx=5, dy=20, dz=dz,
-                           x=5, y=dy, z=-10, dir=(-1, -1, 1)))
-        part.translate(App.Vector(-5, -12.7/2*sin(lit_angle)-6*cos(lit_angle), 0))
+        part = part.cut(_custom_box(dx=8, dy=16, dz=dz-4,
+                           x=extra_x, y=dy+extra_y, z=-6, dir=(-1, -1, 1)))
+        part.translate(App.Vector(-extra_x, -12.7/2*sin(lit_angle)-6*cos(lit_angle), 0))
         part = part.fuse(part)
         part = part.cut(_custom_cylinder(dia=bolt_4_40['clear_dia'], dz=4,
                                          head_dia=bolt_4_40['head_dia'], head_dz=2,
@@ -810,6 +814,37 @@ class grating_mount_on_km05pm:
                                          head_dia=bolt_4_40['head_dia'], head_dz=2,
                                          x=-3.175, y=8+2*3.175, z=-6, dir=(0, 0, -1)))
         obj.Shape = part
+
+
+class mount_tsd_405sluu:
+    '''
+    Mount, model KM05PM
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = mount_color
+        self.part_numbers = ['TSD-405SLUU']
+
+    def execute(self, obj):
+        mesh = _import_stl("TSD-405SLUU.stl", (0, 0, -90), (-19, 0, -62))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+        part = _bounding_box(obj, 3, 3)
+        for x, y in [(-34.88, 15.88), (-34.88, -15.88), (-3.125, 15.88), (-3.125, -15.88)]:
+            part = part.fuse(_custom_cylinder(dia=bolt_4_40['tap_dia'], dz=drill_depth,
+                                            x=x, y=y, z=-62))
+        part.Placement = obj.Placement
+        obj.DrillPart = part
 
 
 class mirror_mount_ks1t:
