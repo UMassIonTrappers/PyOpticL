@@ -234,6 +234,13 @@
         square_grating (grating_args)  
         square_mirror (mirror_args)  
     
+### mount_tsd_405sluu
+  
+    Mount, model KM05PM  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+    
 ### mirror_mount_ks1t
   
     Mirror mount, model KS1T  
