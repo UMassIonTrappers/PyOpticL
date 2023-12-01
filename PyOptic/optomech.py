@@ -53,10 +53,13 @@ def _bounding_box(obj, tol, fillet, x_tol=True, y_tol=True, z_tol=False, min_off
         obj_body = obj.Shape.copy()
     else:
         obj_body = obj.Mesh.copy()
+    obj_body.Placement = App.Placement()
     if hasattr(obj, "RelativePlacement"):
         obj_body.Placement = obj.RelativePlacement
-    else:
-        obj_body.Placement = App.Placement()
+        temp = obj
+        while hasattr(temp, "ParentObject") and hasattr(temp.ParentObject, "RelativePlacement"):
+            temp = temp.ParentObject
+            obj_body.Placement *= temp.RelativePlacement
     global_bound = obj_body.BoundBox
     obj_body.Placement = App.Placement()
     bound = obj_body.BoundBox
@@ -706,6 +709,106 @@ class mirror_mount_km05:
         obj.DrillPart = part
 
 
+class mount_km05pm:
+    '''
+    Mount, model KM05PM
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True, thumbscrews=False, bolt_length=15):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyBool', 'ThumbScrews').ThumbScrews = thumbscrews
+        obj.addProperty('App::PropertyLength', 'BoltLength').BoltLength = bolt_length
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = mount_color
+        self.part_numbers = ['KM05PM']
+
+        if thumbscrews:
+            _add_linked_object(obj, "Upper Thumbscrew", thumbscrew_hkts_5_64, pos_offset=(-19.05, 6.985, 15.49))
+            _add_linked_object(obj, "Lower Thumbscrew", thumbscrew_hkts_5_64, pos_offset=(-19.05, -12.83, -4.318))
+
+    def execute(self, obj):
+        #mesh = _import_stl("KM05PM-Step.stl", (90, 0, 90), (-12.39, -0.894, 1.514))
+        mesh = _import_stl("KM05PM-Step-No-Plate.stl", (90, -0, 90), (-6.425, -4.069, 6.086))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+        part = _bounding_box(obj, 2, 3, min_offset=(4.35, 0, 0))
+        part = part.fuse(_bounding_box(obj, 2, 3, max_offset=(0, -20, 0)))
+        part = _fillet_all(part, 3)
+        part = part.fuse(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=drill_depth,
+                                          head_dia=bolt_8_32['head_dia'], head_dz=drill_depth-obj.BoltLength.Value,
+                                          x=-15.8, y=-2.921, z=-9.144-drill_depth, dir=(0,0,1)))
+        part.Placement = obj.Placement
+        obj.DrillPart = part
+
+
+class grating_mount_on_km05pm:
+    '''
+    Grating and Parallel Mirror Mounted on MK05PM
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        littrow_angle (float) : The angle of the grating and parallel mirror
+
+    Sub_Parts:
+        mount_mk05pm (mount_args)
+        square_grating (grating_args)
+        square_mirror (mirror_args)
+    '''
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, littrow_angle=55, mount_args=dict(), grating_args=dict(), mirror_args=dict()):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyAngle', 'LittrowAngle').LittrowAngle = littrow_angle
+
+        obj.ViewObject.ShapeColor = adapter_color
+        self.dx = 12/tan(radians(2*obj.LittrowAngle))
+
+        gap = 15
+        lit_angle = radians(obj.LittrowAngle.Value)
+        beam_angle = radians(90-obj.LittrowAngle.Value)
+        ref_len = gap/sin(2*beam_angle)
+        ref_x = ref_len*cos(2*beam_angle)
+        grating_dx = -(6*sin(lit_angle)+12.7/2*cos(lit_angle))
+        mirror_dx = grating_dx-ref_x
+        _add_linked_object(obj, "Mount MK05PM", mount_km05pm, pos_offset=(-3.175, 8, -10), rot_offset=(0, 0, 180), **mount_args)
+        _add_linked_object(obj, "Grating", square_grating, pos_offset=(grating_dx, 0, 0), rot_offset=(0, 0, obj.LittrowAngle.Value+90), **grating_args)
+        _add_linked_object(obj, "Mirror", square_mirror, pos_offset=(mirror_dx, gap, 0), rot_offset=(0, 0, obj.LittrowAngle.Value-90), **mirror_args)
+
+    def execute(self, obj):
+        gap = 15
+        lit_angle = radians(obj.LittrowAngle.Value)
+        beam_angle = radians(90-obj.LittrowAngle.Value)
+        ref_len = gap/sin(2*beam_angle)
+        ref_x = ref_len*cos(2*beam_angle)
+        dx = ref_x+12.7*cos(lit_angle)+(6+3.2)*sin(lit_angle)
+        dy = gap+12.7*sin(lit_angle)+(6+3.2)*cos(lit_angle)
+        dz = inch/2
+        cut_x = 12.7*cos(lit_angle)
+        part = _custom_box(dx=dx, dy=dy, dz=dz,
+                           x=0, y=0, z=-10, dir=(-1, 1, 1))
+        temp = _custom_box(dx=ref_len*cos(beam_angle)+6+3.2, dy=dy/sin(lit_angle), dz=dz,
+                           x=-cut_x, y=-(dx-cut_x)*cos(lit_angle), z=-6, dir=(-1, 1, 1))
+        temp.rotate(App.Vector(-cut_x, 0, 0), App.Vector(0, 0, 1), obj.LittrowAngle.Value-90)
+        part = part.cut(temp)
+        part.translate(App.Vector(0, -12.7/2*sin(lit_angle)-6*cos(lit_angle), 0))
+        part = part.fuse(part)
+        part = part.cut(_custom_cylinder(dia=bolt_4_40['clear_dia'], dz=4,
+                                         head_dia=bolt_4_40['head_dia'], head_dz=2,
+                                         x=-3.175, y=8, z=-6, dir=(0, 0, -1)))
+        part = part.cut(_custom_cylinder(dia=bolt_4_40['clear_dia'], dz=4,
+                                         head_dia=bolt_4_40['head_dia'], head_dz=2,
+                                         x=-3.175, y=8+2*3.175, z=-6, dir=(0, 0, -1)))
+        obj.Shape = part
+
 
 class mirror_mount_ks1t:
     '''
@@ -866,8 +969,6 @@ class km05_tec_upper_plate:
         part = _drill_part(part, obj, obj.DrillObject)
         obj.Shape = part
 
-        #obj.Shape = obj.Shape.cut(obj.DrillObject.DrillPart)
-
 
 class km05_tec_lower_plate:
     type = 'Part::FeaturePython'
@@ -894,6 +995,9 @@ class km05_tec_lower_plate:
         for x, y in [(1,1), (1,-1), (-1,1), (-1,-1)]:
             part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
                                               x=(obj.Width.Value/2-4)*x, y=(obj.Width.Value/2-4)*y, z=0, dir=(0, 0, -1)))
+        part = part.fuse(_custom_box(dx=20, dy=5, dz=inch/2,
+                                     x=part.BoundBox.XMin, y=(part.BoundBox.YMax+part.BoundBox.YMin)/2, z=0,
+                                     dir=(-1, 0, -1)))
         part.Placement = obj.Placement
         obj.DrillPart = part
 
@@ -937,7 +1041,7 @@ class mirror_mount_mk05:
 
 class mount_mk05pm:
     '''
-    Mount, model MK05
+    Mount, model MK05PM
 
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
