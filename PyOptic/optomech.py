@@ -695,12 +695,13 @@ class grating_mount_on_km05pm:
         obj.ViewObject.ShapeColor = adapter_color
         self.dx = 12/tan(radians(2*obj.LittrowAngle))
 
-        extra_x = 5
         gap = 10
         lit_angle = radians(90-obj.LittrowAngle.Value)
         beam_angle = radians(obj.LittrowAngle.Value)
         ref_len = gap/sin(2*beam_angle)
         ref_x = ref_len*cos(2*beam_angle)
+        dx = ref_x+12.7*cos(lit_angle)+(6+3.2)*sin(lit_angle)
+        extra_x = 20-dx
         grating_dx = -(6*sin(lit_angle)+12.7/2*cos(lit_angle))-extra_x
         mirror_dx = grating_dx-ref_x
 
@@ -709,7 +710,6 @@ class grating_mount_on_km05pm:
         _add_linked_object(obj, "Mirror", square_mirror, pos_offset=(mirror_dx, gap, 0), rot_offset=(0, 0, -obj.LittrowAngle.Value), **mirror_args)
 
     def execute(self, obj):
-        extra_x = 5
         extra_y = 2
         gap = 10
         lit_angle = radians(90-obj.LittrowAngle.Value)
@@ -717,6 +717,7 @@ class grating_mount_on_km05pm:
         ref_len = gap/sin(2*beam_angle)
         ref_x = ref_len*cos(2*beam_angle)
         dx = ref_x+12.7*cos(lit_angle)+(6+3.2)*sin(lit_angle)
+        extra_x = 20-dx
         dy = gap+12.7*sin(lit_angle)+(6+3.2)*cos(lit_angle)
         dz = inch/2
         cut_x = 12.7*cos(lit_angle)
