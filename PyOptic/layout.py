@@ -218,6 +218,34 @@ class baseplate:
         obj.Shape = part.removeSplitter()
 
 
+def place_element_on_table(name, obj_class, x, y, angle, optional=False, **args):
+        '''
+        Place an element at a fixed coordinate on the baseplate
+
+        Args:
+            name (string): Label for the object
+            obj_class (class): The object class associated with the part to be placed
+            x, y (float): The coordinates the object should be placed at
+            angle (float): The rotation of the object about the z axis
+            optional (bool): If this is true the object will also transmit beams
+            args (any): Additional args to be passed to the object (see object class docs)
+        '''
+        obj = App.ActiveDocument.addObject(obj_class.type, name)
+        obj.addProperty("App::PropertyLinkHidden","Baseplate").Baseplate = None
+        obj.Label = name
+        obj_class(obj, **args)
+        
+        obj.addProperty("App::PropertyPlacement","BasePlacement")
+        obj.BasePlacement = App.Placement(App.Vector(x, y, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
+
+        if optional:
+            obj.Proxy.transmission = True
+            if hasattr(obj, "ChildObjects"):
+                for child in obj.ChildObjects:
+                    child.Proxy.transmission = True
+        return obj
+
+
 class table_grid:
     '''
     Add an optical table mounting grid
@@ -279,7 +307,7 @@ class ViewProvider:
         
     def updateData(self, base_obj, prop):
         for obj in App.ActiveDocument.Objects:
-            if hasattr(obj, "BasePlacement"):
+            if hasattr(obj, "BasePlacement") and obj.Baseplate != None:
                 obj.Placement.Base = obj.BasePlacement.Base + obj.Baseplate.Placement.Base
                 obj.Placement = App.Placement(obj.Placement.Base, obj.Baseplate.Placement.Rotation, -obj.BasePlacement.Base)
                 obj.Placement.Rotation = obj.Placement.Rotation.multiply(obj.BasePlacement.Rotation)
