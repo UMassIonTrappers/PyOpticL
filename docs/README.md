@@ -74,6 +74,18 @@
             name (string): Label for the beam path object  
             color (float[3]): Color of the beam path object in RGB format  
         
+### baseplate.execute
+  
+        Place an element at a fixed coordinate on the baseplate  
+  
+        Args:  
+            name (string): Label for the object  
+            obj_class (class): The object class associated with the part to be placed  
+            x, y (float): The coordinates the object should be placed at  
+            angle (float): The rotation of the object about the z axis  
+            optional (bool): If this is true the object will also transmit beams  
+            args (any): Additional args to be passed to the object (see object class docs)  
+        
 ## Optomech  
 ### example_component
   
@@ -127,21 +139,12 @@
         post_thickness (float) : The thickness of the post that mounts to the element  
         outer_thickness (float) : The thickness of the walls around the bolt holes  
     
-### fiberport_holder
+### fiberport_mount_hca3
   
     Part for mounting an HCA3 fiberport coupler to the side of a baseplate  
   
     Args:  
         drill (bool) : Whether baseplate mounting for this part should be drilled  
-    
-### pbs_on_skate_mount
-  
-    Beam-splitter cube  
-  
-    Args:  
-        invert (bool) : Invert pick-off direction, false is left, true is right  
-        cube_size (float) : The side length of the splitter cube  
-        cube_part_number (string) : The Thorlabs part number of the splitter cube being used  
     
 ### rotation_stage_rsp05
   
@@ -163,9 +166,6 @@
         drill (bool) : Whether baseplate mounting for this part should be drilled  
         mirror (bool) : Whether to add a mirror component to the mount  
         thumbscrews (bool): Whether or not to add two HKTS 5-64 adjusters  
-  
-    Sub-Parts:  
-        circular_mirror (mirror_args)  
     
 ### mirror_mount_k05s1
   
@@ -175,9 +175,6 @@
         drill (bool) : Whether baseplate mounting for this part should be drilled  
         mirror (bool) : Whether to add a mirror component to the mount  
         thumbscrews (bool): Whether or not to add two HKTS 5-64 adjusters  
-  
-    Sub-Parts:  
-        circular_mirror (mirror_args)  
     
 ### splitter_mount_b05g
   
@@ -214,7 +211,7 @@
     Sub-Parts:  
         circular_mirror (mirror_args)  
     
-### mount_km05pm
+### prism_mount_km05pm
   
     Mount, model KM05PM  
   
@@ -495,6 +492,15 @@
         diameter (float) : The width of the plate  
         part_number (string) : The part number of the plate being used  
     
+### cube_splitter
+  
+    Beam-splitter cube  
+  
+    Args:  
+        cube_size (float) : The side length of the splitter cube  
+        invert (bool) : Invert pick-off direction, false is left, true is right  
+        cube_part_number (string) : The Thorlabs part number of the splitter cube being used  
+    
 ### circular_lens
   
     Circular Lens  
@@ -505,6 +511,16 @@
         thickness (float) : The edge thickness of the lens  
         diameter (float) : The width of the lens  
         part_number (string) : The part number of the lens being used  
+    
+### waveplate
+  
+    Waveplate  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+        thickness (float) : The thickness of the waveplate  
+        diameter (float) : The width of the waveplate  
+        part_number (string) : The part number of the waveplate being used  
     
 ### circular_mirror
   
