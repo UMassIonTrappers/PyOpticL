@@ -23,23 +23,26 @@ def example_baseplate(x=0, y=0, angle=0):
     beam = baseplate.add_beam_path(x=gap, y=input_y, angle=layout.cardinal['right'])
 
     # add input fiberport, defined at the same coordinates as beam
-    baseplate.place_element("Input Fiberport", optomech.fiberport_holder,
+    baseplate.place_element("Input Fiberport", optomech.fiberport_mount_hca3,
                             x=gap, y=input_y, angle=layout.cardinal['right'])
 
     # add splitter component along beam, 40 mm from beam input
-    baseplate.place_element_along_beam("Beam Splitter Cube", optomech.pbs_on_skate_mount, beam,
-                                       beam_index=0b1, distance=40, angle=layout.cardinal['right'])
+    baseplate.place_element_along_beam("Beam Splitter Cube", optomech.cube_splitter, beam,
+                                       beam_index=0b1, distance=40, angle=layout.cardinal['right'],
+                                       mount_type=optomech.skate_mount)
 
-    # add rotation stage along the transmitted beam, 30 mm from the splitter cube
-    baseplate.place_element_along_beam("Rotation Stage", optomech.rotation_stage_rsp05, beam,
-                                       beam_index=0b10, distance=35, angle=layout.cardinal['right'])
+    # add waveplate along the transmitted beam, 35 mm from the splitter cube, mounted in a rotation stage
+    baseplate.place_element_along_beam("Rotation Stage", optomech.waveplate, beam,
+                                       beam_index=0b10, distance=25, angle=layout.cardinal['right'],
+                                       mount_type=optomech.rotation_stage_rsp05)
 
-    # add mirror along the reflected beam, 1 inch from the splitter cube
-    baseplate.place_element_along_beam("Mirror", optomech.mirror_mount_k05s2, beam,
-                                       beam_index=0b11, distance=layout.inch, angle=layout.turn['up-right'])
+    # add mirror along the reflected beam, 1 inch from the splitter cube, mounted in a polaris mount
+    baseplate.place_element_along_beam("Mirror", optomech.circular_mirror, beam,
+                                       beam_index=0b11, distance=layout.inch, angle=layout.turn['up-right'],
+                                       mount_type=optomech.mirror_mount_k05s1)
 
     # add output fiberport along the beam, defined by settings it's x position to the edge of the baseplate
-    baseplate.place_element_along_beam("Output Fiberport", optomech.fiberport_holder, beam,
+    baseplate.place_element_along_beam("Output Fiberport", optomech.fiberport_mount_hca3, beam,
                                        beam_index=0b11, x=base_dx-gap, angle=layout.cardinal['left'])
 
 # this allows the file to be run as a macro or imported into other files
