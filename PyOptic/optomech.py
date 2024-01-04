@@ -1417,6 +1417,63 @@ class rb_cell:
         obj.DrillPart = part
 
 
+class rb_cell_new:
+    '''
+    Rubidium Cell Holder
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+    '''
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = adapter_color
+        self.transmission = True
+        self.max_angle = 10
+        self.max_width = 1
+
+    def execute(self, obj):
+        cell_dx = 80
+        cell_dia = 20
+        cell_cap_dia = 25
+        cell_nub_len = 5
+        cell_tol = 2
+        wall_thickness = 20
+        end_block=15
+        dx = cell_dx+wall_thickness/2
+        dy = dz = cell_dia+wall_thickness*2
+        part = _custom_box(dx=dx, dy=dy, dz=dz,
+                           x=0, y=0, z=0, dir=(0, 0, 0),
+                           fillet_dir=(1, 0, 0), fillet=dy/2)
+        for x in [-1, 1]:
+            part = part.fuse(_custom_box(dx=end_block, dy=dy, dz=dz,
+                                         x=x*dx/2, y=0, z=0, dir=(-x, 0, 0)))
+            for y in [-1, 1]:
+                part = part.cut(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=dz,
+                                                 x=x*dx/2+end_block/2, y=y*dy/2+end_block/2, z=dz/2,
+                                                 head_dia=bolt_8_32['clear_dia'], head_dz=dz/2))
+                
+        obj.Shape = part
+
+        part = _bounding_box(obj, 6, 3)
+        dx = 90
+        for x, y in [(1,1), (-1,1), (1,-1), (-1,-1)]:
+            part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
+                                         x=x*dx/2, y=y*15.7, z=-layout.inch/2))
+        part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
+                                     x=45, y=-15.7, z=-layout.inch/2))
+        for x in [1,-1]:
+            part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
+                                         x=x*dx/2, y=25.7, z=-layout.inch/2))
+        part.Placement = obj.Placement
+        obj.DrillPart = part
+
+
 class photodetector_pda10a2:
     '''
     Photodetector, model pda10a2
@@ -1559,7 +1616,7 @@ class thumbscrew_hkts_5_64:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
-        part = _bounding_box(obj, 2, 3, z_tol=True, min_offset=(-2, 0, 0), max_offset=(-6, 0, 0))
+        part = _bounding_box(obj, 2, 3, z_tol=True, min_offset=(-4, 0, 0), max_offset=(-6, 0, 0))
         part.Placement = obj.Placement
         obj.DrillPart = part
 
