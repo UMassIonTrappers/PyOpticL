@@ -403,6 +403,13 @@
     Args:  
         drill (bool) : Whether baseplate mounting for this part should be drilled  
     
+### rb_cell_new
+  
+    Rubidium Cell Holder  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+    
 ### photodetector_pda10a2
   
     Photodetector, model pda10a2  
