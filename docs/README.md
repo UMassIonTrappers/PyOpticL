@@ -81,7 +81,7 @@
         Args:  
             name (string): Label for the object  
             obj_class (class): The object class associated with the part to be placed  
-            x, y (float): The coordinates the object should be placed at  
+            x, y, z (float): The coordinates the object should be placed at in inches  
             angle (float): The rotation of the object about the z axis  
             optional (bool): If this is true the object will also transmit beams  
             args (any): Additional args to be passed to the object (see object class docs)  
