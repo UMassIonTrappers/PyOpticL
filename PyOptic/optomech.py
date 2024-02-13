@@ -2180,7 +2180,8 @@ class ViewProvider:
                 obj.Placement.Base = obj.BasePlacement.Base + obj.Baseplate.Placement.Base
                 obj.Placement = App.Placement(obj.Placement.Base, obj.Baseplate.Placement.Rotation, -obj.BasePlacement.Base)
                 obj.Placement.Rotation = obj.Placement.Rotation.multiply(obj.BasePlacement.Rotation)
-            obj.Placement = obj.BasePlacement
+            else:
+                obj.Placement = obj.BasePlacement
             if hasattr(obj, "ChildObjects"):
                 for child in obj.ChildObjects:
                     child.BasePlacement.Base = obj.BasePlacement.Base + child.RelativePlacement.Base

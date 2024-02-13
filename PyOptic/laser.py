@@ -12,7 +12,7 @@ def is_mult(x, factor, tol=1e-5):
 def check_interaction(x1, y1, a1, ref_obj):
 
     # check if object is an optical component
-    if not (hasattr(ref_obj.Proxy, 'max_angle') and hasattr(ref_obj.Proxy, 'max_width')):
+    if not hasattr(ref_obj, "Proxy") or not (hasattr(ref_obj.Proxy, 'max_angle') and hasattr(ref_obj.Proxy, 'max_width')):
         return
     
     # get object placement

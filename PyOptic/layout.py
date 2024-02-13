@@ -331,8 +331,8 @@ class table_grid:
     '''
     def __init__(self, dx, dy, z_off=-3/2*inch):
         obj = App.ActiveDocument.addObject('Part::FeaturePython', "Table Grid")
-        self.sketch = App.ActiveDocument.addObject("Sketcher::SketchObject", "Grid Sketch")
-        self.sketch.Placement = App.Placement(App.Vector(0, 0, z_off+1), App.Rotation(0, 0, 0), App.Vector(0, 0, 0))
+        self.holes = App.ActiveDocument.addObject("Part::Feature", "Holes")
+        obj.addProperty("App::PropertyLinkListChild","ChildObjects").ChildObjects += [self.holes]
         ViewProvider(obj.ViewObject)
         obj.Proxy = self
         self.dx = dx
@@ -343,9 +343,13 @@ class table_grid:
 
     def execute(self, obj):
         part = Part.makeBox(self.dx*inch, self.dy*inch, inch/4, App.Vector(0, 0, self.z_off-inch/4))
+        holes = []
         for x in range(self.dx):
             for y in range(self.dy):
-                self.sketch.addGeometry(Part.Circle(App.Vector((x+0.5)*inch, (y+0.5)*inch, self.z_off), App.Vector(0, 0, 1), inch/10))
+                for z in [self.z_off+1e-2, self.z_off-inch/4-1e-2]:
+                    holes.append(Part.Circle(App.Vector((x+0.5)*inch, (y+0.5)*inch, z), App.Vector(0, 0, 1), inch/10))
+        temp = Part.makeCompound(holes)
+        self.holes.Shape = temp
         obj.Shape = part
     
             
@@ -353,13 +357,13 @@ class table_grid:
 def redraw():
     for class_type in [laser.beam_path, baseplate]:
         for i in App.ActiveDocument.Objects:
-            if isinstance(i.Proxy, class_type):
+            if hasattr(i, "Proxy") and isinstance(i.Proxy, class_type):
                 i.touch()
         App.ActiveDocument.recompute()
 
 def show_components(state):
     for i in App.ActiveDocument.Objects:
-        if not isinstance(i.Proxy, baseplate):
+        if hasattr(i, "Proxy") and not isinstance(i.Proxy, baseplate):
             if state:
                 i.ViewObject.show()
             else:
