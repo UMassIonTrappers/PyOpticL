@@ -70,14 +70,6 @@ class baseplate:
             mount = self.place_element("Mount Hole (%d, %d)"%(x, y), optomech.baseplate_mount, (x+0.5)*inch, (y+0.5)*inch, 0)
             obj.ChildObjects += [mount]
 
-
-    def add_cover(self, dz, comp_tol, beam_tol):
-        obj = App.ActiveDocument.addObject('Part::FeaturePython', "Table Grid")
-        baseplate = getattr(App.ActiveDocument, self.active_baseplate)
-        obj.Placement = baseplate.Placement
-        baseplate_cover(obj, baseplate, dz=dz, comp_tol=comp_tol, beam_tol=beam_tol)
-
-
     def place_element(self, name, obj_class, x, y, angle, optional=False, **args):
         '''
         Place an element at a fixed coordinate on the baseplate
@@ -235,7 +227,7 @@ class baseplate:
         obj.Shape = part.removeSplitter()
 
 
-def place_element_on_table(name, obj_class, x, y, angle, z=0, **args):
+def place_element_on_table(name, obj_class, x, y, angle, optional=False, **args):
         '''
         Place an element at a fixed coordinate on the baseplate
 
@@ -248,78 +240,18 @@ def place_element_on_table(name, obj_class, x, y, angle, z=0, **args):
             args (any): Additional args to be passed to the object (see object class docs)
         '''
         obj = App.ActiveDocument.addObject(obj_class.type, name)
-        obj.addProperty("App::PropertyLinkHidden","Baseplate").Baseplate = None
         obj.Label = name
         obj_class(obj, **args)
         
         obj.addProperty("App::PropertyPlacement","BasePlacement")
-        obj.BasePlacement = App.Placement(App.Vector(x, y, z), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
+        obj.BasePlacement = App.Placement(App.Vector(x, y, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
+
+        if optional:
+            obj.Proxy.transmission = True
+            if hasattr(obj, "ChildObjects"):
+                for child in obj.ChildObjects:
+                    child.Proxy.transmission = True
         return obj
-
-
-class baseplate_cover:
-    '''
-    Add an optical table mounting grid
-
-    Args:
-        dx, yy (float): The dimentions of the table grid (in inches)
-        z_off (float): The z offset of the top of the grid surface
-    '''
-    def __init__(self, obj, baseplate, dz, comp_tol, beam_tol, drill=True):
-        ViewProvider(obj.ViewObject)
-        obj.Proxy = self
-
-        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
-        obj.addProperty("App::PropertyLinkHidden","Baseplate").Baseplate =  baseplate
-        obj.addProperty('App::PropertyLength', 'dz').dz = dz
-        obj.addProperty('App::PropertyLength', 'CompTol').CompTol = comp_tol
-        obj.addProperty('App::PropertyLength', 'BeamTol').BeamTol = beam_tol
-
-    def execute(self, obj):
-        baseplate = obj.Baseplate
-        part = Part.makeBox(baseplate.dx.Value-2*baseplate.Gap.Value, baseplate.dy.Value-2*baseplate.Gap.Value, obj.dz.Value,
-                            App.Vector(baseplate.Gap.Value+baseplate.xOffset.Value, baseplate.Gap.Value+baseplate.yOffset.Value, -baseplate.OpticsDz.Value))
-        if len(baseplate.xSplits) > 0:
-            for i in baseplate.xSplits:
-                part = part.cut(Part.makeBox(2*baseplate.Gap.Value, baseplate.dy.Value-2*baseplate.Gap.Value, baseplate.dz.Value, 
-                                            App.Vector(i-baseplate.Gap.Value+baseplate.xOffset.Value, baseplate.Gap.Value+baseplate.yOffset.Value, -baseplate.dz.Value-baseplate.OpticsDz.Value)))
-        if len(baseplate.ySplits) > 0:
-            for i in baseplate.ySplits:
-                part = part.cut(Part.makeBox(baseplate.dx.Value-2*baseplate.Gap.Value, 2*baseplate.Gap.Value, baseplate.dz.Value, 
-                                            App.Vector(baseplate.Gap.Value+baseplate.xOffset.Value, i-baseplate.Gap.Value+baseplate.yOffset.Value, -baseplate.dz.Value-baseplate.OpticsDz.Value)))
-        if obj.Drill:
-            for i in App.ActiveDocument.Objects:
-                if isinstance(i.Proxy, laser.beam_path) and i.Baseplate == baseplate:
-                    exploded = i.Shape.Solids
-                    for shape in exploded:
-                        drill = optomech._bounding_box(shape, obj.BeamTol.Value, 2, z_tol=True, )
-                        drill.Placement = i.Placement
-                        part = part.cut(drill)
-                else:
-                    if hasattr(i, "Shape"):
-                        obj_body = i.Shape.copy()
-                    elif hasattr(i, "Mesh"):
-                        obj_body = i.Mesh.copy()
-                    if hasattr(i, 'Baseplate') and i.Baseplate == baseplate and check_bound(part, obj_body):
-                        try:
-                            drill = optomech._bounding_box(i, obj.CompTol.Value, 2, z_tol=True, )
-                            drill.Placement = i.Placement
-                            part = part.cut(drill)
-                        except:
-                            pass
-        if baseplate.CutLabel != "":
-            face = Draft.make_shapestring(baseplate.CutLabel, str(Path(__file__).parent.resolve()) + "/font/OpenSans-Regular.ttf", 5)
-            if baseplate.InvertLabel:
-                face.Placement.Base = App.Vector(baseplate.Gap.Value, baseplate.dy.Value-baseplate.Gap.Value-2, -baseplate.OpticsDz.Value-6)
-                face.Placement.Rotation = App.Rotation(App.Vector(0, 0, 1), -90)*App.Rotation(App.Vector(1, 0, 0), 90)
-                text = face.Shape.extrude(App.Vector(0.5, 0, 0))
-            else:
-                face.Placement.Base = App.Vector(baseplate.Gap.Value+2, baseplate.Gap.Value, -baseplate.OpticsDz.Value-6)
-                face.Placement.Rotation = App.Rotation(App.Vector(1, 0, 0), 90)
-                text = face.Shape.extrude(App.Vector(0, 0.5, 0))
-            part = part.cut(text)
-            App.ActiveDocument.removeObject(face.Label)
-        obj.Shape = part.removeSplitter()
 
 
 class table_grid:

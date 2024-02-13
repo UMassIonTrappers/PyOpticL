@@ -1023,6 +1023,89 @@ class mount_mk05pm:
         obj.DrillPart = part
 
 
+#Nishat Edited : Imported this part
+class dichoric_mirror_mount_km05fl:
+    '''
+    Mirror mount, model MK05
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+
+    Sub-Parts:
+        circular_mirror (mirror_args)
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+
+        obj.ViewObject.ShapeColor = mount_color
+        self.part_numbers = ['KM05fl']
+        self.reflection_angle = 0
+        self.max_angle = 90
+        self.max_width = inch/2
+
+    def execute(self, obj):
+        mesh = _import_stl("KM05FL-Step.stl", (-180, 0, -90), (-11.53, -10.16, -10.16))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+        part = _bounding_box(obj, 2, 2)
+        part = part.cut(_custom_box(dx=4, dy=15, dz=-layout.inch/2-obj.Mesh.BoundBox.ZMin,
+                                    x=part.BoundBox.XMin, y=part.BoundBox.YMax, z=part.BoundBox.ZMin,
+                                    dir=(1, -1, 1), fillet=2))
+        part = _fillet_all(part, 2)
+
+        part = part.fuse(_custom_cylinder(dia=bolt_4_40['tap_dia'], dz=drill_depth,
+                           head_dia=bolt_4_40['head_dia'], head_dz=drill_depth-10,
+                           x=7.378, y=7.378, z=-4.373-drill_depth, dir=(0, 0, 1)))
+        part.Placement = obj.Placement
+        obj.DrillPart = part
+
+
+#Nishat Edited : Imported this part
+class dichoric_mirror_mount_km05fR:
+    '''
+    Mirror mount, model KM05FR
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+
+    Sub-Parts:
+        circular_mirror (mirror_args)
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+
+        obj.ViewObject.ShapeColor = mount_color
+        self.part_numbers = ['KM05fR']
+        self.reflection_angle = 0
+        self.max_angle = 90
+        self.max_width = inch/2
+
+    def execute(self, obj):
+        mesh = _import_stl("KM05FR_M-Step.stl", (-90, 0, 0), (-11.53, -10.16, -10.16))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+        part = _bounding_box(obj, 2, 2)
+        part = part.cut(_custom_box(dx=4, dy=15, dz=-layout.inch/2-obj.Mesh.BoundBox.ZMin,
+                                    x=part.BoundBox.XMin, y=part.BoundBox.YMax, z=part.BoundBox.ZMin,
+                                    dir=(1, -1, 1), fillet=2))
+        part = _fillet_all(part, 2)
+        part = part.fuse(_custom_cylinder(dia=bolt_4_40['tap_dia'], dz=drill_depth,
+                           head_dia=bolt_4_40['head_dia'], head_dz=drill_depth-5,
+                           x=-11.53, y=14.53, z=.275-drill_depth, dir=(0,0,1)))
+        part.Placement = obj.Placement
+        obj.DrillPart = part
+
+
 class grating_mount_on_mk05pm:
     '''
     Grating and Parallel Mirror Mounted on MK05PM
@@ -1769,6 +1852,55 @@ class diode_adapter_s05lm56:
         mesh = _import_stl("S05LM56-Step.stl", (90, 0, -90), (0, 0, -0))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
+
+#Nishat's Edited
+class Room_temp_chamber:
+    '''
+    Nishat importing the room temperature schamber
+    Room_temperature_Chamber_simplified_version
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mirror (bool) : Whether to add a mirror component to the mount
+        thumbscrews (bool): Whether or not to add two HKTS 5-64 adjusters
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.ViewObject.ShapeColor = mount_color
+        self.part_numbers = ['Room_temp_chamber']
+
+    def execute(self, obj):
+        mesh = _import_stl("Room_temp_chamber_step.stl", (0, 0, 0), (-48.89, 1.266, 0.813))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+
+class Room_temp_chamber_Mechanical:
+    '''
+    Nishat importing the room temperature schamber
+    Room_temperature_Chamber_version
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mirror (bool) : Whether to add a mirror component to the mount
+        thumbscrews (bool): Whether or not to add two HKTS 5-64 adjusters
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.ViewObject.ShapeColor = mount_color
+        self.part_numbers = ['Room_temp_chamber']
+
+    def execute(self, obj):
+        mesh = _import_stl("Room Temp Chamber Mechanical.stl", (0, 0, 0), (-33.46, -10.12, -59.69))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
 
 
 class square_grating:
