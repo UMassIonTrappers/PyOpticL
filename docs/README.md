@@ -16,6 +16,14 @@
         optics_dz (float): The optical height of baseplate  
         invert_label (bool): Wheather to switch the face the label is embossed on  
     
+### baseplate_cover
+  
+    Add an optical table mounting grid  
+  
+    Args:  
+        dx, yy (float): The dimentions of the table grid (in inches)  
+        z_off (float): The z offset of the top of the grid surface  
+    
 ### table_grid
   
     Add an optical table mounting grid  
@@ -24,7 +32,7 @@
         dx, yy (float): The dimentions of the table grid (in inches)  
         z_off (float): The z offset of the top of the grid surface  
     
-### baseplate.place_element
+### baseplate.add_cover
   
         Place an element at a fixed coordinate on the baseplate  
   
