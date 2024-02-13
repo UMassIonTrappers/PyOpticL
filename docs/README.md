@@ -16,14 +16,6 @@
         optics_dz (float): The optical height of baseplate  
         invert_label (bool): Wheather to switch the face the label is embossed on  
     
-### baseplate_cover
-  
-    Add an optical table mounting grid  
-  
-    Args:  
-        dx, yy (float): The dimentions of the table grid (in inches)  
-        z_off (float): The z offset of the top of the grid surface  
-    
 ### table_grid
   
     Add an optical table mounting grid  
@@ -32,7 +24,7 @@
         dx, yy (float): The dimentions of the table grid (in inches)  
         z_off (float): The z offset of the top of the grid surface  
     
-### baseplate.add_cover
+### baseplate.place_element
   
         Place an element at a fixed coordinate on the baseplate  
   
@@ -315,6 +307,26 @@
     Args:  
         drill (bool) : Whether baseplate mounting for this part should be drilled  
     
+### dichoric_mirror_mount_km05fl
+  
+    Mirror mount, model MK05  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+  
+    Sub-Parts:  
+        circular_mirror (mirror_args)  
+    
+### dichoric_mirror_mount_km05fR
+  
+    Mirror mount, model KM05FR  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+  
+    Sub-Parts:  
+        circular_mirror (mirror_args)  
+    
 ### grating_mount_on_mk05pm
   
     Grating and Parallel Mirror Mounted on MK05PM  
@@ -485,6 +497,26 @@
 ### diode_adapter_s05lm56
   
     Diode Mount Adapter, model S05LM56  
+    
+### Room_temp_chamber
+  
+    Nishat importing the room temperature schamber  
+    Room_temperature_Chamber_simplified_version  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+        mirror (bool) : Whether to add a mirror component to the mount  
+        thumbscrews (bool): Whether or not to add two HKTS 5-64 adjusters  
+    
+### Room_temp_chamber_Mechanical
+  
+    Nishat importing the room temperature schamber  
+    Room_temperature_Chamber_version  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+        mirror (bool) : Whether to add a mirror component to the mount  
+        thumbscrews (bool): Whether or not to add two HKTS 5-64 adjusters  
     
 ### square_grating
   
