@@ -235,7 +235,7 @@ class baseplate:
         obj.Shape = part.removeSplitter()
 
 
-def place_element_on_table(name, obj_class, x, y, z, angle, **args):
+def place_element_on_table(name, obj_class, x, y, angle, z=0, **args):
         '''
         Place an element at a fixed coordinate on the baseplate
 
@@ -248,10 +248,12 @@ def place_element_on_table(name, obj_class, x, y, z, angle, **args):
             args (any): Additional args to be passed to the object (see object class docs)
         '''
         obj = App.ActiveDocument.addObject(obj_class.type, name)
+        obj.addProperty("App::PropertyLinkHidden","Baseplate").Baseplate = None
         obj.Label = name
         obj_class(obj, **args)
         
-        obj.Placement = App.Placement(App.Vector(x*inch, y*inch, z*inch), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
+        obj.addProperty("App::PropertyPlacement","BasePlacement")
+        obj.BasePlacement = App.Placement(App.Vector(x, y, z), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
         return obj
 
 
@@ -340,10 +342,11 @@ class table_grid:
 
     def execute(self, obj):
         part = Part.makeBox(self.dx*inch, self.dy*inch, inch/4, App.Vector(0, 0, self.z_off-inch/4))
+        temp = Part.makeCylinder(inch/10, inch/4, App.Vector((0.5)*inch, (0.5)*inch, self.z_off), App.Vector(0, 0, -1))
         for x in range(self.dx):
             for y in range(self.dy):
-                part = part.cut(Part.makeCylinder(inch/10, inch/4, App.Vector((x+0.5)*inch, (y+0.5)*inch, self.z_off), App.Vector(0, 0, -1)))
-        obj.Shape = part
+                temp = temp.fuse(Part.makeCylinder(inch/10, inch/4, App.Vector((x+0.5)*inch, (y+0.5)*inch, self.z_off), App.Vector(0, 0, -1)))
+        obj.Shape = part.cut(temp)
     
             
 # Update function for dynamic elements

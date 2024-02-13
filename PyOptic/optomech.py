@@ -95,13 +95,13 @@ def _add_linked_object(obj, obj_name, obj_class, pos_offset=(0, 0, 0), rot_offse
     return new_obj
 
 def _drill_part(part, obj, drill_obj):
-    drill = drill_obj.DrillPart.copy()
-    drill.translate(App.Vector(-obj.BasePlacement.Base))
-    part = part.cut(drill)
+    if hasattr(drill_obj, "DrillPart"):
+        drill = drill_obj.DrillPart.copy()
+        drill.Placement = obj.BasePlacement.inverse().multiply(drill.Placement)
+        part = part.cut(drill)
     if hasattr(drill_obj, "ChildObjects"):
         for sub in drill_obj.ChildObjects:
-            if hasattr(sub, "DrillPart"):
-                part = _drill_part(part, obj, sub)
+            part = _drill_part(part, obj, sub)
     return part
 
 def _custom_box(dx, dy, dz, x, y, z, fillet=0, dir=(0,0,1), fillet_dir=None):
@@ -160,12 +160,6 @@ class example_component:
         obj.ViewObject.ShapeColor = adapter_color
         self.mount_bolt = bolt_8_32
         self.mount_dz = -obj.Baseplate.OpticsDz.Value
-
-    # function which returns the drilling required to mount component
-    def get_drill(self, obj):
-        part = _custom_cylinder(dia=self.mount_bolt['tap_dia'], dz=drill_depth,
-                                x=0, y=0, z=self.mount_dz)
-        return part
 
     # this defines the component body and drilling
     def execute(self, obj):
@@ -1556,7 +1550,7 @@ class periscope:
         mirror_type x2 (mirror_args)
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, lower_dz=inch, upper_dz=3*inch, mirror_type=mirror_mount_k05s2, invert=False, mirror_args=dict()):
+    def __init__(self, obj, drill=True, lower_dz=inch, upper_dz=3*inch, invert=False, mirror_args=dict()):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -1566,13 +1560,13 @@ class periscope:
         obj.addProperty('App::PropertyBool', 'Invert').Invert = invert
 
         obj.ViewObject.ShapeColor = adapter_color
-        if obj.Baseplate != None:
-            self.z_off = -layout.inch/2
+        if obj.Baseplate == None:
+            self.z_off = -layout.inch*3/2
         else:
             self.z_off = 0
 
-        _add_linked_object(obj, "Lower Mirror", mirror_type, rot_offset=((-1)**invert*90, -45, 0), pos_offset=(0, 0, obj.LowerHeight.Value+self.z_off), **mirror_args)
-        _add_linked_object(obj, "Upper Mirror", mirror_type, rot_offset=((-1)**invert*90, 135, 0), pos_offset=(0, 0, obj.UpperHeight.Value+self.z_off), **mirror_args)
+        _add_linked_object(obj, "Lower Mirror", circular_mirror, rot_offset=((-1)**invert*90, -45, 0), pos_offset=(0, 0, obj.LowerHeight.Value+self.z_off), **mirror_args)
+        _add_linked_object(obj, "Upper Mirror", circular_mirror, rot_offset=((-1)**invert*90, 135, 0), pos_offset=(0, 0, obj.UpperHeight.Value+self.z_off), **mirror_args)
 
     def execute(self, obj):
         width = 2*inch #Must be inch wide to keep periscope mirrors 1 inch from mount holes. 
@@ -2050,9 +2044,11 @@ class ViewProvider:
     
     def updateData(self, obj, prop):
         if str(prop) == "BasePlacement":
-            obj.Placement.Base = obj.BasePlacement.Base + obj.Baseplate.Placement.Base
-            obj.Placement = App.Placement(obj.Placement.Base, obj.Baseplate.Placement.Rotation, -obj.BasePlacement.Base)
-            obj.Placement.Rotation = obj.Placement.Rotation.multiply(obj.BasePlacement.Rotation)
+            if obj.Baseplate != None:
+                obj.Placement.Base = obj.BasePlacement.Base + obj.Baseplate.Placement.Base
+                obj.Placement = App.Placement(obj.Placement.Base, obj.Baseplate.Placement.Rotation, -obj.BasePlacement.Base)
+                obj.Placement.Rotation = obj.Placement.Rotation.multiply(obj.BasePlacement.Rotation)
+            obj.Placement = obj.BasePlacement
             if hasattr(obj, "ChildObjects"):
                 for child in obj.ChildObjects:
                     child.BasePlacement.Base = obj.BasePlacement.Base + child.RelativePlacement.Base
