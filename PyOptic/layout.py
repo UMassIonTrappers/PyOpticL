@@ -252,7 +252,7 @@ def place_element_on_table(name, obj_class, x, y, angle, z=0, **args):
         obj_class(obj, **args)
         
         obj.addProperty("App::PropertyPlacement","BasePlacement")
-        obj.BasePlacement = App.Placement(App.Vector(x, y, z), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
+        obj.BasePlacement = App.Placement(App.Vector(x*inch, y*inch, z*inch), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
         return obj
 
 
