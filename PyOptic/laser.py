@@ -265,36 +265,38 @@ class beam_path:
                 
                 ref_obj, xf, yf, af_arr, block = final_ref
                 # restrict beam to baseplate
-                intersect = []
-                x_max = selfobj.Baseplate.dx.Value
-                y_max = selfobj.Baseplate.dy.Value
-                if x_max < xf:
-                    intersect.append((x_max-x1)/cos(a1))
-                if y_max < yf:
-                    intersect.append((y_max-y1)/sin(a1))
-                if xf < 0:
-                    intersect.append((0-x1)/cos(a1))
-                if yf < 0:
-                    intersect.append((0-y1)/sin(a1))
-                if len(intersect) > 0 and min_len > min(intersect):
-                    min_len = min(intersect)
-                    block = True
+                if selfobj.Baseplate.dx != 0 and selfobj.Baseplate.dy != 0:
+                    intersect = []
+                    x_max = selfobj.Baseplate.dx.Value
+                    y_max = selfobj.Baseplate.dy.Value
+                    if x_max < xf:
+                        intersect.append((x_max-x1)/cos(a1))
+                    if y_max < yf:
+                        intersect.append((y_max-y1)/sin(a1))
+                    if xf < 0:
+                        intersect.append((0-x1)/cos(a1))
+                    if yf < 0:
+                        intersect.append((0-y1)/sin(a1))
+                    if len(intersect) > 0 and min_len > min(intersect):
+                        min_len = min(intersect)
+                        block = True
                 self.beams.append([x1, y1, a1, min_len, beam_index])
             else:
                 # restrict beam to baseplate
-                intersect = []
-                xf, yf = x1+500*cos(a1), y1+500*sin(a1) # TODO find a better way than this
-                x_max = selfobj.Baseplate.dx.Value
-                y_max = selfobj.Baseplate.dy.Value
-                if x_max < xf:
-                    intersect.append((x_max-x1)/cos(a1))
-                if y_max < yf:
-                    intersect.append((y_max-y1)/sin(a1))
-                if xf < 0:
-                    intersect.append(-(x1-0)/cos(a1))
-                if yf < 0:
-                    intersect.append(-(y1-0)/sin(a1))
-                self.beams.append([x1, y1, a1, min(intersect), beam_index])
+                if selfobj.Baseplate.dx != 0 and selfobj.Baseplate.dy != 0:
+                    intersect = []
+                    xf, yf = x1+500*cos(a1), y1+500*sin(a1) # TODO find a better way than this
+                    x_max = selfobj.Baseplate.dx.Value
+                    y_max = selfobj.Baseplate.dy.Value
+                    if x_max < xf:
+                        intersect.append((x_max-x1)/cos(a1))
+                    if y_max < yf:
+                        intersect.append((y_max-y1)/sin(a1))
+                    if xf < 0:
+                        intersect.append(-(x1-0)/cos(a1))
+                    if yf < 0:
+                        intersect.append(-(y1-0)/sin(a1))
+                    self.beams.append([x1, y1, a1, min(intersect), beam_index])
                 return
             
             if block:

@@ -45,7 +45,7 @@ class baseplate:
         optics_dz (float): The optical height of baseplate
         invert_label (bool): Wheather to switch the face the label is embossed on
     '''
-    def __init__(self, dx, dy, dz, x=0, y=0, angle=0, gap=0, name="Baseplate", drill=True, mount_holes=[], label="", x_offset=0, y_offset=0, optics_dz=inch/2, x_splits=[], y_splits=[], invert_label=False):
+    def __init__(self, dx=0, dy=0, dz=inch, x=0, y=0, angle=0, gap=0, name="Baseplate", drill=True, mount_holes=[], label="", x_offset=0, y_offset=0, optics_dz=inch/2, x_splits=[], y_splits=[], invert_label=False):
         obj = App.ActiveDocument.addObject('Part::FeaturePython', name)
         ViewProvider(obj.ViewObject)
         obj.Proxy = self
@@ -54,11 +54,12 @@ class baseplate:
         obj.addProperty('App::PropertyLength', 'dy').dy = dy
         obj.addProperty('App::PropertyLength', 'dz').dz = dz
         obj.addProperty('App::PropertyLength', 'Gap').Gap = gap
+        obj.addProperty('App::PropertyLength', 'AutosizeTol').AutosizeTol = 15
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty('App::PropertyString', 'CutLabel').CutLabel = label
-        obj.addProperty('App::PropertyLength', 'xOffset').xOffset = x_offset
-        obj.addProperty('App::PropertyLength', 'yOffset').yOffset = y_offset
-        obj.addProperty('App::PropertyLength', 'OpticsDz').OpticsDz = optics_dz
+        obj.addProperty('App::PropertyDistance', 'xOffset').xOffset = x_offset
+        obj.addProperty('App::PropertyDistance', 'yOffset').yOffset = y_offset
+        obj.addProperty('App::PropertyDistance', 'OpticsDz').OpticsDz = optics_dz
         obj.addProperty('App::PropertyFloatList', 'xSplits').xSplits = x_splits
         obj.addProperty('App::PropertyFloatList', 'ySplits').ySplits = y_splits
         obj.addProperty('App::PropertyLength', 'InvertLabel').InvertLabel = invert_label
@@ -70,11 +71,11 @@ class baseplate:
             mount = self.place_element("Mount Hole (%d, %d)"%(x, y), optomech.baseplate_mount, (x+0.5)*inch, (y+0.5)*inch, 0)
             obj.ChildObjects += [mount]
 
-    def add_cover(self, dz, comp_tol, beam_tol):
+    def add_cover(self, dz):
         obj = App.ActiveDocument.addObject('Part::FeaturePython', "Table Grid")
         baseplate = getattr(App.ActiveDocument, self.active_baseplate)
         obj.Placement = baseplate.Placement
-        baseplate_cover(obj, baseplate, dz=dz, comp_tol=comp_tol, beam_tol=beam_tol)
+        baseplate_cover(obj, baseplate, dz=dz)
 
 
     def place_element(self, name, obj_class, x, y, angle, optional=False, **args):
@@ -202,8 +203,29 @@ class baseplate:
         return obj
     
     def execute(self, obj):
+        if obj.dx == 0 and obj.dy == 0:
+            for i in App.ActiveDocument.Objects:
+                if hasattr(i, "Shape"):
+                    obj_body = i.Shape.copy()
+                elif hasattr(i, "Mesh"):
+                    obj_body = i.Mesh.copy()
+                else:
+                    obj_body = i
+                if hasattr(obj_body, "BoundBox"):
+                    bound = obj_body.BoundBox
+                    obj.xOffset = min(obj.xOffset.Value, bound.XMin-obj.AutosizeTol.Value)
+                    obj.yOffset = min(obj.yOffset.Value, bound.YMin-obj.AutosizeTol.Value)
+                    obj.dx = max(obj.dx.Value, bound.XMax+obj.AutosizeTol.Value-obj.xOffset.Value)
+                    obj.dy = max(obj.dy.Value, bound.YMax+obj.AutosizeTol.Value-obj.yOffset.Value)
+
+        print(obj.xOffset, obj.yOffset)
+
+        if obj.dx == 0 and obj.dy == 0:
+            return
+        
         part = Part.makeBox(obj.dx.Value-2*obj.Gap.Value, obj.dy.Value-2*obj.Gap.Value, obj.dz.Value,
                             App.Vector(obj.Gap.Value+obj.xOffset.Value, obj.Gap.Value+obj.yOffset.Value, -obj.dz.Value-obj.OpticsDz.Value))
+
         if len(obj.xSplits) > 0:
             for i in obj.xSplits:
                 part = part.cut(Part.makeBox(2*obj.Gap.Value, obj.dy.Value-2*obj.Gap.Value, obj.dz.Value, 
@@ -222,11 +244,11 @@ class baseplate:
         if obj.CutLabel != "":
             face = Draft.make_shapestring(obj.CutLabel, str(Path(__file__).parent.resolve()) + "/font/OpenSans-Regular.ttf", 5)
             if obj.InvertLabel:
-                face.Placement.Base = App.Vector(obj.Gap.Value, obj.dy.Value-obj.Gap.Value-2, -obj.OpticsDz.Value-6)
+                face.Placement.Base = App.Vector(obj.Gap.Value+obj.xOffset.Value, obj.dy.Value+obj.yOffset.Value-obj.Gap.Value-2, -obj.OpticsDz.Value-6)
                 face.Placement.Rotation = App.Rotation(App.Vector(0, 0, 1), -90)*App.Rotation(App.Vector(1, 0, 0), 90)
                 text = face.Shape.extrude(App.Vector(0.5, 0, 0))
             else:
-                face.Placement.Base = App.Vector(obj.Gap.Value+2, obj.Gap.Value, -obj.OpticsDz.Value-6)
+                face.Placement.Base = App.Vector(obj.Gap.Value+obj.xOffset.Value+2, obj.Gap.Value+obj.yOffset.Value, -obj.OpticsDz.Value-6)
                 face.Placement.Rotation = App.Rotation(App.Vector(1, 0, 0), 90)
                 text = face.Shape.extrude(App.Vector(0, 0.5, 0))
             part = part.cut(text)
@@ -264,48 +286,47 @@ class baseplate_cover:
         dx, yy (float): The dimentions of the table grid (in inches)
         z_off (float): The z offset of the top of the grid surface
     '''
-    def __init__(self, obj, baseplate, dz, comp_tol, beam_tol, drill=True):
+    def __init__(self, obj, baseplate, dz, wall_thickness=10, beam_tol=5, drill=True):
         ViewProvider(obj.ViewObject)
         obj.Proxy = self
 
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty("App::PropertyLinkHidden","Baseplate").Baseplate =  baseplate
         obj.addProperty('App::PropertyLength', 'dz').dz = dz
-        obj.addProperty('App::PropertyLength', 'CompTol').CompTol = comp_tol
+        obj.addProperty('App::PropertyLength', 'WallThickness').WallThickness = wall_thickness
         obj.addProperty('App::PropertyLength', 'BeamTol').BeamTol = beam_tol
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        self.slots = []
 
     def execute(self, obj):
         baseplate = obj.Baseplate
+
+
         part = Part.makeBox(baseplate.dx.Value-2*baseplate.Gap.Value, baseplate.dy.Value-2*baseplate.Gap.Value, obj.dz.Value,
                             App.Vector(baseplate.Gap.Value+baseplate.xOffset.Value, baseplate.Gap.Value+baseplate.yOffset.Value, -baseplate.OpticsDz.Value))
-        if len(baseplate.xSplits) > 0:
-            for i in baseplate.xSplits:
-                part = part.cut(Part.makeBox(2*baseplate.Gap.Value, baseplate.dy.Value-2*baseplate.Gap.Value, baseplate.dz.Value, 
-                                            App.Vector(i-baseplate.Gap.Value+baseplate.xOffset.Value, baseplate.Gap.Value+baseplate.yOffset.Value, -baseplate.dz.Value-baseplate.OpticsDz.Value)))
-        if len(baseplate.ySplits) > 0:
-            for i in baseplate.ySplits:
-                part = part.cut(Part.makeBox(baseplate.dx.Value-2*baseplate.Gap.Value, 2*baseplate.Gap.Value, baseplate.dz.Value, 
-                                            App.Vector(baseplate.Gap.Value+baseplate.xOffset.Value, i-baseplate.Gap.Value+baseplate.yOffset.Value, -baseplate.dz.Value-baseplate.OpticsDz.Value)))
+        part = part.fuse(Part.makeBox(baseplate.dx.Value-2*baseplate.Gap.Value-obj.WallThickness.Value-1, baseplate.dy.Value-2*baseplate.Gap.Value-obj.WallThickness.Value-1, 1,
+                            App.Vector(baseplate.Gap.Value+baseplate.xOffset.Value+obj.WallThickness.Value/2+0.5, baseplate.Gap.Value+baseplate.yOffset.Value+obj.WallThickness.Value/2+0.5, -baseplate.OpticsDz.Value-1)))
+        part = part.cut(Part.makeBox(baseplate.dx.Value-2*baseplate.Gap.Value-2*obj.WallThickness.Value+1, baseplate.dy.Value-2*baseplate.Gap.Value-2*obj.WallThickness.Value+1, obj.dz.Value-obj.WallThickness.Value+1,
+                            App.Vector(baseplate.Gap.Value+baseplate.xOffset.Value+obj.WallThickness.Value-0.5, baseplate.Gap.Value+baseplate.yOffset.Value+obj.WallThickness.Value-0.5, -baseplate.OpticsDz.Value-1)))
+        
+        temp = Part.makeBox(baseplate.dx.Value-2*baseplate.Gap.Value-obj.WallThickness.Value, baseplate.dy.Value-2*baseplate.Gap.Value-obj.WallThickness.Value, 1.5,
+                            App.Vector(baseplate.Gap.Value+baseplate.xOffset.Value+obj.WallThickness.Value/2, baseplate.Gap.Value+baseplate.yOffset.Value+obj.WallThickness.Value/2, -baseplate.OpticsDz.Value-1.5))
+        temp = temp.cut(Part.makeBox(baseplate.dx.Value-2*baseplate.Gap.Value-2*obj.WallThickness.Value, baseplate.dy.Value-2*baseplate.Gap.Value-2*obj.WallThickness.Value, 1.5,
+                            App.Vector(baseplate.Gap.Value+baseplate.xOffset.Value+obj.WallThickness.Value, baseplate.Gap.Value+baseplate.yOffset.Value+obj.WallThickness.Value, -baseplate.OpticsDz.Value-1.5)))
+        
+        temp.Placement = obj.Placement
+        obj.DrillPart = temp
+
         if obj.Drill:
             for i in App.ActiveDocument.Objects:
                 if isinstance(i.Proxy, laser.beam_path) and i.Baseplate == baseplate:
                     exploded = i.Shape.Solids
                     for shape in exploded:
-                        drill = optomech._bounding_box(shape, obj.BeamTol.Value, 2, z_tol=True, )
+                        drill = optomech._bounding_box(shape, obj.BeamTol.Value, 2, z_tol=True, plate_off=-1)
                         drill.Placement = i.Placement
                         part = part.cut(drill)
-                else:
-                    if hasattr(i, "Shape"):
-                        obj_body = i.Shape.copy()
-                    elif hasattr(i, "Mesh"):
-                        obj_body = i.Mesh.copy()
-                    if hasattr(i, 'Baseplate') and i.Baseplate == baseplate and check_bound(part, obj_body):
-                        try:
-                            drill = optomech._bounding_box(i, obj.CompTol.Value, 2, z_tol=True, )
-                            drill.Placement = i.Placement
-                            part = part.cut(drill)
-                        except:
-                            pass
+
         if baseplate.CutLabel != "":
             face = Draft.make_shapestring(baseplate.CutLabel, str(Path(__file__).parent.resolve()) + "/font/OpenSans-Regular.ttf", 5)
             if baseplate.InvertLabel:
@@ -355,7 +376,7 @@ class table_grid:
             
 # Update function for dynamic elements
 def redraw():
-    for class_type in [laser.beam_path, baseplate]:
+    for class_type in [laser.beam_path, baseplate, baseplate_cover, baseplate]:
         for i in App.ActiveDocument.Objects:
             if hasattr(i, "Proxy") and isinstance(i.Proxy, class_type):
                 i.touch()

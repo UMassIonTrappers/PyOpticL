@@ -48,7 +48,7 @@ def _import_stl(stl_name, rotate, translate, scale=1):
     mesh.translate(*translate)
     return mesh
 
-def _bounding_box(obj, tol, fillet, x_tol=True, y_tol=True, z_tol=False, min_offset=(0, 0, 0), max_offset=(0, 0, 0)):
+def _bounding_box(obj, tol, fillet, x_tol=True, y_tol=True, z_tol=False, min_offset=(0, 0, 0), max_offset=(0, 0, 0), plate_off=0):
     if hasattr(obj, "Shape"):
         obj_body = obj.Shape.copy()
     elif hasattr(obj, "Mesh"):
@@ -68,8 +68,8 @@ def _bounding_box(obj, tol, fillet, x_tol=True, y_tol=True, z_tol=False, min_off
 
     x_min, x_max = bound.XMin-tol*x_tol+min_offset[0], bound.XMax+tol*x_tol+max_offset[0]
     y_min, y_max = bound.YMin-tol*y_tol+min_offset[1], bound.YMax+tol*y_tol+max_offset[1]
-    z_min = min(global_bound.ZMin-tol*z_tol+min_offset[2], -layout.inch/2)-global_bound.ZMin+bound.ZMin
-    z_max = max(global_bound.ZMax+tol*z_tol+max_offset[2], -layout.inch/2)-global_bound.ZMax+bound.ZMax
+    z_min = min(global_bound.ZMin-tol*z_tol+min_offset[2], -layout.inch/2+plate_off)-global_bound.ZMin+bound.ZMin
+    z_max = max(global_bound.ZMax+tol*z_tol+max_offset[2], -layout.inch/2+plate_off)-global_bound.ZMax+bound.ZMax
     bound_part = _custom_box(dx=x_max-x_min, dy=y_max-y_min, dz=z_max-z_min,
                     x=x_min, y=y_min, z=z_min, dir=(1, 1, 1),
                     fillet=fillet, fillet_dir=(0, 0, 1))
