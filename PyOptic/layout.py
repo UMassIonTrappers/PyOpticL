@@ -205,20 +205,21 @@ class baseplate:
     def execute(self, obj):
         if obj.dx == 0 and obj.dy == 0:
             for i in App.ActiveDocument.Objects:
-                if hasattr(i, "Shape"):
-                    obj_body = i.Shape.copy()
-                elif hasattr(i, "Mesh"):
-                    obj_body = i.Mesh.copy()
-                else:
-                    obj_body = i
-                if hasattr(obj_body, "BoundBox"):
-                    bound = obj_body.BoundBox
-                    obj.xOffset = min(obj.xOffset.Value, bound.XMin-obj.AutosizeTol.Value)
-                    obj.yOffset = min(obj.yOffset.Value, bound.YMin-obj.AutosizeTol.Value)
-                    obj.dx = max(obj.dx.Value, bound.XMax+obj.AutosizeTol.Value-obj.xOffset.Value)
-                    obj.dy = max(obj.dy.Value, bound.YMax+obj.AutosizeTol.Value-obj.yOffset.Value)
-
-        print(obj.xOffset, obj.yOffset)
+                if hasattr(i, "Baseplate") and i.Baseplate == obj:
+                    if hasattr(i, "Shape"):
+                        obj_body = i.Shape.copy()
+                    elif hasattr(i, "Mesh"):
+                        obj_body = i.Mesh.copy()
+                    else:
+                        obj_body = i
+                    if hasattr(obj_body, "BoundBox") and hasattr(i, "BasePlacement"):
+                        obj_body.Placement = i.BasePlacement
+                        bound = obj_body.BoundBox
+                        obj.xOffset = min(obj.xOffset.Value, bound.XMin-obj.AutosizeTol.Value)
+                        obj.yOffset = min(obj.yOffset.Value, bound.YMin-obj.AutosizeTol.Value)
+                        obj.dx = max(obj.dx.Value, bound.XMax+obj.AutosizeTol.Value-obj.xOffset.Value)
+                        obj.dy = max(obj.dy.Value, bound.YMax+obj.AutosizeTol.Value-obj.yOffset.Value)
+                        print(i.Name, obj.dy)
 
         if obj.dx == 0 and obj.dy == 0:
             return
