@@ -1517,40 +1517,48 @@ class rb_cell_new:
         self.max_width = 1
 
     def execute(self, obj):
-        cell_dx = 80
-        cell_dia = 20
-        cell_cap_dia = 25
-        cell_nub_len = 5
-        cell_tol = 2
-        wall_thickness = 20
-        end_block=15
-        dx = cell_dx+wall_thickness/2
+        cell_dx = 85
+        cell_dia = 25
+        wall_thickness = 15
+        base_dy=4*inch
+        dx = cell_dx+wall_thickness*2
         dy = dz = cell_dia+wall_thickness*2
-        part = _custom_box(dx=dx, dy=dy, dz=dz,
-                           x=0, y=0, z=0, dir=(0, 0, 0),
-                           fillet_dir=(1, 0, 0), fillet=dy/2)
-        for x in [-1, 1]:
-            part = part.fuse(_custom_box(dx=end_block, dy=dy, dz=dz,
-                                         x=x*dx/2, y=0, z=0, dir=(-x, 0, 0)))
-            for y in [-1, 1]:
-                part = part.cut(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=dz,
-                                                 x=x*dx/2+end_block/2, y=y*dy/2+end_block/2, z=dz/2,
-                                                 head_dia=bolt_8_32['clear_dia'], head_dz=dz/2))
-                
-        obj.Shape = part
+        base = _custom_box(dx=dx, dy=dy, dz=dz/2,
+                           x=0, y=0, z=dz/2, dir=(0, 0, -1))
+        base = base.fuse(_custom_box(dx=dx, dy=base_dy, dz=inch,
+                           x=0, y=0, z=-(3/2*inch-dz/2), dir=(0, 0, 1)))
+        cover = _custom_box(dx=dx, dy=dy, dz=dz/2,
+                           x=0, y=0, z=dz/2, dir=(0, 0, 1))
+        cover = cover.cut(_custom_box(dx=20, dy=dy/2, dz=5,
+                           x=0, y=0, z=dz/2+2.5, dir=(0, -1, 0)))
+        base = base.cut(_custom_cylinder(dia=15, dz=cell_dia/2+10,
+                                         x=0, y=0, z=dz/2))
+        cell = _custom_cylinder(dia=cell_dia, dz=cell_dx,
+                                x=-cell_dx/2, y=0, z=dz/2,
+                                dir=(1, 0, 0))
+        cell = cell.fuse( _custom_cylinder(dia=5, dz=dx,
+                                           x=-dx/2, y=0, z=dz/2,
+                                           dir=(1, 0, 0)))
+        base = base.cut(cell)
+        cover = cover.cut(cell)
 
-        part = _bounding_box(obj, 6, 3)
-        dx = 90
-        for x, y in [(1,1), (-1,1), (1,-1), (-1,-1)]:
-            part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                                         x=x*dx/2, y=y*15.7, z=-layout.inch/2))
-        part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                                     x=45, y=-15.7, z=-layout.inch/2))
-        for x in [1,-1]:
-            part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                                         x=x*dx/2, y=25.7, z=-layout.inch/2))
-        part.Placement = obj.Placement
-        obj.DrillPart = part
+        for x, y in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:
+            hole = _custom_cylinder(dia=bolt_8_32['clear_dia'], dz=dz/2,
+                                    x=x*(dx/2-wall_thickness/2), y=y*(dy/2-wall_thickness/2), z=dz,
+                                    head_dia=bolt_8_32['head_dia'], head_dz=dz/4)
+            hole = hole.fuse(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=3/2*inch,
+                                    x=x*(dx/2-wall_thickness/2), y=y*(dy/2-wall_thickness/2), z=dz/2))
+            base = base.cut(hole)
+            cover = cover.cut(hole)
+            base = base.cut(_custom_cylinder(dia=bolt_14_20['clear_dia'], dz=inch,
+                                             x=x*1.5*inch, y=y*1.5*inch, z=-(1/2*inch-dz/2),
+                                             head_dia=bolt_14_20['washer_dia'], head_dz=bolt_14_20['head_dz']))
+
+        base.translate(App.Vector(0, 0, -dz/2))
+        cover.translate(App.Vector(0, 0, -dz/2))
+   
+        obj.Shape = Part.Compound([base, cover])
+
 
 
 class photodetector_pda10a2:
