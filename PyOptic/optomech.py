@@ -1555,7 +1555,7 @@ class rb_cell_new:
             hole = _custom_cylinder(dia=bolt_8_32['clear_dia'], dz=dz/2,
                                     x=x*(dx/2-wall_thickness/2), y=y*(dy/2-wall_thickness/2), z=dz,
                                     head_dia=bolt_8_32['head_dia'], head_dz=dz/4)
-            hole = hole.fuse(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=3/2*inch,
+            hole = hole.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=3/2*inch,
                                     x=x*(dx/2-wall_thickness/2), y=y*(dy/2-wall_thickness/2), z=dz/2))
             base = base.cut(hole)
             cover = cover.cut(hole)
