@@ -1518,7 +1518,7 @@ class rb_cell_new:
 
     def execute(self, obj):
         cell_dx = 88
-        cell_dia = 22
+        cell_dia = 23
         end_dia = 25
         wall_thickness = 15
         base_dy=4*inch
