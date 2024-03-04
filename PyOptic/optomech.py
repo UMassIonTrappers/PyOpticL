@@ -1518,16 +1518,16 @@ class rb_cell_new:
 
     def execute(self, obj):
         cell_dx = 88
-        cell_dia = 23
-        end_dia = 25
+        cell_dia = 25
+        end_dia = 28
         wall_thickness = 15
         base_dy=4*inch
         dx = cell_dx+wall_thickness*2
         dy = dz = cell_dia+wall_thickness*2
         base = _custom_box(dx=dx, dy=dy, dz=dz/2,
                            x=0, y=0, z=dz/2, dir=(0, 0, -1))
-        base = base.fuse(_custom_box(dx=dx, dy=base_dy, dz=inch,
-                           x=0, y=0, z=-(3/2*inch-dz/2), dir=(0, 0, 1)))
+        base = base.fuse(_custom_box(dx=dx, dy=base_dy, dz=3/4*inch,
+                           x=0, y=0, z=-(1/2*inch-dz/2), dir=(0, 0, -1)))
         cover = _custom_box(dx=dx, dy=dy, dz=dz/2,
                            x=0, y=0, z=dz/2, dir=(0, 0, 1))
         cover = cover.cut(_custom_box(dx=20, dy=dy/2, dz=5,
