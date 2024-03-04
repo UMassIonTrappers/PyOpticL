@@ -1517,8 +1517,9 @@ class rb_cell_new:
         self.max_width = 1
 
     def execute(self, obj):
-        cell_dx = 85
-        cell_dia = 25
+        cell_dx = 88
+        cell_dia = 22
+        end_dia = 25
         wall_thickness = 15
         base_dy=4*inch
         dx = cell_dx+wall_thickness*2
@@ -1531,14 +1532,22 @@ class rb_cell_new:
                            x=0, y=0, z=dz/2, dir=(0, 0, 1))
         cover = cover.cut(_custom_box(dx=20, dy=dy/2, dz=5,
                            x=0, y=0, z=dz/2+2.5, dir=(0, -1, 0)))
-        base = base.cut(_custom_cylinder(dia=15, dz=cell_dia/2+10,
-                                         x=0, y=0, z=dz/2))
         cell = _custom_cylinder(dia=cell_dia, dz=cell_dx,
                                 x=-cell_dx/2, y=0, z=dz/2,
                                 dir=(1, 0, 0))
+        cell = cell.fuse(_custom_cylinder(dia=end_dia, dz=10,
+                                          x=-cell_dx/2, y=0, z=dz/2,
+                                          dir=(1, 0, 0)))
+        cell = cell.fuse(_custom_cylinder(dia=end_dia, dz=10,
+                                          x=cell_dx/2, y=0, z=dz/2,
+                                          dir=(-1, 0, 0)))
         cell = cell.fuse( _custom_cylinder(dia=5, dz=dx,
                                            x=-dx/2, y=0, z=dz/2,
                                            dir=(1, 0, 0)))
+        cell = cell.fuse(_custom_cylinder(dia=15, dz=cell_dia/2+10,
+                                         x=0, y=0, z=dz/2,
+                                         dir=(0, 1, 0)))
+        
         base = base.cut(cell)
         cover = cover.cut(cell)
 
@@ -1552,7 +1561,7 @@ class rb_cell_new:
             cover = cover.cut(hole)
             base = base.cut(_custom_cylinder(dia=bolt_14_20['clear_dia'], dz=inch,
                                              x=x*1.5*inch, y=y*1.5*inch, z=-(1/2*inch-dz/2),
-                                             head_dia=bolt_14_20['washer_dia'], head_dz=bolt_14_20['head_dz']))
+                                             head_dia=bolt_14_20['washer_dia'], head_dz=10))
 
         base.translate(App.Vector(0, 0, -dz/2))
         cover.translate(App.Vector(0, 0, -dz/2))
@@ -1703,7 +1712,7 @@ class thumbscrew_hkts_5_64:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
-        part = _bounding_box(obj, 2, 3, z_tol=True, min_offset=(-4, 0, 0), max_offset=(-6, 0, 0))
+        part = _bounding_box(obj, 2, 3, z_tol=True, min_offset=(-6, 0, 0), max_offset=(-6, 0, 0))
         part.Placement = obj.Placement
         obj.DrillPart = part
 
