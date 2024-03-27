@@ -1521,7 +1521,7 @@ class rb_cell_new:
         cell_dia = 25
         end_dia = 28
         wall_thickness = 15
-        base_dy=4*inch
+        base_dy=4.75*inch
         dx = cell_dx+wall_thickness*2
         dy = dz = cell_dia+wall_thickness*2
         base = _custom_box(dx=dx, dy=dy, dz=dz/2,
@@ -1560,7 +1560,7 @@ class rb_cell_new:
             base = base.cut(hole)
             cover = cover.cut(hole)
             base = base.cut(_custom_cylinder(dia=bolt_14_20['clear_dia'], dz=inch,
-                                             x=x*1.5*inch, y=y*1.5*inch, z=-(1/2*inch-dz/2),
+                                             x=x*1.5*inch, y=y*2*inch, z=-(1/2*inch-dz/2),
                                              head_dia=bolt_14_20['washer_dia'], head_dz=10))
 
         base.translate(App.Vector(0, 0, -dz/2))
