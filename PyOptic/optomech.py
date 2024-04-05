@@ -276,7 +276,7 @@ class skate_mount:
         cube_tol (float) : The tolerance for size of the recess in the skate mount
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, cube_dx=10, cube_dy=10, cube_dz=10, mount_hole_dy=20, cube_depth=1, outer_thickness=2, cube_tol=0.1):
+    def __init__(self, obj, drill=True, cube_dx=10, cube_dy=10, cube_dz=10, mount_hole_dy=20, cube_depth=1, outer_thickness=2, cube_tol=0.1, slots=False):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -288,13 +288,19 @@ class skate_mount:
         obj.addProperty('App::PropertyLength', 'CubeDepth').CubeDepth = cube_depth+1e-3
         obj.addProperty('App::PropertyLength', 'OuterThickness').OuterThickness = outer_thickness
         obj.addProperty('App::PropertyLength', 'CubeTolerance').CubeTolerance = cube_tol
+        obj.addProperty('App::PropertyBool', 'Slots').Slots = slots
         obj.addProperty('Part::PropertyPartShape', 'DrillPart')
 
         obj.ViewObject.ShapeColor = adapter_color
         obj.setEditorMode('Placement', 2)
 
     def execute(self, obj):
-        dx = bolt_8_32['head_dia']+obj.OuterThickness.Value*2
+        if obj.Slots:
+            slot = 5
+            dx = bolt_8_32['head_dia']+obj.OuterThickness.Value*2+slot
+        else:
+            slot = 0
+            dx = bolt_8_32['head_dia']+obj.OuterThickness.Value*2
         dy = dx+obj.MountHoleDistance.Value
         raw_dz = obj.Baseplate.OpticsDz.Value-obj.CubeDz.Value/2+obj.CubeDepth.Value
         dz = max(raw_dz, 8)
@@ -306,15 +312,23 @@ class skate_mount:
         part = part.cut(_custom_box(dx=cut_dx, dy=cut_dy, dz=obj.CubeDepth.Value+1e-3,
                                     x=0, y=0, z=-obj.Baseplate.OpticsDz.Value+dz-obj.CubeDepth.Value-1e-3))
         for i in [-1, 1]:
-            part = part.cut(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=dz,
-                                             head_dia=bolt_8_32['head_dia'], head_dz=bolt_8_32['head_dz'],
-                                             x=0, y=i*obj.MountHoleDistance.Value/2, z=-obj.Baseplate.OpticsDz.Value+dz))
+            if obj.Slots:
+                part = part.cut(_custom_box(dx=slot+bolt_8_32['head_dia'], dy=bolt_8_32['head_dia'], dz=bolt_8_32['head_dz'],
+                                            x=0, y=i*obj.MountHoleDistance.Value/2, z=-obj.Baseplate.OpticsDz.Value+dz,
+                                            fillet=bolt_8_32['head_dia']/2, dir=(0,0,-1)))
+                part = part.cut(_custom_box(dx=slot+bolt_8_32['clear_dia'], dy=bolt_8_32['clear_dia'], dz=bolt_8_32['head_dz'],
+                                            x=0, y=i*obj.MountHoleDistance.Value/2, z=-obj.Baseplate.OpticsDz.Value+dz-bolt_8_32['head_dz'],
+                                            fillet=bolt_8_32['clear_dia']/2, dir=(0,0,-1)))
+            else:
+                part = part.cut(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=dz,
+                                                head_dia=bolt_8_32['head_dia'], head_dz=bolt_8_32['head_dz'],
+                                                x=0, y=i*obj.MountHoleDistance.Value/2, z=-obj.Baseplate.OpticsDz.Value+dz))
             
         part.translate(App.Vector(0, 0, obj.CubeDz.Value/2+(raw_dz-dz)))
         part = part.fuse(part)
         obj.Shape = part
 
-        part = _bounding_box(obj, 1, 6)
+        part = _bounding_box(obj, 1, 6,min_offset=(-slot, 0, 0), max_offset=(slot, 0, 0))
         for i in [-1, 1]:
             part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
                                               x=0, y=i*obj.MountHoleDistance.Value/2, z=-obj.Baseplate.OpticsDz.Value+obj.CubeDz.Value/2))
@@ -2087,7 +2101,7 @@ class cylindrical_lens:
         part_number (string) : The part number of the lens being used
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, focal_length=50, thickness=4, width=20, height=22, part_number='', mount_type=skate_mount, mount_args=dict()):
+    def __init__(self, obj, drill=True, focal_length=50, thickness=4, width=20, height=22, slots=False, part_number='', mount_type=skate_mount, mount_args=dict()):
         mount_args.setdefault("cube_dx", thickness)
         mount_args.setdefault("cube_dy", width)
         mount_args.setdefault("cube_dz", height)
@@ -2102,7 +2116,7 @@ class cylindrical_lens:
         obj.addProperty('App::PropertyLength', 'Height').Height = height
 
         if mount_type != None:
-            _add_linked_object(obj, "Mount", mount_type, pos_offset=(thickness/2, 0, -height/2), mount_hole_dy=width+10, cube_dy=width, cube_dz=height, cube_dx=thickness)
+            _add_linked_object(obj, "Mount", mount_type, pos_offset=(thickness/2, 0, -height/2), mount_hole_dy=width+10, cube_dy=width, cube_dz=height, cube_dx=thickness, slots=slots)
 
         obj.ViewObject.ShapeColor = glass_color
         obj.ViewObject.Transparency=50
