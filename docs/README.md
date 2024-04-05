@@ -129,7 +129,7 @@
   
     Args:  
         drill (bool) : Whether baseplate mounting for this part should be drilled  
-        cube_size (float) : The side length of the splitter cube  
+        cube_dx, cube_dy (float) : The side length of the splitter cube  
         mount_hole_dy (float) : The spacing between the two mount holes of the adapter  
         cube_depth (float) : The depth of the recess for the cube  
         outer_thickness (float) : The thickness of the walls around the bolt holes  
@@ -565,6 +565,18 @@
         focal_length (float) : The focal length of the lens  
         thickness (float) : The edge thickness of the lens  
         diameter (float) : The width of the lens  
+        part_number (string) : The part number of the lens being used  
+    
+### cylindrical_lens
+  
+    Cylindrical Lens  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+        focal_length (float) : The focal length of the lens  
+        thickness (float) : The edge thickness of the lens  
+        width (float) : The width of the lens  
+        height (float) : The width of the lens  
         part_number (string) : The part number of the lens being used  
     
 ### waveplate
