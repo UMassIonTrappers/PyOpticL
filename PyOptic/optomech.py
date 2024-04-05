@@ -269,19 +269,21 @@ class skate_mount:
 
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
-        cube_size (float) : The side length of the splitter cube
+        cube_dx, cube_dy (float) : The side length of the splitter cube
         mount_hole_dy (float) : The spacing between the two mount holes of the adapter
         cube_depth (float) : The depth of the recess for the cube
         outer_thickness (float) : The thickness of the walls around the bolt holes
         cube_tol (float) : The tolerance for size of the recess in the skate mount
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, cube_size=10, mount_hole_dy=20, cube_depth=1, outer_thickness=2, cube_tol=0.1):
+    def __init__(self, obj, drill=True, cube_dx=10, cube_dy=10, cube_dz=10, mount_hole_dy=20, cube_depth=1, outer_thickness=2, cube_tol=0.1):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
-        obj.addProperty('App::PropertyLength', 'CubeSize').CubeSize = cube_size
+        obj.addProperty('App::PropertyLength', 'CubeDx').CubeDx = cube_dy
+        obj.addProperty('App::PropertyLength', 'CubeDy').CubeDy = cube_dx
+        obj.addProperty('App::PropertyLength', 'CubeDz').CubeDz = cube_dz
         obj.addProperty('App::PropertyLength', 'MountHoleDistance').MountHoleDistance = mount_hole_dy
         obj.addProperty('App::PropertyLength', 'CubeDepth').CubeDepth = cube_depth+1e-3
         obj.addProperty('App::PropertyLength', 'OuterThickness').OuterThickness = outer_thickness
@@ -294,25 +296,28 @@ class skate_mount:
     def execute(self, obj):
         dx = bolt_8_32['head_dia']+obj.OuterThickness.Value*2
         dy = dx+obj.MountHoleDistance.Value
-        dz = obj.Baseplate.OpticsDz.Value-obj.CubeSize.Value/2+obj.CubeDepth.Value
-        cut_dx = obj.CubeSize.Value+obj.CubeTolerance.Value
+        raw_dz = obj.Baseplate.OpticsDz.Value-obj.CubeDz.Value/2+obj.CubeDepth.Value
+        dz = max(raw_dz, 8)
+        cut_dy = obj.CubeDx.Value+obj.CubeTolerance.Value
+        cut_dx = obj.CubeDy.Value+obj.CubeTolerance.Value
 
         part = _custom_box(dx=dx, dy=dy, dz=dz,
                            x=0, y=0, z=-obj.Baseplate.OpticsDz.Value, fillet=5)
-        part = part.cut(_custom_box(dx=cut_dx, dy=cut_dx, dz=obj.CubeDepth.Value+1e-3,
-                                    x=0, y=0, z=-obj.CubeSize.Value/2-1e-3))
+        part = part.cut(_custom_box(dx=cut_dx, dy=cut_dy, dz=obj.CubeDepth.Value+1e-3,
+                                    x=0, y=0, z=-obj.Baseplate.OpticsDz.Value+dz-obj.CubeDepth.Value-1e-3))
         for i in [-1, 1]:
             part = part.cut(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=dz,
                                              head_dia=bolt_8_32['head_dia'], head_dz=bolt_8_32['head_dz'],
                                              x=0, y=i*obj.MountHoleDistance.Value/2, z=-obj.Baseplate.OpticsDz.Value+dz))
-        part.translate(App.Vector(0, 0, obj.CubeSize.Value/2))
+            
+        part.translate(App.Vector(0, 0, obj.CubeDz.Value/2+(raw_dz-dz)))
         part = part.fuse(part)
         obj.Shape = part
 
-        part = Part.Shape()
+        part = _bounding_box(obj, 1, 6)
         for i in [-1, 1]:
             part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                                              x=0, y=i*obj.MountHoleDistance.Value/2, z=-obj.Baseplate.OpticsDz.Value+obj.CubeSize.Value/2))
+                                              x=0, y=i*obj.MountHoleDistance.Value/2, z=-obj.Baseplate.OpticsDz.Value+obj.CubeDz.Value/2))
         part.Placement = obj.Placement
         obj.DrillPart = part
 
@@ -2066,6 +2071,51 @@ class circular_lens:
     def execute(self, obj):
         part = _custom_cylinder(dia=obj.Diameter.Value, dz=obj.Thickness.Value,
                                 x=-obj.Thickness.Value/2, y=0, z=0, dir=(1, 0, 0))
+        obj.Shape = part
+
+
+class cylindrical_lens:
+    '''
+    Cylindrical Lens
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        focal_length (float) : The focal length of the lens
+        thickness (float) : The edge thickness of the lens
+        width (float) : The width of the lens
+        height (float) : The width of the lens
+        part_number (string) : The part number of the lens being used
+    '''
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True, focal_length=50, thickness=4, width=20, height=22, part_number='', mount_type=skate_mount, mount_args=dict()):
+        mount_args.setdefault("cube_dx", thickness)
+        mount_args.setdefault("cube_dy", width)
+        mount_args.setdefault("cube_dz", height)
+        mount_args.setdefault("mount_hole_dy", width+10)
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'FocalLength').FocalLength = focal_length
+        obj.addProperty('App::PropertyLength', 'Thickness').Thickness = thickness
+        obj.addProperty('App::PropertyLength', 'Width').Width = width
+        obj.addProperty('App::PropertyLength', 'Height').Height = height
+
+        if mount_type != None:
+            _add_linked_object(obj, "Mount", mount_type, pos_offset=(thickness/2, 0, -height/2), mount_hole_dy=width+10, cube_dy=width, cube_dz=height, cube_dx=thickness)
+
+        obj.ViewObject.ShapeColor = glass_color
+        obj.ViewObject.Transparency=50
+        self.part_numbers = [part_number]
+        self.transmission = True
+        self.focal_length = obj.FocalLength.Value
+        self.max_angle = 90
+        self.max_width = width
+
+    def execute(self, obj):
+        part = _custom_box(dx=obj.Thickness.Value, dy=obj.Width.Value, dz=obj.Height.Value,
+                           x=0, y=0, z=0,
+                           dir=(1, 0, 0))
         obj.Shape = part
 
 
