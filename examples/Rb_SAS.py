@@ -1,6 +1,6 @@
 # Jacob Myers, Ryland Yurow, Chris Caron - 10/20/23
 
-from PyOptic import layout, optomech
+from PyOpticL import layout, optomech
 from datetime import datetime
 
 name = "Rb SAS"

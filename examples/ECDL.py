@@ -1,4 +1,4 @@
-from PyOptic import layout, optomech
+from PyOpticL import layout, optomech
 from datetime import datetime
 import numpy as np
 

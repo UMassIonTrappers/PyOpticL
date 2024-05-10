@@ -8,7 +8,7 @@ import re
 import math
 import numpy as np
 from pathlib import Path
-from PyOptic import laser, layout, optomech
+from PyOpticL import laser, layout, optomech
 
 class Rerun_Macro():
     def GetResources(self):
@@ -212,7 +212,7 @@ class Get_Orientation():
                 break
         obj.Label = text[2:-5]
 
-        Mesh.export([obj], "%sMod/PyOptic/PyOptic/stl/%s.stl"%(App.getUserAppDataDir(), obj.Label))
+        Mesh.export([obj], "%sMod/PyOpticL/PyOpticL/stl/%s.stl"%(App.getUserAppDataDir(), obj.Label))
 
         view_rot = Gui.ActiveDocument.ActiveView.viewPosition().Rotation
         rot1 = view_rot.inverted()

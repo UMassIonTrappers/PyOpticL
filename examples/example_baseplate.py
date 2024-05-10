@@ -1,4 +1,4 @@
-from PyOptic import layout, optomech
+from PyOpticL import layout, optomech
 
 # baseplate constants
 base_dx = 4*layout.inch
