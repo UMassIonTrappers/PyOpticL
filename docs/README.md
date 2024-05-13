@@ -219,6 +219,17 @@
     Sub-Parts:  
         circular_mirror (mirror_args)  
     
+### fixed_mount_smr05
+  
+    Fixed mount, model SMR05  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+        bolt_length (float) : The length of the bolt used for mounting  
+  
+    Sub-Parts:  
+        circular_mirror (mirror_args)  
+    
 ### prism_mount_km05pm
   
     Mount, model KM05PM  
@@ -227,6 +238,19 @@
         drill (bool) : Whether baseplate mounting for this part should be drilled  
     
 ### grating_mount_on_km05pm
+  
+    Grating and Parallel Mirror Mounted on MK05PM  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+        littrow_angle (float) : The angle of the grating and parallel mirror  
+  
+    Sub_Parts:  
+        mount_mk05pm (mount_args)  
+        square_grating (grating_args)  
+        square_mirror (mirror_args)  
+    
+### grating_mount_on_km05pm_no_arm
   
     Grating and Parallel Mirror Mounted on MK05PM  
   
