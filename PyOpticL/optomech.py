@@ -646,6 +646,42 @@ class mirror_mount_km05:
         obj.DrillPart = part
 
 
+class fixed_mount_smr05:
+    '''
+    Fixed mount, model SMR05
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        bolt_length (float) : The length of the bolt used for mounting
+
+    Sub-Parts:
+        circular_mirror (mirror_args)
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True, thumbscrews=False, bolt_length=15):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'BoltLength').BoltLength = bolt_length
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = mount_color
+        self.part_numbers = ['SMR05']
+
+
+    def execute(self, obj):
+        mesh = _import_stl("SMR05-Step.stl", (90, 0, 90), (-3.81, 0, 0))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+        part = _custom_cylinder(dia=bolt_8_32['clear_dia'], dz=inch,
+                                          head_dia=bolt_8_32['head_dia'], head_dz=0.92*inch-obj.BoltLength.Value,
+                                          x=-3.81, y=0, z=-16-obj.BoltLength.Value, dir=(0,0,1))
+        part.Placement = obj.Placement
+        obj.DrillPart = part
+
+
 class prism_mount_km05pm:
     '''
     Mount, model KM05PM
@@ -654,11 +690,12 @@ class prism_mount_km05pm:
         drill (bool) : Whether baseplate mounting for this part should be drilled
     '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, drill=True, thumbscrews=False, bolt_length=15):
+    def __init__(self, obj, drill=True, thumbscrews=False, bolt_length=15, arm=True):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyBool', 'Arm').Arm = arm
         obj.addProperty('App::PropertyBool', 'ThumbScrews').ThumbScrews = thumbscrews
         obj.addProperty('App::PropertyLength', 'BoltLength').BoltLength = bolt_length
         obj.addProperty('Part::PropertyPartShape', 'DrillPart')
@@ -672,7 +709,10 @@ class prism_mount_km05pm:
 
     def execute(self, obj):
         #mesh = _import_stl("KM05PM-Step.stl", (90, 0, 90), (-12.39, -0.894, 1.514))
-        mesh = _import_stl("KM05PM-Step-No-Plate.stl", (90, -0, 90), (-6.425, -4.069, 6.086))
+        if obj.Arm:
+            mesh = _import_stl("KM05PM-Step-No-Plate.stl", (90, -0, 90), (-6.425, -4.069, 6.086))
+        else:
+            mesh = _import_stl("KM05PM-Step-NoArm.stl", (90, 0, 90), (-3.25, -8.26, 10.4))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -701,7 +741,7 @@ class grating_mount_on_km05pm:
         square_mirror (mirror_args)
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, littrow_angle=55, mount_args=dict(), grating_args=dict(), mirror_args=dict()):
+    def __init__(self, obj, drill=True, littrow_angle=55, mount_args=dict(), grating_args=dict(), mirror_args=dict()):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -720,7 +760,76 @@ class grating_mount_on_km05pm:
         grating_dx = -(6*sin(lit_angle)+12.7/2*cos(lit_angle))-extra_x
         mirror_dx = grating_dx-ref_x
 
-        _add_linked_object(obj, "Mount MK05PM", prism_mount_km05pm, pos_offset=(-3.175, 8, -10), rot_offset=(0, 0, 180), **mount_args)
+        _add_linked_object(obj, "Mount MK05PM", prism_mount_km05pm, pos_offset=(-3.175, 8, -10), rot_offset=(0, 0, 180), drill=drill, **mount_args)
+        _add_linked_object(obj, "Grating", square_grating, pos_offset=(grating_dx, 0, 0), rot_offset=(0, 0, 180-obj.LittrowAngle.Value), **grating_args)
+        _add_linked_object(obj, "Mirror", square_mirror, pos_offset=(mirror_dx, gap, 0), rot_offset=(0, 0, -obj.LittrowAngle.Value), **mirror_args)
+
+    def execute(self, obj):
+        extra_y = 2
+        gap = 10
+        lit_angle = radians(90-obj.LittrowAngle.Value)
+        beam_angle = radians(obj.LittrowAngle.Value)
+        ref_len = gap/sin(2*beam_angle)
+        ref_x = ref_len*cos(2*beam_angle)
+        dx = ref_x+12.7*cos(lit_angle)+(6+3.2)*sin(lit_angle)
+        extra_x = 20-dx
+        dy = gap+12.7*sin(lit_angle)+(6+3.2)*cos(lit_angle)
+        dz = inch/2
+        cut_x = 12.7*cos(lit_angle)
+
+        part = _custom_box(dx=dx+extra_x, dy=dy+extra_y, dz=dz,
+                           x=extra_x, y=0, z=-10, dir=(-1, 1, 1))
+        temp = _custom_box(dx=ref_len*cos(beam_angle)+6+3.2, dy=dy/sin(lit_angle)+10, dz=dz,
+                           x=-cut_x, y=-(dx-cut_x)*cos(lit_angle), z=-6, dir=(-1, 1, 1))
+        temp.rotate(App.Vector(-cut_x, 0, 0), App.Vector(0, 0, 1), -obj.LittrowAngle.Value)
+        part = part.cut(temp)
+        part = part.cut(_custom_box(dx=8, dy=16, dz=dz-4,
+                           x=extra_x, y=dy+extra_y, z=-6, dir=(-1, -1, 1)))
+        part.translate(App.Vector(-extra_x, -12.7/2*sin(lit_angle)-6*cos(lit_angle), 0))
+        part = part.fuse(part)
+        part = part.cut(_custom_cylinder(dia=bolt_4_40['clear_dia'], dz=4,
+                                         head_dia=bolt_4_40['head_dia'], head_dz=2,
+                                         x=-3.175, y=8, z=-6, dir=(0, 0, -1)))
+        part = part.cut(_custom_cylinder(dia=bolt_4_40['clear_dia'], dz=4,
+                                         head_dia=bolt_4_40['head_dia'], head_dz=2,
+                                         x=-3.175, y=8+2*3.175, z=-6, dir=(0, 0, -1)))
+        obj.Shape = part
+
+
+class grating_mount_on_km05pm_no_arm:
+    '''
+    Grating and Parallel Mirror Mounted on MK05PM
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        littrow_angle (float) : The angle of the grating and parallel mirror
+
+    Sub_Parts:
+        mount_mk05pm (mount_args)
+        square_grating (grating_args)
+        square_mirror (mirror_args)
+    '''
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True, littrow_angle=55, mount_args=dict(), grating_args=dict(), mirror_args=dict()):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyAngle', 'LittrowAngle').LittrowAngle = littrow_angle
+
+        obj.ViewObject.ShapeColor = adapter_color
+        self.dx = 12/tan(radians(2*obj.LittrowAngle))
+
+        gap = 10
+        lit_angle = radians(90-obj.LittrowAngle.Value)
+        beam_angle = radians(obj.LittrowAngle.Value)
+        ref_len = gap/sin(2*beam_angle)
+        ref_x = ref_len*cos(2*beam_angle)
+        dx = ref_x+12.7*cos(lit_angle)+(6+3.2)*sin(lit_angle)
+        extra_x = 20-dx
+        grating_dx = -(6*sin(lit_angle)+12.7/2*cos(lit_angle))-extra_x
+        mirror_dx = grating_dx-ref_x
+
+        _add_linked_object(obj, "Mount MK05PM", prism_mount_km05pm, pos_offset=(-3.175, 8, 4.064-inch/2), rot_offset=(0, 0, 180), arm=False, drill=drill, **mount_args)
         _add_linked_object(obj, "Grating", square_grating, pos_offset=(grating_dx, 0, 0), rot_offset=(0, 0, 180-obj.LittrowAngle.Value), **grating_args)
         _add_linked_object(obj, "Mirror", square_mirror, pos_offset=(mirror_dx, gap, 0), rot_offset=(0, 0, -obj.LittrowAngle.Value), **mirror_args)
 
@@ -883,6 +992,7 @@ class fiberport_mount_ks1t:
         _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(1.524+2, 0, 0))
 
 
+
 class km05_50mm_laser:
     '''
     Mirror mount, model KM05, adapted to use as laser mount
@@ -920,6 +1030,85 @@ class km05_50mm_laser:
         upper_plate = _add_linked_object(obj, "Upper Plate", km05_tec_upper_plate, pos_offset=(dx-4, 0, -0.08*inch), drill_obj=mount, **upper_plate_args)
         _add_linked_object(obj, "Lower Plate", km05_tec_lower_plate, pos_offset=(dx-4, 0, -0.08*inch-tec_thickness-upper_plate.Thickness.Value), **lower_plate_args)
 
+
+class laser_cavity_mount:
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True, tec_thickness=4, mount_args=dict(), grating_args=dict(), upper_plate_args=dict(), lower_plate_args=dict()):
+        mount_args.setdefault("bolt_length", 12.5)
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'TecThickness').TecThickness = tec_thickness
+        obj.ViewObject.ShapeColor = misc_color
+        
+        self.part_numbers = [] # TODO add part numbers
+        self.max_angle = 0
+        self.max_width = 1
+
+        dx = -5.334+2.032
+        _add_linked_object(obj, "Diode Adapter", diode_adapter_s05lm56, pos_offset=(0, 0, 0))
+        _add_linked_object(obj, "Lens Tube", lens_tube_sm05l05, pos_offset=(dx+1.524+3.812, 0, 0))
+        _add_linked_object(obj, "Lens Adapter", lens_adapter_s05tm09, pos_offset=(dx+1.524+5, 0, 0))
+        _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(dx+1.524+3.167+5, 0, 0))
+
+        width = 3*inch
+        mount = _add_linked_object(obj, "Mount", fixed_mount_smr05, pos_offset=(dx+5.334, 0, 16-inch/2), drill=False, **mount_args)
+        grating = _add_linked_object(obj, "Grating", grating_mount_on_km05pm_no_arm, pos_offset=(dx+width*3/4, 0, 16-inch/2), drill=False, **grating_args)
+        upper_plate = _add_linked_object(obj, "Upper Plate", laser_cavity_mount_upper_plate, pos_offset=(dx-8+width/2, 0, ), drill_objs=[mount, grating], **upper_plate_args)
+        _add_linked_object(obj, "Lower Plate", laser_cavity_mount_lower_plate, pos_offset=(dx-8+width/2, 0, -tec_thickness-upper_plate.Thickness.Value), **lower_plate_args)
+
+class laser_cavity_mount_upper_plate:
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, drill_objs, width=inch, length=3*inch, thickness=0.25*inch):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyLength', 'Width').Width = width
+        obj.addProperty('App::PropertyLength', 'Length').Length = length
+        obj.addProperty('App::PropertyLength', 'Thickness').Thickness = thickness
+        obj.addProperty('App::PropertyLinkListHidden', 'DrillObjects').DrillObjects = drill_objs
+
+        obj.ViewObject.ShapeColor = adapter_color
+
+    def execute(self, obj):
+        part = _custom_box(dx=obj.Length.Value, dy=obj.Width.Value, dz=obj.Thickness.Value,
+                           x=0, y=0, z=-inch/2, dir=(0, 0, -1))
+        for sub_obj in obj.DrillObjects:
+            part = _drill_part(part, obj, sub_obj)
+            obj.Shape = part
+
+class laser_cavity_mount_lower_plate:
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True, width=1.5*inch, length=3.5*inch, thickness=0.25*inch):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'Width').Width = width
+        obj.addProperty('App::PropertyLength', 'Length').Length = length
+        obj.addProperty('App::PropertyLength', 'Thickness').Thickness = thickness
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = adapter_color
+
+    def execute(self, obj):
+        part = _custom_box(dx=obj.Length.Value, dy=obj.Width.Value, dz=obj.Thickness.Value,
+                                     x=0, y=0, z=-inch/2, dir=(0, 0, -1))
+        for x, y in [(1,1), (1,-1), (-1,1), (-1,-1)]:
+            part = part.cut(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=obj.Thickness.Value,
+                                        x=(obj.Length.Value/2-4)*x, y=(obj.Width.Value/2-4)*y, z=-inch/2, dir=(0, 0, -1)))
+        obj.Shape = part
+
+        part = _bounding_box(obj, 3, 3)
+        for x, y in [(1,1), (1,-1), (-1,1), (-1,-1)]:
+            part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
+                                              x=(obj.Length.Value/2-4)*x, y=(obj.Width.Value/2-4)*y, z=0, dir=(0, 0, -1)))
+        part = part.fuse(_custom_box(dx=20, dy=5, dz=inch/2,
+                                     x=part.BoundBox.XMin, y=(part.BoundBox.YMax+part.BoundBox.YMin)/2, z=0,
+                                     dir=(-1, 0, -1)))
+        part.Placement = obj.Placement
+        obj.DrillPart = part
 
 class km05_tec_upper_plate:
     type = 'Part::FeaturePython'
@@ -1139,7 +1328,7 @@ class grating_mount_on_mk05pm:
         square_mirror (mirror_args)
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, littrow_angle=45, mount_args=dict(), grating_args=dict(), mirror_args=dict()):
+    def __init__(self, obj, drill=True, littrow_angle=45, mount_args=dict(), grating_args=dict(), mirror_args=dict()):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -1148,7 +1337,7 @@ class grating_mount_on_mk05pm:
         obj.ViewObject.ShapeColor = adapter_color
         self.dx = 12/tan(radians(2*obj.LittrowAngle))
 
-        _add_linked_object(obj, "Mount MK05PM", mount_mk05pm, pos_offset=(-12, -4, -4-12.7/2+2), **mount_args)
+        _add_linked_object(obj, "Mount MK05PM", mount_mk05pm, pos_offset=(-12, -4, -4-12.7/2+2), drill=drill, **mount_args)
         _add_linked_object(obj, "Grating", square_grating, pos_offset=(0, 0, 2), rot_offset=(0, 0, -obj.LittrowAngle.Value), **grating_args)
         _add_linked_object(obj, "Mirror", square_mirror, pos_offset=(self.dx, -12, 2), rot_offset=(0, 0, -obj.LittrowAngle.Value+180), **mirror_args)
 
