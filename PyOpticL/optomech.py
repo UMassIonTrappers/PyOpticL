@@ -1145,9 +1145,9 @@ class km05_tec_lower_plate:
     def execute(self, obj):
         part = _custom_box(dx=obj.Width.Value, dy=obj.Width.Value, dz=obj.Thickness.Value,
                                      x=0, y=0, z=-inch/2, dir=(0, 0, -1))
-        for x, y in [(1,1), (1,-1), (-1,1), (-1,-1)]:
-            part = part.cut(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=obj.Thickness.Value,
-                                        x=(obj.Width.Value/2-4)*x, y=(obj.Width.Value/2-4)*y, z=-inch/2, dir=(0, 0, -1)))
+        #for x, y in [(1,1), (1,-1), (-1,1), (-1,-1)]:
+        #    part = part.cut(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=obj.Thickness.Value,
+        #                                x=(obj.Width.Value/2-4)*x, y=(obj.Width.Value/2-4)*y, z=-inch/2, dir=(0, 0, -1)))
         obj.Shape = part
 
         part = _bounding_box(obj, 3, 3)
@@ -1469,8 +1469,8 @@ class prism_mount_km100pm:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
-        part = _bounding_box(obj, 3, 4, max_offset=(-18, -38, 0), z_tol=True)
-        part = part.fuse(_bounding_box(obj, 3, 4, min_offset=(17, 0, 0.63)))
+        #part = _bounding_box(obj, 3, 4, max_offset=(-18, -38, 0), z_tol=True)
+        part = _bounding_box(obj, 3, 4, min_offset=(17, 0, 0.63))
         part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
                                      x=-14.02, y=12.63, z=17.5))
         part.Placement = obj.Placement
@@ -1479,7 +1479,7 @@ class prism_mount_km100pm:
 
 class laser_mount_km100pm:
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, slot_length=5, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=4, stage_length=21):
+    def __init__(self, obj, drill=True, slot_length=5, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=5, stage_length=18):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -1491,12 +1491,12 @@ class laser_mount_km100pm:
         obj.addProperty('App::PropertyLength', 'ArmClearance').ArmClearance = arm_clearance
         obj.addProperty('App::PropertyLength', 'StageThickness').StageThickness = stage_thickness
         obj.addProperty('App::PropertyLength', 'StageLength').StageLength = stage_length
+        obj.addProperty('App::PropertyAngle', 'LittrowAngle').LittrowAngle = 44
         obj.addProperty('Part::PropertyPartShape', 'DrillPart')
 
         obj.ViewObject.ShapeColor = adapter_color
         obj.setEditorMode('Placement', 2)
 
-        _add_linked_object(obj, "Mount KM100PM", prism_mount_km100pm, pos_offset=(0, 0, 0))
 
         dx = -5.334+2.032
         _add_linked_object(obj, "Diode Adapter", diode_adapter_s05lm56, pos_offset=(0, 0, 0))
@@ -1504,10 +1504,29 @@ class laser_mount_km100pm:
         _add_linked_object(obj, "Lens Adapter", lens_adapter_s05tm09, pos_offset=(dx+1.524+5, 0, 0))
         _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(dx+1.524+3.167+5, 0, 0))
 
+        mount = _add_linked_object(obj, "Mount KM100PM", prism_mount_km100pm, pos_offset=(2.032+13.96-3.8, -25.91+16, -18.67))
+        _add_linked_object(obj, "Mount", fixed_mount_smr05, pos_offset=(2.032, 0, 0), rot_offset=(90, 0, 0), drill=False)
+
+        gap = 15
+        lit_angle = radians(90-obj.LittrowAngle.Value)
+        beam_angle = radians(obj.LittrowAngle.Value)
+        ref_len = gap/sin(2*beam_angle)
+        ref_x = ref_len*cos(2*beam_angle)
+        dx = ref_x+12.7*cos(lit_angle)+(6+3.2)*sin(lit_angle)
+        extra_x = 20-dx
+        grating_dx = -(6*sin(lit_angle)+12.7/2*cos(lit_angle))-extra_x
+        mirror_dx = grating_dx-ref_x
+
+        _add_linked_object(obj, "Grating", square_grating, pos_offset=(grating_dx+36, 0, 0), rot_offset=(0, 0, 180-obj.LittrowAngle.Value))
+        _add_linked_object(obj, "Mirror", square_mirror, pos_offset=(mirror_dx+36, gap, 0), rot_offset=(0, 0, -obj.LittrowAngle.Value))
+
+        upper_plate = _add_linked_object(obj, "Upper Plate", km05_tec_upper_plate, pos_offset=(2.032+13.96-3.8-13.96, 0, -inch/4-6.3), width=1.5*inch, drill_obj=mount)
+        _add_linked_object(obj, "Lower Plate", km05_tec_lower_plate, pos_offset=(2.032+13.96-3.8-13.96, 0, -inch/4-6.3-4-upper_plate.Thickness.Value))
+
     def execute(self, obj):
         dx = obj.ArmThickness.Value
-        dy = 47.5
-        dz = 16.92
+        dy = 40
+        dz = 16
         stage_dx = obj.StageLength.Value
         stage_dz = obj.StageThickness.Value
 
@@ -1515,6 +1534,8 @@ class laser_mount_km100pm:
                            x=0, y=0, z=obj.ArmClearance.Value)
         part = part.fuse(_custom_box(dx=stage_dx, dy=dy, dz=stage_dz,
                                      x=0, y=0, z=dz, dir=(1, 0, -1)))
+        part = part.fuse(_custom_box(dx=stage_dx, dy=dy, dz=stage_dz+2.72,
+                                     x=0, y=0, z=dz+2.72, dir=(1, 0, -1)))
         for ddy in [15.2, 38.1]:
             part = part.cut(_custom_box(dx=dx, dy=obj.SlotLength.Value+bolt_4_40['clear_dia'], dz=bolt_4_40['clear_dia'],
                                         x=dx/2, y=25.4-ddy, z=6.4,
@@ -1522,12 +1543,42 @@ class laser_mount_km100pm:
             part = part.cut(_custom_box(dx=dx/2, dy=obj.SlotLength.Value+bolt_4_40['head_dia'], dz=bolt_4_40['head_dia'],
                                         x=dx/2, y=25.4-ddy, z=6.4,
                                         fillet=bolt_4_40['head_dia']/2, dir=(-1, 0, 0)))
-        for ddy in [0, -11.42, -26.65, -38.07]:
-            part = part.cut(_custom_cylinder(dia=bolt_4_40['clear_dia'], dz=stage_dz, head_dia=bolt_4_40['head_dia'],
-                                        head_dz=obj.CounterDepth.Value, countersink=obj.Countersink,
-                                        x=11.25, y=18.9+ddy, z=dz-4, dir=(0,0,1)))
+            
+        extra_y = 0
+        gap = 15
+        lit_angle = radians(90-obj.LittrowAngle.Value)
+        beam_angle = radians(obj.LittrowAngle.Value)
+        ref_len = gap/sin(2*beam_angle)
+        ref_x = ref_len*cos(2*beam_angle)
+        dx2 = ref_x+12.7*cos(lit_angle)+(6+3.2)*sin(lit_angle)
+        extra_x = 20-dx2
+        dy2 = gap+12.7*sin(lit_angle)+(6+3.2)*cos(lit_angle)
+        dz2 = inch/2
+        cut_x = 12.7*cos(lit_angle)
+
+        part = part.fuse(_custom_box(dx=stage_dx, dy=dy, dz=stage_dz+2.72+12.7,
+                                     x=0, y=0, z=dz+2.72+12.7, dir=(1, 0, -1)))
+
         part.translate(App.Vector(dx/2, 25.4-15.2+obj.SlotLength.Value/2, -6.4))
+        part.translate(App.Vector(2.032+13.96-3.8, -25.91+16, -18.67))
         part = part.fuse(part)
+
+        temp = _custom_box(dx=ref_len*cos(beam_angle)+6+3.2+3, dy=dy/sin(lit_angle)+10, dz=dz,
+                           x=-cut_x+3, y=-(dx-cut_x)*cos(lit_angle)-15, z=-6, dir=(-1, 1, 1))
+        temp.rotate(App.Vector(-cut_x, 0, 0), App.Vector(0, 0, 1), -obj.LittrowAngle.Value)
+        temp.translate(App.Vector(-extra_x+36, -12.7/2*sin(lit_angle)-6*cos(lit_angle), 0))
+
+        part = part.cut(temp)
+
+        #part = _custom_box(dx=dx+extra_x, dy=dy+extra_y, dz=dz,
+        #                   x=extra_x, y=0, z=-10, dir=(-1, 1, 1))
+        #temp = _custom_box(dx=ref_len*cos(beam_angle)+6+3.2, dy=dy/sin(lit_angle)+10, dz=dz,
+        #                   x=-cut_x, y=-(dx-cut_x)*cos(lit_angle), z=-6, dir=(-1, 1, 1))
+        #temp.rotate(App.Vector(-cut_x, 0, 0), App.Vector(0, 0, 1), -obj.LittrowAngle.Value)
+        #part = part.cut(temp)
+        #part = part.cut(_custom_box(dx=8, dy=16, dz=dz-4,
+        #                   x=extra_x, y=dy+extra_y, z=-6, dir=(-1, -1, 1)))
+
         obj.Shape = part
 
         part = _bounding_box(obj, 3, 4, z_tol=True, min_offset=(0, 0, 0.668))
