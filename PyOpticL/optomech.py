@@ -1479,7 +1479,7 @@ class prism_mount_km100pm:
 
 class laser_mount_km100pm:
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, slot_length=5, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=5, stage_length=18):
+    def __init__(self, obj, drill=True, slot_length=5, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=5, stage_length=18, littrow_angle=44.58768):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -1491,7 +1491,7 @@ class laser_mount_km100pm:
         obj.addProperty('App::PropertyLength', 'ArmClearance').ArmClearance = arm_clearance
         obj.addProperty('App::PropertyLength', 'StageThickness').StageThickness = stage_thickness
         obj.addProperty('App::PropertyLength', 'StageLength').StageLength = stage_length
-        obj.addProperty('App::PropertyAngle', 'LittrowAngle').LittrowAngle = 44
+        obj.addProperty('App::PropertyAngle', 'LittrowAngle').LittrowAngle = littrow_angle
         obj.addProperty('Part::PropertyPartShape', 'DrillPart')
 
         obj.ViewObject.ShapeColor = adapter_color
@@ -1518,6 +1518,7 @@ class laser_mount_km100pm:
         mirror_dx = grating_dx-ref_x
 
         _add_linked_object(obj, "Grating", square_grating, pos_offset=(grating_dx+36, 0, 0), rot_offset=(0, 0, 180-obj.LittrowAngle.Value))
+        _add_linked_object(obj, "PZT", box, pos_offset=(grating_dx+36+4.2, -4.2, 0), rot_offset=(0, 0, 180-obj.LittrowAngle.Value))
         _add_linked_object(obj, "Mirror", square_mirror, pos_offset=(mirror_dx+36, gap, 0), rot_offset=(0, 0, -obj.LittrowAngle.Value))
 
         upper_plate = _add_linked_object(obj, "Upper Plate", km05_tec_upper_plate, pos_offset=(2.032+13.96-3.8-13.96, 0, -inch/4-6.3), width=1.5*inch, drill_obj=mount)
@@ -2234,7 +2235,25 @@ class Room_temp_chamber_Mechanical:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
+class box:
 
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True, thickness=3, width=10, height=10, part_number=''):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'Thickness').Thickness = thickness
+        obj.addProperty('App::PropertyLength', 'Width').Width = width
+        obj.addProperty('App::PropertyLength', 'Height').Height = height
+
+        obj.ViewObject.ShapeColor = misc_color
+        self.part_numbers = [part_number]
+
+    def execute(self, obj):
+        part = _custom_box(dx=obj.Thickness.Value, dy=obj.Width.Value, dz=obj.Height.Value,
+                           x=0, y=0, z=0, dir=(-1, 0, 0))
+        obj.Shape = part
 
 class square_grating:
     '''
