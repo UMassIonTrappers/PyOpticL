@@ -1479,7 +1479,7 @@ class prism_mount_km100pm:
 
 class laser_mount_km100pm:
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, slot_length=5, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=5, stage_length=18, littrow_angle=44.58768):
+    def __init__(self, obj, drill=True, slot_length=0, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=5, stage_length=18, littrow_angle=44.58768):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -1517,32 +1517,30 @@ class laser_mount_km100pm:
         grating_dx = -(6*sin(lit_angle)+12.7/2*cos(lit_angle))-extra_x
         mirror_dx = grating_dx-ref_x
 
-        _add_linked_object(obj, "Grating", square_grating, pos_offset=(grating_dx+36, 0, 0), rot_offset=(0, 0, 180-obj.LittrowAngle.Value))
-        _add_linked_object(obj, "PZT", box, pos_offset=(grating_dx+36+4.2, -4.2, 0), rot_offset=(0, 0, 180-obj.LittrowAngle.Value))
-        _add_linked_object(obj, "Mirror", square_mirror, pos_offset=(mirror_dx+36, gap, 0), rot_offset=(0, 0, -obj.LittrowAngle.Value))
+        _add_linked_object(obj, "Grating", square_grating, pos_offset=(grating_dx+36, 0, -3.1), rot_offset=(0, 0, 180-obj.LittrowAngle.Value))
+        _add_linked_object(obj, "PZT", box, pos_offset=(grating_dx+36+4.2, -4.2, -3.1), rot_offset=(0, 0, 180-obj.LittrowAngle.Value))
+        _add_linked_object(obj, "Mirror", square_mirror, pos_offset=(mirror_dx+36, gap, -3.1), rot_offset=(0, 0, -obj.LittrowAngle.Value))
 
         upper_plate = _add_linked_object(obj, "Upper Plate", km05_tec_upper_plate, pos_offset=(2.032+13.96-3.8-13.96, 0, -inch/4-6.3), width=1.5*inch, drill_obj=mount)
         _add_linked_object(obj, "Lower Plate", km05_tec_lower_plate, pos_offset=(2.032+13.96-3.8-13.96, 0, -inch/4-6.3-4-upper_plate.Thickness.Value))
 
     def execute(self, obj):
         dx = obj.ArmThickness.Value
-        dy = 40
+        dy = 38
         dz = 16
         stage_dx = obj.StageLength.Value
         stage_dz = obj.StageThickness.Value
 
         part = _custom_box(dx=dx, dy=dy, dz=dz-obj.ArmClearance.Value,
-                           x=0, y=0, z=obj.ArmClearance.Value)
-        part = part.fuse(_custom_box(dx=stage_dx, dy=dy, dz=stage_dz,
-                                     x=0, y=0, z=dz, dir=(1, 0, -1)))
-        part = part.fuse(_custom_box(dx=stage_dx, dy=dy, dz=stage_dz+2.72,
-                                     x=0, y=0, z=dz+2.72, dir=(1, 0, -1)))
+                           x=0, y=4, z=obj.ArmClearance.Value)
+        part = part.fuse(_custom_box(dx=stage_dx, dy=dy, dz=dz-obj.ArmClearance.Value,
+                                     x=0, y=4, z=dz, dir=(1, 0, -1)))
         for ddy in [15.2, 38.1]:
-            part = part.cut(_custom_box(dx=dx, dy=obj.SlotLength.Value+bolt_4_40['clear_dia'], dz=bolt_4_40['clear_dia'],
-                                        x=dx/2, y=25.4-ddy, z=6.4,
+            part = part.cut(_custom_box(dx=stage_dx+dx, dy=obj.SlotLength.Value+bolt_4_40['clear_dia'], dz=bolt_4_40['clear_dia'],
+                                        x=stage_dx, y=25.4-ddy+2.5, z=6.4,
                                         fillet=bolt_4_40['clear_dia']/2, dir=(-1, 0, 0)))
-            part = part.cut(_custom_box(dx=dx/2, dy=obj.SlotLength.Value+bolt_4_40['head_dia'], dz=bolt_4_40['head_dia'],
-                                        x=dx/2, y=25.4-ddy, z=6.4,
+            part = part.cut(_custom_box(dx=stage_dx+dx-5-4, dy=obj.SlotLength.Value+bolt_4_40['head_dia'], dz=bolt_4_40['head_dia'],
+                                        x=stage_dx, y=25.4-ddy+2.5, z=6.4,
                                         fillet=bolt_4_40['head_dia']/2, dir=(-1, 0, 0)))
             
         extra_y = 0
@@ -1557,15 +1555,15 @@ class laser_mount_km100pm:
         dz2 = inch/2
         cut_x = 12.7*cos(lit_angle)
 
-        part = part.fuse(_custom_box(dx=stage_dx, dy=dy, dz=stage_dz+2.72+12.7,
-                                     x=0, y=0, z=dz+2.72+12.7, dir=(1, 0, -1)))
+        part = part.fuse(_custom_box(dx=stage_dx, dy=dy, dz=stage_dz+2.72+12.7-2.72,
+                                     x=0, y=4, z=dz+2.72+12.7-2.72, dir=(1, 0, -1)))
 
         part.translate(App.Vector(dx/2, 25.4-15.2+obj.SlotLength.Value/2, -6.4))
         part.translate(App.Vector(2.032+13.96-3.8, -25.91+16, -18.67))
         part = part.fuse(part)
 
         temp = _custom_box(dx=ref_len*cos(beam_angle)+6+3.2+3, dy=dy/sin(lit_angle)+10, dz=dz,
-                           x=-cut_x+3, y=-(dx-cut_x)*cos(lit_angle)-15, z=-6, dir=(-1, 1, 1))
+                           x=-cut_x+3, y=-(dx-cut_x)*cos(lit_angle)-15+4, z=-6-3.07, dir=(-1, 1, 1))
         temp.rotate(App.Vector(-cut_x, 0, 0), App.Vector(0, 0, 1), -obj.LittrowAngle.Value)
         temp.translate(App.Vector(-extra_x+36, -12.7/2*sin(lit_angle)-6*cos(lit_angle), 0))
 
