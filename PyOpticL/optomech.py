@@ -640,8 +640,8 @@ class mirror_mount_km05:
         part = part.fuse(_bounding_box(obj, 2, 3, max_offset=(0, -20, 0)))
         part = _fillet_all(part, 3)
         part = part.fuse(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=inch,
-                                          head_dia=bolt_8_32['head_dia'], head_dz=0.92*inch-obj.BoltLength.Value,
-                                          x=-7.29, y=0, z=-inch*3/2, dir=(0,0,1)))
+                                          head_dia=bolt_8_32['head_dia'], head_dz=0.92*inch-obj.BoltLength.Value+drill_depth,
+                                          x=-7.29, y=0, z=-inch*3/2-drill_depth, dir=(0,0,1)))
         part.Placement = obj.Placement
         obj.DrillPart = part
 
@@ -1476,6 +1476,67 @@ class prism_mount_km100pm:
         part.Placement = obj.Placement
         obj.DrillPart = part
 
+class laser_box:
+
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True, thickness=130, width=100, height=110, part_number=''):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'Thickness').Thickness = thickness
+        obj.addProperty('App::PropertyLength', 'Width').Width = width
+        obj.addProperty('App::PropertyLength', 'Height').Height = height
+
+        obj.ViewObject.ShapeColor = misc_color
+        self.part_numbers = [part_number]
+
+    def execute(self, obj):
+        x_off = -2
+        y_off = 4
+        thickness = inch/4
+        part = _custom_box(dx=obj.Thickness.Value, dy=obj.Width.Value, dz=obj.Height.Value,
+                           x=x_off, y=y_off, z=-3/2*inch-3.95-inch, dir=(0, 0, 1))
+        part = part.cut(_custom_box(dx=obj.Thickness.Value-inch/4*2, dy=obj.Width.Value-inch/4*2, dz=obj.Height.Value-inch/4,
+                           x=x_off, y=y_off, z=-3/2*inch-3.95-inch, dir=(0, 0, 1)))
+        part = part.cut(_custom_box(dx=obj.Thickness.Value/2, dy=10, dz=30,
+                           x=x_off-obj.Thickness.Value/2, y=y_off, z=-3/2*inch-3.95-inch, dir=(0, 0, 1)))
+        part = part.cut(_custom_cylinder(dia=15, dz=obj.Thickness.Value/2,
+                           x=x_off+obj.Thickness.Value/2, y=y_off+12, z=0, dir=(-1, 0, 0)))
+        
+        part = part.cut(_custom_cylinder(dia=5, dz=obj.Thickness.Value/2,
+                           x=x_off-obj.Thickness.Value/2, y=y_off+19.5, z=19.1, dir=(1, 0, 0)))
+        part = part.cut(_custom_cylinder(dia=5, dz=obj.Thickness.Value/2,
+                           x=x_off-obj.Thickness.Value/2, y=y_off-18.2, z=-18.6, dir=(1, 0, 0)))
+        obj.Shape = part
+
+class laser_base:
+
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True, thickness=130-inch/2-1, width=100-inch/2-1, height=inch/2, part_number=''):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'Thickness').Thickness = thickness
+        obj.addProperty('App::PropertyLength', 'Width').Width = width
+        obj.addProperty('App::PropertyLength', 'Height').Height = height
+
+        obj.ViewObject.ShapeColor = misc_color
+        self.part_numbers = [part_number]
+
+    def execute(self, obj):
+        x_off = -2
+        y_off = 4
+        part = _custom_box(dx=obj.Thickness.Value, dy=obj.Width.Value, dz=obj.Height.Value,
+                           x=x_off, y=y_off, z=-3/2*inch-3.95-inch/2, dir=(0, 0, -1))
+        
+        for x, y in [(-1,-1), (-1,1), (1,-1), (1,1)]:
+            part = part.cut(_custom_cylinder(dia=bolt_14_20['clear_dia'], dz=drill_depth,
+                                    head_dia=bolt_14_20["washer_dia"], head_dz=8,
+                                    x=1.5*inch*x+x_off, y=inch*y+y_off, z=-3/2*inch-3.95-inch/2))
+        
+        obj.Shape = part
 
 class laser_mount_km100pm:
     type = 'Part::FeaturePython'
@@ -1506,8 +1567,10 @@ class laser_mount_km100pm:
 
         mount = _add_linked_object(obj, "Mount KM100PM", prism_mount_km100pm, pos_offset=(2.032+13.96-3.8, -25.91+16, -18.67))
         _add_linked_object(obj, "Mount", fixed_mount_smr05, pos_offset=(2.032, 0, 0), rot_offset=(90, 0, 0), drill=False)
+        _add_linked_object(obj, "Box", laser_box, pos_offset=(0, 0, 0), rot_offset=(0, 0, 0))
+        _add_linked_object(obj, "Base", laser_base, pos_offset=(0, 0, 0), rot_offset=(0, 0, 0))
 
-        gap = 15
+        gap = 16
         lit_angle = radians(90-obj.LittrowAngle.Value)
         beam_angle = radians(obj.LittrowAngle.Value)
         ref_len = gap/sin(2*beam_angle)
@@ -1522,7 +1585,7 @@ class laser_mount_km100pm:
         _add_linked_object(obj, "Mirror", square_mirror, pos_offset=(mirror_dx+36, gap, -3.1), rot_offset=(0, 0, -obj.LittrowAngle.Value))
 
         upper_plate = _add_linked_object(obj, "Upper Plate", km05_tec_upper_plate, pos_offset=(2.032+13.96-3.8-13.96, 0, -inch/4-6.3), width=1.5*inch, drill_obj=mount)
-        _add_linked_object(obj, "Lower Plate", km05_tec_lower_plate, pos_offset=(2.032+13.96-3.8-13.96, 0, -inch/4-6.3-4-upper_plate.Thickness.Value))
+        _add_linked_object(obj, "Lower Plate", km05_tec_lower_plate, pos_offset=(2.032+13.96-3.8-13.96, 0, -inch/4-6.3-4-upper_plate.Thickness.Value), width=2.5*inch)
 
     def execute(self, obj):
         dx = obj.ArmThickness.Value
@@ -1544,7 +1607,7 @@ class laser_mount_km100pm:
                                         fillet=bolt_4_40['head_dia']/2, dir=(-1, 0, 0)))
             
         extra_y = 0
-        gap = 15
+        gap = 16
         lit_angle = radians(90-obj.LittrowAngle.Value)
         beam_angle = radians(obj.LittrowAngle.Value)
         ref_len = gap/sin(2*beam_angle)
@@ -1555,15 +1618,15 @@ class laser_mount_km100pm:
         dz2 = inch/2
         cut_x = 12.7*cos(lit_angle)
 
-        part = part.fuse(_custom_box(dx=stage_dx, dy=dy, dz=stage_dz+2.72+12.7-2.72,
-                                     x=0, y=4, z=dz+2.72+12.7-2.72, dir=(1, 0, -1)))
+        part = part.fuse(_custom_box(dx=stage_dx+dx/2, dy=dy, dz=stage_dz+2.72+12.7-2.72,
+                                     x=-dx/2, y=4, z=dz+2.72+12.7-2.72, dir=(1, 0, -1)))
 
         part.translate(App.Vector(dx/2, 25.4-15.2+obj.SlotLength.Value/2, -6.4))
         part.translate(App.Vector(2.032+13.96-3.8, -25.91+16, -18.67))
         part = part.fuse(part)
 
-        temp = _custom_box(dx=ref_len*cos(beam_angle)+6+3.2+3, dy=dy/sin(lit_angle)+10, dz=dz,
-                           x=-cut_x+3, y=-(dx-cut_x)*cos(lit_angle)-15+4, z=-6-3.07, dir=(-1, 1, 1))
+        temp = _custom_box(dx=ref_len*cos(beam_angle)+6+3.2+3, dy=dy/sin(lit_angle)+15, dz=dz,
+                           x=-cut_x+3, y=-(dx-cut_x)*cos(lit_angle)-15, z=-6-3.07, dir=(-1, 1, 1))
         temp.rotate(App.Vector(-cut_x, 0, 0), App.Vector(0, 0, 1), -obj.LittrowAngle.Value)
         temp.translate(App.Vector(-extra_x+36, -12.7/2*sin(lit_angle)-6*cos(lit_angle), 0))
 
