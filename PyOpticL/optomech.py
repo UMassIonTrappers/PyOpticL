@@ -61,7 +61,7 @@ def _bounding_box(obj, tol, fillet, x_tol=True, y_tol=True, z_tol=False, min_off
         temp = obj
         while hasattr(temp, "ParentObject") and hasattr(temp.ParentObject, "RelativePlacement"):
             temp = temp.ParentObject
-            obj_body.Placement *= temp.RelativePlacement
+            #obj_body.Placement *= temp.RelativePlacement
     global_bound = obj_body.BoundBox
     obj_body.Placement = App.Placement()
     bound = obj_body.BoundBox
@@ -1965,7 +1965,7 @@ class periscope:
         mirror_type x2 (mirror_args)
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, lower_dz=inch, upper_dz=3*inch, invert=False, mirror_args=dict()):
+    def __init__(self, obj, drill=True, lower_dz=1.5*inch, upper_dz=3*inch, invert=True, mirror_args=dict()):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
