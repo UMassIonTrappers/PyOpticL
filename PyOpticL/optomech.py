@@ -1479,7 +1479,7 @@ class prism_mount_km100pm:
 class laser_box:
 
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, thickness=130, width=100, height=110, part_number=''):
+    def __init__(self, obj, drill=True, thickness=130, width=100, height=110, mat_thickness=inch/2, part_number=''):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -1487,6 +1487,7 @@ class laser_box:
         obj.addProperty('App::PropertyLength', 'Thickness').Thickness = thickness
         obj.addProperty('App::PropertyLength', 'Width').Width = width
         obj.addProperty('App::PropertyLength', 'Height').Height = height
+        obj.addProperty('App::PropertyLength', 'MatThickness').MatThickness = mat_thickness
 
         obj.ViewObject.ShapeColor = misc_color
         self.part_numbers = [part_number]
@@ -1496,9 +1497,9 @@ class laser_box:
         y_off = 4
         thickness = inch/4
         part = _custom_box(dx=obj.Thickness.Value, dy=obj.Width.Value, dz=obj.Height.Value,
-                           x=x_off, y=y_off, z=-3/2*inch-3.95-inch, dir=(0, 0, 1))
+                           x=x_off, y=y_off, z=-3/2*inch-3.95-inch/2-obj.MatThickness.Value, dir=(0, 0, 1))
         part = part.cut(_custom_box(dx=obj.Thickness.Value-inch/4*2, dy=obj.Width.Value-inch/4*2, dz=obj.Height.Value-inch/4,
-                           x=x_off, y=y_off, z=-3/2*inch-3.95-inch, dir=(0, 0, 1)))
+                           x=x_off, y=y_off, z=-3/2*inch-3.95-inch/2-obj.MatThickness.Value, dir=(0, 0, 1)))
         part = part.cut(_custom_box(dx=obj.Thickness.Value/2, dy=10, dz=30,
                            x=x_off-obj.Thickness.Value/2, y=y_off, z=-3/2*inch-3.95-inch, dir=(0, 0, 1)))
         part = part.cut(_custom_cylinder(dia=15, dz=obj.Thickness.Value/2,
@@ -1513,7 +1514,7 @@ class laser_box:
 class laser_base:
 
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, thickness=130-inch/2-1, width=100-inch/2-1, height=inch/2, part_number=''):
+    def __init__(self, obj, drill=True, thickness=130-inch/2-1, width=100-inch/2-1, height=inch/2, mat_thickness=inch/2, part_number=''):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -1521,6 +1522,7 @@ class laser_base:
         obj.addProperty('App::PropertyLength', 'Thickness').Thickness = thickness
         obj.addProperty('App::PropertyLength', 'Width').Width = width
         obj.addProperty('App::PropertyLength', 'Height').Height = height
+        obj.addProperty('App::PropertyLength', 'MatThickness').MatThickness = mat_thickness
 
         obj.ViewObject.ShapeColor = misc_color
         self.part_numbers = [part_number]
@@ -1529,7 +1531,7 @@ class laser_base:
         x_off = -2
         y_off = 4
         part = _custom_box(dx=obj.Thickness.Value, dy=obj.Width.Value, dz=obj.Height.Value,
-                           x=x_off, y=y_off, z=-3/2*inch-3.95-inch/2, dir=(0, 0, -1))
+                           x=x_off, y=y_off, z=-3/2*inch-3.95-obj.MatThickness.Value, dir=(0, 0, -1))
         
         for x, y in [(-1,-1), (-1,1), (1,-1), (1,1)]:
             part = part.cut(_custom_cylinder(dia=bolt_14_20['clear_dia'], dz=drill_depth,
@@ -1540,7 +1542,7 @@ class laser_base:
 
 class laser_mount_km100pm:
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, slot_length=0, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=5, stage_length=18, littrow_angle=44.58768):
+    def __init__(self, obj, drill=True, slot_length=0, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=5, stage_length=18, mat_thickness=inch/2, littrow_angle=44.58768):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -1552,6 +1554,7 @@ class laser_mount_km100pm:
         obj.addProperty('App::PropertyLength', 'ArmClearance').ArmClearance = arm_clearance
         obj.addProperty('App::PropertyLength', 'StageThickness').StageThickness = stage_thickness
         obj.addProperty('App::PropertyLength', 'StageLength').StageLength = stage_length
+        obj.addProperty('App::PropertyLength', 'MatThickness').MatThickness = mat_thickness
         obj.addProperty('App::PropertyAngle', 'LittrowAngle').LittrowAngle = littrow_angle
         obj.addProperty('Part::PropertyPartShape', 'DrillPart')
 
@@ -1567,8 +1570,8 @@ class laser_mount_km100pm:
 
         mount = _add_linked_object(obj, "Mount KM100PM", prism_mount_km100pm, pos_offset=(2.032+13.96-3.8, -25.91+16, -18.67))
         _add_linked_object(obj, "Mount", fixed_mount_smr05, pos_offset=(2.032, 0, 0), rot_offset=(90, 0, 0), drill=False)
-        _add_linked_object(obj, "Box", laser_box, pos_offset=(0, 0, 0), rot_offset=(0, 0, 0))
-        _add_linked_object(obj, "Base", laser_base, pos_offset=(0, 0, 0), rot_offset=(0, 0, 0))
+        _add_linked_object(obj, "Box", laser_box, pos_offset=(0, 0, 0), rot_offset=(0, 0, 0), mat_thickness=mat_thickness)
+        _add_linked_object(obj, "Base", laser_base, pos_offset=(0, 0, 0), rot_offset=(0, 0, 0), mat_thickness=mat_thickness)
 
         gap = 16
         lit_angle = radians(90-obj.LittrowAngle.Value)
