@@ -66,6 +66,7 @@ class baseplate:
 
         obj.Placement = App.Placement(App.Vector(x*inch, y*inch, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
         self.active_baseplate = obj.Name
+        obj.ViewObject.Transparency=0
         obj.addProperty("App::PropertyLinkListHidden","ChildObjects")
         for x, y in mount_holes:
             mount = self.place_element("Mount Hole (%d, %d)"%(x, y), optomech.baseplate_mount, (x+0.5)*inch, (y+0.5)*inch, 0)
@@ -180,7 +181,7 @@ class baseplate:
                     child.Proxy.transmission = True
         return obj
 
-    def add_beam_path(self, x, y, angle, name="Beam Path", color=(1.0, 0.0, 0.0)):
+    def add_beam_path(self, x, y, angle, name="Beam Path", color=(1.0, 0.0, 0.0), **args):
         '''
         Add a new dynamic beam path
 
@@ -193,7 +194,7 @@ class baseplate:
         obj = App.ActiveDocument.addObject('Part::FeaturePython', name)
         obj.Label = name
         laser.ViewProvider(obj.ViewObject)
-        laser.beam_path(obj)
+        laser.beam_path(obj, **args)
 
         obj.addProperty("App::PropertyLinkHidden","Baseplate").Baseplate = getattr(App.ActiveDocument, self.active_baseplate) 
         obj.addProperty("App::PropertyPlacement","BasePlacement")
@@ -237,11 +238,14 @@ class baseplate:
                                             App.Vector(obj.Gap.Value+obj.xOffset.Value, i-obj.Gap.Value+obj.yOffset.Value, -obj.dz.Value-obj.OpticsDz.Value)))
         if obj.Drill:
             for i in App.ActiveDocument.Objects:
-                if hasattr(i, 'DrillPart'):
+                if hasattr(i, 'DrillPart') and not isinstance(i.Proxy, laser.beam_path):
                     if i.Drill and i.Baseplate == obj:
                         drill = i.DrillPart.copy()
                         drill.Placement = obj.Placement.inverse()*drill.Placement
                         part = part.cut(drill)
+                if hasattr(i, 'DrillPart') and isinstance(i.Proxy, laser.beam_path):
+                    if i.Drill and i.Baseplate == obj:
+                        part = part.cut(i.DrillPart)
         if obj.CutLabel != "":
             face = Draft.make_shapestring(obj.CutLabel, str(Path(__file__).parent.resolve()) + "/font/OpenSans-Regular.ttf", 5)
             if obj.InvertLabel:
