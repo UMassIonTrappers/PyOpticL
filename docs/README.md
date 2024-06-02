@@ -166,6 +166,18 @@
     Sub-Parts:  
         surface_adapter (adapter_args)  
     
+### rotation_stage_rsp1
+  
+    Rotation stage, model RSP1  
+  
+    Args:  
+        invert (bool) : Whether the mount should be offset 90 degrees from the component  
+        mount_hole_dy (float) : The spacing between the two mount holes of it's adapter  
+        wave_plate_part_num (string) : The Thorlabs part number of the wave plate being used  
+  
+    Sub-Parts:  
+        surface_adapter (adapter_args)  
+    
 ### mirror_mount_k05s2
   
     Mirror mount, model K05S2  
@@ -195,6 +207,17 @@
     Sub-Parts:  
         circular_splitter (mirror_args)  
     
+### splitter_mount_b1g
+  
+    Splitter mount, model B1G  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+        splitter (bool) : Whether to add a splitter plate component to the mount  
+  
+    Sub-Parts:  
+        circular_splitter (mirror_args)  
+    
 ### mirror_mount_c05g
   
     Mirror mount, model C05G  
@@ -209,6 +232,19 @@
 ### mirror_mount_km05
   
     Mirror mount, model KM05  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+        mirror (bool) : Whether to add a mirror component to the mount  
+        thumbscrews (bool): Whether or not to add two HKTS 5-64 adjusters  
+        bolt_length (float) : The length of the bolt used for mounting  
+  
+    Sub-Parts:  
+        circular_mirror (mirror_args)  
+    
+### mirror_mount_km100
+  
+    Mirror mount, model KM100  
   
     Args:  
         drill (bool) : Whether baseplate mounting for this part should be drilled  
@@ -455,7 +491,21 @@
     Args:  
         drill (bool) : Whether baseplate mounting for this part should be drilled  
     
-### rb_cell_new
+### rb_cell_cube
+  
+    Rubidium Cell Holder  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+    
+### rb_cell_holder
+  
+    Rubidium Cell Holder  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+    
+### rb_cell_holder_old
   
     Rubidium Cell Holder  
   
@@ -529,6 +579,10 @@
 ### diode_adapter_s05lm56
   
     Diode Mount Adapter, model S05LM56  
+    
+### photodiode_fds010
+  
+    Photodiode, model FDS010  
     
 ### Room_temp_chamber
   
