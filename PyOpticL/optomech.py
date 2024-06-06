@@ -68,8 +68,12 @@ def _bounding_box(obj, tol, fillet, x_tol=True, y_tol=True, z_tol=False, min_off
 
     x_min, x_max = bound.XMin-tol*x_tol+min_offset[0], bound.XMax+tol*x_tol+max_offset[0]
     y_min, y_max = bound.YMin-tol*y_tol+min_offset[1], bound.YMax+tol*y_tol+max_offset[1]
-    z_min = min(global_bound.ZMin-tol*z_tol+min_offset[2], -obj.Baseplate.OpticsDz.Value+plate_off)-global_bound.ZMin+bound.ZMin
-    z_max = max(global_bound.ZMax+tol*z_tol+max_offset[2], -obj.Baseplate.OpticsDz.Value+plate_off)-global_bound.ZMax+bound.ZMax
+    if obj.Baseplate != None:
+        z_min = min(global_bound.ZMin-tol*z_tol+min_offset[2], -obj.Baseplate.OpticsDz.Value+plate_off)-global_bound.ZMin+bound.ZMin
+        z_max = max(global_bound.ZMax+tol*z_tol+max_offset[2], -obj.Baseplate.OpticsDz.Value+plate_off)-global_bound.ZMax+bound.ZMax
+    else:
+        z_min = min(global_bound.ZMin-tol*z_tol+min_offset[2], -inch/2+plate_off)-global_bound.ZMin+bound.ZMin
+        z_max = max(global_bound.ZMax+tol*z_tol+max_offset[2], -inch/2+plate_off)-global_bound.ZMax+bound.ZMax
     bound_part = _custom_box(dx=x_max-x_min, dy=y_max-y_min, dz=z_max-z_min,
                     x=x_min, y=y_min, z=z_min, dir=(1, 1, 1),
                     fillet=fillet, fillet_dir=(0, 0, 1))
@@ -2638,7 +2642,7 @@ class cube_splitter:
             self.reflection_angle = 135
         self.transmission = True
         self.max_angle = 90
-        self.max_width = sqrt(200)
+        self.max_width = sqrt(2*cube_size**2)
 
         if mount_type != None:
             _add_linked_object(obj, "Mount", mount_type, pos_offset=(0, 0, -cube_size/2), **mount_args, cube_dx=cube_size, cube_dy=cube_size, cube_dz=cube_size)
@@ -2646,10 +2650,14 @@ class cube_splitter:
     def execute(self, obj):
         part = _custom_box(dx=obj.CubeSize.Value, dy=obj.CubeSize.Value, dz=obj.CubeSize.Value,
                            x=0, y=0, z=0, dir=(0, 0, 0))
-        temp = _custom_box(dx=sqrt(2*obj.CubeSize.Value**2)-0.25, dy=0.1, dz=obj.CubeSize.Value-0.25,
+        temp = _custom_box(dx=sqrt(2*obj.CubeSize.Value**2)-1, dy=1, dz=obj.CubeSize.Value-1,
                            x=0, y=0, z=0, dir=(0, 0, 0))
         temp.rotate(App.Vector(0, 0, 0), App.Vector(0, 0, 1), -self.reflection_angle)
         part = part.cut(temp)
+        temp = _custom_box(dx=sqrt(2*obj.CubeSize.Value**2)-1.25, dy=0.5, dz=obj.CubeSize.Value-1.25,
+                           x=0, y=0, z=0, dir=(0, 0, 0))
+        temp.rotate(App.Vector(0, 0, 0), App.Vector(0, 0, 1), -self.reflection_angle)
+        part = part.fuse(temp)
         obj.Shape = part
         
         part = _bounding_box(obj, 0, 0)
@@ -2821,8 +2829,9 @@ class circular_mirror:
         obj.Shape = part
 
         part = _bounding_box(obj, 0, 0)
-        part = part.fuse(_custom_cylinder(dia=12, dz=max(0, -obj.Baseplate.OpticsDz.Value),
-                                          x=-obj.Thickness.Value/2, y=0, z=0, dir=(0, 0, 1)))
+        if obj.Baseplate != None:
+            part = part.fuse(_custom_cylinder(dia=12, dz=max(0, -obj.Baseplate.OpticsDz.Value),
+                                              x=-obj.Thickness.Value/2, y=0, z=0, dir=(0, 0, 1)))
         part.Placement = obj.Placement
         obj.DrillPart = part
 
@@ -2861,8 +2870,9 @@ class square_mirror:
         obj.Shape = part
 
         part = _bounding_box(obj, 0, 0)
-        part = part.fuse(_custom_cylinder(dia=12, dz=max(0, -obj.Baseplate.OpticsDz.Value),
-                                          x=-obj.Thickness.Value/2, y=0, z=0, dir=(0, 0, 1)))
+        if obj.Baseplate != None:
+            part = part.fuse(_custom_cylinder(dia=12, dz=max(0, -obj.Baseplate.OpticsDz.Value),
+                                            x=-obj.Thickness.Value/2, y=0, z=0, dir=(0, 0, 1)))
         part.Placement = obj.Placement
         obj.DrillPart = part
 
