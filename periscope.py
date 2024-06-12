@@ -5,7 +5,7 @@ import numpy as np
 # Append the general path to the system path list  
 
 # import sys
-# sys.path.append("/Users/K_1/Desktop/SummerResearch2024/PyOpticL")
+# sys.path.append("/Users/K_1/Desktop/SummerResearch2024/PyOpticL/PyOpticL")
 # print(sys.path)
 from grid_optics import *
 
@@ -47,3 +47,5 @@ if __name__ == "__main__":
     # layout.place_element_on_table("grid beam splitter_2_", optomech.grid_beamsplitter_lying_down,  x = 62, y = 40, z = 10.96, angle = 45)
 
     # layout.place_element_on_table("grid waveplate_3_", optomech.grid_waveplate_lying_down,  x = 55, y = 30, z = 10.96, angle = 45)
+
+    print("test")
