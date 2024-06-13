@@ -14,9 +14,9 @@ name = "Periscope"
 date_time = datetime.now().strftime("%m/%d/%Y")
 label = name + " " + date_time
 
-basedx = 16*layout.inch
-basedy = 16*layout.inch
+basedx = 10*layout.inch
 basedy = layout.inch
+basedy = 10*layout.inch
 
 # mountholes = np.array()
 
