@@ -495,11 +495,11 @@ class table_grid:
         temp = Part.makeCompound(holes)
         self.holes.Shape = temp
         obj.Shape = part
-    
+
 # this is zhenyu editing
-class table_grid:
+class table_no_grid:
     '''
-    Add an optical table mounting grid
+    Add an optical table without mounting grid
 
     Args:
         dx, yy (float): The dimentions of the table grid (in inches)
@@ -519,13 +519,13 @@ class table_grid:
 
     def execute(self, obj):
         part = Part.makeBox(self.dx*inch, self.dy*inch, inch/4, App.Vector(0, 0, self.z_off-inch/4))
-        holes = []
-        for x in range(self.dx):
-            for y in range(self.dy):
-                for z in [self.z_off+1e-2, self.z_off-inch/4-1e-2]:
-                    holes.append(Part.Circle(App.Vector((x+0.5)*inch, (y+0.5)*inch, z), App.Vector(0, 0, 1), inch/10))
-        temp = Part.makeCompound(holes)
-        self.holes.Shape = temp
+        # holes = []
+        # for x in range(self.dx):
+        #     for y in range(self.dy):
+        #         for z in [self.z_off+1e-2, self.z_off-inch/4-1e-2]:
+        #             holes.append(Part.Circle(App.Vector((x+0.5)*inch, (y+0.5)*inch, z), App.Vector(0, 0, 1), inch/10))
+        # temp = Part.makeCompound(holes)
+        # self.holes.Shape = temp
         obj.Shape = part
             
 # Update function for dynamic elements

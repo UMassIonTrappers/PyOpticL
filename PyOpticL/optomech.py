@@ -831,6 +831,37 @@ class mirror_mount_km05:
         obj.DrillPart = part
 
 # this is zhenyu editing:
+class grid_optics:
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+        Number_of_light_source = 13
+        base_dx = Number_of_light_source* 1.5 * layout.inch + 2 + 1 * layout.inch
+        base_dy = Number_of_light_source* 1.5 * layout.inch + 2 + 1 * layout.inch
+        
+        base_dz = 1 * layout.inch
+        input_x = 1.0 * layout.inch
+        input_y = 0.3 * layout.inch
+        for i in 1 + np.arange(Number_of_light_source):
+            _add_linked_object(obj, 'Laser_diode_LT230P-B_' + str(i), km05_50mm_laser_no_pad,
+                                    pos_offset=(input_x, input_y + i * 1.5 * layout.inch, 0), rot_offset = (0,0,layout.turn['left-up']))
+            _add_linked_object(obj, 'Laser_diode_LT230P-B_' + str(i), km05_50mm_laser_no_pad,
+                                    pos_offset=(input_y + i * 1.5 * layout.inch,input_x, 0), rot_offset = (0,0,layout.turn['left-up']))
+            
+            _add_linked_object(obj, 'mirror_' + str(i), circular_mirror, 
+                                         pos_offset=(base_dx -5, input_y + i * 1.5 * layout.inch, 0) , rot_offset=(0,0,180,),  #layout.turn['up-right'],
+                                        mount_type=mirror_mount_k05s1, mount_args=dict(thumbscrews=True))
+            
+            _add_linked_object(obj, 'mirror__' + str(i), circular_mirror, pos_offset=(input_y + i * 1.5 * layout.inch, base_dx - 5, 0), rot_offset=(0,0,-90),  #layout.turn['up-right'],
+                                        mount_type=mirror_mount_k05s1, mount_args=dict(thumbscrews=True))
+    def execute(self, obj):
+        mesh = _import_stl("grid_optics_fast_baseplate.stl", rotate=(0, 0, 0), translate=(0, 0, 0))
+        
+        mesh.Placement = obj.Mesh.Placement
+
+        obj.Mesh = mesh
+# this is zhenyu editing:
 class grid_beamsplitter_lying_down:
     '''
     mirror grid, fixed as 6 * 6
@@ -1353,6 +1384,43 @@ class km05_50mm_laser:
         upper_plate = _add_linked_object(obj, "Upper Plate", km05_tec_upper_plate, pos_offset=(dx-4, 0, -0.08*inch), drill_obj=mount, **upper_plate_args)
         _add_linked_object(obj, "Lower Plate", km05_tec_lower_plate, pos_offset=(dx-4, 0, -0.08*inch-tec_thickness-upper_plate.Thickness.Value), **lower_plate_args)
 
+# this is zhenyu editing
+class km05_50mm_laser_no_pad:
+    '''
+    Mirror mount, model KM05, adapted to use as laser mount
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        tec_thickness (float) : The thickness of the TEC used
+
+    Sub-Parts:
+        mirror_mount_km05 (mount_args)
+        km05_tec_upper_plate (upper_plate_args)
+        km05_tec_lower_plate (lower_plate_args)
+    '''
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True, tec_thickness=4, mount_args=dict(), upper_plate_args=dict(), lower_plate_args=dict()):
+        mount_args.setdefault("bolt_length", 2)
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'TecThickness').TecThickness = tec_thickness
+        obj.ViewObject.ShapeColor = misc_color
+        
+        self.part_numbers = [] # TODO add part numbers
+        self.max_angle = 0
+        self.max_width = 1
+
+        dx = -5.334+2.032
+        _add_linked_object(obj, "Diode Adapter", diode_adapter_s05lm56, pos_offset=(0, 0, 0))
+        _add_linked_object(obj, "Lens Tube", lens_tube_sm05l05, pos_offset=(dx+1.524+3.812, 0, 0))
+        _add_linked_object(obj, "Lens Adapter", lens_adapter_s05tm09, pos_offset=(dx+1.524+5, 0, 0))
+        _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(dx+1.524+3.167+5, 0, 0))
+
+        mount = _add_linked_object(obj, "Mount", mirror_mount_km05, pos_offset=(dx, 0, 0), drill=True, **mount_args)
+        # upper_plate = _add_linked_object(obj, "Upper Plate", km05_tec_upper_plate, pos_offset=(dx-4, 0, -0.08*inch), drill_obj=mount, **upper_plate_args)
+        # _add_linked_object(obj, "Lower Plate", km05_tec_lower_plate, pos_offset=(dx-4, 0, -0.08*inch-tec_thickness-upper_plate.Thickness.Value), **lower_plate_args)
 
 class laser_cavity_mount:
     type = 'Part::FeaturePython'
@@ -2399,6 +2467,112 @@ class periscope:
             part = _drill_part(part, obj, i)
         obj.Shape = part
 
+class periscope_for_redstone:
+    '''
+    Custom periscope mount
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        lower_dz (float) : Distance from the bottom of the mount to the center of the lower mirror
+        upper_dz (float) : Distance from the bottom of the mount to the center of the upper mirror
+        mirror_type (obj class) : Object class of mirrors to be used
+        table_mount (bool) : Whether the periscope is meant to be mounted directly to the optical table
+
+    Sub-Parts:
+        mirror_type x2 (mirror_args)
+    '''
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True, lower_dz=1.5*inch, upper_dz=3*inch, invert=True, mirror_args=dict()):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'LowerHeight').LowerHeight = lower_dz
+        obj.addProperty('App::PropertyLength', 'UpperHeight').UpperHeight = upper_dz
+        obj.addProperty('App::PropertyBool', 'Invert').Invert = invert
+
+        # obj.ViewObject.ShapeColor = adapter_color
+        if obj.Baseplate == None:
+            self.z_off = -layout.inch*3/2
+        else:
+            self.z_off = 0
+
+        # _add_linked_object(obj, "Lower Mirror", circular_mirror, rot_offset=((-1)**invert*90, -45, 0), pos_offset=(0, 0, obj.LowerHeight.Value+self.z_off), **mirror_args)
+        # _add_linked_object(obj, "Upper Mirror", circular_mirror, rot_offset=((-1)**invert*90, 135, 0), pos_offset=(0, 0, obj.UpperHeight.Value+self.z_off), **mirror_args)
+        # for i in range(6):
+        #     for j in range(6):
+        #         _add_linked_object(obj, 'Upper Mirror' + str(i) + str(j), circular_mirror, rot_offset=(135,90,45), pos_offset=(-110 +  i * 35, 100 -  j * 24, 20 +  j * 24 ), **mirror_args)
+
+        #         _add_linked_object(obj, 'Lower Mirror' + str(i) + str(j), circular_mirror, rot_offset=(0, 0, 45), pos_offset=(- 110 + j * 35, 250 - j * 24, 20 +  i * 27), **mirror_args)
+                
+
+    def execute(self, obj):
+        width = 0.8*inch 
+        # mesh = _import_stl("baseplate_for_periscope_redstone.stl", rotate=(0, 0, 0), translate=(0, 0, 3))
+        
+        # mesh.Placement = obj.Mesh.Placement
+
+        # obj.Mesh = mesh
+        part = _custom_box(dx=210, dy=  1.1 * width, dz=obj.UpperHeight.Value + 78,
+                           x=-20, y= - 20, z=0)
+        
+        for i in range(6): # lower
+            part = part.fuse(_custom_box(dx=1.7 * width  , dy=150 + 18 - (i + 1 )*25 , dz=obj.UpperHeight.Value + 95   ,
+                           x= 100 - (i + 1 )*35, y=200 + width + (i + 1 )*12.5, z=0))
+
+        for i in range(6): # upper
+            part = part.fuse(_custom_box(dx=210  , dy=1.2 * width, dz=obj.UpperHeight.Value + 78 - (i + 1 )*23 ,
+                           x= -20, y= -20 +  1.1 * width * (i+1), z=-3))
+        part.translate(App.Vector(0, (-1)**obj.Invert*(width/2+inch/2), 0))
+        part.rotate(App.Vector(0, 0, 0), App.Vector(1, 0, 0), 90)
+        part = part.fuse(part)
+        # # for i in obj.ChildObjects:
+        # #     part = _drill_part(part, obj, i)
+        obj.Shape = part
+        part.Placement = obj.Placement
+        obj.DrillPart = part
+
+# class periscope_for_redstone_:
+#     '''
+#     Custom periscope mount
+
+#     Args:
+#         drill (bool) : Whether baseplate mounting for this part should be drilled
+#         lower_dz (float) : Distance from the bottom of the mount to the center of the lower mirror
+#         upper_dz (float) : Distance from the bottom of the mount to the center of the upper mirror
+#         mirror_type (obj class) : Object class of mirrors to be used
+#         table_mount (bool) : Whether the periscope is meant to be mounted directly to the optical table
+
+#     Sub-Parts:
+#         mirror_type x2 (mirror_args)
+#     '''
+#     type = 'Part::FeaturePython'
+#     def __init__(self, obj, drill=True, lower_dz=1.5*inch, upper_dz=3*inch, invert=True, mirror_args=dict()):
+#         obj.Proxy = self
+#         ViewProvider(obj.ViewObject)
+
+#         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+#         obj.addProperty('App::PropertyLength', 'LowerHeight').LowerHeight = lower_dz
+#         obj.addProperty('App::PropertyLength', 'UpperHeight').UpperHeight = upper_dz
+#         obj.addProperty('App::PropertyBool', 'Invert').Invert = invert
+
+#         obj.ViewObject.ShapeColor = adapter_color
+#         if obj.Baseplate == None:
+#             self.z_off = -layout.inch*3/2
+#         else:
+#             self.z_off = 0
+
+#         # _add_linked_object(obj, "Lower Mirror", circular_mirror, rot_offset=((-1)**invert*90, -45, 0), pos_offset=(0, 0, obj.LowerHeight.Value+self.z_off), **mirror_args)
+#         # _add_linked_object(obj, "Upper Mirror", circular_mirror, rot_offset=((-1)**invert*90, 135, 0), pos_offset=(0, 0, obj.UpperHeight.Value+self.z_off), **mirror_args)
+#         # for i in range(6):
+#         #     for j in range(6):
+#         #         _add_linked_object(obj, 'Upper Mirror' + str(i) + str(j), circular_mirror, rot_offset=(135,90,45), pos_offset=(-110 +  i * 35, 100 -  j * 24, 20 +  j * 24 ), **mirror_args)
+
+#         #         _add_linked_object(obj, 'Lower Mirror' + str(i) + str(j), circular_mirror, rot_offset=(0, 0, 45), pos_offset=(- 110 + j * 35, 250 - j * 24, 20 +  i * 27), **mirror_args)
+#     def execute(self, obj):
+#         mesh = _import_stl("periscope_for_redstone.stl", (0, 0, 0), (20, 20, 20))
+#         mesh.Placement = obj.Mesh.Placement
+#         obj.Mesh = mesh
 
 class thumbscrew_hkts_5_64:
     '''
