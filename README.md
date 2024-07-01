@@ -47,17 +47,19 @@ There are a few important things to ensure before you can use PyOpticL:
 
 1. **Install FreeCAD, Python, and Git**
 
-2. **Clone the GitHub repo into your FreeCAD user folder**  
-	To do this on windows, run the following in a terminal:  
-	```cd "C:/Users/<username goes here>/AppData/Roaming/FreeCAD/Mod"```   
-	```git clone "https://github.com/UMassIonTrappers/PyOpticL.git"```  
-	```git config --global --add safe.directory "C:/Users/<username goes here>/AppData/Roaming/FreeCAD/Mod/PyOpticL"```
+2. **Add PyOpticL as an custom addon repository in FreeCAD**  
+	Under _Edit>Preferences>Addons>Custom Repositories,_ enter the following information:
+    _Repository URL:_ https://github.com/UMassIonTrappers/PyOpticL.git
+    _Branch:_ main
+
+4. **Install the PyOpticL library**
+    In the Addon Manager _(Tools>Addon Manager),_ search for PyOpticL and click install.
 		
-4. **Check everything is setup correctly**  
+5. **Check everything is setup correctly**  
    You should now be able to re-launch FreeCAD and see the "PyOpticL" workbench in the dropdown  
 <img width="250" alt="Screenshot 2023-10-27 225345" src="https://github.com/UMassIonTrappers/PyOpticL/assets/103533593/6eeec81a-e7de-4bde-8509-0c30bda0b9b7">
 
-5. **Check out the [wiki](https://github.com/UMassIonTrappers/PyOpticL/wiki) or the [docs](https://github.com/UMassIonTrappers/PyOpticL/tree/main/docs) for guides, examples, and library documentation**
+6. **Check out the [wiki](https://github.com/UMassIonTrappers/PyOpticL/wiki) or the [docs](https://github.com/UMassIonTrappers/PyOpticL/tree/main/docs) for guides, examples, and library documentation**
 
 ## Examples
 ### Modular Doublepass Baseplate
