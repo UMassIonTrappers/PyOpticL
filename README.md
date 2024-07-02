@@ -48,8 +48,8 @@ There are a few important things to ensure before you can use PyOpticL:
 1. **Install FreeCAD, Python, and Git**
 
 2. **Add PyOpticL as an custom addon repository in FreeCAD**  
-	Under _Edit>Preferences>Addons>Custom Repositories,_ enter the following information:\
-    _Repository URL:_ https://github.com/UMassIonTrappers/PyOpticL.git\
+	Under _Edit>Preferences>Addons>Custom Repositories,_ enter the following information: \
+    _Repository URL:_ https://github.com/UMassIonTrappers/PyOpticL.git \
     _Branch:_ main
 
 3. **Install the PyOpticL library**
