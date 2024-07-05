@@ -2,5 +2,6 @@
 *.pyc
 PyOpticL/stl/Room Temp Chamber Mechanical.stl
 PyOpticL/stl/Room_temp_chamber_step.stl
+macros/
 PyOpticL/redstone/*.stl
 PyOpticL/redstone/*.step
