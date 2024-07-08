@@ -10,7 +10,11 @@ inch = 25.4
 cardinal = {"right":0,
             "left":180,
             "up":90,
-            "down":-90}
+            "down":-90,
+            "ne":45,
+            "se": -45,
+            "sw": -135,
+            "nw": 135}
 turn = {"up-right":-45,
         "right-up":135,
         "up-left":-135,
@@ -192,7 +196,7 @@ class baseplate:
                     child.Proxy.transmission = True
         return obj
 
-    def place_element_relative(self, name, obj_class, rel_obj, angle, x_off=0, y_off=0, optional=False, **args):
+    def place_element_relative(self, name, obj_class, rel_obj, angle, x_off=0, y_off=0, z_off=0, optional=False, grid_comp=False, **args):
         '''
         Place an element relative to another object
 
@@ -203,6 +207,7 @@ class baseplate:
             angle (float): The rotation of the object about the z axis
             x_off, y_off (float): The offset between the parent object and this object
             optional (bool): If this is true the object will also transmit beams
+            grid_comp (bool): If this object is part of a grid setup
             args (any): Additional args to be passed to the object (see object class docs)
         '''
         obj = App.ActiveDocument.addObject(obj_class.type, name)
@@ -214,9 +219,14 @@ class baseplate:
         obj.addProperty("App::PropertyPlacement","BasePlacement")
         obj.addProperty("App::PropertyAngle","Angle").Angle = angle
         obj.addProperty("App::PropertyPlacement","RelativePlacement").RelativePlacement
-        obj.RelativePlacement.Base = App.Vector(x_off, y_off, 0)
+        obj.RelativePlacement.Base = App.Vector(x_off, y_off, z_off)
+        # rel_pos = rel_obj.BasePlacement.Base
+        # print(rel_pos)
+        # print(rel_obj.BasePlacement)
+        # print(rel_obj)
+        # obj.BasePlacement = App.Placement(App.Vector(x_off, y_off, z_off) + rel_pos, App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
         obj.addProperty("App::PropertyLinkHidden","RelativeParent").RelativeParent = rel_obj
-        if not hasattr(obj, "RelativeObjects"):
+        if not hasattr(rel_obj, "RelativeObjects"):
             rel_obj.addProperty("App::PropertyLinkListChild","RelativeObjects")
         rel_obj.RelativeObjects += [obj]
 
@@ -225,6 +235,10 @@ class baseplate:
             if hasattr(obj, "ChildObjects"):
                 for child in obj.ChildObjects:
                     child.Proxy.transmission = True
+
+        if grid_comp:
+            obj.addProperty("App::PropertyBool", "GridComponent")
+            obj.GridComponent = True
         return obj
 
     def add_beam_path(self, x, y, angle, name="Beam Path", color=(1.0, 0.0, 0.0)):
