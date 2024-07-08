@@ -786,7 +786,50 @@ class KMS_MH_12:
         part.Placement = obj.Placement
         # part.Placement = obj.Placement
         obj.DrillPart = part
+# this is zhenyu and k editing
+class EOM_:
+    '''
+    Isomet 1205C AOM on KM100PM Mount
 
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        diffraction_angle (float) : The diffraction angle (in degrees) of the AOM
+        forward_direction (integer) : The direction of diffraction on forward pass (1=right, -1=left)
+        backward_direction (integer) : The direction of diffraction on backward pass (1=right, -1=left)
+
+    Sub-Parts:
+        prism_mount_km100pm (mount_args)
+        mount_for_km100pm (adapter_args)
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True, diffraction_angle=degrees(0.026), forward_direction=1, backward_direction=1, mount_args=dict(), adapter_args=dict()):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyAngle', 'DiffractionAngle').DiffractionAngle = diffraction_angle
+        obj.addProperty('App::PropertyInteger', 'ForwardDirection').ForwardDirection = forward_direction
+        obj.addProperty('App::PropertyInteger', 'BackwardDirection').BackwardDirection = backward_direction
+
+        obj.ViewObject.ShapeColor = misc_color
+        self.part_numbers = ['ISOMET_1205C']
+        self.diffraction_angle = diffraction_angle
+        self.diffraction_dir = (forward_direction, backward_direction)
+        self.transmission = True
+        self.max_angle = 10
+        self.max_width = 5
+
+        # TODO fix these parts to remove arbitrary translations
+        _add_linked_object(obj, "Mount KM100PM", prism_mount_km100pm,
+                           pos_offset=(-15.25, -20.15, -17.50), **mount_args)
+        _add_linked_object(obj, "Adapter Bracket", mount_for_km100pm,
+                           pos_offset=(-15.25, -20.15, -17.50), **adapter_args)
+
+    def execute(self, obj):
+        mesh = _import_stl("isomet_1205c.stl", (0, 0, 90), (0, 0, 0))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+        
 class mirror_mount_km05:
     '''
     Mirror mount, model KM05
