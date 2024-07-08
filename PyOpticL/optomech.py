@@ -565,6 +565,8 @@ class rotation_stage_rsp05:
         obj.ViewObject.ShapeColor = misc_color
         self.part_numbers = ['RSP05']
         self.transmission = True
+        self.max_angle = 90
+        self.max_width = inch/2
 
         _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(1.397, 0, -13.97), rot_offset=(0, 0, 90*obj.Invert), **adapter_args)
 
