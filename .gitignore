@@ -3,6 +3,8 @@
 PyOpticL/stl/Room Temp Chamber Mechanical.stl
 PyOpticL/stl/Room_temp_chamber_step.stl
 macros/
-PyOpticL/redstone/*.stl
-PyOpticL/redstone/*.step
-PyOpticL/redstone/*.FCStd
+redstone/*.stl
+redstone/*.step
+redstone/*.FCStd
+examples/*
+baseplate_design_K/*
