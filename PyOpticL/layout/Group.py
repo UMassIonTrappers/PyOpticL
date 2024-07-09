@@ -12,33 +12,42 @@ class Group:
     name (string)
     x, y, z (float): Coordinates of the group's origin
     angle_x, angle_y, angle_z (float): Rotation of the group's coordinate system
-    parent: Parent object to make placements relative to
 
     """
 
-    def __init__(
-        self, name, x=0, y=0, z=0, angle_z=0, angle_y=0, angle_x=0, parent=None
-    ) -> None:
-        self.obj = App.ActiveDocument.addObject("App::FeaturePython", name, self)
+    def __init__(self, name, x=0, y=0, z=0, angle_z=0, angle_y=0, angle_x=0) -> None:
+        self.obj = App.ActiveDocument.addObject("Part::FeaturePython", name)
+        self.obj.Proxy = self
+        ViewProvider(self.obj.ViewObject)
 
         self.obj.Placement = App.Placement(
             App.Vector(x, y, z),
             App.Rotation(angle_z, angle_y, angle_x),
             App.Vector(0, 0, 0),
         )
-        self.obj.addProperty("App::PropertyLinkList", "Children")
-
-        if parent != None:
-            self.obj.addProperty("App::PropertyLink", "Parent").Parent = parent
 
     def place(self, obj):
-        obj.obj.Parent = self.obj
-        self.obj.Children += [obj]
+        """Place an object in the group's relative coord system"""
 
-    def execute(self, obj):
-        if hasattr(obj, "Children"):
+        if not hasattr(self.obj, "Children"):
+            self.obj.addProperty("App::PropertyLinkList", "Children")
+
+        self.obj.Children += [obj.obj]
+        obj.obj.addProperty("App::PropertyLink", "RelativeTo").RelativeTo = self.obj
+
+        return obj
+
+    # def execute(self, obj):
+
+    def calculate(self, depth=0):
+        """Recursively apply relative transforms to all children"""
+
+        if depth > 250:  # recursion depth check
+            return
+        if hasattr(self.obj, "Children"):
             for i in self.obj.Children:
-                i.obj.Placement = self.obj.Placement * i.obj.Placement
+                i.Placement = self.obj.Placement * i.Placement
+                i.Proxy.calculate(depth + 1)
 
 
 class ViewProvider:
@@ -53,27 +62,30 @@ class ViewProvider:
     def getDefaultDisplayMode(self):
         return "Shaded"
 
-    def updateData(self, base_obj, prop):
-        for obj in App.ActiveDocument.Objects:
-            if hasattr(obj, "BasePlacement") and obj.Baseplate != None:
-                obj.Placement.Base = (
-                    obj.BasePlacement.Base + obj.Baseplate.Placement.Base
-                )
-                obj.Placement = App.Placement(
-                    obj.Placement.Base,
-                    obj.Baseplate.Placement.Rotation,
-                    -obj.BasePlacement.Base,
-                )
-                obj.Placement.Rotation = obj.Placement.Rotation.multiply(
-                    obj.BasePlacement.Rotation
-                )
+    # def updateData(self, base_obj, prop):
+    #     if prop in "Children":
+    #
+    #
+    #     for obj in App.ActiveDocument.Objects:
+    #         if hasattr(obj, "BasePlacement") and obj.Baseplate != None:
+    #             obj.Placement.Base = (
+    #                 obj.BasePlacement.Base + obj.Baseplate.Placement.Base
+    #             )
+    #             obj.Placement = App.Placement(
+    #                 obj.Placement.Base,
+    #                 obj.Baseplate.Placement.Rotation,
+    #                 -obj.BasePlacement.Base,
+    #             )
+    #             obj.Placement.Rotation = obj.Placement.Rotation.multiply(
+    #                 obj.BasePlacement.Rotation
+    #             )
 
     # def onDelete(self, feature, subelements):
-        # # delete all elements when baseplate is deleted
-        # for i in App.ActiveDocument.Objects:
-        #     if i != feature.Object:
-        #         App.ActiveDocument.removeObject(i.Name)
-        # return True
+    # # delete all elements when baseplate is deleted
+    # for i in App.ActiveDocument.Objects:
+    #     if i != feature.Object:
+    #         App.ActiveDocument.removeObject(i.Name)
+    # return True
 
     def claimChildren(self):
         if hasattr(self.Object, "ChildObjects"):
