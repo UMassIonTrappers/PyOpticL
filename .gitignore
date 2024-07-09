@@ -8,7 +8,10 @@ redstone/*.step
 redstone/*.FCStd
 examples/*
 baseplate_design_K/*
+<<<<<<< HEAD
 redstone/stl_workflow/*.stl
 redstone/stl_workflow/*.step
 redstone/stl_workflow/*.FCStd
 redstone/stl_workflow/*.FCBak
+=======
+>>>>>>> a5e7d0a4b19ed6bd2f73ba909cb31093632d4734
