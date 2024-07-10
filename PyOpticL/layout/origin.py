@@ -4,9 +4,9 @@ import Mesh
 import Part
 
 
-class Group:
+class Origin:
     """
-    A class for grouping objects on a common coordinate system
+    A class defining a coordinate system
 
     Args:
     name (string)
@@ -27,7 +27,7 @@ class Group:
         )
 
     def place(self, obj):
-        """Place an object in the group's relative coord system"""
+        """Place an object in the relative coordinate system"""
 
         if not hasattr(self.obj, "Children"):
             self.obj.addProperty("App::PropertyLinkList", "Children")
@@ -37,7 +37,8 @@ class Group:
 
         return obj
 
-    # def execute(self, obj):
+    def execute(self, obj):
+        return
 
     def calculate(self, depth=0):
         """Recursively apply relative transforms to all children"""

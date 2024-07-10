@@ -3,8 +3,10 @@ import FreeCAD as App
 import Mesh
 import Part
 
+from .origin import Origin
 
-class Baseplate:
+
+class Baseplate(Origin):
     """
     A class for defining new baseplates
 
@@ -44,6 +46,8 @@ class Baseplate:
         y_splits=[],
         invert_label=False,
     ):
+        super().__init__(name, x, y, z, angle_z, angle_y, angle_x)
+
         self.obj = App.ActiveDocument.addObject("Part::FeaturePython", name, self)
         ViewProvider(self.obj.ViewObject)
 
@@ -63,37 +67,9 @@ class Baseplate:
             invert_label
         )
 
-        self.obj.Placement = App.Placement(
-            App.Vector(x, y, z),
-            App.Rotation(angle_z, angle_y, angle_x),
-            App.Vector(0, 0, 0),
-        )
-
-    def place(self, obj):
-        """Place an object in the group's relative coord system"""
-
-        if not hasattr(self.obj, "Children"):
-            self.obj.addProperty("App::PropertyLinkList", "Children")
-
-        self.obj.Children += [obj.obj]
-        obj.obj.addProperty("App::PropertyLink", "RelativeTo").RelativeTo = self.obj
-
-        return obj
-
     def execute(self, obj):
         part = Part.makeBox(obj.lx.Value, obj.ly.Value, obj.lz.Value)
-
         obj.Shape = part.removeSplitter()
-
-    def calculate(self, depth=0):
-        """Recursively apply relative transforms to all children"""
-
-        if depth > 250:  # recursion depth check
-            return
-        if hasattr(self.obj, "Children"):
-            for i in self.obj.Children:
-                i.Placement = self.obj.Placement * i.Placement
-                i.Proxy.calculate(depth + 1)
 
 
 class ViewProvider:
