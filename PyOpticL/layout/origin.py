@@ -40,15 +40,17 @@ class Origin:
     def execute(self, obj):
         return
 
-    def calculate(self, depth=0):
+    def calculate(self, parent_placement=App.Placement(App.Matrix()), depth=0):
         """Recursively apply relative transforms to all children"""
 
         if depth > 250:  # recursion depth check
             return
+
+        self.obj.Placement = parent_placement * self.obj.Placement
+
         if hasattr(self.obj, "Children"):
             for i in self.obj.Children:
-                i.Placement = self.obj.Placement * i.Placement
-                i.Proxy.calculate(depth + 1)
+                i.Proxy.calculate(self.obj.Placement, depth + 1)
 
 
 class ViewProvider:

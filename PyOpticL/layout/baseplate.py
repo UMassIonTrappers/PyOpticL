@@ -48,9 +48,6 @@ class Baseplate(Origin):
     ):
         super().__init__(name, x, y, z, angle_z, angle_y, angle_x)
 
-        self.obj = App.ActiveDocument.addObject("Part::FeaturePython", name, self)
-        ViewProvider(self.obj.ViewObject)
-
         self.obj.addProperty("App::PropertyLength", "lx").lx = lx
         self.obj.addProperty("App::PropertyLength", "ly").ly = ly
         self.obj.addProperty("App::PropertyLength", "lz").lz = lz
