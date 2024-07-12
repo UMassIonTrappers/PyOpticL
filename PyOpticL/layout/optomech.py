@@ -23,16 +23,17 @@ class CylindricalOptic:
 
     type = "Part::FeaturePython"
 
-    def __init__(self, name, position, normal, radius, thickness):
+    def __init__(self, name, position, normal, radius, thickness, type="none", max_angle=45):
         self.obj = App.ActiveDocument.addObject("Part::FeaturePython", name)
 
         self.obj.Proxy = self
         ViewProvider(self.obj.ViewObject)
 
         self.obj.addProperty("App::PropertyVector", "Position").Position = position
-        self.obj.addProperty("App::PropertyVector", "Vec2").Vec2 = normal
-        self.obj.addProperty("App::PropertyLength", "Radius").Radius = radius
-        self.obj.addProperty("App::PropertyLength", "Thickness").Thickness = thickness
+        self.obj.addProperty("App::PropertyVector", "Vec2").Vec2 = normal.normalize()
+        self.obj.addProperty("App::PropertyFloat", "Radius").Radius = radius
+        self.obj.addProperty("App::PropertyFloat", "Thickness").Thickness = thickness
+        self.obj.addProperty("App::PropertyString", "OpticalType").OpticalType = type
 
         # self.reflection_angle = 0
         # self.max_angle = 90
@@ -49,6 +50,9 @@ class CylindricalOptic:
             return
         
         print(parent_placement)
+
+        self.Position = parent_placement * self.Position
+        self.Vec2 = parent_placement.Rotation * self.Vec2
 
         self.obj.Placement = parent_placement * (
             App.Placement(
