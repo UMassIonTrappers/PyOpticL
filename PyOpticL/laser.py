@@ -31,6 +31,29 @@ class Beam:
         ]
         self.obj.addProperty("App::PropertyFloatList", "Distances")
 
+    def placeAlong(self, obj, distance, normal=None):
+        """
+        Places an object along the beam path
+
+        Args:
+            obj: The object to place
+            distance (float): The distance along the beam to place the object
+            normal (App.Vector): The normal vector of the object (will override obj's normal if it exists)
+        """
+
+        obj.obj.addProperty("App::PropertyFloat", "Distance").Distance = distance
+        if normal != None:
+            obj.obj.Vec2 = normal.normalize()
+        obj.obj.Position = App.Vector(0, 0, 0)
+
+        obj.obj.addProperty("App::PropertyBool", "Unplaced").Unplaced = True
+
+        obj.obj.addProperty("App::PropertyLink", "Parent").Parent = self.obj
+
+        if not hasattr(self.obj, "InlineComponents"):
+            self.obj.addProperty("App::PropertyLinkList", "InlineComponents")
+        self.obj.InlineComponents += [obj.obj]
+
     def calculate(self, parent_placement=App.Placement(App.Matrix()), depth=0):
         if depth > 250:
             return
@@ -46,7 +69,7 @@ class Beam:
         for i in App.ActiveDocument.Objects:
             if hasattr(i, "OpticalType"):
                 if hasattr(i, "Parent"):
-                    if i.Parent == self.obj:
+                    if i.Parent == self.obj or i.Unplaced:
                         continue
                 optical_components.append(i)
 
@@ -60,17 +83,24 @@ class Beam:
             print(beam_index)
             count += 1
             if count > 1000:
-                print("hit recursion limit")
+                print("hit interaction limit")
                 break
 
             origin = self.obj.Origins[beam_index]
             offset = self.obj.Offsets[beam_index]
             hit = None
-            for check_comp in optical_components:
+            for (
+                check_comp
+            ) in optical_components:  # check all optical components w/ known positions
                 print(check_comp, last_hit)
-                if last_hit != None and check_comp == last_hit:
+                if (
+                    last_hit != None and check_comp == last_hit
+                ):  # can't hit same component twice
                     continue
-                if type(check_comp.Proxy) is optomech.CylindricalOptic and check_comp.Vec2.dot(offset) != 0:
+                if (
+                    type(check_comp.Proxy) is optomech.CylindricalOptic
+                    and check_comp.Vec2.dot(offset) != 0
+                ):
                     t = (
                         check_comp.Vec2.dot(check_comp.Position.add(origin.negative()))
                     ) / (check_comp.Vec2.dot(offset))
@@ -86,7 +116,9 @@ class Beam:
                                 self.obj.InlineComponents[inline_index].Distance
                                 - dist_since_last_inline
                             )
-                            and (hit == None or t < hit[1])
+                            and (
+                                hit == None or t < hit[1]
+                            )  # take the component if it hits it before the next inline component gets placed
                         ):
                             if check_comp.OpticalType == "mirror":
                                 hit = check_comp, t
@@ -105,7 +137,7 @@ class Beam:
                 last_hit = hit[0]
             elif (
                 hasattr(self.obj, "InlineComponents")
-                and self.obj.InlineComponents[inline_index] != None
+                and len(self.obj.InlineComponents) > inline_index
             ):
                 hit = (
                     self.obj.InlineComponents[inline_index],
@@ -120,10 +152,15 @@ class Beam:
                         * App.Rotation(offset.negative(), hit[0].Vec2)
                         * offset.negative()
                     ]  # TODO: check for max_angle
+
+                hit[0].Position = origin.add(hit[1] * offset)
+                hit[0].Proxy.calculate(depth=depth + 1)
+
                 beam_index += 1
+                inline_index += 1
                 last_hit = hit[0]
             else:
-                self.obj.Distances.append(50)
+                self.obj.Distances += [50]
                 warn("Uncapped beam detected")
                 break
 

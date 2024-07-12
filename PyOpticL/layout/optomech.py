@@ -8,6 +8,8 @@ import Part
 
 from .origin import Origin
 
+INCH = 25.4
+
 
 class CylindricalOptic:
     """
@@ -21,9 +23,9 @@ class CylindricalOptic:
         thickness (float): The thickness of the cylinder
     """
 
-    type = "Part::FeaturePython"
-
-    def __init__(self, name, position, normal, radius, thickness, type="none", max_angle=45):
+    def __init__(
+        self, name, position, normal, radius, thickness, type="none", max_angle=45
+    ):
         self.obj = App.ActiveDocument.addObject("Part::FeaturePython", name)
 
         self.obj.Proxy = self
@@ -48,11 +50,11 @@ class CylindricalOptic:
 
         if depth > 250:  # recursion depth check
             return
-        
+
         print(parent_placement)
 
-        self.Position = parent_placement * self.Position
-        self.Vec2 = parent_placement.Rotation * self.Vec2
+        self.obj.Position = parent_placement * self.obj.Position
+        self.obj.Vec2 = parent_placement.Rotation * self.obj.Vec2
 
         self.obj.Placement = parent_placement * (
             App.Placement(
@@ -65,6 +67,21 @@ class CylindricalOptic:
         if hasattr(self.obj, "Children"):
             for i in self.obj.Children:
                 i.Proxy.calculate(self.obj.Placement, depth + 1)
+
+
+class CircularMirror(CylindricalOptic):
+    """Cylindrical mirror"""
+
+    def __init__(
+        self,
+        name,
+        position=App.Vector(0, 0, 0),
+        normal=App.Vector(1, 0, 0),
+        radius=0.5 * INCH,
+        thickness=1 / 8 * INCH,
+        max_angle=45,
+    ):
+        super().__init__(name, position, normal, radius, thickness, "mirror", max_angle)
 
 
 class ViewProvider:
