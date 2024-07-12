@@ -54,6 +54,14 @@ class Beam:
             self.obj.addProperty("App::PropertyLinkList", "InlineComponents")
         self.obj.InlineComponents += [obj.obj]
 
+    def execute(self, obj):
+        shapes = []
+        for i in range(len(self.obj.Origins)):
+            temp = Part.makeCylinder(0.5, self.obj.Distances[i], self.obj.Origins[i], self.obj.Offsets[i], 0)
+            shapes.append(temp)
+        comp = Part.Compound(shapes)
+        obj.Shape = comp
+
     def calculate(self, parent_placement=App.Placement(App.Matrix()), depth=0):
         if depth > 250:
             return
