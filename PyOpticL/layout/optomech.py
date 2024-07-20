@@ -36,6 +36,7 @@ class CylindricalOptic:
         self.obj.addProperty("App::PropertyFloat", "Radius").Radius = radius
         self.obj.addProperty("App::PropertyFloat", "Thickness").Thickness = thickness
         self.obj.addProperty("App::PropertyString", "OpticalType").OpticalType = type
+        self.obj.addProperty("App::PropertyFloat", "MaxAngle").MaxAngle = max_angle
 
         # self.reflection_angle = 0
         # self.max_angle = 90
@@ -83,6 +84,22 @@ class CircularMirror(CylindricalOptic):
     ):
         super().__init__(name, position, normal, radius, thickness, "mirror", max_angle)
 
+
+class CircularSplitter(CylindricalOptic):
+    """Cylindrical beam splitter, (normal vector is to the reflection plane)"""
+
+    def __init__(
+        self,
+        name,
+        position=App.Vector(0, 0, 0),
+        normal=App.Vector(1, 0, 0),
+        radius=0.5 * INCH,
+        thickness=1 / 8 * INCH,
+        max_angle=45,
+    ):
+        super().__init__(
+            name, position, normal, radius, thickness, "splitter", max_angle
+        )
 
 class ViewProvider:
     def __init__(self, obj):
