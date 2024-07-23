@@ -12,8 +12,9 @@ INCH = 25.4
 
 STL_PATH = str(Path(__file__).parent.parent.resolve()) + "/stl/"
 
+
 def _import_stl(stl_name, rotate, translate, scale=1):
-    mesh = Mesh.read(STL_PATH+stl_name)
+    mesh = Mesh.read(STL_PATH + stl_name)
     # mat = App.Matrix()
     # mat.scale(App.Vector(scale, scale, scale))
     # mesh.transform(mat)
@@ -21,34 +22,49 @@ def _import_stl(stl_name, rotate, translate, scale=1):
     # mesh.translate(*translate)
     return mesh
 
-class GenericStl:
 
-    def __init__(self, name, stl_name, rotate, translate, scale=1, placement=App.Matrix()) -> None:
+class GenericStl:
+    def __init__(
+        self, name, stl_name, rotate, translate, scale=1, placement=App.Matrix()
+    ) -> None:
         self.obj = App.ActiveDocument.addObject("Mesh::FeaturePython", name)
         self.stl_name = stl_name
         self.rotate = rotate
         self.translate = translate
         print(translate, rotate)
-        self.obj.Placement = App.Rotation(App.Vector(1, 0, 0), App.Vector(0, 0, -1)) * placement * App.Placement(translate, rotate, App.Vector(0, 0, 0))
+        self.obj.addProperty(
+            "App::PropertyPlacement", "BasePlacement"
+        ).BasePlacement = (
+            App.Rotation(App.Vector(1, 0, 0), App.Vector(0, 0, -1))
+            * placement
+            * App.Placement(translate, rotate, App.Vector(0, 0, 0))
+        )
 
         self.obj.Proxy = self
         ViewProvider(self.obj.ViewObject)
 
-    def calculate(self, parent_placement=App.Placement(App.Matrix()), depth=0):
-        """Recursively apply relative transforms to all children"""
+    def calculate(
+        self,
+        parent_placement=App.Placement(App.Matrix()),
+        depth=0,
+        recurse=True,
+        transform=True,
+    ):
+        """Apply parent transform and/or recurse to all children"""
 
         if depth > 250:  # recursion depth check
             return
 
-        self.obj.Placement = parent_placement * self.obj.Placement
+        if transform:
+            self.obj.Placement = parent_placement * self.obj.BasePlacement
 
-        if hasattr(self.obj, "Children"):
+        if recurse and hasattr(self.obj, "Children"):
             for i in self.obj.Children:
                 i.Proxy.calculate(self.obj.Placement, depth + 1)
 
     def execute(self, obj):
         print(self.obj.Placement)
-        mesh = Mesh.read(STL_PATH+self.stl_name)
+        mesh = Mesh.read(STL_PATH + self.stl_name)
         print(mesh.Placement)
         mesh.Placement = self.obj.Placement
         obj.Mesh = mesh
@@ -74,13 +90,21 @@ class CylindricalOptic:
         self.obj.Proxy = self
         ViewProvider(self.obj.ViewObject)
 
-        self.obj.addProperty("App::PropertyVector", "Position").Position = position
-        self.obj.addProperty("App::PropertyVector", "Vec2").Vec2 = normal.normalize()
+        self.obj.addProperty(
+            "App::PropertyVector", "BasePosition"
+        ).BasePosition = position
+        self.obj.addProperty(
+            "App::PropertyVector", "BaseNormal"
+        ).BaseNormal = normal.normalize()
+        self.obj.addProperty("App::PropertyVector", "Position")
+        self.obj.addProperty("App::PropertyVector", "Normal")
         self.obj.addProperty("App::PropertyFloat", "Radius").Radius = radius
         self.obj.addProperty("App::PropertyFloat", "Thickness").Thickness = thickness
         self.obj.addProperty("App::PropertyString", "OpticalType").OpticalType = type
         self.obj.addProperty("App::PropertyFloat", "MaxAngle").MaxAngle = max_angle
-        self.obj.addProperty("App::PropertyString", "OpticalShape").OpticalShape = "circle"
+        self.obj.addProperty(
+            "App::PropertyString", "OpticalShape"
+        ).OpticalShape = "circle"
 
         # self.reflection_angle = 0
         # self.max_angle = 90
@@ -90,28 +114,32 @@ class CylindricalOptic:
         part = Part.makeCylinder(self.obj.Radius, self.obj.Thickness)
         obj.Shape = part
 
-    def calculate(self, parent_placement=App.Placement(App.Matrix()), depth=0):
+    def calculate(
+        self,
+        parent_placement=App.Placement(App.Matrix()),
+        depth=0,
+        transform=True,
+        recurse=True,
+    ):
         """Recursively apply relative transforms to all children"""
 
         if depth > 250:  # recursion depth check
             return
 
-        print(parent_placement)
-
-        self.obj.Position = parent_placement * self.obj.Position
-        self.obj.Vec2 = parent_placement.Rotation * self.obj.Vec2
+        if transform:
+            self.obj.Position = parent_placement * self.obj.BasePosition
+            self.obj.Normal = parent_placement.Rotation * self.obj.BaseNormal
 
         self.obj.Placement = parent_placement * (
             App.Placement(
                 self.obj.Position,
-                App.Rotation(App.Vector(0, 0, -1), self.obj.Vec2),
+                App.Rotation(App.Vector(0, 0, -1), self.obj.Normal),
                 App.Vector(0, 0, 0),
             )
         )
 
-        if hasattr(self.obj, "Children"):
+        if recurse and hasattr(self.obj, "Children"):
             for i in self.obj.Children:
-                print("please work{}".format(i))
                 i.Proxy.calculate(self.obj.Placement, depth + 1)
 
 
@@ -171,7 +199,7 @@ class MirrorKm05(CircularMirror):
                 "{}_mount".format(name),
                 "KM05-Step.stl",
                 App.Rotation(90, -0, 90),
-                App.Vector(2.084 - mirror_thickness, -1.148, 0.498)
+                App.Vector(2.084 - mirror_thickness, -1.148, 0.498),
             )
         )
 
@@ -194,24 +222,26 @@ class MirrorKm05(CircularMirror):
             self.obj.addProperty("App::PropertyLinkList", "Children")
 
         self.obj.Children += [obj.obj]
-        obj.obj.addProperty("App::PropertyLinkHidden", "RelativeTo").RelativeTo = self.obj
+        obj.obj.addProperty(
+            "App::PropertyLinkHidden", "RelativeTo"
+        ).RelativeTo = self.obj
 
         return obj
 
     # def execute(self, obj):
     #     return
-        # mesh = _import_stl("KM05-Step.stl", (90, -0, 90), (2.084, -1.148, 0.498))
-        # mesh.Placement = obj.Mesh.Placement
-        # obj.Mesh = mesh
-        #
-        # part = _bounding_box(obj, 2, 3, min_offset=(4.35, 0, 0))
-        # part = part.fuse(_bounding_box(obj, 2, 3, max_offset=(0, -20, 0)))
-        # part = _fillet_all(part, 3)
-        # part = part.fuse(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=inch,
-        #                                   head_dia=bolt_8_32['head_dia'], head_dz=0.92*inch-obj.BoltLength.Value,
-        #                                   x=-7.29, y=0, z=-inch*3/2, dir=(0,0,1)))
-        # part.Placement = obj.Placement
-        # obj.DrillPart = part
+    # mesh = _import_stl("KM05-Step.stl", (90, -0, 90), (2.084, -1.148, 0.498))
+    # mesh.Placement = obj.Mesh.Placement
+    # obj.Mesh = mesh
+    #
+    # part = _bounding_box(obj, 2, 3, min_offset=(4.35, 0, 0))
+    # part = part.fuse(_bounding_box(obj, 2, 3, max_offset=(0, -20, 0)))
+    # part = _fillet_all(part, 3)
+    # part = part.fuse(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=inch,
+    #                                   head_dia=bolt_8_32['head_dia'], head_dz=0.92*inch-obj.BoltLength.Value,
+    #                                   x=-7.29, y=0, z=-inch*3/2, dir=(0,0,1)))
+    # part.Placement = obj.Placement
+    # obj.DrillPart = part
 
 
 class ViewProvider:

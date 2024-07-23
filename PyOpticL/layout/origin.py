@@ -20,7 +20,7 @@ class Origin:
         self.obj.Proxy = self
         ViewProvider(self.obj.ViewObject)
 
-        self.obj.Placement = App.Placement(
+        self.obj.addProperty("App::PropertyPlacement", "BasePlacement").BasePlacement = App.Placement(
             App.Vector(x, y, z),
             App.Rotation(angle_z, angle_y, angle_x),
             App.Vector(0, 0, 0),
@@ -33,7 +33,7 @@ class Origin:
             self.obj.addProperty("App::PropertyLinkList", "Children")
 
         self.obj.Children += [obj.obj]
-        obj.obj.addProperty("App::PropertyLink", "RelativeTo").RelativeTo = self.obj
+        obj.obj.addProperty("App::PropertyLinkHidden", "RelativeTo").RelativeTo = self.obj
 
         return obj
 
@@ -46,7 +46,7 @@ class Origin:
         if depth > 250:  # recursion depth check
             return
 
-        self.obj.Placement = parent_placement * self.obj.Placement
+        self.obj.Placement = parent_placement * self.obj.BasePlacement
 
         if hasattr(self.obj, "Children"):
             for i in self.obj.Children:
