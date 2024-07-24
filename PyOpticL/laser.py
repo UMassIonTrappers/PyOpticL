@@ -165,6 +165,7 @@ class Beam:
                     self.obj.Offsets += [offset]  # transmitted beam
                     self.calculate(parent_placement, depth, beam_index=beam_index << 1)
 
+                    self.obj.Origins += [origin.add(hit[1] * offset)]
                     self.obj.Offsets += [
                         App.Rotation(offset.negative(), hit[0].Normal)
                         * App.Rotation(offset.negative(), hit[0].Normal)
@@ -202,9 +203,11 @@ class Beam:
                 hit[0].Unplaced = False
 
                 if hit[0].Reflect and hit[0].Transmit:  # splitter
+                    print(f"split on: {hit[0].Label}")
                     self.obj.Offsets += [offset]  # transmitted beam
                     self.calculate(parent_placement, depth, beam_index=beam_index << 1)
 
+                    self.obj.Origins += [origin.add(hit[1] * offset)]
                     self.obj.Offsets += [
                         App.Rotation(offset.negative(), hit[0].Normal)
                         * App.Rotation(offset.negative(), hit[0].Normal)

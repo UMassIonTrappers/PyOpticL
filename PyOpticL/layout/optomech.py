@@ -138,17 +138,35 @@ class CylindricalOptic:
             self.obj.Position = parent_placement * self.obj.BasePosition
             self.obj.Normal = parent_placement.Rotation * self.obj.BaseNormal
 
-        self.obj.Placement = parent_placement * (
-            App.Placement(
-                self.obj.Position,
-                App.Rotation(App.Vector(0, 0, -1), self.obj.Normal),
-                App.Vector(0, 0, 0),
-            )
+        self.obj.Placement = App.Placement(
+            self.obj.Position,
+            App.Rotation(App.Vector(0, 0, -1), self.obj.Normal),
+            App.Vector(0, 0, 0),
         )
 
         if recurse and hasattr(self.obj, "Children"):
             for i in self.obj.Children:
-                i.Proxy.calculate(self.obj.Placement, depth + 1)
+                i.Proxy.calculate(
+                    App.Placement(
+                        self.obj.Position,
+                        App.Rotation(App.Vector(1, 0, 0), self.obj.Normal),
+                        App.Vector(0, 0, 0),
+                    ),
+                    depth + 1,
+                )  # everything else defines "0 rotation" to be +x
+
+    def place(self, obj):
+        """Place an object in the relative coordinate system"""
+
+        if not hasattr(self.obj, "Children"):
+            self.obj.addProperty("App::PropertyLinkList", "Children")
+
+        self.obj.Children += [obj.obj]
+        obj.obj.addProperty(
+            "App::PropertyLinkHidden", "RelativeTo"
+        ).RelativeTo = self.obj
+
+        return obj
 
 
 class CircularMirror(CylindricalOptic):
@@ -192,6 +210,35 @@ class CircularSplitter(CylindricalOptic):
         )
 
 
+class CircularMirrorWithMount(CircularMirror):
+    """
+    Circular mirror with a mount
+    """
+
+    def __init__(
+        self,
+        name,
+        mount_class,
+        position=App.Vector(0, 0, 0),
+        normal=App.Vector(1, 0, 0),
+        radius=0.25 * INCH,
+        thickness=6,
+        max_angle=45,
+        rotation=0,
+    ):
+        super().__init__(name, position, normal, radius, thickness, max_angle)
+        self.place(
+            mount_class(
+                name=f"{name}_mount",
+                placement=App.Placement(
+                    App.Vector(-thickness, 0, 0),
+                    App.Rotation(0, 0, 0),
+                    App.Vector(0, 0, 0),
+                ),
+            )
+        )  # , rotation=rotation))
+
+
 class Km05:
     """
     Mirror mount, model KM05
@@ -216,19 +263,19 @@ class Km05:
         drill=True,
         thumbscrews=False,
         bolt_length=15,
-        mirror_thickness=6,
+        placement=App.Matrix(),
     ):
-        self.optic = CylindricalOptic(
-            "name", position, normal, INCH / 4, mirror_thickness
+        self.obj = App.ActiveDocument.addObject("Mesh::FeaturePython", name)
+        self.obj.addProperty(
+            "App::PropertyPlacement", "BasePlacement"
+        ).BasePlacement = placement * App.Placement(
+            App.Vector(2.084, -1.148, 0.498),
+            App.Rotation(90, -0, 90),
+            App.Vector(0, 0, 0),
         )
-        self.place(
-            GenericStl(
-                "{}_mount".format(name),
-                "KM05-Step.stl",
-                App.Rotation(90, -0, 90),
-                App.Vector(2.084 - mirror_thickness, -1.148, 0.498),
-            )
-        )
+
+        self.obj.Proxy = self
+        ViewProvider(self.obj.ViewObject)
 
         # obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         # obj.addProperty('App::PropertyBool', 'ThumbScrews').ThumbScrews = thumbscrews
@@ -241,6 +288,13 @@ class Km05:
         # if thumbscrews:
         #     _add_linked_object(obj, "Upper Thumbscrew", thumbscrew_hkts_5_64, pos_offset=(-10.54, 9.906, 9.906))
         #     _add_linked_object(obj, "Lower Thumbscrew", thumbscrew_hkts_5_64, pos_offset=(-10.54, -9.906, -9.906))
+
+    def execute(self, obj):
+        print(self.obj.Placement)
+        mesh = Mesh.read(STL_PATH + "KM05-Step.stl")
+        print(mesh.Placement)
+        mesh.Placement = self.obj.Placement
+        obj.Mesh = mesh
 
     def place(self, obj):
         """Place an object in the relative coordinate system"""
@@ -255,20 +309,35 @@ class Km05:
 
         return obj
 
-    # def execute(self, obj):
-    #     return
-    # mesh = _import_stl("KM05-Step.stl", (90, -0, 90), (2.084, -1.148, 0.498))
-    # mesh.Placement = obj.Mesh.Placement
-    # obj.Mesh = mesh
-    #
-    # part = _bounding_box(obj, 2, 3, min_offset=(4.35, 0, 0))
-    # part = part.fuse(_bounding_box(obj, 2, 3, max_offset=(0, -20, 0)))
-    # part = _fillet_all(part, 3)
-    # part = part.fuse(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=inch,
-    #                                   head_dia=bolt_8_32['head_dia'], head_dz=0.92*inch-obj.BoltLength.Value,
-    #                                   x=-7.29, y=0, z=-inch*3/2, dir=(0,0,1)))
-    # part.Placement = obj.Placement
-    # obj.DrillPart = part
+    def calculate(self, parent_placement=App.Placement(App.Matrix()), depth=0):
+        """Recursively apply relative transforms to all children"""
+
+        if depth > 250:  # recursion depth check
+            return
+
+        print(f"placement passed to mount: {parent_placement}")
+
+        self.obj.Placement = parent_placement * self.obj.BasePlacement
+
+        if hasattr(self.obj, "Children"):
+            for i in self.obj.Children:
+                i.Proxy.calculate(self.obj.Placement, depth + 1)
+
+
+# def execute(self, obj):
+#     return
+# mesh = _import_stl("KM05-Step.stl", (90, -0, 90), (2.084, -1.148, 0.498))
+# mesh.Placement = obj.Mesh.Placement
+# obj.Mesh = mesh
+#
+# part = _bounding_box(obj, 2, 3, min_offset=(4.35, 0, 0))
+# part = part.fuse(_bounding_box(obj, 2, 3, max_offset=(0, -20, 0)))
+# part = _fillet_all(part, 3)
+# part = part.fuse(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=inch,
+#                                   head_dia=bolt_8_32['head_dia'], head_dz=0.92*inch-obj.BoltLength.Value,
+#                                   x=-7.29, y=0, z=-inch*3/2, dir=(0,0,1)))
+# part.Placement = obj.Placement
+# obj.DrillPart = part
 
 
 class ViewProvider:
