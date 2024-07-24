@@ -83,7 +83,15 @@ class CylindricalOptic:
     """
 
     def __init__(
-        self, name, position, normal, radius, thickness, type="none", max_angle=45
+        self,
+        name,
+        position,
+        normal,
+        radius,
+        thickness,
+        max_angle=45,
+        reflect=False,
+        transmit=False,
     ):
         self.obj = App.ActiveDocument.addObject("Part::FeaturePython", name)
 
@@ -100,12 +108,12 @@ class CylindricalOptic:
         self.obj.addProperty("App::PropertyVector", "Normal")
         self.obj.addProperty("App::PropertyFloat", "Radius").Radius = radius
         self.obj.addProperty("App::PropertyFloat", "Thickness").Thickness = thickness
-        self.obj.addProperty("App::PropertyString", "OpticalType").OpticalType = type
         self.obj.addProperty("App::PropertyFloat", "MaxAngle").MaxAngle = max_angle
         self.obj.addProperty(
             "App::PropertyString", "OpticalShape"
         ).OpticalShape = "circle"
-
+        self.obj.addProperty("App::PropertyBool", "Transmit").Transmit = transmit
+        self.obj.addProperty("App::PropertyBool", "Reflect").Reflect = reflect
         # self.reflection_angle = 0
         # self.max_angle = 90
         # self.max_width = diameter
@@ -155,7 +163,9 @@ class CircularMirror(CylindricalOptic):
         thickness=1 / 8 * INCH,
         max_angle=45,
     ):
-        super().__init__(name, position, normal, radius, thickness, "mirror", max_angle)
+        super().__init__(
+            name, position, normal, radius, thickness, max_angle, reflect=True
+        )
 
 
 class CircularSplitter(CylindricalOptic):
@@ -171,11 +181,18 @@ class CircularSplitter(CylindricalOptic):
         max_angle=45,
     ):
         super().__init__(
-            name, position, normal, radius, thickness, "splitter", max_angle
+            name,
+            position,
+            normal,
+            radius,
+            thickness,
+            max_angle,
+            reflect=True,
+            transmit=True,
         )
 
 
-class MirrorKm05(CircularMirror):
+class Km05:
     """
     Mirror mount, model KM05
 
@@ -190,10 +207,20 @@ class MirrorKm05(CircularMirror):
     """
 
     def __init__(
-        self, name, drill=True, thumbscrews=False, bolt_length=15, mirror_thickness=6
+        self,
+        name,
+        position=App.Vector(0, 0, 0),
+        normal=App.Vector(1, 0, 0),
+        reflect=True,
+        transmit=False,
+        drill=True,
+        thumbscrews=False,
+        bolt_length=15,
+        mirror_thickness=6,
     ):
-        super().__init__(name, radius=0.25 * INCH, thickness=mirror_thickness)
-
+        self.optic = CylindricalOptic(
+            "name", position, normal, INCH / 4, mirror_thickness
+        )
         self.place(
             GenericStl(
                 "{}_mount".format(name),

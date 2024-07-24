@@ -84,7 +84,7 @@ class Beam:
         optical_components = []
 
         for i in App.ActiveDocument.Objects:
-            if hasattr(i, "OpticalType"):
+            if hasattr(i, "Reflect") or hasattr(i, "Transmit"):
                 if hasattr(i, "Parent"):
                     if i.Parent == self.obj or i.Unplaced:
                         continue
@@ -96,7 +96,7 @@ class Beam:
         if hasattr(self.obj, "InlineComponents"):
             for i in self.obj.InlineComponents:
                 if i.BeamIndex == beam_index:
-                    i.Proxy.calculate(parent_placement, depth+1, recurse=False)
+                    i.Proxy.calculate(parent_placement, depth + 1, recurse=False)
                     inline_components.append(i)
 
         inline_index = 0
@@ -113,7 +113,7 @@ class Beam:
             origin = self.obj.Origins[-1]
             offset = self.obj.Offsets[-1]
 
-            print(f'offset: {offset}')
+            print(f"offset: {offset}")
             hit = None
             for (
                 check_comp
@@ -154,20 +154,14 @@ class Beam:
                             # if check_comp.OpticalType == "mirror":
                             hit = check_comp, t
             print(hit)
-            if hit != None: # non-inline handling
+            if hit != None:  # non-inline handling
                 dist_since_last_inline += hit[1]
                 self.obj.Distances += [hit[1]]
                 self.obj.Origins += [origin.add(hit[1] * offset)]
 
                 last_hit = hit[0]
 
-                if hit[0].OpticalType == "mirror":
-                    self.obj.Offsets += [
-                        App.Rotation(offset.negative(), hit[0].Normal)
-                        * App.Rotation(offset.negative(), hit[0].Normal)
-                        * offset.negative()
-                    ]  # TODO: check for max_angle
-                elif hit[0].OpticalType == "splitter":
+                if hit[0].Reflect and hit[0].Transmit:  # splitter
                     self.obj.Offsets += [offset]  # transmitted beam
                     self.calculate(parent_placement, depth, beam_index=beam_index << 1)
 
@@ -179,15 +173,23 @@ class Beam:
                     self.calculate(
                         parent_placement, depth, beam_index=(beam_index << 1) + 1
                     )
+                elif hit[0].Reflect:  # just reflect
+                    self.obj.Offsets += [
+                        App.Rotation(offset.negative(), hit[0].Normal)
+                        * App.Rotation(offset.negative(), hit[0].Normal)
+                        * offset.negative()
+                    ]  # TODO: check for max_angle
+                elif hit[0].Transmit:  # just transmit
+                    self.obj.Offsets += [offset]  # TODO: check for max_angle
             elif (
                 hasattr(self.obj, "InlineComponents")
                 and len(inline_components) > inline_index
-            ):                                                                  # inline handling
+            ):  # inline handling
                 hit = (
                     inline_components[inline_index],
                     inline_components[inline_index].Distance,
                 )
-                print(f'normal: {hit[0].Normal}')
+                print(f"normal: {hit[0].Normal}")
                 optical_components += [inline_components[inline_index]]
                 dist_since_last_inline = 0
                 self.obj.Distances += [hit[1]]
@@ -199,17 +201,10 @@ class Beam:
                 hit[0].Proxy.calculate(depth=depth + 1, transform=False)
                 hit[0].Unplaced = False
 
-                if hit[0].OpticalType == "mirror":
-                    self.obj.Offsets += [
-                        App.Rotation(offset.negative(), hit[0].Normal)
-                        * App.Rotation(offset.negative(), hit[0].Normal)
-                        * offset.negative()
-                    ]  # TODO: check for max_angle
-                elif hit[0].OpticalType == "splitter":
+                if hit[0].Reflect and hit[0].Transmit:  # splitter
                     self.obj.Offsets += [offset]  # transmitted beam
                     self.calculate(parent_placement, depth, beam_index=beam_index << 1)
 
-                    self.obj.Origins += [origin.add(hit[1] * offset)]
                     self.obj.Offsets += [
                         App.Rotation(offset.negative(), hit[0].Normal)
                         * App.Rotation(offset.negative(), hit[0].Normal)
@@ -218,6 +213,14 @@ class Beam:
                     self.calculate(
                         parent_placement, depth, beam_index=(beam_index << 1) + 1
                     )
+                elif hit[0].Reflect:  # just reflect
+                    self.obj.Offsets += [
+                        App.Rotation(offset.negative(), hit[0].Normal)
+                        * App.Rotation(offset.negative(), hit[0].Normal)
+                        * offset.negative()
+                    ]  # TODO: check for max_angle
+                elif hit[0].Transmit:  # just transmit
+                    self.obj.Offsets += [offset]  # TODO: check for max_angle
 
                 inline_index += 1
             else:
