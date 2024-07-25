@@ -26,12 +26,8 @@ class Baseplate(Origin):
     def __init__(
         self,
         name="Baseplate",
-        x=0,
-        y=0,
-        z=0,
-        angle_z=0,
-        angle_y=0,
-        angle_x=0,
+        position=(0, 0, 0),
+        rotation=(0.0, 0.0, 0.0),
         lx=0,
         ly=0,
         lz=0,
@@ -46,7 +42,7 @@ class Baseplate(Origin):
         y_splits=[],
         invert_label=False,
     ):
-        super().__init__(name, x, y, z, angle_z, angle_y, angle_x)
+        super().__init__(name, position, rotation)
 
         self.obj.addProperty("App::PropertyLength", "lx").lx = lx
         self.obj.addProperty("App::PropertyLength", "ly").ly = ly
@@ -64,6 +60,7 @@ class Baseplate(Origin):
             invert_label
         )
 
+            
     def execute(self, obj):
         part = Part.makeBox(obj.lx.Value, obj.ly.Value, obj.lz.Value)
         obj.Shape = part.removeSplitter()

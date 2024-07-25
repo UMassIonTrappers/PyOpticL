@@ -29,15 +29,12 @@ class GenericStl:
     ) -> None:
         self.obj = App.ActiveDocument.addObject("Mesh::FeaturePython", name)
         self.stl_name = stl_name
-        self.rotate = rotate
-        self.translate = translate
-        print(translate, rotate)
         self.obj.addProperty(
             "App::PropertyPlacement", "BasePlacement"
         ).BasePlacement = (
             App.Rotation(App.Vector(1, 0, 0), App.Vector(0, 0, -1))
             * placement
-            * App.Placement(translate, rotate, App.Vector(0, 0, 0))
+            * App.Placement(App.Vector(translate), App.Rotation(translate[0], translate[1], translate[2]), App.Vector(0, 0, 0))
         )
 
         self.obj.Proxy = self
@@ -76,8 +73,8 @@ class CylindricalOptic:
 
     Args:
         name (string)
-        position (App.Vector): The vector location of the optical center
-        normal (App.Vector): The normal vector of the optical surface
+        position (tuple[float, float, float]): The vector location of the optical center
+        normal (tuple[float, float, float]): The normal vector of the optical surface
         radius (float): The radius of the cylinder
         thickness (float): The thickness of the cylinder
     """
@@ -100,10 +97,10 @@ class CylindricalOptic:
 
         self.obj.addProperty(
             "App::PropertyVector", "BasePosition"
-        ).BasePosition = position
+        ).BasePosition = App.Vector(position)
         self.obj.addProperty(
             "App::PropertyVector", "BaseNormal"
-        ).BaseNormal = normal.normalize()
+        ).BaseNormal = App.Vector(normal).normalize()
         self.obj.addProperty("App::PropertyVector", "Position")
         self.obj.addProperty("App::PropertyVector", "Normal")
         self.obj.addProperty("App::PropertyFloat", "Radius").Radius = radius
@@ -175,8 +172,8 @@ class CircularMirror(CylindricalOptic):
     def __init__(
         self,
         name,
-        position=App.Vector(0, 0, 0),
-        normal=App.Vector(1, 0, 0),
+        position=(0, 0, 0),
+        normal=(1, 0, 0),
         radius=0.5 * INCH,
         thickness=1 / 8 * INCH,
         max_angle=45,
@@ -192,8 +189,8 @@ class CircularSplitter(CylindricalOptic):
     def __init__(
         self,
         name,
-        position=App.Vector(0, 0, 0),
-        normal=App.Vector(1, 0, 0),
+        position=(0, 0, 0),
+        normal=(1, 0, 0),
         radius=0.5 * INCH,
         thickness=1 / 8 * INCH,
         max_angle=45,
@@ -256,10 +253,6 @@ class Km05:
     def __init__(
         self,
         name,
-        position=App.Vector(0, 0, 0),
-        normal=App.Vector(1, 0, 0),
-        reflect=True,
-        transmit=False,
         drill=True,
         thumbscrews=False,
         bolt_length=15,
@@ -322,6 +315,89 @@ class Km05:
         if hasattr(self.obj, "Children"):
             for i in self.obj.Children:
                 i.Proxy.calculate(self.obj.Placement, depth + 1)
+
+
+
+class K05S2:
+    """
+    Mirror mount, model Polaris K05S2
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mirror (bool) : Whether to add a mirror component to the mount
+        thumbscrews (bool): Whether or not to add two HKTS 5-64 adjusters
+        bolt_length (float) : The length of the bolt used for mounting
+
+    Sub-Parts:
+        circular_mirror (mirror_args)
+    """
+
+    def __init__(
+        self,
+        name,
+        drill=True,
+        thumbscrews=False,
+        bolt_length=15,
+        placement=App.Matrix(),
+    ):
+        self.obj = App.ActiveDocument.addObject("Mesh::FeaturePython", name)
+        self.obj.addProperty(
+            "App::PropertyPlacement", "BasePlacement"
+        ).BasePlacement = placement * App.Placement(
+            App.Vector(-4.514, 0.254, -0.254),
+            App.Rotation(90, -0, -90),
+            App.Vector(0, 0, 0),
+        )
+
+        self.obj.Proxy = self
+        ViewProvider(self.obj.ViewObject)
+
+        # obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        # obj.addProperty('App::PropertyBool', 'ThumbScrews').ThumbScrews = thumbscrews
+        # obj.addProperty('App::PropertyLength', 'BoltLength').BoltLength = bolt_length
+        # obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+        #
+        # obj.ViewObject.ShapeColor = mount_color
+        # self.part_numbers = ['KM05']
+        #
+        # if thumbscrews:
+        #     _add_linked_object(obj, "Upper Thumbscrew", thumbscrew_hkts_5_64, pos_offset=(-10.54, 9.906, 9.906))
+        #     _add_linked_object(obj, "Lower Thumbscrew", thumbscrew_hkts_5_64, pos_offset=(-10.54, -9.906, -9.906))
+
+    def execute(self, obj):
+        print(self.obj.Placement)
+        mesh = Mesh.read(STL_PATH + "POLARIS-K05S2-Step.stl")
+        print(mesh.Placement)
+        mesh.Placement = self.obj.Placement
+        obj.Mesh = mesh
+
+    def place(self, obj):
+        """Place an object in the relative coordinate system"""
+
+        if not hasattr(self.obj, "Children"):
+            self.obj.addProperty("App::PropertyLinkList", "Children")
+
+        self.obj.Children += [obj.obj]
+        obj.obj.addProperty(
+            "App::PropertyLinkHidden", "RelativeTo"
+        ).RelativeTo = self.obj
+
+        return obj
+
+    def calculate(self, parent_placement=App.Placement(App.Matrix()), depth=0):
+        """Recursively apply relative transforms to all children"""
+
+        if depth > 250:  # recursion depth check
+            return
+
+        print(f"placement passed to mount: {parent_placement}")
+
+        self.obj.Placement = parent_placement * self.obj.BasePlacement
+
+        if hasattr(self.obj, "Children"):
+            for i in self.obj.Children:
+                i.Proxy.calculate(self.obj.Placement, depth + 1)
+
 
 
 # def execute(self, obj):

@@ -15,8 +15,8 @@ class Beam:
 
     Args:
         name (string): Beam's name
-        position (App.Vector): Beam origin's vector position
-        direction (App.Vector): Vector defining the beam's direction
+        position (tuple[float, float, float]): Beam origin's vector position
+        direction (tuple[float, float, float]): Vector defining the beam's direction
     """
 
     def __init__(self, name, position, direction):
@@ -25,9 +25,11 @@ class Beam:
         self.obj.Proxy = self
         ViewProvider(self.obj.ViewObject)
 
-        self.obj.addProperty("App::PropertyVectorList", "Origins").Origins += [position]
+        self.obj.addProperty("App::PropertyVectorList", "Origins").Origins += [
+            App.Vector(position)
+        ]
         self.obj.addProperty("App::PropertyVectorList", "Offsets").Offsets += [
-            direction
+            App.Vector(direction)
         ]
         self.obj.addProperty("App::PropertyFloatList", "Distances")
 
@@ -38,15 +40,13 @@ class Beam:
         Args:
             obj: The object to place
             distance (float): The distance along the beam to place the object
-            normal (App.Vector): The normal vector of the object (will override obj's normal if it exists)
+            normal (tuple[float, float, float]): The normal vector of the object (will override obj's normal if it exists)
             beam_index (int): The binary tree index of the beam object
         """
 
-        print(obj)
-
         obj.obj.addProperty("App::PropertyFloat", "Distance").Distance = distance
         if normal != None:
-            obj.obj.BaseNormal = normal.normalize()
+            obj.obj.BaseNormal = App.Vector(normal).normalize()
         obj.obj.Position = App.Vector(0, 0, 0)
 
         obj.obj.addProperty("App::PropertyInteger", "BeamIndex").BeamIndex = beam_index

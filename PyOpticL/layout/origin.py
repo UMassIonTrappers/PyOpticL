@@ -15,14 +15,14 @@ class Origin:
 
     """
 
-    def __init__(self, name, x=0, y=0, z=0, angle_z=0, angle_y=0, angle_x=0) -> None:
+    def __init__(self, name, position=(0, 0, 0), rotation=(0.0, 0.0, 0.0)) -> None:
         self.obj = App.ActiveDocument.addObject("Part::FeaturePython", name)
         self.obj.Proxy = self
         ViewProvider(self.obj.ViewObject)
 
         self.obj.addProperty("App::PropertyPlacement", "BasePlacement").BasePlacement = App.Placement(
-            App.Vector(x, y, z),
-            App.Rotation(angle_z, angle_y, angle_x),
+            App.Vector(position),
+            App.Rotation(rotation[0], rotation[1], rotation[2]),
             App.Vector(0, 0, 0),
         )
 
@@ -51,6 +51,17 @@ class Origin:
         if hasattr(self.obj, "Children"):
             for i in self.obj.Children:
                 i.Proxy.calculate(self.obj.Placement, depth + 1)
+
+    def addDrill(self, obj, recurse=False):
+        """
+        Adds obj to the drill list for self, and optionally passes to all parents
+        """
+        if not hasattr(self.obj, "DrilledBy"):
+            self.obj.addProperty("App::PropertyLinkListHidden", "DrilledBy")
+        self.obj.DrilledBy += [obj]
+
+        if recurse and hasattr(self.obj, "RelativeTo"):
+            self.obj.RelativeTo.Proxy.addDrill(obj, recurse=True)
 
 
 class ViewProvider:
