@@ -186,7 +186,9 @@ class Reload_Modules():
 
     def Activated(self):
         from importlib import reload
-        reload(optomech)
+        reload(layout.optomech)
+        reload(layout.origin)
+        reload(layout.baseplate)
         reload(layout)
         reload(laser)
         App.Console.PrintMessage("Freecad Optics Modules Reloaded\n")
