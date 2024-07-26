@@ -34,7 +34,11 @@ class GenericStl:
         ).BasePlacement = (
             App.Rotation(App.Vector(1, 0, 0), App.Vector(0, 0, -1))
             * placement
-            * App.Placement(App.Vector(translate), App.Rotation(translate[0], translate[1], translate[2]), App.Vector(0, 0, 0))
+            * App.Placement(
+                App.Vector(translate),
+                App.Rotation(translate[0], translate[1], translate[2]),
+                App.Vector(0, 0, 0),
+            )
         )
 
         self.obj.Proxy = self
@@ -174,6 +178,7 @@ class CircularMirror(CylindricalOptic):
         name,
         position=(0, 0, 0),
         normal=(1, 0, 0),
+        mount_class=None,
         radius=0.5 * INCH,
         thickness=1 / 8 * INCH,
         max_angle=45,
@@ -181,6 +186,17 @@ class CircularMirror(CylindricalOptic):
         super().__init__(
             name, position, normal, radius, thickness, max_angle, reflect=True
         )
+        if mount_class != None:
+            self.place(
+                mount_class(
+                    name=f"{name}_mount",
+                    placement=App.Placement(
+                        App.Vector(-thickness, 0, 0),
+                        App.Rotation(0, 0, 0),
+                        App.Vector(0, 0, 0),
+                    ),
+                )
+            )  # , rotation=rotation))
 
 
 class CircularSplitter(CylindricalOptic):
@@ -205,35 +221,6 @@ class CircularSplitter(CylindricalOptic):
             reflect=True,
             transmit=True,
         )
-
-
-class CircularMirrorWithMount(CircularMirror):
-    """
-    Circular mirror with a mount
-    """
-
-    def __init__(
-        self,
-        name,
-        mount_class,
-        position=App.Vector(0, 0, 0),
-        normal=App.Vector(1, 0, 0),
-        radius=0.25 * INCH,
-        thickness=6,
-        max_angle=45,
-        rotation=0,
-    ):
-        super().__init__(name, position, normal, radius, thickness, max_angle)
-        self.place(
-            mount_class(
-                name=f"{name}_mount",
-                placement=App.Placement(
-                    App.Vector(-thickness, 0, 0),
-                    App.Rotation(0, 0, 0),
-                    App.Vector(0, 0, 0),
-                ),
-            )
-        )  # , rotation=rotation))
 
 
 class Km05:
@@ -317,7 +304,6 @@ class Km05:
                 i.Proxy.calculate(self.obj.Placement, depth + 1)
 
 
-
 class K05S2:
     """
     Mirror mount, model Polaris K05S2
@@ -397,7 +383,6 @@ class K05S2:
         if hasattr(self.obj, "Children"):
             for i in self.obj.Children:
                 i.Proxy.calculate(self.obj.Placement, depth + 1)
-
 
 
 # def execute(self, obj):
