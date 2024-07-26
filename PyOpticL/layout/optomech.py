@@ -36,7 +36,7 @@ class GenericStl:
             * placement
             * App.Placement(
                 App.Vector(translate),
-                App.Rotation(translate[0], translate[1], translate[2]),
+                App.Rotation(rotate[0], rotate[1], rotate[2]),
                 App.Vector(0, 0, 0),
             )
         )
