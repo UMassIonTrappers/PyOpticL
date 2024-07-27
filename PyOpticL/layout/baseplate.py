@@ -28,9 +28,9 @@ class Baseplate(Origin):
         name="Baseplate",
         position=(0, 0, 0),
         rotation=(0.0, 0.0, 0.0),
-        lx=0,
-        ly=0,
-        lz=0,
+        lx=0.0,
+        ly=0.0,
+        lz=0.0,
         gap=0,
         drill=True,
         mount_holes=[],
@@ -56,18 +56,20 @@ class Baseplate(Origin):
         # self.# obj.addProperty("App::PropertyDistance", "OpticsDz").OpticsDz = optics_dz
         self.obj.addProperty("App::PropertyFloatList", "xSplits").xSplits = x_splits
         self.obj.addProperty("App::PropertyFloatList", "ySplits").ySplits = y_splits
-        self.obj.addProperty("App::PropertyLength", "InvertLabel").InvertLabel = (
-            invert_label
-        )
+        self.obj.addProperty(
+            "App::PropertyLength", "InvertLabel"
+        ).InvertLabel = invert_label
 
-            
     def execute(self, obj):
         part = Part.makeBox(obj.lx.Value, obj.ly.Value, obj.lz.Value)
+        if hasattr(self.obj, "DrilledBy"):
+            for i in self.obj.DrilledBy:
+                part = part.cut(i.Proxy.getDrillObj())
+
         obj.Shape = part.removeSplitter()
 
 
 class ViewProvider:
-
     def __init__(self, obj):
         obj.Proxy = self
         self.Object = obj.Object

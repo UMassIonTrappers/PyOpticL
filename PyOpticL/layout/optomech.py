@@ -13,6 +13,29 @@ INCH = 25.4
 STL_PATH = str(Path(__file__).parent.parent.resolve()) + "/stl/"
 
 
+BOLT_4_40 = {
+    "clear_dia": 0.120 * INCH,
+    "tap_dia": 0.089 * INCH,
+    "head_dia": 5.50,
+    "head_dz": 2.79,
+}
+
+BOLT_8_32 = {
+    "clear_dia": 0.172 * INCH,
+    "tap_dia": 0.136 * INCH,
+    "head_dia": 7,
+    "head_dz": 4.4,
+}
+
+BOLT_14_20 = {
+    "clear_dia": 0.260 * INCH,
+    "tap_dia": 0.201 * INCH,
+    "head_dia": 9.8,
+    "head_dz": 8,
+    "washer_dia": 9 / 16 * INCH,
+}
+
+
 def _import_stl(stl_name, rotate, translate, scale=1):
     mesh = Mesh.read(STL_PATH + stl_name)
     # mat = App.Matrix()
@@ -21,6 +44,68 @@ def _import_stl(stl_name, rotate, translate, scale=1):
     # mesh.rotate(*np.deg2rad(rotate))
     # mesh.translate(*translate)
     return mesh
+
+
+class Bolt(Origin):
+    """
+    Bolt. Bottom edge of the head is at the origin and points in +x by default. Can optionally specify position of tip instead (will rotate about end instead)
+    """
+
+    def __init__(
+        self,
+        name,
+        bolt_type,
+        length,
+        drill_type,
+        drills=[],
+        position=(0, 0, 0),
+        rotation=(0.0, 0.0, 0.0),
+        tip_relative=False,
+    ) -> None:
+        super().__init__(name, position, rotation)
+
+        if tip_relative:
+            self.obj.addProperty("App::PropertyBool", "TipRelative").TipRelative = True
+        else:
+            self.obj.addProperty("App::PropertyBool", "TipRelative").TipRelative = False
+
+        self.bolt_type = bolt_type
+        self.obj.addProperty("App::PropertyString", "DrillType").DrillType = drill_type
+        self.obj.addProperty("App::PropertyFloat", "Length").Length = length
+        self.obj.addProperty("App::PropertyFloat", "HeadLength").HeadLength = bolt_type[
+            "head_dz"
+        ]  # add property to modify head length in FreeCAD if necessary
+
+        if len(drills):
+            for i in drills:
+                if not hasattr(i.obj, "DrilledBy"):
+                    i.obj.addProperty("App::PropertyLinkListHidden", "DrilledBy")
+                i.obj.DrilledBy += [self.obj]
+
+    def execute(self, obj):
+        return  # TODO maybe draw the actual bolt as well
+
+    def getDrillObj(self):
+        part = Part.makeCylinder(
+            self.bolt_type[self.obj.DrillType],
+            self.obj.Length,
+            App.Vector(0, 0, 0),
+            App.Vector(0, 0, -1),
+        )
+        part = part.fuse(
+            Part.makeCylinder(
+                self.bolt_type["head_dia"],
+                self.obj.HeadLength,
+                App.Vector(0, 0, 0),
+                App.Vector(0, 0, 1),
+            )
+        )
+        if self.obj.TipRelative:
+            part.translate(App.Vector(0, 0, self.obj.Length))
+
+        part.Placement = self.obj.Placement * part.Placement
+
+        return part
 
 
 class GenericStl:
