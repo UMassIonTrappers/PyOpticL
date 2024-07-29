@@ -178,6 +178,8 @@ class CylindricalOptic:
         max_angle=45,
         reflect=False,
         transmit=False,
+        mount_class=None,
+        mount_pos=App.Vector(0, 0, 0),
     ):
         self.obj = App.ActiveDocument.addObject("Part::FeaturePython", name)
 
@@ -203,6 +205,18 @@ class CylindricalOptic:
         # self.reflection_angle = 0
         # self.max_angle = 90
         # self.max_width = diameter
+
+        if mount_class != None:
+            self.place(
+                mount_class(
+                    name=f"{name}_mount",
+                    placement=App.Placement(
+                        mount_pos,
+                        App.Rotation(0, 0, 0),
+                        App.Vector(0, 0, 0),
+                    ),
+                )
+            )  # , rotation=rotation))
 
     def execute(self, obj):
         part = Part.makeCylinder(self.obj.Radius, self.obj.Thickness)
@@ -263,25 +277,22 @@ class CircularMirror(CylindricalOptic):
         name,
         position=(0, 0, 0),
         normal=(1, 0, 0),
-        mount_class=None,
         radius=0.5 * INCH,
         thickness=1 / 8 * INCH,
         max_angle=45,
+        mount_class=None,
     ):
         super().__init__(
-            name, position, normal, radius, thickness, max_angle, reflect=True
+            name,
+            position,
+            normal,
+            radius,
+            thickness,
+            max_angle,
+            reflect=True,
+            mount_class=mount_class,
+            mount_pos=App.Vector(-thickness, 0, 0)
         )
-        if mount_class != None:
-            self.place(
-                mount_class(
-                    name=f"{name}_mount",
-                    placement=App.Placement(
-                        App.Vector(-thickness, 0, 0),
-                        App.Rotation(0, 0, 0),
-                        App.Vector(0, 0, 0),
-                    ),
-                )
-            )  # , rotation=rotation))
 
 
 class CircularSplitter(CylindricalOptic):
@@ -295,6 +306,7 @@ class CircularSplitter(CylindricalOptic):
         radius=0.5 * INCH,
         thickness=1 / 8 * INCH,
         max_angle=45,
+        mount_class=None
     ):
         super().__init__(
             name,
@@ -305,6 +317,8 @@ class CircularSplitter(CylindricalOptic):
             max_angle,
             reflect=True,
             transmit=True,
+            mount_class=mount_class,
+            mount_pos=App.Vector(-thickness/2, 0, 0)
         )
 
 
