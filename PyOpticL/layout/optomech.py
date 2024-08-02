@@ -61,6 +61,7 @@ class Bolt(Origin):
         position=(0, 0, 0),
         rotation=(0.0, 0.0, 0.0),
         tip_relative=False,
+        head_length=None,
     ) -> None:
         super().__init__(name, position, rotation)
 
@@ -72,9 +73,11 @@ class Bolt(Origin):
         self.bolt_type = bolt_type
         self.obj.addProperty("App::PropertyString", "DrillType").DrillType = drill_type
         self.obj.addProperty("App::PropertyFloat", "Length").Length = length
-        self.obj.addProperty("App::PropertyFloat", "HeadLength").HeadLength = bolt_type[
-            "head_dz"
-        ]  # add property to modify head length in FreeCAD if necessary
+        self.obj.addProperty("App::PropertyFloat", "HeadLength")
+        if head_length != None:
+            self.obj.HeadLength = head_length
+        else:
+            self.obj.HeadLength = bolt_type["head_dz"]
 
         if len(drills):
             for i in drills:
@@ -149,9 +152,7 @@ class GenericStl:
                 i.Proxy.calculate(self.obj.Placement, depth + 1)
 
     def execute(self, obj):
-        print(self.obj.Placement)
         mesh = Mesh.read(STL_PATH + self.stl_name)
-        print(mesh.Placement)
         mesh.Placement = self.obj.Placement
         obj.Mesh = mesh
 
@@ -291,7 +292,7 @@ class CircularMirror(CylindricalOptic):
             max_angle,
             reflect=True,
             mount_class=mount_class,
-            mount_pos=App.Vector(-thickness, 0, 0)
+            mount_pos=App.Vector(-thickness, 0, 0),
         )
 
 
@@ -306,7 +307,7 @@ class CircularSplitter(CylindricalOptic):
         radius=0.5 * INCH,
         thickness=1 / 8 * INCH,
         max_angle=45,
-        mount_class=None
+        mount_class=None,
     ):
         super().__init__(
             name,
@@ -318,8 +319,115 @@ class CircularSplitter(CylindricalOptic):
             reflect=True,
             transmit=True,
             mount_class=mount_class,
-            mount_pos=App.Vector(-thickness/2, 0, 0)
+            mount_pos=App.Vector(-thickness / 2, 0, 0),
         )
+
+
+class CircularTransmission(CylindricalOptic):
+    """Cylindrical transmission optic"""
+
+    def __init__(
+        self,
+        name,
+        position=(0, 0, 0),
+        normal=(1, 0, 0),
+        radius=0.5 * INCH,
+        thickness=1 / 8 * INCH,
+        max_angle=45,
+        mount_class=None,
+    ):
+        super().__init__(
+            name,
+            position,
+            normal,
+            radius,
+            thickness,
+            max_angle,
+            reflect=False,
+            transmit=True,
+            mount_class=mount_class,
+            mount_pos=App.Vector(-thickness, 0, 0),
+        )
+
+
+class Rsp05:
+    """
+    Rotation mount, Rsp05
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mirror (bool) : Whether to add a mirror component to the mount
+        bolt_length (float) : The length of the bolt used for mounting
+
+    """
+
+    def __init__(
+        self,
+        name,
+        drill=True,
+        bolt_length=15,
+        placement=App.Matrix(),
+    ):
+        self.obj = App.ActiveDocument.addObject("Mesh::FeaturePython", name)
+        self.obj.addProperty(
+            "App::PropertyPlacement", "BasePlacement"
+        ).BasePlacement = placement * App.Placement(
+            App.Vector(2.084, -1.148, 0.498),
+            App.Rotation(90, -0, 90),
+            App.Vector(0, 0, 0),
+        )
+
+        self.obj.Proxy = self
+        ViewProvider(self.obj.ViewObject)
+
+        # obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        # obj.addProperty('App::PropertyBool', 'ThumbScrews').ThumbScrews = thumbscrews
+        # obj.addProperty('App::PropertyLength', 'BoltLength').BoltLength = bolt_length
+        # obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+        #
+        # obj.ViewObject.ShapeColor = mount_color
+        # self.part_numbers = ['KM05']
+        #
+        # if thumbscrews:
+        #     _add_linked_object(obj, "Upper Thumbscrew", thumbscrew_hkts_5_64, pos_offset=(-10.54, 9.906, 9.906))
+        #     _add_linked_object(obj, "Lower Thumbscrew", thumbscrew_hkts_5_64, pos_offset=(-10.54, -9.906, -9.906))
+
+    def execute(self, obj):
+        mesh = Mesh.read(STL_PATH + "RSP05-Step.stl")
+        mesh.Placement = self.obj.Placement
+        obj.Mesh = mesh
+
+    def place(self, obj):
+        """Place an object in the relative coordinate system"""
+
+        if not hasattr(self.obj, "Children"):
+            self.obj.addProperty("App::PropertyLinkList", "Children")
+
+        self.obj.Children += [obj.obj]
+        obj.obj.addProperty(
+            "App::PropertyLinkHidden", "RelativeTo"
+        ).RelativeTo = self.obj
+
+        return obj
+
+    def calculate(
+        self,
+        parent_placement=App.Placement(App.Matrix()),
+        depth=0,
+        recurse=True,
+        transform=True,
+    ):
+        """Apply parent transform and/or recurse to all children"""
+
+        if depth > 250:  # recursion depth check
+            return
+
+        if transform:
+            self.obj.Placement = parent_placement * self.obj.BasePlacement
+
+        if recurse and hasattr(self.obj, "Children"):
+            for i in self.obj.Children:
+                i.Proxy.calculate(self.obj.Placement, depth + 1)
 
 
 class Km05:
@@ -369,9 +477,7 @@ class Km05:
         #     _add_linked_object(obj, "Lower Thumbscrew", thumbscrew_hkts_5_64, pos_offset=(-10.54, -9.906, -9.906))
 
     def execute(self, obj):
-        print(self.obj.Placement)
         mesh = Mesh.read(STL_PATH + "KM05-Step.stl")
-        print(mesh.Placement)
         mesh.Placement = self.obj.Placement
         obj.Mesh = mesh
 
@@ -388,17 +494,22 @@ class Km05:
 
         return obj
 
-    def calculate(self, parent_placement=App.Placement(App.Matrix()), depth=0):
-        """Recursively apply relative transforms to all children"""
+    def calculate(
+        self,
+        parent_placement=App.Placement(App.Matrix()),
+        depth=0,
+        recurse=True,
+        transform=True,
+    ):
+        """Apply parent transform and/or recurse to all children"""
 
         if depth > 250:  # recursion depth check
             return
 
-        print(f"placement passed to mount: {parent_placement}")
+        if transform:
+            self.obj.Placement = parent_placement * self.obj.BasePlacement
 
-        self.obj.Placement = parent_placement * self.obj.BasePlacement
-
-        if hasattr(self.obj, "Children"):
+        if recurse and hasattr(self.obj, "Children"):
             for i in self.obj.Children:
                 i.Proxy.calculate(self.obj.Placement, depth + 1)
 
@@ -450,9 +561,7 @@ class K05S2:
         #     _add_linked_object(obj, "Lower Thumbscrew", thumbscrew_hkts_5_64, pos_offset=(-10.54, -9.906, -9.906))
 
     def execute(self, obj):
-        print(self.obj.Placement)
         mesh = Mesh.read(STL_PATH + "POLARIS-K05S2-Step.stl")
-        print(mesh.Placement)
         mesh.Placement = self.obj.Placement
         obj.Mesh = mesh
 
@@ -469,17 +578,22 @@ class K05S2:
 
         return obj
 
-    def calculate(self, parent_placement=App.Placement(App.Matrix()), depth=0):
-        """Recursively apply relative transforms to all children"""
+    def calculate(
+        self,
+        parent_placement=App.Placement(App.Matrix()),
+        depth=0,
+        recurse=True,
+        transform=True,
+    ):
+        """Apply parent transform and/or recurse to all children"""
 
         if depth > 250:  # recursion depth check
             return
 
-        print(f"placement passed to mount: {parent_placement}")
+        if transform:
+            self.obj.Placement = parent_placement * self.obj.BasePlacement
 
-        self.obj.Placement = parent_placement * self.obj.BasePlacement
-
-        if hasattr(self.obj, "Children"):
+        if recurse and hasattr(self.obj, "Children"):
             for i in self.obj.Children:
                 i.Proxy.calculate(self.obj.Placement, depth + 1)
 
