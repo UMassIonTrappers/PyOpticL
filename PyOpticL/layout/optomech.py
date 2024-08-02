@@ -167,6 +167,7 @@ class SquareOptic:
         normal (tuple[float, float, float]): The normal vector of the optical surface
         side_length (float): The side length of the square
         thickness (float): The thickness of the square
+        thickness (float): The thickness of the recangle
     """
 
     def __init__(
@@ -174,14 +175,18 @@ class SquareOptic:
         name,
         position,
         normal,
-        side_length,
-        thickness,
+        base_length,
+        height_length=None,
+        thickness=1,
         max_angle=45,
         reflect=False,
         transmit=False,
         mount_class=None,
         mount_pos=(0, 0, 0),
     ) -> None:
+        if not height_length:
+            height_length = base_length
+
         self.obj = App.ActiveDocument.addObject("Part::FeaturePython", name)
 
         self.obj.Proxy = self
@@ -193,13 +198,18 @@ class SquareOptic:
         self.obj.addProperty(
             "App::PropertyVector", "BaseNormal"
         ).BaseNormal = App.Vector(normal).normalize()
-        self.obj.addProperty("App::PropertyVector", "BaseVertex").BaseVertex = (
+        self.obj.addProperty("App::PropertyVector", "BaseEdge1").BaseEdge1 = (
             App.Rotation(App.Vector(1, 0, 0), self.obj.BaseNormal)
-            * App.Vector(0, side_length / 2, side_length / 2)
+            * App.Vector(0, base_length, 0)
+        )
+        self.obj.addProperty("App::PropertyVector", "BaseEdge2").BaseEdge2 = (
+            App.Rotation(App.Vector(1, 0, 0), self.obj.BaseNormal)
+            * App.Vector(0, 0, height_length)
         )
         self.obj.addProperty("App::PropertyVector", "Position")
         self.obj.addProperty("App::PropertyVector", "Normal")
-        self.obj.addProperty("App::PropertyVector", "Vertex")
+        self.obj.addProperty("App::PropertyVector", "Edge1")
+        self.obj.addProperty("App::PropertyVector", "Edge2")
         self.obj.addProperty("App::PropertyFloat", "Thickness").Thickness = thickness
         self.obj.addProperty("App::PropertyFloat", "MaxAngle").MaxAngle = max_angle
         self.obj.addProperty(
@@ -238,13 +248,14 @@ class SquareOptic:
         if transform:
             self.obj.Position = parent_placement * self.obj.BasePosition
             self.obj.Normal = parent_placement.Rotation * self.obj.BaseNormal
-            self.obj.Vertex = parent_placement.Rotation * self.obj.BaseVertex
+            self.obj.Edge1 = parent_placement.Rotation * self.obj.BaseEdge1
+            self.obj.Edge2 = parent_placement.Rotation * self.obj.BaseEdge2
 
         self.obj.Placement = App.Placement(
             self.obj.Position,
             App.Rotation(App.Vector(1, 0, 0), self.obj.Normal),
             App.Vector(0, 0, 0),
-        ) # TODO constrain the rotation about the normal aswell
+        )  # TODO constrain the rotation about the normal aswell
 
         if recurse and hasattr(self.obj, "Children"):
             for i in self.obj.Children:
@@ -258,8 +269,17 @@ class SquareOptic:
                 )  # everything else defines "0 rotation" to be +x
 
     def execute(self, obj):
-        part = Part.makeBox(np.sqrt(2) * self.obj.Vertex.Length, np.sqrt(2) * self.obj.Vertex.Length, self.obj.Thickness, App.Vector(0, 0, 0), App.Vector(-1, 0, 0))
-        part.translate(self.obj.Vertex.Length * App.Vector(0, 1, 1).normalize())
+        part = Part.makeBox(
+            self.obj.Edge2.Length,
+            self.obj.Edge1.Length,
+            self.obj.Thickness,
+            App.Vector(0, 0, 0),
+            App.Vector(-1, 0, 0),
+        )
+        part.translate(
+            self.obj.Edge1.Length * App.Vector(0, 0.5, 0)
+            + self.obj.Edge2.Length * App.Vector(0, 0, 0.5)
+        )
         obj.Shape = part
         obj.Placement = obj.Placement * part.Placement
 

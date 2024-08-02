@@ -28,6 +28,8 @@ def inCircle(center, radius, checkPoint):
 
 def reflectRay(offset, normal, max_angle=90):
     """Returns the offset vector of a ray reflected by normal"""
+    print(offset, normal)
+    print(np.abs(offset.negative().getAngle(normal)))
     if np.abs(offset.negative().getAngle(normal)) <= np.radians(max_angle):
         return (
             App.Rotation(offset.negative(), normal)
@@ -36,17 +38,13 @@ def reflectRay(offset, normal, max_angle=90):
         )
     return False
 
-def inSquare(center, normal, vectorToVertex, checkPoint):
+def inRecangle(center, normal, edge1, edge2, checkPoint):
     """Returns true if the given point lies within the square defined by the vector to its center, its normal, and a vector from its center to a vertex (assumes that checkPoint is in the square's plane)"""
-    v = checkPoint.sub(center.sub(vectorToVertex)) # finds the position of checkPoint relative to the vertex
-    edge1 = normal.cross(vectorToVertex).sub(vectorToVertex)
-    edge2 = vectorToVertex.cross(normal).sub(vectorToVertex)
+    v = checkPoint.sub(center.sub(0.5 * (edge1.negative() + edge2.negative()))) # finds the position of checkPoint relative to the vertex
     proj1 = edge1.dot(v) / v.Length
     proj2 = edge2.dot(v) / v.Length
 
-    edge_length = vectorToVertex.Length * np.sqrt(2)
-
-    if (proj1 >= 0 and proj1 <= edge_length) and (proj2 >= 0 and proj2 <= edge_length):
+    if (proj1 >= 0 and proj1 <= edge1.Length) and (proj2 >= 0 and proj2 <= edge2.Length):
         return True
     return False
 
@@ -185,7 +183,7 @@ class Beam:
                     if inCircle(check_comp.Position, check_comp.Radius, origin.add( t * offset )):
                         hit = [check_comp, t]
                 elif (hasattr(check_comp, "OpticalShape") and check_comp.OpticalShape == "square"): # and check_comp.Normal.dot(offset) != 0):
-                    if inSquare(check_comp.Position, check_comp.Normal, check_comp.Vertex, origin.add( t * offset )):
+                    if inRecangle(check_comp.Position, check_comp.Normal, check_comp.Edge1, check_comp.Edge2, origin.add( t * offset )):
                         hit = [check_comp, t]
 
             if hit[0] != None:  # non-inline handling
@@ -240,6 +238,7 @@ class Beam:
                         parent_placement, depth, beam_index=(beam_index << 1) + 1
                     )
                 elif hit[0].Reflect:  # just reflect
+                    print(offset, hit[0].Normal)
                     self.obj.Offsets += [reflectRay(offset, hit[0].Normal)]  # TODO: check for max_angle
                 elif hit[0].Transmit:  # just transmit
                     self.obj.Offsets += [offset]  # TODO: check for max_angle
