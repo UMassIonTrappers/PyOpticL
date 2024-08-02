@@ -9,6 +9,32 @@ import Part
 from .layout import optomech
 
 
+def rayPlaneIntersect(origin, offset, pointOnPlane, planeNormal):
+    """Returns the parameter to intersect the ray and plane, returns false if there is no intersction"""
+    if planeNormal.dot(offset) == 0:
+        return False;
+    t = (planeNormal.dot(pointOnPlane.add(origin.negative()))) / (
+        planeNormal.dot(offset)
+    )
+    if t < 0:
+        return False
+    return t
+
+
+def inCircle(center, radius, checkPoint):
+    """Returns true if the given point lies within the circle defined by center and radius assuming that the point lies in the plane of the circle"""
+    return center.add(checkPoint.negative()).Length <= radius
+
+
+def reflectRay(offset, normal, max_angle=90):
+    """Returns the offset vector of a ray reflected by normal"""
+    if np.abs(offset.negative().getAngle(normal)) <= np.radians(max_angle):
+        return (
+            App.Rotation(offset.negative(), normal)
+            * App.Rotation(offset.negative(), normal)
+            * offset.negative()
+        )
+    return False
 class Beam:
     """
     Defines a beam object
@@ -88,15 +114,20 @@ class Beam:
                 if hasattr(i, "Parent"):
                     if i.Parent == self.obj or i.Unplaced:
                         continue
-                print("i did something")
+                # print("i did something")
                 optical_components.append(i)
 
         inline_components = []
+
+        # print(f"parent_placement: {parent_placement})")
 
         if hasattr(self.obj, "InlineComponents"):
             for i in self.obj.InlineComponents:
                 if i.BeamIndex == beam_index:
                     i.Proxy.calculate(parent_placement, depth + 1, recurse=False)
+                    if i.Distance < 0:
+                        print("Detected negative inline distance")
+                        break
                     inline_components.append(i)
 
         inline_index = 0
@@ -106,55 +137,39 @@ class Beam:
 
         while True:
             count += 1
-            if count > 1000:
-                print("hit interaction limit")
+            if count > 100:
+                # print("hit interaction limit")
                 break
 
             origin = self.obj.Origins[-1]
             offset = self.obj.Offsets[-1]
 
-            print(f"offset: {offset}")
-            hit = None
+            # print(f"on {count} check, optical_components is {optical_components}")
+
+            # print(f"offset: {offset}")
+            hit = [None, float('inf')]
             for (
                 check_comp
             ) in optical_components:  # check all optical components w/ known positions
-                print(check_comp, last_hit)
                 if (
                     last_hit != None and check_comp == last_hit
                 ):  # can't hit same component twice
                     continue
-                print(type(check_comp))
+                t = rayPlaneIntersect(origin, offset, check_comp.Position, check_comp.Normal)
+                if not t or ((t >= hit[1]) or (len(inline_components) > inline_index and not len(inline_components) == 0 and (t >= (inline_components[inline_index].Distance - dist_since_last_inline)))):
+                    continue # continue if the ray doesn't hit the plane of the component, isn't the closest hit, or hits it after the next inline
                 if (
                     hasattr(check_comp, "OpticalShape")
                     and check_comp.OpticalShape == "circle"
-                    and check_comp.Normal.dot(offset) != 0
-                ):
-                    print("pain")
-                    t = (
+                    # and check_comp.Normal.dot(offset) != 0
+                    ):
+                    if inCircle(check_comp.Position, check_comp.Radius, origin.add( t * offset )):
+                        hit = [check_comp, t]
                         check_comp.Normal.dot(
                             check_comp.Position.add(origin.negative())
                         )
                     ) / (check_comp.Normal.dot(offset))
-                    if (
-                        (
-                            origin.add(t * offset).add(check_comp.Position.negative())
-                        ).Length
-                    ) <= check_comp.Radius:
-                        if (
-                            (not hasattr(self.obj, "InlineComponents"))
-                            or t
-                            < (
-                                inline_components[inline_index].Distance
-                                - dist_since_last_inline
-                            )
-                            and (
-                                hit == None or t < hit[1]
-                            )  # take the component if it hits it before the next inline component gets placed
-                        ):
-                            # if check_comp.OpticalType == "mirror":
-                            hit = check_comp, t
-            print(hit)
-            if hit != None:  # non-inline handling
+            if hit[0] != None:  # non-inline handling
                 dist_since_last_inline += hit[1]
                 self.obj.Distances += [hit[1]]
                 self.obj.Origins += [origin.add(hit[1] * offset)]
@@ -166,20 +181,12 @@ class Beam:
                     self.calculate(parent_placement, depth, beam_index=beam_index << 1)
 
                     self.obj.Origins += [origin.add(hit[1] * offset)]
-                    self.obj.Offsets += [
-                        App.Rotation(offset.negative(), hit[0].Normal)
-                        * App.Rotation(offset.negative(), hit[0].Normal)
-                        * offset.negative()
-                    ]  # reflected beam TODO: check for max_angle
+                    self.obj.Offsets += [reflectRay(offset, hit[0].Normal)]  # reflected beam TODO: check for max_angle
                     self.calculate(
                         parent_placement, depth, beam_index=(beam_index << 1) + 1
                     )
                 elif hit[0].Reflect:  # just reflect
-                    self.obj.Offsets += [
-                        App.Rotation(offset.negative(), hit[0].Normal)
-                        * App.Rotation(offset.negative(), hit[0].Normal)
-                        * offset.negative()
-                    ]  # TODO: check for max_angle
+                    self.obj.Offsets += [reflectRay(offset, hit[0].Normal)]  # TODO: check for max_angle
                 elif hit[0].Transmit:  # just transmit
                     self.obj.Offsets += [offset]  # TODO: check for max_angle
             elif (
@@ -190,8 +197,7 @@ class Beam:
                     inline_components[inline_index],
                     inline_components[inline_index].Distance,
                 )
-                print(f"normal: {hit[0].Normal}")
-                optical_components += [inline_components[inline_index]]
+
                 dist_since_last_inline = 0
                 self.obj.Distances += [hit[1]]
                 self.obj.Origins += [origin.add(hit[1] * offset)]
@@ -199,31 +205,28 @@ class Beam:
                 last_hit = hit[0]
 
                 hit[0].Position = origin.add(hit[1] * offset)
+                # print(f"placed inline w/ position: {hit[0].Position}")
                 hit[0].Proxy.calculate(depth=depth + 1, transform=False)
                 hit[0].Unplaced = False
+                optical_components += [inline_components[inline_index]]
+                # print(optical_components)
 
                 if hit[0].Reflect and hit[0].Transmit:  # splitter
-                    print(f"split on: {hit[0].Label}")
                     self.obj.Offsets += [offset]  # transmitted beam
                     self.calculate(parent_placement, depth, beam_index=beam_index << 1)
 
                     self.obj.Origins += [origin.add(hit[1] * offset)]
-                    self.obj.Offsets += [
-                        App.Rotation(offset.negative(), hit[0].Normal)
-                        * App.Rotation(offset.negative(), hit[0].Normal)
-                        * offset.negative()
-                    ]  # reflected beam TODO: check for max_angle
+                    self.obj.Offsets += [reflectRay(offset, hit[0].Normal)]  # reflected beam TODO: check for max_angle
                     self.calculate(
                         parent_placement, depth, beam_index=(beam_index << 1) + 1
                     )
                 elif hit[0].Reflect:  # just reflect
-                    self.obj.Offsets += [
-                        App.Rotation(offset.negative(), hit[0].Normal)
-                        * App.Rotation(offset.negative(), hit[0].Normal)
-                        * offset.negative()
-                    ]  # TODO: check for max_angle
+                    self.obj.Offsets += [reflectRay(offset, hit[0].Normal)]  # TODO: check for max_angle
                 elif hit[0].Transmit:  # just transmit
                     self.obj.Offsets += [offset]  # TODO: check for max_angle
+                elif hit[0].Absorb:
+                    self.obj.Origin.pop(-1)
+                    break
 
                 inline_index += 1
             else:
