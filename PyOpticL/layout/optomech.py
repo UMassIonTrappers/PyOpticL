@@ -157,6 +157,126 @@ class GenericStl:
         obj.Mesh = mesh
 
 
+class SquareOptic:
+    """
+    Defines a square in space
+
+    Args:
+        name (string)
+        position (tuple[float, float, float]): The vector location of the optical center
+        normal (tuple[float, float, float]): The normal vector of the optical surface
+        side_length (float): The side length of the square
+        thickness (float): The thickness of the square
+    """
+
+    def __init__(
+        self,
+        name,
+        position,
+        normal,
+        side_length,
+        thickness,
+        max_angle=45,
+        reflect=False,
+        transmit=False,
+        mount_class=None,
+        mount_pos=(0, 0, 0),
+    ) -> None:
+        self.obj = App.ActiveDocument.addObject("Part::FeaturePython", name)
+
+        self.obj.Proxy = self
+        ViewProvider(self.obj.ViewObject)
+
+        self.obj.addProperty(
+            "App::PropertyVector", "BasePosition"
+        ).BasePosition = App.Vector(position)
+        self.obj.addProperty(
+            "App::PropertyVector", "BaseNormal"
+        ).BaseNormal = App.Vector(normal).normalize()
+        self.obj.addProperty("App::PropertyVector", "BaseVertex").BaseVertex = (
+            App.Rotation(App.Vector(1, 0, 0), self.obj.BaseNormal)
+            * App.Vector(0, side_length / 2, side_length / 2)
+        )
+        self.obj.addProperty("App::PropertyVector", "Position")
+        self.obj.addProperty("App::PropertyVector", "Normal")
+        self.obj.addProperty("App::PropertyVector", "Vertex")
+        self.obj.addProperty("App::PropertyFloat", "Thickness").Thickness = thickness
+        self.obj.addProperty("App::PropertyFloat", "MaxAngle").MaxAngle = max_angle
+        self.obj.addProperty(
+            "App::PropertyString", "OpticalShape"
+        ).OpticalShape = "square"
+        self.obj.addProperty("App::PropertyBool", "Transmit").Transmit = transmit
+        self.obj.addProperty("App::PropertyBool", "Reflect").Reflect = reflect
+        # self.reflection_angle = 0
+        # self.max_angle = 90
+        # self.max_width = diameter
+
+        if mount_class != None:
+            self.place(
+                mount_class(
+                    name=f"{name}_mount",
+                    placement=App.Placement(
+                        App.Vector(mount_pos),
+                        App.Rotation(0, 0, 0),
+                        App.Vector(0, 0, 0),
+                    ),
+                )
+            )  # , rotation=rotation))
+
+    def calculate(
+        self,
+        parent_placement=App.Placement(App.Matrix()),
+        depth=0,
+        transform=True,
+        recurse=True,
+    ):
+        """Recursively apply relative transforms to all children"""
+
+        if depth > 250:  # recursion depth check
+            return
+
+        if transform:
+            self.obj.Position = parent_placement * self.obj.BasePosition
+            self.obj.Normal = parent_placement.Rotation * self.obj.BaseNormal
+            self.obj.Vertex = parent_placement.Rotation * self.obj.BaseVertex
+
+        self.obj.Placement = App.Placement(
+            self.obj.Position,
+            App.Rotation(App.Vector(1, 0, 0), self.obj.Normal),
+            App.Vector(0, 0, 0),
+        ) # TODO constrain the rotation about the normal aswell
+
+        if recurse and hasattr(self.obj, "Children"):
+            for i in self.obj.Children:
+                i.Proxy.calculate(
+                    App.Placement(
+                        self.obj.Position,
+                        App.Rotation(App.Vector(1, 0, 0), self.obj.Normal),
+                        App.Vector(0, 0, 0),
+                    ),
+                    depth + 1,
+                )  # everything else defines "0 rotation" to be +x
+
+    def execute(self, obj):
+        part = Part.makeBox(np.sqrt(2) * self.obj.Vertex.Length, np.sqrt(2) * self.obj.Vertex.Length, self.obj.Thickness, App.Vector(0, 0, 0), App.Vector(-1, 0, 0))
+        part.translate(self.obj.Vertex.Length * App.Vector(0, 1, 1).normalize())
+        obj.Shape = part
+        obj.Placement = obj.Placement * part.Placement
+
+    def place(self, obj):
+        """Place an object in the relative coordinate system"""
+
+        if not hasattr(self.obj, "Children"):
+            self.obj.addProperty("App::PropertyLinkList", "Children")
+
+        self.obj.Children += [obj.obj]
+        obj.obj.addProperty(
+            "App::PropertyLinkHidden", "RelativeTo"
+        ).RelativeTo = self.obj
+
+        return obj
+
+
 class CylindricalOptic:
     """
     Defines a cylinder in space
@@ -180,7 +300,7 @@ class CylindricalOptic:
         reflect=False,
         transmit=False,
         mount_class=None,
-        mount_pos=App.Vector(0, 0, 0),
+        mount_pos=(0, 0, 0),
     ):
         self.obj = App.ActiveDocument.addObject("Part::FeaturePython", name)
 
@@ -212,7 +332,7 @@ class CylindricalOptic:
                 mount_class(
                     name=f"{name}_mount",
                     placement=App.Placement(
-                        mount_pos,
+                        App.Vector(mount_pos),
                         App.Rotation(0, 0, 0),
                         App.Vector(0, 0, 0),
                     ),
@@ -292,7 +412,7 @@ class CircularMirror(CylindricalOptic):
             max_angle,
             reflect=True,
             mount_class=mount_class,
-            mount_pos=App.Vector(-thickness, 0, 0),
+            mount_pos=(-thickness, 0, 0),
         )
 
 
@@ -319,7 +439,7 @@ class CircularSplitter(CylindricalOptic):
             reflect=True,
             transmit=True,
             mount_class=mount_class,
-            mount_pos=App.Vector(-thickness / 2, 0, 0),
+            mount_pos=(-thickness / 2, 0, 0),
         )
 
 
@@ -346,7 +466,7 @@ class CircularTransmission(CylindricalOptic):
             reflect=False,
             transmit=True,
             mount_class=mount_class,
-            mount_pos=App.Vector(-thickness, 0, 0),
+            mount_pos=(-thickness, 0, 0),
         )
 
 
