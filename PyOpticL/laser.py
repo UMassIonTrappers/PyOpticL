@@ -35,6 +35,22 @@ def reflectRay(offset, normal, max_angle=90):
             * offset.negative()
         )
     return False
+
+def inSquare(center, normal, vectorToVertex, checkPoint):
+    """Returns true if the given point lies within the square defined by the vector to its center, its normal, and a vector from its center to a vertex (assumes that checkPoint is in the square's plane)"""
+    v = checkPoint.sub(center.sub(vectorToVertex)) # finds the position of checkPoint relative to the vertex
+    edge1 = normal.cross(vectorToVertex).sub(vectorToVertex)
+    edge2 = vectorToVertex.cross(normal).sub(vectorToVertex)
+    proj1 = edge1.dot(v) / v.Length
+    proj2 = edge2.dot(v) / v.Length
+
+    edge_length = vectorToVertex.Length * np.sqrt(2)
+
+    if (proj1 >= 0 and proj1 <= edge_length) and (proj2 >= 0 and proj2 <= edge_length):
+        return True
+    return False
+
+
 class Beam:
     """
     Defines a beam object
@@ -55,7 +71,7 @@ class Beam:
             App.Vector(position)
         ]
         self.obj.addProperty("App::PropertyVectorList", "Offsets").Offsets += [
-            App.Vector(direction)
+            App.Vector(direction).normalize()
         ]
         self.obj.addProperty("App::PropertyFloatList", "Distances")
 
@@ -156,6 +172,9 @@ class Beam:
                 ):  # can't hit same component twice
                     continue
                 t = rayPlaneIntersect(origin, offset, check_comp.Position, check_comp.Normal)
+                if len(optical_components) == 2:
+                    print(f"t = {t}")
+                    print( origin, offset, check_comp.Position, check_comp.Normal )
                 if not t or ((t >= hit[1]) or (len(inline_components) > inline_index and not len(inline_components) == 0 and (t >= (inline_components[inline_index].Distance - dist_since_last_inline)))):
                     continue # continue if the ray doesn't hit the plane of the component, isn't the closest hit, or hits it after the next inline
                 if (
@@ -165,10 +184,10 @@ class Beam:
                     ):
                     if inCircle(check_comp.Position, check_comp.Radius, origin.add( t * offset )):
                         hit = [check_comp, t]
-                        check_comp.Normal.dot(
-                            check_comp.Position.add(origin.negative())
-                        )
-                    ) / (check_comp.Normal.dot(offset))
+                elif (hasattr(check_comp, "OpticalShape") and check_comp.OpticalShape == "square"): # and check_comp.Normal.dot(offset) != 0):
+                    if inSquare(check_comp.Position, check_comp.Normal, check_comp.Vertex, origin.add( t * offset )):
+                        hit = [check_comp, t]
+
             if hit[0] != None:  # non-inline handling
                 dist_since_last_inline += hit[1]
                 self.obj.Distances += [hit[1]]
