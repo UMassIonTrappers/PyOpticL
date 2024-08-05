@@ -48,7 +48,7 @@ def _import_stl(stl_name, rotate, translate, scale=1):
 
 class Bolt(Origin):
     """
-    Bolt. Bottom edge of the head is at the origin and points in +x by default. Can optionally specify position of tip instead (will rotate about end instead)
+    Bolt. Bottom edge of the head is at the origin and points down by default. Can optionally specify position of tip instead (will rotate about tip instead)
     """
 
     def __init__(
@@ -79,25 +79,44 @@ class Bolt(Origin):
         else:
             self.obj.HeadLength = bolt_type["head_dz"]
 
-        if len(drills):
-            for i in drills:
-                if not hasattr(i.obj, "DrilledBy"):
-                    i.obj.addProperty("App::PropertyLinkListHidden", "DrilledBy")
-                i.obj.DrilledBy += [self.obj]
+        try:
+            drills = iter(drills)
+        except TypeError:
+            drills = [
+                drills,
+            ]
+        for i in drills:
+            if not hasattr(i.obj, "DrilledBy"):
+                i.obj.addProperty("App::PropertyLinkListHidden", "DrilledBy")
+            i.obj.DrilledBy += [self.obj]
 
     def execute(self, obj):
-        return  # TODO maybe draw the actual bolt as well
-
-    def getDrillObj(self):
         part = Part.makeCylinder(
-            self.bolt_type[self.obj.DrillType],
+            self.bolt_type[self.obj.DrillType] / 2,
             self.obj.Length,
             App.Vector(0, 0, 0),
             App.Vector(0, 0, -1),
         )
         part = part.fuse(
             Part.makeCylinder(
-                self.bolt_type["head_dia"],
+                self.bolt_type["head_dia"] / 2,
+                self.obj.HeadLength,
+                App.Vector(0, 0, 0),
+                App.Vector(0, 0, 1),
+            )
+        )
+        self.obj.Shape = part
+
+    def getDrillObj(self):
+        part = Part.makeCylinder(
+            self.bolt_type[self.obj.DrillType] / 2,
+            self.obj.Length,
+            App.Vector(0, 0, 0),
+            App.Vector(0, 0, -1),
+        )
+        part = part.fuse(
+            Part.makeCylinder(
+                self.bolt_type["head_dia"] / 2,
                 self.obj.HeadLength,
                 App.Vector(0, 0, 0),
                 App.Vector(0, 0, 1),
@@ -105,6 +124,50 @@ class Bolt(Origin):
         )
         if self.obj.TipRelative:
             part.translate(App.Vector(0, 0, self.obj.Length))
+
+        part.Placement = self.obj.Placement * part.Placement
+
+        return part
+
+
+class CutBox(Origin):
+    """
+    Negative box
+    """
+
+    def __init__(
+        self,
+        name,
+        dx,
+        dy,
+        dz,
+        drills=[],
+        position=(0, 0, 0),
+        rotation=(0.0, 0.0, 0.0),
+        # TODO: add fillet
+    ) -> None:
+        super().__init__(name, position, rotation)
+
+        self.obj.addProperty("App::PropertyFloat", "Dx").Dx = dx
+        self.obj.addProperty("App::PropertyFloat", "Dy").Dy = dy
+        self.obj.addProperty("App::PropertyFloat", "Dz").Dz = dz
+
+        try:
+            drills = iter(drills)
+        except TypeError:
+            drills = [
+                drills,
+            ]
+        for i in drills:
+            if not hasattr(i.obj, "DrilledBy"):
+                i.obj.addProperty("App::PropertyLinkListHidden", "DrilledBy")
+            i.obj.DrilledBy += [self.obj]
+
+    def execute(self, obj):
+        return
+
+    def getDrillObj(self):
+        part = Part.makeBox(self.obj.Dx, self.obj.Dy, self.obj.Dz)
 
         part.Placement = self.obj.Placement * part.Placement
 
