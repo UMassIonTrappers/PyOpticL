@@ -62,9 +62,15 @@ class Baseplate(Origin):
 
     def execute(self, obj):
         part = Part.makeBox(obj.lx.Value, obj.ly.Value, obj.lz.Value)
+
+        part.Placement = self.obj.Placement # drill objects are in absolute coordinates
+
         if hasattr(self.obj, "DrilledBy"):
             for i in self.obj.DrilledBy:
                 part = part.cut(i.Proxy.getDrillObj())
+                print(f"drilled by {i}")
+
+        part.Placement = self.obj.Placement.inverse() * part.Placement # revert to relative coord
 
         obj.Shape = part.removeSplitter()
 
@@ -106,8 +112,8 @@ class ViewProvider:
     # return True
 
     def claimChildren(self):
-        if hasattr(self.Object, "ChildObjects"):
-            return self.Object.ChildObjects
+        if hasattr(self.Object, "Children"):
+            return self.Object.Children
         else:
             return []
 
