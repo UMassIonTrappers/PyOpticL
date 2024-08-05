@@ -36,6 +36,25 @@ BOLT_14_20 = {
 }
 
 
+def _custom_box(dx, dy, dz, position, fillet=0, dir=(0, 0, 1), fillet_dir=None):
+    if fillet_dir == None:
+        fillet_dir = np.abs(dir)
+    part = Part.makeBox(dx, dy, dz)
+    if fillet != 0:
+        for i in part.Edges:
+            if i.tangentAt(i.FirstParameter) == App.Vector(*fillet_dir):
+                part = part.makeFillet(fillet - 1e-3, [i])
+    part.translate(
+        App.Vector(
+            position[0] - (1 - dir[0]) * dx / 2,
+            position[1] - (1 - dir[1]) * dy / 2,
+            position[2] - (1 - dir[2]) * dz / 2,
+        )
+    )
+    part = part.fuse(part)
+    return part
+
+
 def _import_stl(stl_name, rotate, translate, scale=1):
     mesh = Mesh.read(STL_PATH + stl_name)
     # mat = App.Matrix()
@@ -91,21 +110,7 @@ class Bolt(Origin):
             i.obj.DrilledBy += [self.obj]
 
     def execute(self, obj):
-        part = Part.makeCylinder(
-            self.bolt_type[self.obj.DrillType] / 2,
-            self.obj.Length,
-            App.Vector(0, 0, 0),
-            App.Vector(0, 0, -1),
-        )
-        part = part.fuse(
-            Part.makeCylinder(
-                self.bolt_type["head_dia"] / 2,
-                self.obj.HeadLength,
-                App.Vector(0, 0, 0),
-                App.Vector(0, 0, 1),
-            )
-        )
-        self.obj.Shape = part
+        return  # TODO: draw actual bolt
 
     def getDrillObj(self):
         part = Part.makeCylinder(
@@ -246,6 +251,7 @@ class RectangularOptic:
         transmit=False,
         mount_class=None,
         mount_pos=(0, 0, 0),
+        drills=None,
     ) -> None:
         if not height_length:
             height_length = base_length
@@ -293,6 +299,7 @@ class RectangularOptic:
                         App.Rotation(0, 0, 0),
                         App.Vector(0, 0, 0),
                     ),
+                    drills=drills,
                 )
             )  # , rotation=rotation))
 
@@ -372,6 +379,7 @@ class SquareMirror(RectangularOptic):
         thickness=1 / 8 * INCH,
         max_angle=45,
         mount_class=None,
+        drills=None,
     ):
         super().__init__(
             name,
@@ -384,6 +392,7 @@ class SquareMirror(RectangularOptic):
             reflect=True,
             mount_class=mount_class,
             mount_pos=(-thickness, 0, 0),
+            drills=drills,
         )
 
 
@@ -398,6 +407,7 @@ class CubeSplitter(RectangularOptic):
         cube_size=10,
         max_angle=45,
         mount_class=None,
+        drills=None,
     ):
         super().__init__(
             name,
@@ -410,6 +420,7 @@ class CubeSplitter(RectangularOptic):
             reflect=True,
             transmit=True,
             mount_class=mount_class,
+            drills=drills,
         )
 
         self.obj.ViewObject.Transparency = 50
@@ -639,8 +650,8 @@ class Mount:
     def __init__(
         self,
         name,
-        mount_position,
-        mount_rotation,
+        mount_position=(0, 0, 0),
+        mount_rotation=(0, 0, 0),
         additional_placement=App.Matrix(),
     ):
         """
@@ -655,7 +666,11 @@ class Mount:
             "App::PropertyPlacement", "BasePlacement"
         ).BasePlacement = additional_placement * App.Placement(
             App.Vector(mount_position),
-            App.Rotation(mount_rotation),
+            App.Rotation(
+                float(mount_rotation[0]),
+                float(mount_rotation[1]),
+                float(mount_rotation[2]),
+            ),
             App.Vector(0, 0, 0),
         )
 
@@ -719,9 +734,10 @@ class Rsp05(Mount):
         additional_placement=App.Matrix(),
     ):
         super().__init__(
-                name, (2.084, -1.148, .498),
-                (90, 0, 90),
-                additional_placement,
+            name,
+            (2.032, 0, 0),
+            (90, 0, 90),
+            additional_placement,
         )
 
         if drills != None:
@@ -757,9 +773,10 @@ class Rsp05ForRedstone(Mount):
         additional_placement=App.Matrix(),
     ):
         super().__init__(
-                name, (2.084, -1.148, .498),
-                (90, 0, 90),
-                additional_placement,
+            name,
+            (2.032, 0, 0),
+            (90, 0, 90),
+            additional_placement,
         )
 
         if drills != None:
@@ -767,7 +784,7 @@ class Rsp05ForRedstone(Mount):
                 Bolt(
                     f"{name}_mountbolt",
                     BOLT_8_32,
-                    0.375 * INCH,
+                    0.75 * INCH,
                     "clear_dia",
                     drills,
                     (1.397, 0, -13.97 + 0.25 * INCH),
@@ -778,21 +795,49 @@ class Rsp05ForRedstone(Mount):
             self.place(
                 CutBox(
                     f"{name}_boundbox",
-                    0.75 * INCH,
+                    2 * INCH,
                     1.5 * INCH,
                     1.5 * INCH,
                     drills,
-                    (1.397 - 0.375 * INCH, -0.75 * INCH, -13.97),
+                    (1.397 - INCH, -0.75 * INCH, -13.97),
                 )
             )
-
-        self.obj.Proxy = self
-        ViewProvider(self.obj.ViewObject)
 
     def execute(self, obj):
         mesh = Mesh.read(STL_PATH + "RSP05-Step.stl")
         mesh.Placement = self.obj.Placement
         obj.Mesh = mesh
+
+
+class PBSForRedstone(Mount):
+    def __init__(self, name, drills=None, additional_placement=App.Matrix()):
+        super().__init__(name)
+
+        if drills != None:
+            self.place(
+                CutBox(
+                    f"{name}_mount",
+                    10.1,
+                    10.1,
+                    1,
+                    drills,
+                    (0, -5.05 * np.sqrt(2), -5),
+                    (45, 0, 0),
+                )
+            )
+            self.place(
+                CutBox(
+                    f"{name}_mount",
+                    1.5 * INCH,
+                    2 * INCH,
+                    1.5 * INCH,
+                    drills,
+                    (-0.75 * INCH, -1 * INCH, -4),
+                )
+            )
+
+    def execute(self, obj):
+        return
 
 
 class Km05(Mount):
@@ -817,7 +862,9 @@ class Km05(Mount):
         bolt_length=15,
         additional_placement=App.Matrix(),
     ):
-        super().__init__(name, (2.084, -1.148, .498), (90, 0, 90), additional_placement)
+        super().__init__(
+            name, (2.084, -1.148, 0.498), (90, 0, 90), additional_placement
+        )
 
     def execute(self, obj):
         mesh = Mesh.read(STL_PATH + "KM05-Step.stl")
@@ -847,13 +894,15 @@ class Km05ForRedstone(Mount):
         drills=None,
         additional_placement=App.Matrix(),
     ):
-        super().__init__(name, (2.048, -1.148, .498), (90, 0, 90), additional_placement)
+        super().__init__(
+            name, (2.048, -1.148, 0.498), (90, 0, 90), additional_placement
+        )
         if drills != None:
             self.place(
                 Bolt(
                     f"{name}_mountbolt",
                     BOLT_8_32,
-                    INCH,
+                    0.75 * INCH,
                     "clear_dia",
                     drills,
                     (-7.29, 0, -6.7),
@@ -864,11 +913,11 @@ class Km05ForRedstone(Mount):
             self.place(
                 CutBox(
                     f"{name}_bounding_box",
-                    1.2 * INCH,
+                    2 * INCH,
                     1.5 * INCH,
                     1.5 * INCH,
                     drills,
-                    (0.2 * INCH, -0.375 * INCH, -14.73),
+                    (-1 * INCH, -0.75 * INCH, -14.73),
                 )
             )
 
@@ -900,14 +949,14 @@ class K05S2(Mount):
         bolt_length=15,
         additional_placement=App.Matrix(),
     ):
-        super().__init__(name, (-4.514, .254, -.254), (90, 0, 90), additional_placement)
+        super().__init__(
+            name, (-4.514, 0.254, -0.254), (90, 0, 90), additional_placement
+        )
 
     def execute(self, obj):
         mesh = Mesh.read(STL_PATH + "POLARIS-K05S2-Step.stl")
         mesh.Placement = self.obj.Placement
         obj.Mesh = mesh
-
-
 
 
 class ViewProvider:
