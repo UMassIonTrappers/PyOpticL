@@ -72,6 +72,7 @@ class Beam:
             App.Vector(direction).normalize()
         ]
         self.obj.addProperty("App::PropertyFloatList", "Distances")
+        self.obj.ViewObject.ShapeColor = (1, 0, 0)
 
     def placeAlong(self, obj, distance, normal=None, beam_index=1):
         """
@@ -281,11 +282,11 @@ class ViewProvider:
     # return True
 
     def claimChildren(self):
-        return
-    #     if hasattr(self.Object, "InlineComponents"):
-    #         return self.Object.InlineComponents
-    #     else:
-    #         return []
+        # return
+        if hasattr(self.Object, "InlineComponents"):
+            return self.Object.InlineComponents
+        else:
+            return []
 
     def getIcon(self):
         return

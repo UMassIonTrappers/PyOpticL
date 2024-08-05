@@ -424,6 +424,7 @@ class CubeSplitter(RectangularOptic):
         )
 
         self.obj.ViewObject.Transparency = 50
+        self.obj.ViewObject.ShapeColor = (0.5, 0.5, 0.8)
 
     def execute(self, obj):
         part = Part.makeBox(
@@ -471,7 +472,7 @@ class CylindricalOptic:
         mount_class=None,
         mount_pos=(0, 0, 0),
     ):
-        self.obj = App.ActiveDocument.addObject("Mesh::FeaturePython", name)
+        self.obj = App.ActiveDocument.addObject("Part::FeaturePython", name)
 
         self.obj.Proxy = self
         ViewProvider(self.obj.ViewObject)
@@ -586,6 +587,7 @@ class CircularMirror(CylindricalOptic):
             mount_class=mount_class,
             mount_pos=(-thickness, 0, 0),
         )
+        self.obj.ViewObject.ShapeColor = (0.8, 0.8, 0.8)
 
 
 class CircularSplitter(CylindricalOptic):
@@ -644,6 +646,8 @@ class CircularTransmission(CylindricalOptic):
             mount_class=mount_class,
             mount_pos=(-thickness, 0, 0),
         )
+        self.obj.ViewObject.Transparency = 50
+        self.obj.ViewObject.ShapeColor = (0.5, 0.5, 0.8)
 
 
 class Mount:
@@ -973,11 +977,11 @@ class ViewProvider:
         return "Shaded"
 
     def claimChildren(self):
-        return
-        # if hasattr(self.Object, "Children"):
-        #     return self.Object.Children
-        # else:
-        #     return []
+        # return
+        if hasattr(self.Object, "Children"):
+            return self.Object.Children
+        else:
+            return []
 
     # def updateData(self, base_obj, prop):
     #     if prop in "Children":
