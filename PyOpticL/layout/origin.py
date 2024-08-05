@@ -16,7 +16,7 @@ class Origin:
     """
 
     def __init__(self, name, position=(0, 0, 0), rotation=(0.0, 0.0, 0.0)) -> None:
-        self.obj = App.ActiveDocument.addObject("Part::FeaturePython", name)
+        self.obj = App.ActiveDocument.addObject("Mesh::FeaturePython", name)
         self.obj.Proxy = self
         ViewProvider(self.obj.ViewObject)
 
@@ -76,6 +76,12 @@ class ViewProvider:
     def getDefaultDisplayMode(self):
         return "Shaded"
 
+    def claimChildren(self):
+        return
+        # if hasattr(self.Object, "Children"):
+        #     return self.Object.Children
+        # else:
+        #     return []
     # def updateData(self, base_obj, prop):
     #     if prop in "Children":
     #
@@ -100,12 +106,6 @@ class ViewProvider:
     #     if i != feature.Object:
     #         App.ActiveDocument.removeObject(i.Name)
     # return True
-
-    def claimChildren(self):
-        if hasattr(self.Object, "ChildObjects"):
-            return self.Object.ChildObjects
-        else:
-            return []
 
     def getIcon(self):
         return

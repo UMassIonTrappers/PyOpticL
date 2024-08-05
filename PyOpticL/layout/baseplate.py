@@ -68,7 +68,6 @@ class Baseplate(Origin):
         if hasattr(self.obj, "DrilledBy"):
             for i in self.obj.DrilledBy:
                 part = part.cut(i.Proxy.getDrillObj())
-                print(f"drilled by {i}")
 
         part.Placement = self.obj.Placement.inverse() * part.Placement # revert to relative coord
 

@@ -471,7 +471,7 @@ class CylindricalOptic:
         mount_class=None,
         mount_pos=(0, 0, 0),
     ):
-        self.obj = App.ActiveDocument.addObject("Part::FeaturePython", name)
+        self.obj = App.ActiveDocument.addObject("Mesh::FeaturePython", name)
 
         self.obj.Proxy = self
         ViewProvider(self.obj.ViewObject)
@@ -676,6 +676,8 @@ class Mount:
 
         self.obj.Proxy = self
         ViewProvider(self.obj.ViewObject)
+
+        self.obj.ViewObject.ShapeColor = (0.5, 0.5, 0.55)
 
     def place(self, obj):
         """Place an object in the relative coordinate system"""
@@ -971,10 +973,11 @@ class ViewProvider:
         return "Shaded"
 
     def claimChildren(self):
-        if hasattr(self.Object, "Children"):
-            return self.Object.Children
-        else:
-            return []
+        return
+        # if hasattr(self.Object, "Children"):
+        #     return self.Object.Children
+        # else:
+        #     return []
 
     # def updateData(self, base_obj, prop):
     #     if prop in "Children":
@@ -1000,12 +1003,6 @@ class ViewProvider:
     #     if i != feature.Object:
     #         App.ActiveDocument.removeObject(i.Name)
     # return True
-
-    def claimChildren(self):
-        if hasattr(self.Object, "ChildObjects"):
-            return self.Object.ChildObjects
-        else:
-            return []
 
     def getIcon(self):
         return

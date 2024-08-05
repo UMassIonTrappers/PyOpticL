@@ -281,10 +281,11 @@ class ViewProvider:
     # return True
 
     def claimChildren(self):
-        if hasattr(self.Object, "InlineComponents"):
-            return self.Object.InlineComponents
-        else:
-            return []
+        return
+    #     if hasattr(self.Object, "InlineComponents"):
+    #         return self.Object.InlineComponents
+    #     else:
+    #         return []
 
     def getIcon(self):
         return
