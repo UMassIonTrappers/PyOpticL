@@ -28,21 +28,21 @@ def inCircle(center, radius, checkPoint):
 
 def reflectRay(offset, normal, max_angle=90):
     """Returns the offset vector of a ray reflected by normal"""
-    print(offset, normal)
-    print(np.abs(offset.negative().getAngle(normal)))
-    if np.abs(offset.negative().getAngle(normal)) <= np.radians(max_angle):
-        return (
-            App.Rotation(offset.negative(), normal)
-            * App.Rotation(offset.negative(), normal)
-            * offset.negative()
-        )
-    return False
+    # print(offset, normal) TODO: max_angle is broken
+    # print(np.abs(offset.negative().getAngle(normal)))
+    # if np.abs(offset.negative().getAngle(normal)) <= np.radians(max_angle):
+    return (
+        App.Rotation(offset.negative(), normal)
+        * App.Rotation(offset.negative(), normal)
+        * offset.negative()
+    )
+    # return False
 
-def inRecangle(center, normal, edge1, edge2, checkPoint):
+def inRectangle(center, normal, edge1, edge2, checkPoint):
     """Returns true if the given point lies within the square defined by the vector to its center, its normal, and a vector from its center to a vertex (assumes that checkPoint is in the square's plane)"""
     v = checkPoint.sub(center.sub(0.5 * (edge1.negative() + edge2.negative()))) # finds the position of checkPoint relative to the vertex
-    proj1 = edge1.dot(v) / v.Length
-    proj2 = edge2.dot(v) / v.Length
+    proj1 = edge1.dot(v) / edge1.Length
+    proj2 = edge2.dot(v) / edge2.Length
 
     if (proj1 >= 0 and proj1 <= edge1.Length) and (proj2 >= 0 and proj2 <= edge2.Length):
         return True
@@ -99,6 +99,8 @@ class Beam:
             self.obj.addProperty("App::PropertyLinkList", "InlineComponents")
         self.obj.InlineComponents += [obj.obj]
 
+        return obj
+
     def execute(self, obj):
         shapes = []
         for i in range(len(self.obj.Origins)):
@@ -128,12 +130,10 @@ class Beam:
                 if hasattr(i, "Parent"):
                     if i.Parent == self.obj or i.Unplaced:
                         continue
-                # print("i did something")
                 optical_components.append(i)
 
         inline_components = []
 
-        # print(f"parent_placement: {parent_placement})")
 
         if hasattr(self.obj, "InlineComponents"):
             for i in self.obj.InlineComponents:
@@ -151,16 +151,13 @@ class Beam:
 
         while True:
             count += 1
-            if count > 100:
-                # print("hit interaction limit")
+            if count > 1000:
+                print("hit interaction limit")
                 break
 
             origin = self.obj.Origins[-1]
             offset = self.obj.Offsets[-1]
 
-            # print(f"on {count} check, optical_components is {optical_components}")
-
-            # print(f"offset: {offset}")
             hit = [None, float('inf')]
             for (
                 check_comp
@@ -170,9 +167,6 @@ class Beam:
                 ):  # can't hit same component twice
                     continue
                 t = rayPlaneIntersect(origin, offset, check_comp.Position, check_comp.Normal)
-                if len(optical_components) == 2:
-                    print(f"t = {t}")
-                    print( origin, offset, check_comp.Position, check_comp.Normal )
                 if not t or ((t >= hit[1]) or (len(inline_components) > inline_index and not len(inline_components) == 0 and (t >= (inline_components[inline_index].Distance - dist_since_last_inline)))):
                     continue # continue if the ray doesn't hit the plane of the component, isn't the closest hit, or hits it after the next inline
                 if (
@@ -182,8 +176,8 @@ class Beam:
                     ):
                     if inCircle(check_comp.Position, check_comp.Radius, origin.add( t * offset )):
                         hit = [check_comp, t]
-                elif (hasattr(check_comp, "OpticalShape") and check_comp.OpticalShape == "square"): # and check_comp.Normal.dot(offset) != 0):
-                    if inRecangle(check_comp.Position, check_comp.Normal, check_comp.Edge1, check_comp.Edge2, origin.add( t * offset )):
+                elif (hasattr(check_comp, "OpticalShape") and check_comp.OpticalShape == "rectangle"): # and check_comp.Normal.dot(offset) != 0):
+                    if inRectangle(check_comp.Position, check_comp.Normal, check_comp.Edge1, check_comp.Edge2, origin.add( t * offset )):
                         hit = [check_comp, t]
 
             if hit[0] != None:  # non-inline handling
@@ -222,11 +216,9 @@ class Beam:
                 last_hit = hit[0]
 
                 hit[0].Position = origin.add(hit[1] * offset)
-                # print(f"placed inline w/ position: {hit[0].Position}")
                 hit[0].Proxy.calculate(depth=depth + 1, transform=False)
                 hit[0].Unplaced = False
                 optical_components += [inline_components[inline_index]]
-                # print(optical_components)
 
                 if hit[0].Reflect and hit[0].Transmit:  # splitter
                     self.obj.Offsets += [offset]  # transmitted beam
@@ -238,7 +230,6 @@ class Beam:
                         parent_placement, depth, beam_index=(beam_index << 1) + 1
                     )
                 elif hit[0].Reflect:  # just reflect
-                    print(offset, hit[0].Normal)
                     self.obj.Offsets += [reflectRay(offset, hit[0].Normal)]  # TODO: check for max_angle
                 elif hit[0].Transmit:  # just transmit
                     self.obj.Offsets += [offset]  # TODO: check for max_angle
@@ -290,8 +281,8 @@ class ViewProvider:
     # return True
 
     def claimChildren(self):
-        if hasattr(self.Object, "ChildObjects"):
-            return self.Object.ChildObjects
+        if hasattr(self.Object, "InlineComponents"):
+            return self.Object.InlineComponents
         else:
             return []
 
