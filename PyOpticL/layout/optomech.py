@@ -382,6 +382,7 @@ class CylindricalOptic:
         max_angle=45,
         reflect=False,
         transmit=False,
+        drills=None,
         mount_class=None,
         mount_pos=(0, 0, 0),
     ):
@@ -414,11 +415,12 @@ class CylindricalOptic:
             self.place(
                 mount_class(
                     name=f"{name}_mount",
-                    placement=App.Placement(
+                    additional_placement=App.Placement(
                         App.Vector(mount_pos),
                         App.Rotation(0, 0, 0),
                         App.Vector(0, 0, 0),
                     ),
+                    drills=drills,
                 )
             )  # , rotation=rotation))
 
@@ -484,6 +486,7 @@ class CircularMirror(CylindricalOptic):
         radius=0.5 * INCH,
         thickness=1 / 8 * INCH,
         max_angle=45,
+        drills=None,
         mount_class=None,
     ):
         super().__init__(
@@ -494,6 +497,7 @@ class CircularMirror(CylindricalOptic):
             thickness,
             max_angle,
             reflect=True,
+            drills=drills,
             mount_class=mount_class,
             mount_pos=(-thickness, 0, 0),
         )
@@ -510,6 +514,7 @@ class CircularSplitter(CylindricalOptic):
         radius=0.5 * INCH,
         thickness=1 / 8 * INCH,
         max_angle=45,
+        drills=None,
         mount_class=None,
     ):
         super().__init__(
@@ -521,6 +526,7 @@ class CircularSplitter(CylindricalOptic):
             max_angle,
             reflect=True,
             transmit=True,
+            drills=drills,
             mount_class=mount_class,
             mount_pos=(-thickness / 2, 0, 0),
         )
@@ -537,6 +543,7 @@ class CircularTransmission(CylindricalOptic):
         radius=0.5 * INCH,
         thickness=1 / 8 * INCH,
         max_angle=45,
+        drills=None,
         mount_class=None,
     ):
         super().__init__(
@@ -548,57 +555,38 @@ class CircularTransmission(CylindricalOptic):
             max_angle,
             reflect=False,
             transmit=True,
+            drills=drills,
             mount_class=mount_class,
             mount_pos=(-thickness, 0, 0),
         )
 
 
-class Rsp05:
-    """
-    Rotation mount, Rsp05
-
-    Args:
-        drill (bool) : Whether baseplate mounting for this part should be drilled
-        mirror (bool) : Whether to add a mirror component to the mount
-        bolt_length (float) : The length of the bolt used for mounting
-
-    """
-
+class Mount:
     def __init__(
         self,
         name,
-        drill=True,
-        bolt_length=15,
-        placement=App.Matrix(),
+        mount_position,
+        mount_rotation,
+        additional_placement=App.Matrix(),
     ):
+        """
+        Parent class for mounts
+        """
+
         self.obj = App.ActiveDocument.addObject("Mesh::FeaturePython", name)
         self.obj.addProperty(
+            "App::PropertyPlacement", "OffsetPlacement"
+        ).OffsetPlacement = additional_placement
+        self.obj.addProperty(
             "App::PropertyPlacement", "BasePlacement"
-        ).BasePlacement = placement * App.Placement(
-            App.Vector(2.084, -1.148, 0.498),
-            App.Rotation(90, -0, 90),
+        ).BasePlacement = additional_placement * App.Placement(
+            App.Vector(mount_position),
+            App.Rotation(mount_rotation),
             App.Vector(0, 0, 0),
         )
 
         self.obj.Proxy = self
         ViewProvider(self.obj.ViewObject)
-
-        # obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
-        # obj.addProperty('App::PropertyBool', 'ThumbScrews').ThumbScrews = thumbscrews
-        # obj.addProperty('App::PropertyLength', 'BoltLength').BoltLength = bolt_length
-        # obj.addProperty('Part::PropertyPartShape', 'DrillPart')
-        #
-        # obj.ViewObject.ShapeColor = mount_color
-        # self.part_numbers = ['KM05']
-        #
-        # if thumbscrews:
-        #     _add_linked_object(obj, "Upper Thumbscrew", thumbscrew_hkts_5_64, pos_offset=(-10.54, 9.906, 9.906))
-        #     _add_linked_object(obj, "Lower Thumbscrew", thumbscrew_hkts_5_64, pos_offset=(-10.54, -9.906, -9.906))
-
-    def execute(self, obj):
-        mesh = Mesh.read(STL_PATH + "RSP05-Step.stl")
-        mesh.Placement = self.obj.Placement
-        obj.Mesh = mesh
 
     def place(self, obj):
         """Place an object in the relative coordinate system"""
@@ -628,12 +616,112 @@ class Rsp05:
         if transform:
             self.obj.Placement = parent_placement * self.obj.BasePlacement
 
-        if recurse and hasattr(self.obj, "Children"):
+        if (
+            recurse and hasattr(self.obj, "Children")
+        ):  # don't apply mount transform to children but do apply mirror_thickness offset or similar
             for i in self.obj.Children:
-                i.Proxy.calculate(self.obj.Placement, depth + 1)
+                i.Proxy.calculate(
+                    parent_placement * self.obj.OffsetPlacement,
+                    depth + 1,
+                )
 
 
-class Km05:
+class Rsp05(Mount):
+    """
+    Rotation mount, Rsp05
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mirror (bool) : Whether to add a mirror component to the mount
+        bolt_length (float) : The length of the bolt used for mounting
+
+    """
+
+    def __init__(
+        self,
+        name,
+        drills=None,
+        bolt_length=15,
+        additional_placement=App.Matrix(),
+    ):
+        super().__init__(
+                name, (2.084, -1.148, .498),
+                (90, 0, 90),
+                additional_placement,
+        )
+
+        if drills != None:
+            self.place(
+                Bolt(
+                    f"{name}_mountbolt",
+                    BOLT_8_32,
+                    0.375 * INCH,
+                    "clear_dia",
+                    drills,
+                    (1.397, 0, -13.97 + 0.25 * INCH),
+                    (0, 180, 0),
+                    tip_relative=True,
+                )
+            )
+
+    def execute(self, obj):
+        mesh = Mesh.read(STL_PATH + "RSP05-Step.stl")
+        mesh.Placement = self.obj.Placement
+        obj.Mesh = mesh
+
+
+class Rsp05ForRedstone(Mount):
+    """
+    Rotation mount, Rsp05
+    """
+
+    def __init__(
+        self,
+        name,
+        drills=None,
+        bolt_length=15,
+        additional_placement=App.Matrix(),
+    ):
+        super().__init__(
+                name, (2.084, -1.148, .498),
+                (90, 0, 90),
+                additional_placement,
+        )
+
+        if drills != None:
+            self.place(
+                Bolt(
+                    f"{name}_mountbolt",
+                    BOLT_8_32,
+                    0.375 * INCH,
+                    "clear_dia",
+                    drills,
+                    (1.397, 0, -13.97 + 0.25 * INCH),
+                    (0, 180, 0),
+                    tip_relative=True,
+                )
+            )
+            self.place(
+                CutBox(
+                    f"{name}_boundbox",
+                    0.75 * INCH,
+                    1.5 * INCH,
+                    1.5 * INCH,
+                    drills,
+                    (1.397 - 0.375 * INCH, -0.75 * INCH, -13.97),
+                )
+            )
+
+        self.obj.Proxy = self
+        ViewProvider(self.obj.ViewObject)
+
+    def execute(self, obj):
+        mesh = Mesh.read(STL_PATH + "RSP05-Step.stl")
+        mesh.Placement = self.obj.Placement
+        obj.Mesh = mesh
+
+
+class Km05(Mount):
     """
     Mirror mount, model KM05
 
@@ -653,71 +741,70 @@ class Km05:
         drill=True,
         thumbscrews=False,
         bolt_length=15,
-        placement=App.Matrix(),
+        additional_placement=App.Matrix(),
     ):
-        self.obj = App.ActiveDocument.addObject("Mesh::FeaturePython", name)
-        self.obj.addProperty(
-            "App::PropertyPlacement", "BasePlacement"
-        ).BasePlacement = placement * App.Placement(
-            App.Vector(2.084, -1.148, 0.498),
-            App.Rotation(90, -0, 90),
-            App.Vector(0, 0, 0),
-        )
-
-        self.obj.Proxy = self
-        ViewProvider(self.obj.ViewObject)
-
-        # obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
-        # obj.addProperty('App::PropertyBool', 'ThumbScrews').ThumbScrews = thumbscrews
-        # obj.addProperty('App::PropertyLength', 'BoltLength').BoltLength = bolt_length
-        # obj.addProperty('Part::PropertyPartShape', 'DrillPart')
-        #
-        # obj.ViewObject.ShapeColor = mount_color
-        # self.part_numbers = ['KM05']
-        #
-        # if thumbscrews:
-        #     _add_linked_object(obj, "Upper Thumbscrew", thumbscrew_hkts_5_64, pos_offset=(-10.54, 9.906, 9.906))
-        #     _add_linked_object(obj, "Lower Thumbscrew", thumbscrew_hkts_5_64, pos_offset=(-10.54, -9.906, -9.906))
+        super().__init__(name, (2.084, -1.148, .498), (90, 0, 90), additional_placement)
 
     def execute(self, obj):
         mesh = Mesh.read(STL_PATH + "KM05-Step.stl")
         mesh.Placement = self.obj.Placement
         obj.Mesh = mesh
 
-    def place(self, obj):
-        """Place an object in the relative coordinate system"""
 
-        if not hasattr(self.obj, "Children"):
-            self.obj.addProperty("App::PropertyLinkList", "Children")
+class Km05ForRedstone(Mount):
+    """
+    Mirror mount, model KM05
 
-        self.obj.Children += [obj.obj]
-        obj.obj.addProperty(
-            "App::PropertyLinkHidden", "RelativeTo"
-        ).RelativeTo = self.obj
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mirror (bool) : Whether to add a mirror component to the mount
+        thumbscrews (bool): Whether or not to add two HKTS 5-64 adjusters
+        bolt_length (float) : The length of the bolt used for mounting
 
-        return obj
+    Sub-Parts:
+        circular_mirror (mirror_args)
+    """
 
-    def calculate(
+    def __init__(
         self,
-        parent_placement=App.Placement(App.Matrix()),
-        depth=0,
-        recurse=True,
-        transform=True,
+        name,
+        drill=True,
+        thumbscrews=False,
+        drills=None,
+        additional_placement=App.Matrix(),
     ):
-        """Apply parent transform and/or recurse to all children"""
+        super().__init__(name, (2.048, -1.148, .498), (90, 0, 90), additional_placement)
+        if drills != None:
+            self.place(
+                Bolt(
+                    f"{name}_mountbolt",
+                    BOLT_8_32,
+                    INCH,
+                    "clear_dia",
+                    drills,
+                    (-7.29, 0, -6.7),
+                    (0, 180, 0),
+                    True,
+                )
+            )
+            self.place(
+                CutBox(
+                    f"{name}_bounding_box",
+                    1.2 * INCH,
+                    1.5 * INCH,
+                    1.5 * INCH,
+                    drills,
+                    (0.2 * INCH, -0.375 * INCH, -14.73),
+                )
+            )
 
-        if depth > 250:  # recursion depth check
-            return
-
-        if transform:
-            self.obj.Placement = parent_placement * self.obj.BasePlacement
-
-        if recurse and hasattr(self.obj, "Children"):
-            for i in self.obj.Children:
-                i.Proxy.calculate(self.obj.Placement, depth + 1)
+    def execute(self, obj):
+        mesh = Mesh.read(STL_PATH + "KM05-Step.stl")
+        mesh.Placement = self.obj.Placement
+        obj.Mesh = mesh
 
 
-class K05S2:
+class K05S2(Mount):
     """
     Mirror mount, model Polaris K05S2
 
@@ -737,84 +824,16 @@ class K05S2:
         drill=True,
         thumbscrews=False,
         bolt_length=15,
-        placement=App.Matrix(),
+        additional_placement=App.Matrix(),
     ):
-        self.obj = App.ActiveDocument.addObject("Mesh::FeaturePython", name)
-        self.obj.addProperty(
-            "App::PropertyPlacement", "BasePlacement"
-        ).BasePlacement = placement * App.Placement(
-            App.Vector(-4.514, 0.254, -0.254),
-            App.Rotation(90, -0, -90),
-            App.Vector(0, 0, 0),
-        )
-
-        self.obj.Proxy = self
-        ViewProvider(self.obj.ViewObject)
-
-        # obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
-        # obj.addProperty('App::PropertyBool', 'ThumbScrews').ThumbScrews = thumbscrews
-        # obj.addProperty('App::PropertyLength', 'BoltLength').BoltLength = bolt_length
-        # obj.addProperty('Part::PropertyPartShape', 'DrillPart')
-        #
-        # obj.ViewObject.ShapeColor = mount_color
-        # self.part_numbers = ['KM05']
-        #
-        # if thumbscrews:
-        #     _add_linked_object(obj, "Upper Thumbscrew", thumbscrew_hkts_5_64, pos_offset=(-10.54, 9.906, 9.906))
-        #     _add_linked_object(obj, "Lower Thumbscrew", thumbscrew_hkts_5_64, pos_offset=(-10.54, -9.906, -9.906))
+        super().__init__(name, (-4.514, .254, -.254), (90, 0, 90), additional_placement)
 
     def execute(self, obj):
         mesh = Mesh.read(STL_PATH + "POLARIS-K05S2-Step.stl")
         mesh.Placement = self.obj.Placement
         obj.Mesh = mesh
 
-    def place(self, obj):
-        """Place an object in the relative coordinate system"""
 
-        if not hasattr(self.obj, "Children"):
-            self.obj.addProperty("App::PropertyLinkList", "Children")
-
-        self.obj.Children += [obj.obj]
-        obj.obj.addProperty(
-            "App::PropertyLinkHidden", "RelativeTo"
-        ).RelativeTo = self.obj
-
-        return obj
-
-    def calculate(
-        self,
-        parent_placement=App.Placement(App.Matrix()),
-        depth=0,
-        recurse=True,
-        transform=True,
-    ):
-        """Apply parent transform and/or recurse to all children"""
-
-        if depth > 250:  # recursion depth check
-            return
-
-        if transform:
-            self.obj.Placement = parent_placement * self.obj.BasePlacement
-
-        if recurse and hasattr(self.obj, "Children"):
-            for i in self.obj.Children:
-                i.Proxy.calculate(self.obj.Placement, depth + 1)
-
-
-# def execute(self, obj):
-#     return
-# mesh = _import_stl("KM05-Step.stl", (90, -0, 90), (2.084, -1.148, 0.498))
-# mesh.Placement = obj.Mesh.Placement
-# obj.Mesh = mesh
-#
-# part = _bounding_box(obj, 2, 3, min_offset=(4.35, 0, 0))
-# part = part.fuse(_bounding_box(obj, 2, 3, max_offset=(0, -20, 0)))
-# part = _fillet_all(part, 3)
-# part = part.fuse(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=inch,
-#                                   head_dia=bolt_8_32['head_dia'], head_dz=0.92*inch-obj.BoltLength.Value,
-#                                   x=-7.29, y=0, z=-inch*3/2, dir=(0,0,1)))
-# part.Placement = obj.Placement
-# obj.DrillPart = part
 
 
 class ViewProvider:
@@ -827,6 +846,12 @@ class ViewProvider:
 
     def getDefaultDisplayMode(self):
         return "Shaded"
+
+    def claimChildren(self):
+        if hasattr(self.Object, "Children"):
+            return self.Object.Children
+        else:
+            return []
 
     # def updateData(self, base_obj, prop):
     #     if prop in "Children":
