@@ -220,16 +220,16 @@ class GenericStl:
         obj.Mesh = mesh
 
 
-class SquareOptic:
+class RectangularOptic:
     """
-    Defines a square in space
+    Defines a recangle in space
 
     Args:
         name (string)
         position (tuple[float, float, float]): The vector location of the optical center
         normal (tuple[float, float, float]): The normal vector of the optical surface
-        side_length (float): The side length of the square
-        thickness (float): The thickness of the square
+        base_length (float): The base length of the recangle
+        height_length (float): The height of the rectangle, will match base_length if not given
         thickness (float): The thickness of the recangle
     """
 
@@ -240,7 +240,7 @@ class SquareOptic:
         normal,
         base_length,
         height_length=None,
-        thickness=1,
+        thickness=1.0,
         max_angle=45,
         reflect=False,
         transmit=False,
@@ -277,7 +277,7 @@ class SquareOptic:
         self.obj.addProperty("App::PropertyFloat", "MaxAngle").MaxAngle = max_angle
         self.obj.addProperty(
             "App::PropertyString", "OpticalShape"
-        ).OpticalShape = "square"
+        ).OpticalShape = "rectangle"
         self.obj.addProperty("App::PropertyBool", "Transmit").Transmit = transmit
         self.obj.addProperty("App::PropertyBool", "Reflect").Reflect = reflect
         # self.reflection_angle = 0
@@ -288,7 +288,7 @@ class SquareOptic:
             self.place(
                 mount_class(
                     name=f"{name}_mount",
-                    placement=App.Placement(
+                    additional_placement=App.Placement(
                         App.Vector(mount_pos),
                         App.Rotation(0, 0, 0),
                         App.Vector(0, 0, 0),
@@ -358,6 +358,80 @@ class SquareOptic:
         ).RelativeTo = self.obj
 
         return obj
+
+
+class SquareMirror(RectangularOptic):
+    """Square mirror"""
+
+    def __init__(
+        self,
+        name,
+        position=(0, 0, 0),
+        normal=(1, 0, 0),
+        side_length=0.5 * INCH,
+        thickness=1 / 8 * INCH,
+        max_angle=45,
+        mount_class=None,
+    ):
+        super().__init__(
+            name,
+            position,
+            normal,
+            side_length,
+            side_length,
+            thickness,
+            max_angle,
+            reflect=True,
+            mount_class=mount_class,
+            mount_pos=(-thickness, 0, 0),
+        )
+
+
+class CubeSplitter(RectangularOptic):
+    """Cube splitter"""
+
+    def __init__(
+        self,
+        name,
+        position=(0, 0, 0),
+        normal=(1, 0, 0),
+        cube_size=10,
+        max_angle=45,
+        mount_class=None,
+    ):
+        super().__init__(
+            name,
+            position,
+            normal,
+            np.sqrt(2) * cube_size,
+            cube_size,
+            1,
+            max_angle,
+            reflect=True,
+            transmit=True,
+            mount_class=mount_class,
+        )
+
+        self.obj.ViewObject.Transparency = 50
+
+    def execute(self, obj):
+        part = Part.makeBox(
+            self.obj.Edge2.Length, self.obj.Edge2.Length, self.obj.Edge2.Length
+        )
+        part.Placement = part.Placement * App.Rotation(45, 0, 0)
+        temp = Part.makeBox(
+            0.1,
+            self.obj.Edge1.Length + 1,
+            self.obj.Edge2.Length,
+            App.Vector(-0.05, -0.5, 0),
+        )
+        part = part.cut(temp)
+        part.translate(
+            self.obj.Edge1.Length * App.Vector(0, -0.5, 0)
+            + self.obj.Edge2.Length * App.Vector(0, 0, -0.5)
+        )
+        obj.Shape = part
+        obj.Placement = obj.Placement * part.Placement
 
 
 class CylindricalOptic:
