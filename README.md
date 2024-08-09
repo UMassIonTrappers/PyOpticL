@@ -1,5 +1,6 @@
 ## PyOpticL - Code-to-CAD optical layout for AMO experiments
 
+A minimal working example of a complete AMO laser system in PyOpticL:
 ![image](https://github.com/user-attachments/assets/6a2da406-1616-453c-b7e2-dd967f6639dc)
 
 ## Useful Links
