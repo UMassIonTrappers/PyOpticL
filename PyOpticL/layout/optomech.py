@@ -181,10 +181,11 @@ class CutBox(Origin):
 
 class GenericStl:
     def __init__(
-        self, name, stl_name, rotate, translate, scale=1, placement=App.Matrix()
+        self, name, stl_name, rotate, translate, scale=1, placement=App.Matrix(), quality=1.
     ) -> None:
         self.obj = App.ActiveDocument.addObject("Mesh::FeaturePython", name)
         self.stl_name = stl_name
+        self.quality = quality
         self.obj.addProperty(
             "App::PropertyPlacement", "BasePlacement"
         ).BasePlacement = (
@@ -221,13 +222,14 @@ class GenericStl:
 
     def execute(self, obj):
         mesh = Mesh.read(STL_PATH + self.stl_name)
+        mesh.decimate(.1, self.quality)
         mesh.Placement = self.obj.Placement
         obj.Mesh = mesh
 
 
 class RectangularOptic:
     """
-    Defines a recangle in space
+    Defines a rectangle in space
 
     Args:
         name (string)
@@ -241,9 +243,9 @@ class RectangularOptic:
     def __init__(
         self,
         name,
-        position,
-        normal,
-        base_length,
+        position=(0, 0, 0),
+        normal=(1, 0, 0),
+        base_length=5,
         height_length=None,
         thickness=1.0,
         max_angle=45,
@@ -841,9 +843,11 @@ class Rsp05ForRedstone(Mount):
             )
 
     def execute(self, obj):
-        mesh = Mesh.read(STL_PATH + "RSP05-Step.stl")
-        mesh.Placement = self.obj.Placement
-        obj.Mesh = mesh
+        return
+        # mesh = Mesh.read(STL_PATH + "RSP05-Step.stl")
+        # mesh.Placement = self.obj.Placement
+        # mesh.decimate(.1, .9)
+        # obj.Mesh = mesh
 
 
 class PBSForRedstone(Mount):
@@ -894,7 +898,7 @@ class Km05(Mount):
     def __init__(
         self,
         name,
-        drill=True,
+        drills=None,
         thumbscrews=False,
         bolt_length=15,
         additional_placement=App.Matrix(),
@@ -959,9 +963,11 @@ class Km05ForRedstone(Mount):
             )
 
     def execute(self, obj):
-        mesh = Mesh.read(STL_PATH + "KM05-Step.stl")
-        mesh.Placement = self.obj.Placement
-        obj.Mesh = mesh
+        return
+        # mesh = Mesh.read(STL_PATH + "KM05-Step.stl")
+        # mesh.Placement = self.obj.Placement
+        # mesh.decimate(.1, .9)
+        # obj.Mesh = mesh
 
 
 class K05S2(Mount):
