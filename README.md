@@ -1,6 +1,6 @@
 ## PyOpticL - A FreeCAD Workbench and Python Library for Creating Optical Layouts
 
-<img width="624" alt="Screenshot 2023-10-27 221107" src="https://github.com/UMassIonTrappers/PyOpticL/assets/103533593/bb37373c-c2fe-4d69-8a45-c3edd08fe944">
+![image](https://github.com/user-attachments/assets/6a2da406-1616-453c-b7e2-dd967f6639dc)
 
 ## Useful Links
 
