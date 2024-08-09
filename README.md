@@ -16,7 +16,6 @@
 * [Rb SAS Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Rb-SAS-Baseplate)
 
 ## About PyOpticL
-### Inspired by the MIT QUANTA LAB repo - C4PO ('CAD for Precision Optics') which is written for OpenSCAD
 FreeCAD is based on python with built-in support for python scripts etc. It also has:
 * Support for custom workbenches and python libraries
 * Fully featured and customizable GUI
@@ -72,3 +71,6 @@ There are a few important things to ensure before you can use PyOpticL:
 
 <img width="900" alt="image" src="https://github.com/UMassIonTrappers/PyOpticL/assets/103533593/9b169333-a5e8-4257-9e03-2dce2c6f0db3">
 <img width="900" alt="image" src="https://github.com/UMassIonTrappers/PyOpticL/assets/103533593/ade01d2c-99c3-4e50-8a99-1446ed10fab9">  
+
+
+#### We thank the MIT QUANTA LAB for sharing their C4PO ('CAD for Precision Optics') based on OpenSCAD which inspired this library.
