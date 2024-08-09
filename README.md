@@ -15,13 +15,24 @@
 * [Modular Doublepass Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Modular-Doublepass-Baseplate)
 * [Rb SAS Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Rb-SAS-Baseplate)
 
+
+## Examples
+
+### Modular Saturated Absorption Spectroscopy Baseplates compiled at different scales
+![image](https://github.com/user-attachments/assets/5340ac9b-0a6f-4758-803f-e5a5f15b18a3)
+
+### Modular Doublepass Baseplate
+![image](https://github.com/user-attachments/assets/ad6c6617-a2f6-4cba-b60d-bde7d375bfb2)
+
+### Simple ECDL (all off-the-shelf components)
+![image](https://github.com/user-attachments/assets/41fba0be-d6c5-48b3-9fd5-c1e4fdddcd74)
+
+
 ## About PyOpticL
 FreeCAD is based on python with built-in support for python scripts etc. It also has:
 * Support for custom workbenches and python libraries
 * Fully featured and customizable GUI
 * Ability to work with various object formats
-
-![image](https://github.com/user-attachments/assets/5340ac9b-0a6f-4758-803f-e5a5f15b18a3)
 
 ### Beam Simulation
 * Beam paths are automatically calculated based on component placement
@@ -61,16 +72,5 @@ There are a few important things to ensure before you can use PyOpticL:
 <img width="250" alt="Screenshot 2023-10-27 225345" src="https://github.com/UMassIonTrappers/PyOpticL/assets/103533593/6eeec81a-e7de-4bde-8509-0c30bda0b9b7">
 
 5. **Check out the [wiki](https://github.com/UMassIonTrappers/PyOpticL/wiki) or the [docs](https://github.com/UMassIonTrappers/PyOpticL/tree/main/docs) for guides, examples, and library documentation**
-
-## Examples
-### Modular Doublepass Baseplate
-![image](https://github.com/user-attachments/assets/ad6c6617-a2f6-4cba-b60d-bde7d375bfb2)
-
-### Simple ECDL (all off-the-shelf components)
-![image](https://github.com/user-attachments/assets/41fba0be-d6c5-48b3-9fd5-c1e4fdddcd74)
-
-<img width="900" alt="image" src="https://github.com/UMassIonTrappers/PyOpticL/assets/103533593/9b169333-a5e8-4257-9e03-2dce2c6f0db3">
-<img width="900" alt="image" src="https://github.com/UMassIonTrappers/PyOpticL/assets/103533593/ade01d2c-99c3-4e50-8a99-1446ed10fab9">  
-
 
 #### We thank the MIT QUANTA LAB for sharing their C4PO ('CAD for Precision Optics') based on OpenSCAD which inspired this library.
