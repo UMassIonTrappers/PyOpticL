@@ -649,6 +649,37 @@ class CircularTransmission(CylindricalOptic):
         self.obj.ViewObject.Transparency = 50
         self.obj.ViewObject.ShapeColor = (0.5, 0.5, 0.8)
 
+class CircularStopper(CylindricalOptic):
+    """Absorbs beams"""
+
+    def __init__(
+        self,
+        name,
+        position=(0, 0, 0),
+        normal=(1, 0, 0),
+        radius=0.5 * INCH,
+        thickness=1 / 8 * INCH,
+        max_angle=45,
+        drills=None,
+        mount_class=None,
+    ):
+        super().__init__(
+            name,
+            position,
+            normal,
+            radius,
+            thickness,
+            max_angle,
+            reflect=False,
+            transmit=False,
+            drills=drills,
+            mount_class=mount_class,
+            mount_pos=(-thickness, 0, 0),
+        )
+
+        self.obj.addProperty("App::PropertyBool", "Absorb").Absorb = True
+        self.obj.ViewObject.ShapeColor = (0, 0, 0)
+
 
 class Mount:
     def __init__(
