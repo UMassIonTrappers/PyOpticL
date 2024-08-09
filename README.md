@@ -22,6 +22,8 @@ FreeCAD is based on python with built-in support for python scripts etc. It also
 * Fully featured and customizable GUI
 * Ability to work with various object formats
 
+![image](https://github.com/user-attachments/assets/5340ac9b-0a6f-4758-803f-e5a5f15b18a3)
+
 ### Beam Simulation
 * Beam paths are automatically calculated based on component placement
 * Component placement can be defined "along beam" to remove the need for hard-coded coordinates
@@ -63,9 +65,10 @@ There are a few important things to ensure before you can use PyOpticL:
 
 ## Examples
 ### Modular Doublepass Baseplate
-<img width="900" alt="image" src="https://github.com/UMassIonTrappers/PyOpticL/assets/103533593/6677d37d-d2ab-4938-b119-7d9bdd488a76">
-<img width="900" alt="image" src="https://github.com/UMassIonTrappers/PyOpticL/assets/103533593/bcec73b6-b197-4c15-ab84-5962ccb32dcf">
+![image](https://github.com/user-attachments/assets/ad6c6617-a2f6-4cba-b60d-bde7d375bfb2)
 
-### ECDL Baseplate
+### Simple ECDL (all off-the-shelf components)
+![image](https://github.com/user-attachments/assets/41fba0be-d6c5-48b3-9fd5-c1e4fdddcd74)
+
 <img width="900" alt="image" src="https://github.com/UMassIonTrappers/PyOpticL/assets/103533593/9b169333-a5e8-4257-9e03-2dce2c6f0db3">
 <img width="900" alt="image" src="https://github.com/UMassIonTrappers/PyOpticL/assets/103533593/ade01d2c-99c3-4e50-8a99-1446ed10fab9">  
