@@ -1,4 +1,4 @@
-## PyOpticL - A FreeCAD Workbench and Python Library for Creating Optical Layouts
+## PyOpticL - Code-to-CAD optical layout for AMO experiments
 
 ![image](https://github.com/user-attachments/assets/6a2da406-1616-453c-b7e2-dd967f6639dc)
 
