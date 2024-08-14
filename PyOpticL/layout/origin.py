@@ -26,6 +26,8 @@ class Origin:
             App.Vector(0, 0, 0),
         )
 
+        self.obj.addProperty("App::PropertyPlacement", "ParentPlacement").ParentPlacement = App.Placement(App.Matrix())
+
     def place(self, obj):
         """Place an object in the relative coordinate system"""
 
@@ -65,7 +67,6 @@ class Origin:
 
 
 class ViewProvider:
-
     def __init__(self, obj):
         obj.Proxy = self
         self.Object = obj.Object
@@ -82,30 +83,21 @@ class ViewProvider:
             return self.Object.Children
         else:
             return []
-    # def updateData(self, base_obj, prop):
-    #     if prop in "Children":
-    #
-    #
-    #     for obj in App.ActiveDocument.Objects:
-    #         if hasattr(obj, "BasePlacement") and obj.Baseplate != None:
-    #             obj.Placement.Base = (
-    #                 obj.BasePlacement.Base + obj.Baseplate.Placement.Base
-    #             )
-    #             obj.Placement = App.Placement(
-    #                 obj.Placement.Base,
-    #                 obj.Baseplate.Placement.Rotation,
-    #                 -obj.BasePlacement.Base,
-    #             )
-    #             obj.Placement.Rotation = obj.Placement.Rotation.multiply(
-    #                 obj.BasePlacement.Rotation
-    #             )
 
-    # def onDelete(self, feature, subelements):
-    # # delete all elements when baseplate is deleted
-    # for i in App.ActiveDocument.Objects:
-    #     if i != feature.Object:
-    #         App.ActiveDocument.removeObject(i.Name)
-    # return True
+    def updateData(self, obj, prop):
+        if str(prop) == "ParentPlacement":
+            obj.Placement = obj.ParentPlacement * obj.BasePlacement
+
+            if hasattr(obj, "Children"):
+                for child in obj.Children:
+                    child.ParentPlacement = obj.Placement
+
+    def onDelete(self, feature, subelements):
+        # delete all elements when baseplate is deleted
+        for i in self.obj.Children:
+            if i != feature.Object:
+                App.ActiveDocument.removeObject(i.Name)
+        return True
 
     def getIcon(self):
         return
@@ -115,3 +107,4 @@ class ViewProvider:
 
     def __setstate__(self, state):
         return None
+

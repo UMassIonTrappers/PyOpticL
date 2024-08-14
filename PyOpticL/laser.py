@@ -40,9 +40,12 @@ def reflectRay(offset, normal, max_angle=90):
 
 def inRectangle(center, normal, edge1, edge2, checkPoint):
     """Returns true if the given point lies within the square defined by the vector to its center, its normal, and a vector from its center to a vertex (assumes that checkPoint is in the square's plane)"""
-    v = checkPoint.sub(center.sub(0.5 * (edge1.negative() + edge2.negative()))) # finds the position of checkPoint relative to the vertex
+    v = checkPoint.sub(center.sub(0.5 * (edge1 + edge2))) # finds the position of checkPoint relative to the vertex
+    print(f"originprime{center.sub(0.5 * (edge1 + edge2))}")
+    print(v)
     proj1 = edge1.dot(v) / edge1.Length
     proj2 = edge2.dot(v) / edge2.Length
+    print(proj1, proj2)
 
     if (proj1 >= 0 and proj1 <= edge1.Length) and (proj2 >= 0 and proj2 <= edge2.Length):
         return True
@@ -65,12 +68,11 @@ class Beam:
         self.obj.Proxy = self
         ViewProvider(self.obj.ViewObject)
 
-        self.obj.addProperty("App::PropertyVectorList", "Origins").Origins += [
-            App.Vector(position)
-        ]
-        self.obj.addProperty("App::PropertyVectorList", "Offsets").Offsets += [
-            App.Vector(direction).normalize()
-        ]
+        self.obj.addProperty("App::PropertyPlacement", "ParentPlacement").ParentPlacement = App.Placement(App.Matrix())
+        self.obj.addProperty("App::PropertyVector", "BaseOrigin").BaseOrigin = App.Vector(position)
+        self.obj.addProperty("App::PropertyVector", "BaseOffset").BaseOffset = App.Vector(direction).normalize()
+        self.obj.addProperty("App::PropertyVectorList", "Origins")
+        self.obj.addProperty("App::PropertyVectorList", "Offsets")
         self.obj.addProperty("App::PropertyFloatList", "Distances")
         self.obj.ViewObject.ShapeColor = (1, 0, 0)
 
@@ -95,6 +97,7 @@ class Beam:
         obj.obj.addProperty("App::PropertyBool", "Unplaced").Unplaced = True
 
         obj.obj.addProperty("App::PropertyLinkHidden", "Parent").Parent = self.obj
+        obj.obj.addProperty("App::PropertyPlacement", "ParentPlacement").ParentPlacement = App.Placement(App.Matrix())
 
         if not hasattr(self.obj, "InlineComponents"):
             self.obj.addProperty("App::PropertyLinkList", "InlineComponents")
@@ -104,7 +107,7 @@ class Beam:
 
     def execute(self, obj):
         shapes = []
-        for i in range(len(self.obj.Origins)):
+        for i in range(len(self.obj.Distances)):
             temp = Part.makeCylinder(
                 0.5, self.obj.Distances[i], self.obj.Origins[i], self.obj.Offsets[i], 0
             )
@@ -115,14 +118,15 @@ class Beam:
     def calculate(
         self, parent_placement=App.Placement(App.Matrix()), depth=0, beam_index=1
     ):
+        parent_placement=self.obj.ParentPlacement
         if depth > 250:
             return
 
         # do something and create a list of possible components and inline_components
 
-        for i in range(len(self.obj.Origins)):
-            self.obj.Origins[i] = parent_placement * self.obj.Origins[i]
-            self.obj.Offsets[i] = parent_placement.Rotation * self.obj.Offsets[i]
+        if beam_index == 1: # only transform first beam_start, rest will be absolute coord
+            self.obj.Origins += [parent_placement * self.obj.BaseOrigin]
+            self.obj.Offsets += [parent_placement.Rotation * self.obj.BaseOffset]
 
         optical_components = []
 
@@ -132,6 +136,8 @@ class Beam:
                     if i.Parent == self.obj or i.Unplaced:
                         continue
                 optical_components.append(i)
+
+        print(f"{self.obj.Label}: oc = {optical_components}")
 
         inline_components = []
 
@@ -197,10 +203,15 @@ class Beam:
                     self.calculate(
                         parent_placement, depth, beam_index=(beam_index << 1) + 1
                     )
+                    break
                 elif hit[0].Reflect:  # just reflect
                     self.obj.Offsets += [reflectRay(offset, hit[0].Normal)]  # TODO: check for max_angle
                 elif hit[0].Transmit:  # just transmit
                     self.obj.Offsets += [offset]  # TODO: check for max_angle
+                elif hit[0].Absorb:
+                    print('absorbed')
+                    self.obj.Origins = self.obj.Origins[:-1]
+                    break
             elif (
                 hasattr(self.obj, "InlineComponents")
                 and len(inline_components) > inline_index
@@ -216,8 +227,9 @@ class Beam:
 
                 last_hit = hit[0]
 
-                hit[0].Position = origin.add(hit[1] * offset)
-                hit[0].Proxy.calculate(depth=depth + 1, transform=False)
+                # hit[0].Position = origin.add(hit[1] * offset)
+                # hit[0].Proxy.calculate(depth=depth + 1, transform=False)
+                hit[0].ParentPlacement = App.Placement(origin.add(hit[1] * offset), App.Rotation(App.Vector(1, 0, 0), hit[0].Normal))
                 hit[0].Unplaced = False
                 optical_components += [inline_components[inline_index]]
 
@@ -230,12 +242,13 @@ class Beam:
                     self.calculate(
                         parent_placement, depth, beam_index=(beam_index << 1) + 1
                     )
+                    break
                 elif hit[0].Reflect:  # just reflect
                     self.obj.Offsets += [reflectRay(offset, hit[0].Normal)]  # TODO: check for max_angle
                 elif hit[0].Transmit:  # just transmit
                     self.obj.Offsets += [offset]  # TODO: check for max_angle
                 elif hit[0].Absorb:
-                    self.obj.Origin.pop(-1)
+                    self.obj.Origins = self.obj.Origins[:-1]
                     break
 
                 inline_index += 1

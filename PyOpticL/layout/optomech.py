@@ -513,7 +513,7 @@ class CylindricalOptic:
             )  # , rotation=rotation))
 
     def execute(self, obj):
-        part = Part.makeCylinder(self.obj.Radius, self.obj.Thickness)
+        part = Part.makeCylinder(self.obj.Radius, self.obj.Thickness, App.Vector(0, 0, 0), App.Vector(-1, 0, 0))
         obj.Shape = part
 
     def calculate(
@@ -1020,23 +1020,20 @@ class ViewProvider:
         else:
             return []
 
-    # def updateData(self, base_obj, prop):
-    #     if prop in "Children":
-    #
-    #
-    #     for obj in App.ActiveDocument.Objects:
-    #         if hasattr(obj, "BasePlacement") and obj.Baseplate != None:
-    #             obj.Placement.Base = (
-    #                 obj.BasePlacement.Base + obj.Baseplate.Placement.Base
-    #             )
-    #             obj.Placement = App.Placement(
-    #                 obj.Placement.Base,
-    #                 obj.Baseplate.Placement.Rotation,
-    #                 -obj.BasePlacement.Base,
-    #             )
-    #             obj.Placement.Rotation = obj.Placement.Rotation.multiply(
-    #                 obj.BasePlacement.Rotation
-    #             )
+    def updateData(self, obj, prop):
+        if str(prop) == "ParentPlacement":
+            obj.Position = obj.ParentPlacement.Base
+            if obj.OpticalShape == "circle":
+                obj.Normal = obj.ParentPlacement.Rotation * App.Vector(1, 0, 0)
+            elif obj.OpticalShape == "rectangle":
+                obj.Edge1 = obj.ParentPlacement.Rotation * obj.BaseEdge1
+                obj.Edge2 = obj.ParentPlacement.Rotation * obj.BaseEdge2
+            obj.Placement = obj.ParentPlacement
+            print('updated data')
+
+            if hasattr(obj, "Children"):
+                for child in obj.Children:
+                    child.ParentPlacement = obj.Placement
 
     # def onDelete(self, feature, subelements):
     # # delete all elements when baseplate is deleted

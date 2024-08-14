@@ -85,23 +85,14 @@ class ViewProvider:
     def getDefaultDisplayMode(self):
         return "Shaded"
 
-    # def updateData(self, base_obj, prop):
-    #     if prop in "Children":
-    #
-    #
-    #     for obj in App.ActiveDocument.Objects:
-    #         if hasattr(obj, "BasePlacement") and obj.Baseplate != None:
-    #             obj.Placement.Base = (
-    #                 obj.BasePlacement.Base + obj.Baseplate.Placement.Base
-    #             )
-    #             obj.Placement = App.Placement(
-    #                 obj.Placement.Base,
-    #                 obj.Baseplate.Placement.Rotation,
-    #                 -obj.BasePlacement.Base,
-    #             )
-    #             obj.Placement.Rotation = obj.Placement.Rotation.multiply(
-    #                 obj.BasePlacement.Rotation
-    #             )
+    def updateData(self, obj, prop):
+        if str(prop) == "ParentPlacement":
+            print('did updatedata')
+            obj.Placement = obj.ParentPlacement * obj.BasePlacement
+
+            if hasattr(obj, "Children"):
+                for child in obj.Children:
+                    child.ParentPlacement = obj.Placement
 
     # def onDelete(self, feature, subelements):
     # # delete all elements when baseplate is deleted
