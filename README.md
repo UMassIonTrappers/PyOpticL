@@ -1,7 +1,7 @@
-## PyOpticL - Code-to-CAD optical layout for AMO experiments
+## PyOpticL - Code-to-CAD optical design system for AMO experiments
 
-A minimal working example of a complete AMO laser system in PyOpticL:
-![image](https://github.com/user-attachments/assets/6a2da406-1616-453c-b7e2-dd967f6639dc)
+Example of design abstraction layers applied to a trapped ion system for strontium: 
+![image](https://github.com/user-attachments/assets/75341182-ff6c-4106-bd7c-8fa9ee56bba2)
 
 ## Useful Links
 
