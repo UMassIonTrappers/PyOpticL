@@ -121,8 +121,8 @@ def check_interaction(x1, y1, a1, ref_obj):
 # beam path freecad object
 class beam_path:
 
-    def __init__(self, obj, drill=True):
-
+    def __init__(self, obj, drill=True, free=False):
+        self.onBaseplate = not free
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         self.components = [[]]
@@ -193,6 +193,9 @@ class beam_path:
             for obj in selfobj.PathObjects:
                 if obj.BeamIndex == beam_index:
                     inline_comps.append(obj)
+
+            # print(inline_comps)
+            # print(comp_index)
             
             # get next inline component
             inline_obj = None
@@ -228,6 +231,8 @@ class beam_path:
                 if hasattr(obj, "Baseplate"):
                     if obj.Baseplate != selfobj.Baseplate:
                         continue
+                if hasattr(obj, "GridComponent") and obj.GridComponent:
+                    continue
                 check_objs.append(obj)
                 
             # find all interactions
@@ -235,10 +240,11 @@ class beam_path:
             comp_d =[]
             for obj in check_objs:
                 ref = check_interaction(x1, y1, a1, obj)
+                print(ref)
                 if ref != None:
                     refs.append(ref)
                     comp_d.append(sqrt((ref[1]-x1)**2+(ref[2]-y1)**2))
-            
+
             # pick nearest valid interaction
             inline_ref = False
             if len(refs) > 0:
@@ -250,6 +256,8 @@ class beam_path:
                     check_comp = final_ref[0].ParentObject
                 else:
                     check_comp = final_ref[0]
+
+                print(check_comp, inline_obj)
 
                 if check_comp == inline_obj:
                     inline_ref = True
@@ -285,7 +293,7 @@ class beam_path:
                 # restrict beam to baseplate
                 if selfobj.Baseplate.dx != 0 and selfobj.Baseplate.dy != 0:
                     intersect = []
-                    xf, yf = x1+500*cos(a1), y1+500*sin(a1) # TODO find a better way than this
+                    xf, yf = x1+11500*cos(a1), y1+11500*sin(a1) # TODO find a better way than this -- agreed
                     x_max = selfobj.Baseplate.dx.Value
                     y_max = selfobj.Baseplate.dy.Value
                     if x_max < xf:

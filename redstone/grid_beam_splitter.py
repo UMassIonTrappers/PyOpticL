@@ -27,6 +27,25 @@ def grid_beam_splitter(x=0, y=0, angle=0, Row_numnber = 6, Column_number = 6):
     #                                    beam_index=0b1, distance=19, angle=layout.cardinal['right'],
     #                                    mount_type=optomech.skate_mount)
 
+def grid_beam_splitter_along_beam(x=0, y=0, Row_numnber = 6, Column_number = 6, beam_obj, beam_index, angle, distance, baseplate, parity=1):
+    origin = baseplate.place_element_along_beam("beam_splitter_origin", optomech.cube_splitter, beam_obj, beam_index, angle, distance)
+
+    for i in range(Row_numnber):
+        for j in range(Column_number):
+            if (i == j ==0):
+                continue
+            baseplate.place_element_relative("beam_splitter_" + str(i) + str(j),
+                                             optomech.cube_splitter, origin, angle,
+                                             x_off=(-1 * parity * 
+                                                    np.sin(np.rad(angle)) * i * 2 * layout.inch),
+                                             y_off=(parity * np.cos(np.rad(angle)
+                                                                    * i * 2 * layout.inch)),
+                                             z_off=(2 * layout.inch * j))
+            # baseplate.place_element_general('beam_splitter_' + str(i) + str(j), optomech.cube_splitter, x=(2 * i + 1.25) * layout.inch , y=(2 * j + 1.25) * layout.inch, z=-25.5, angle_x = 0, angle_y = 45, angle_z = 90 ,mount_type=optomech.skate_mount_lying_down)
+    # beam_splitter = baseplate.place_element_along_beam("Beam Splitter", optomech.cube_splitter_rotate, beam,
+    #                                    beam_index=0b1, distance=19, angle=layout.cardinal['right'],
+    #                                    mount_type=optomech.skate_mount)
+
 if __name__ == "__main__":
     grid_beam_splitter(Row_numnber=6, Column_number=6)
     layout.redraw()
