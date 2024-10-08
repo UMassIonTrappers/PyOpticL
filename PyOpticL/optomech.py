@@ -2823,6 +2823,27 @@ class lens_mount_MT3A:
         # part.Placement = obj.Placement
         # obj.DrillPart = part
 #this is zhenyu editing
+class lens_mount_optosigma_TSD:
+    type = 'Mesh::FeaturePython'
+    # type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True):#, thumbscrews=False):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        # obj.addProperty('App::PropertyBool', 'ThumbScrews').ThumbScrews = thumbscrews
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+        obj.ViewObject.ShapeColor = mount_color
+
+    def execute(self, obj):
+        # mesh = _import_stl("POLARIS-K05S2-Step.stl", (90, -0, -90), (-4.514, 0.254-20, -0.254))
+        mesh = _import_stl("lens_mount_optosigma_TSD.stl", (0, 0, 180), (-10,-135.8,0))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+        part = _bounding_box(obj, 2,3)#,x_tol=True, y_tol=True, z_tol=True,min_offset=(0, 0, -40), max_offset=(40, 95, 0), plate_off=-28)
+        part.Placement = obj.Placement
+        obj.DrillPart = part
+#this is zhenyu editing
 class square_hollow:
     type = 'Mesh::FeaturePython'
     # type = 'Part::FeaturePython'
@@ -2852,7 +2873,7 @@ class square_hollow:
         # part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
         #                         x=-8.017, y=0, z=-layout.inch/2)
         # for i in [-1, 1]:
-        part = _bounding_box(obj, 20,3,x_tol=True, y_tol=True, z_tol=True,min_offset=(0, 0, -40), max_offset=(40, 95, 0), plate_off=-28)
+        part = _bounding_box(obj, 20,3,x_tol=True, y_tol=True, z_tol=True,min_offset=(0, 0, -40), max_offset=(70, 1000, 0), plate_off=-28)
         part.Placement = obj.Placement
         obj.DrillPart = part
 
