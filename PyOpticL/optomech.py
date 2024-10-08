@@ -1412,8 +1412,8 @@ class mirror_mount_km05_rot90:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
-        part = _bounding_box(obj, 2, 3, min_offset=(4.35, 0, 0))
-        part = part.fuse(_bounding_box(obj, 2, 3, max_offset=(0, 4, 0)))
+        part = _bounding_box(obj, 1, 3, min_offset=(3.35, 0, 0))
+        part = part.fuse(_bounding_box(obj, 1, 3, max_offset=(0, 3, 0)))
         part = _fillet_all(part, 3)
         part = part.fuse(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=inch,
                                           head_dia=bolt_8_32['head_dia']+1, head_dz=0.92*inch-obj.BoltLength.Value,
