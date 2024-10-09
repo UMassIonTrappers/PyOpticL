@@ -1905,6 +1905,72 @@ class fiberport_mount_km05:
         _add_linked_object(obj, "Lens Adapter", lens_adapter_s05tm09, pos_offset=(1.524+5, 0, 0))
         _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(1.524+3.167+5, 0, 0))
 
+#zhenyu editing
+class fiberport_mount_k1t1:
+    '''
+    Mirror mount, model KM05, adapted to use as fiberport mount
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+
+    Sub-Parts:
+        mirror_mount_km05 (mount_args)
+        fiber_adapter_sm05fca2
+        lens_tube_sm05l05
+        lens_adapter_s05tm09
+        mounted_lens_c220tmda
+    '''
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True, mount_args=dict()):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+
+        obj.ViewObject.ShapeColor = misc_color
+
+        _add_linked_object(obj, "Mount", mirror_mount_k1t1, pos_offset=(0, 0, 0), **mount_args)
+        _add_linked_object(obj, "Fiber Adapter", fiber_adapter_sm05fca2, pos_offset=(1.524, 0, 0))
+        _add_linked_object(obj, "Lens Tube", lens_tube_sm05l05, pos_offset=(1.524+3.812, 0, 0))
+        _add_linked_object(obj, "Lens Adapter", lens_adapter_s05tm09, pos_offset=(1.524+5, 0, 0))
+        _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(1.524+3.167+5, 0, 0))
+class mirror_mount_k1t1:
+    '''
+    Mirror mount, model K1t1
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mirror (bool) : Whether to add a mirror component to the mount
+
+    Sub-Parts:
+        circular_mirror (mirror_args)
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = mount_color
+        self.part_numbers = ['KM1T']
+
+    def execute(self, obj):
+        mesh = _import_stl("Fiberport_mount_k1t1.stl", (90, -0, -90), (97.06, 17.87, -10.35))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+        dz = -inch-obj.Mesh.BoundBox.ZMin
+        part = _bounding_box(obj, 3, 3, min_offset=(0, 0, dz))
+        part = part.fuse(_bounding_box(obj, 3, 3, z_tol=True, max_offset=(-28, 0, 0)))
+        part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
+                                          x=-16.94+1.18, y=0, z=-layout.inch/2, dir=(0,0,-1)))
+        for i in [-1, 1]:
+            part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
+                                              x=-15.667, y=i*5.05, z=-layout.inch/2-12.5))
+        part.Placement = obj.Placement
+        obj.DrillPart = part  
 
 class fiberport_mount_ks1t:
     '''
@@ -1935,7 +2001,63 @@ class fiberport_mount_ks1t:
         _add_linked_object(obj, "Lens Adapter", lens_adapter_s1tm09, pos_offset=(1.524+6, 0, 0))
         _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(1.524+2, 0, 0))
 
+# this is zhenyu editing
+class fiberport_mount_ks1t_with_tube:
+    '''
+    Mirror mount, model KM05, adapted to use as fiberport mount
 
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+
+    Sub-Parts:
+        mirror_mount_km05 (mount_args)
+        fiber_adapter_sm05fca2
+        lens_tube_sm05l05
+        lens_adapter_s05tm09
+        mounted_lens_c220tmda
+    '''
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True, mount_args=dict()):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+
+        obj.ViewObject.ShapeColor = misc_color
+
+        _add_linked_object(obj, "Mount", mirror_mount_ks1t, pos_offset=(0, 0, 0), **mount_args)
+        _add_linked_object(obj, "Fiber Adapter", fiber_adapter_sm1fca2, pos_offset=(-3, 0, 0))
+        # _add_linked_object(obj, "Lens Tube", lens_tube_sm1l05, pos_offset=(0, 0, 0))
+        _add_linked_object(obj, "Lens Adapter", lens_adapter_s1tm09, pos_offset=(1.524+6, 0, 0))
+        _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(1.524+2, 0, 0))
+        _add_linked_object(obj, "Lens Slot Tube", lens_slot_tube, pos_offset=(1.524+2+5, 0, 0))
+
+class lens_slot_tube:
+    '''
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = misc_color
+        # self.part_numbers = ['HCA3', 'PAF2-5A']
+        self.max_angle = 0
+        self.max_width = 1
+
+    def execute(self, obj):
+        mesh = _import_stl("SM1L10C_slot_tube.stl", (90, 180, -90), (18.35, 0.05, -81.87))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+        part = _bounding_box(obj, 3, 3, min_offset=(0, 0, -3))
+        part.Placement = obj.Placement
+        obj.DrillPart = part
 
 class km05_50mm_laser:
     '''
@@ -2822,6 +2944,24 @@ class lens_mount_MT3A:
         # part = _bounding_box(obj, 2,3)#,x_tol=True, y_tol=True, z_tol=True,min_offset=(0, 0, -40), max_offset=(40, 95, 0), plate_off=-28)
         # part.Placement = obj.Placement
         # obj.DrillPart = part
+# this is zhenyu editing
+class lens_mount_fmp1:
+    type = 'Mesh::FeaturePython'
+    # type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True):#, thumbscrews=False):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        # obj.addProperty('App::PropertyBool', 'ThumbScrews').ThumbScrews = thumbscrews
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+        obj.ViewObject.ShapeColor = mount_color
+        _add_linked_object(obj, 'surface_adapter', surface_adapter, pos_offset=(1.5 ,0 ,-22.1 ),rot_offset=(0, 0, 0))
+    def execute(self, obj):
+        # mesh = _import_stl("POLARIS-K05S2-Step.stl", (90, -0, -90), (-4.514, 0.254-20, -0.254))
+        mesh = _import_stl("lens_mount_FMP1.stl", (90,0, 90), (4.65,0,0))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
 #this is zhenyu editing
 class lens_mount_optosigma_TSD:
     type = 'Mesh::FeaturePython'
@@ -2843,6 +2983,27 @@ class lens_mount_optosigma_TSD:
         part = _bounding_box(obj, 2,3)#,x_tol=True, y_tol=True, z_tol=True,min_offset=(0, 0, -40), max_offset=(40, 95, 0), plate_off=-28)
         part.Placement = obj.Placement
         obj.DrillPart = part
+#this is zhenyu editing
+class lens_mount_optosigma_TSD_1inch_in:
+    type = 'Mesh::FeaturePython'
+    # type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True):#, thumbscrews=False):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        # obj.addProperty('App::PropertyBool', 'ThumbScrews').ThumbScrews = thumbscrews
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+        obj.ViewObject.ShapeColor = mount_color
+
+    def execute(self, obj):
+        # mesh = _import_stl("POLARIS-K05S2-Step.stl", (90, -0, -90), (-4.514, 0.254-20, -0.254))
+        mesh = _import_stl("lens_mount_optosigma_tsd_1inch_in.stl", (0, 0, 180), (16,-135.8,0))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+        # part = _bounding_box(obj, 2,3)#,x_tol=True, y_tol=True, z_tol=True,min_offset=(0, 0, -40), max_offset=(40, 95, 0), plate_off=-28)
+        # part.Placement = obj.Placement
+        # obj.DrillPart = part
 #this is zhenyu editing
 class square_hollow:
     type = 'Mesh::FeaturePython'
