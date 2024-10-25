@@ -445,7 +445,7 @@ class baseplate_cover:
         dx, yy (float): The dimentions of the table grid (in inches)
         z_off (float): The z offset of the top of the grid surface
     '''
-    def __init__(self, obj, baseplate, dz, wall_thickness=10, beam_tol=5, drill=True):
+    def __init__(self, obj, baseplate, dz, wall_thickness=1, beam_tol=5, drill=True):
         ViewProvider(obj.ViewObject)
         obj.Proxy = self
 

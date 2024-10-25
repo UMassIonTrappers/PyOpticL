@@ -548,6 +548,82 @@ class skate_mount_lying_down:
                                               x=0, y=i*obj.MountHoleDistance.Value/2, z=-obj.Baseplate.OpticsDz.Value+obj.CubeDz.Value/2))
         part.Placement = obj.Placement
         obj.DrillPart = part
+# this is zhenyu editing
+class skate_mount_crossholes:
+    '''
+    Skate mount for splitter cubes
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        cube_dx, cube_dy (float) : The side length of the splitter cube
+        mount_hole_dy (float) : The spacing between the two mount holes of the adapter
+        cube_depth (float) : The depth of the recess for the cube
+        outer_thickness (float) : The thickness of the walls around the bolt holes
+        cube_tol (float) : The tolerance for size of the recess in the skate mount
+    '''
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True, cube_dx=10, cube_dy=10, cube_dz=10, mount_hole_dy=20, cube_depth=1, outer_thickness=2, cube_tol=0.1, slots=False):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'CubeDx').CubeDx = cube_dy
+        obj.addProperty('App::PropertyLength', 'CubeDy').CubeDy = cube_dx
+        obj.addProperty('App::PropertyLength', 'CubeDz').CubeDz = cube_dz
+        obj.addProperty('App::PropertyLength', 'MountHoleDistance').MountHoleDistance = mount_hole_dy
+        obj.addProperty('App::PropertyLength', 'CubeDepth').CubeDepth = cube_depth+1e-3
+        obj.addProperty('App::PropertyLength', 'OuterThickness').OuterThickness = outer_thickness
+        obj.addProperty('App::PropertyLength', 'CubeTolerance').CubeTolerance = cube_tol
+        obj.addProperty('App::PropertyBool', 'Slots').Slots = slots
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = adapter_color
+        obj.setEditorMode('Placement', 2)
+
+    def execute(self, obj):
+        if obj.Slots:
+            slot = 5
+            dx = bolt_8_32['head_dia']+obj.OuterThickness.Value*2+slot
+        else:
+            slot = 0
+            dx = bolt_8_32['head_dia']+obj.OuterThickness.Value*2
+        dy = dx+obj.MountHoleDistance.Value
+        raw_dz = obj.Baseplate.OpticsDz.Value-obj.CubeDz.Value/2+obj.CubeDepth.Value
+        dz = max(raw_dz, 8)
+        cut_dy = obj.CubeDx.Value+obj.CubeTolerance.Value
+        cut_dx = obj.CubeDy.Value+obj.CubeTolerance.Value
+
+        part = _custom_box(dx=dx, dy=dy, dz=dz,
+                           x=0, y=0, z=-obj.Baseplate.OpticsDz.Value, fillet=5)
+        part = part.cut(_custom_box(dx=cut_dx, dy=cut_dy, dz=obj.CubeDepth.Value+1e-3,
+                                    x=0, y=0, z=-obj.Baseplate.OpticsDz.Value+dz-obj.CubeDepth.Value-1e-3))
+        
+        for i in [-1, 1]:
+            if obj.Slots:
+                part = part.cut(_custom_box(dx=slot+bolt_8_32['head_dia'], dy=bolt_8_32['head_dia'], dz=bolt_8_32['head_dz'],
+                                            x=0, y=i*obj.MountHoleDistance.Value/2, z=-obj.Baseplate.OpticsDz.Value+dz,
+                                            fillet=bolt_8_32['head_dia']/2, dir=(0,0,-1)))
+                part = part.cut(_custom_box(dx=slot+bolt_8_32['clear_dia'], dy=bolt_8_32['clear_dia'], dz=bolt_8_32['head_dz'],
+                                            x=0, y=i*obj.MountHoleDistance.Value/2, z=-obj.Baseplate.OpticsDz.Value+dz-bolt_8_32['head_dz'],
+                                            fillet=bolt_8_32['clear_dia']/2, dir=(0,0,-1)))
+            else:
+                part = part.cut(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=dz,
+                                                head_dia=bolt_8_32['head_dia'], head_dz=bolt_8_32['head_dz'],
+                                                x=0, y=i*obj.MountHoleDistance.Value/2, z=-obj.Baseplate.OpticsDz.Value+dz))
+            
+        part.translate(App.Vector(0, 0, obj.CubeDz.Value/2+(raw_dz-dz)))
+        part = part.fuse(part)
+        obj.Shape = part
+
+        part = _bounding_box(obj, 1, 6,min_offset=(-slot, 0, 0), max_offset=(slot, 0, 0))
+        for i in [-1, 1]:
+            part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
+                                              x=0, y=i*obj.MountHoleDistance.Value/2, z=-obj.Baseplate.OpticsDz.Value+obj.CubeDz.Value/2))
+        for i in [-1, 1]:
+            part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
+                                              y=0, x=i*obj.MountHoleDistance.Value/2, z=-obj.Baseplate.OpticsDz.Value+obj.CubeDz.Value/2))
+        part.Placement = obj.Placement
+        obj.DrillPart = part
 
 class skate_mount:
     '''
@@ -2234,34 +2310,31 @@ class km05_tec_upper_plate:
 
 class km05_tec_lower_plate:
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, width=1.5*inch, thickness=0.25*inch):
+    def __init__(self, obj, drill=True, width=3*inch, height=.25*inch, thickness=5*inch, part_number=''): #thickness=130-inch/2-1,
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
-        obj.addProperty('App::PropertyLength', 'Width').Width = width
         obj.addProperty('App::PropertyLength', 'Thickness').Thickness = thickness
-        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+        obj.addProperty('App::PropertyLength', 'Width').Width = width
+        obj.addProperty('App::PropertyLength', 'Height').Height = height
 
         obj.ViewObject.ShapeColor = adapter_color
+        self.part_numbers = [part_number]
 
     def execute(self, obj):
-        part = _custom_box(dx=obj.Width.Value, dy=obj.Width.Value, dz=obj.Thickness.Value,
-                                     x=0, y=0, z=-inch/2, dir=(0, 0, -1))
-        #for x, y in [(1,1), (1,-1), (-1,1), (-1,-1)]:
-        #    part = part.cut(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=obj.Thickness.Value,
-        #                                x=(obj.Width.Value/2-4)*x, y=(obj.Width.Value/2-4)*y, z=-inch/2, dir=(0, 0, -1)))
+        x_off = 0 #-2
+        y_off = 0 #-4
+        bolt_off = 2.5
+        part = _custom_box(dx=obj.Thickness.Value, dy=obj.Width.Value, dz=obj.Height.Value,
+                           x=x_off, y=y_off, z=-3/2*inch-3.95-obj.Thickness.Value, dir=(0, 0, -1))
+        
+        for x, y in [(0,0), (-1,1), (1,-1), (1,1)]:
+            part = part.cut(_custom_cylinder(dia=bolt_14_20['clear_dia'], dz=drill_depth,
+                                    head_dia=bolt_14_20["washer_dia"], head_dz=8,
+                                    x=1.5*inch*x+x_off, y=inch*y+y_off-bolt_off, z=-3/2*inch-3.95-inch/2))
+        
         obj.Shape = part
-
-        part = _bounding_box(obj, 3, 3)
-        for x, y in [(1,1), (1,-1), (-1,1), (-1,-1)]:
-            part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                                              x=(obj.Width.Value/2-4)*x, y=(obj.Width.Value/2-4)*y, z=0, dir=(0, 0, -1)))
-        part = part.fuse(_custom_box(dx=20, dy=5, dz=inch/2,
-                                     x=part.BoundBox.XMin, y=(part.BoundBox.YMax+part.BoundBox.YMin)/2, z=0,
-                                     dir=(-1, 0, -1)))
-        part.Placement = obj.Placement
-        obj.DrillPart = part
 
 
 class mirror_mount_mk05:
@@ -2583,7 +2656,7 @@ class prism_mount_km100pm:
 class laser_box:
 
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, thickness=130, width=90, height=80, mat_thickness=0, part_number=''):
+    def __init__(self, obj, drill=True, thickness=4.5*inch, width=3.5*inch, height=80, mat_thickness=0, part_number=''):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -2624,7 +2697,7 @@ class laser_box:
 class laser_base:
 
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, thickness=130-inch/2-1, width=100-inch/2-1, height=0, mat_thickness=0, part_number=''): #thickness=130-inch/2-1,
+    def __init__(self, obj, drill=True, thickness=4*inch, width=3*inch, height=0.25*inch, mat_thickness=0.25*inch, part_number=''): #thickness=130-inch/2-1,
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -2634,26 +2707,28 @@ class laser_base:
         obj.addProperty('App::PropertyLength', 'Height').Height = height
         obj.addProperty('App::PropertyLength', 'MatThickness').MatThickness = mat_thickness
 
-        obj.ViewObject.ShapeColor = misc_color
+        obj.ViewObject.ShapeColor = adapter_color
         self.part_numbers = [part_number]
 
     def execute(self, obj):
         x_off = -2
         y_off = -4
-        bolt_off = 5.5
+        bolt_off = 1.5
         part = _custom_box(dx=obj.Thickness.Value, dy=obj.Width.Value, dz=obj.Height.Value,
-                           x=x_off, y=y_off, z=-3/2*inch-3.95-obj.MatThickness.Value, dir=(0, 0, -1))
+                           x=x_off, y=y_off, z=-3/2*inch-3.95-obj.MatThickness.Value, dir=(0, 0, -2))
+        
         
         for x, y in [(-1,-1), (-1,1), (1,-1), (1,1)]:
-            part = part.cut(_custom_cylinder(dia=bolt_14_20['clear_dia'], dz=drill_depth,
-                                    head_dia=bolt_14_20["washer_dia"], head_dz=8,
-                                    x=1.5*inch*x+x_off, y=inch*y+y_off-bolt_off, z=-3/2*inch-3.95-inch/2))
+            
+            part = part.cut(_custom_cylinder(dia=6.6, dz=drill_depth,
+                                    head_dia=6.6, head_dz=8,
+                                    x=1.5*inch*x+x_off, y=inch*y+y_off-bolt_off, z=-3/2*inch-3.95-inch/2))  #bolt_14_20['tap_dia']
         
         obj.Shape = part
 
 class laser_mount_km100pm:
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, slot_length=0, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=6, stage_length=20, mat_thickness=0, littrow_angle=56.6): #49 for 674
+    def __init__(self, obj, drill=True, slot_length=0, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=6, stage_length=20, mat_thickness=10, littrow_angle=56.6): #49 for 674
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -2681,8 +2756,8 @@ class laser_mount_km100pm:
 
         mount = _add_linked_object(obj, "Mount KM100PM", prism_mount_km100pm, pos_offset=(2.032+13.96-3.8, -25.91+16, -18.67))
         _add_linked_object(obj, "Mount", fixed_mount_smr05, pos_offset=(2.032, 0, 0), rot_offset=(90, 0, 0), drill=False)
-        _add_linked_object(obj, "Box", laser_box, pos_offset=(-10, 0, 0), rot_offset=(0, 0, 0), mat_thickness=mat_thickness)
-       # _add_linked_object(obj, "Base", laser_base, pos_offset=(0, 0, 0), rot_offset=(0, 0, 0), mat_thickness=mat_thickness)
+        _add_linked_object(obj, "Box", laser_box, pos_offset=(0, 5, 0), rot_offset=(0, 0, 0), mat_thickness=mat_thickness)
+        _add_linked_object(obj, "Base", laser_base, pos_offset=(0, 5, .75*inch), rot_offset=(0, 0, 0), mat_thickness=mat_thickness)
 
         gap = 18
         lit_angle = radians(90-obj.LittrowAngle.Value)
@@ -2699,8 +2774,11 @@ class laser_mount_km100pm:
         _add_linked_object(obj, "Mirror", square_mirror, pos_offset=(mirror_dx+36.5, gap-3, -2.7), rot_offset=(0, 0, -obj.LittrowAngle.Value))
 
         upper_plate = _add_linked_object(obj, "Upper Plate", km05_tec_upper_plate, pos_offset=(2.032+13.96-3.8-13.96, 0, -inch/4-6.3), width=1.5*inch, drill_obj=mount)
-        _add_linked_object(obj, "TEC", TEC, pos_offset=(grating_dx+11.1, 0, -33.7), rot_offset=(90, 90, 90))
-        _add_linked_object(obj, "Lower Plate", km05_tec_lower_plate, pos_offset=(2.032+13.96-3.8-13.96, 0, -inch/4-6.3-4-upper_plate.Thickness.Value), width=2.5*inch)
+        _add_linked_object(obj, "TEC", TEC, pos_offset=(grating_dx+20, 0, -33.7), rot_offset=(90, 90, 90))
+        #_add_linked_object(obj, "Lower Plate", km05_tec_lower_plate, pos_offset=(2.032+13.96-3.8-13.96, 0, 5.25*inch), width=3*inch)
+
+        #-inch/4-6.3-4-0.25*inch
+        #upper_plate.Thickness.Value
 
     def execute(self, obj):
         dx = obj.ArmThickness.Value
