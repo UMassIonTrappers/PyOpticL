@@ -61,7 +61,7 @@ def _bounding_box(obj, tol, fillet, x_tol=True, y_tol=True, z_tol=False, min_off
         temp = obj
         while hasattr(temp, "ParentObject") and hasattr(temp.ParentObject, "RelativePlacement"):
             temp = temp.ParentObject
-            #obj_body.Placement *= temp.RelativePlacement
+        #    obj_body.Placement *= temp.RelativePlacement
     global_bound = obj_body.BoundBox
     obj_body.Placement = App.Placement()
     bound = obj_body.BoundBox
@@ -2656,7 +2656,8 @@ class prism_mount_km100pm:
 class laser_box:
 
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, thickness=4.5*inch, width=3.5*inch, height=80, mat_thickness=0, part_number=''):
+    def __init__(self, obj, drill=True, thickness=94.95 + inch/4*2 + 1 * inch, width=102.88 + inch/4*2, height=90, mat_thickness=0, part_number=''):
+        # (self, obj, drill=True, thickness=4.5*inch, width=3.5*inch, height=80, mat_thickness=0, part_number=''):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -2686,18 +2687,19 @@ class laser_box:
         part = part.cut(_custom_box(dx=obj.Thickness.Value/2, dy=20, dz=70,
                            x=x_off-obj.Thickness.Value/2, y=y_off+0, z=-2*inch-3.95-inch, dir=(0, 0, 1)))
         part = part.cut(_custom_cylinder(dia=20, dz=obj.Thickness.Value/2,
-                           x=x_off+obj.Thickness.Value/2, y=y_off+20.5+0, z=0, dir=(-1, 0, 0)))
+                           x=x_off+obj.Thickness.Value/2, y=y_off+20.5+0-5, z=0, dir=(-1, 0, 0)))
         
         part = part.cut(_custom_cylinder(dia=10, dz=obj.Thickness.Value/2,
-                           x=x_off-obj.Thickness.Value/2, y=y_off+25.5+0, z=19.1, dir=(1, 0, 0)))
+                           x=x_off-obj.Thickness.Value/2, y=y_off+25.5+0-5, z=19.1, dir=(1, 0, 0)))
         part = part.cut(_custom_cylinder(dia=10, dz=obj.Thickness.Value/2,
-                           x=x_off-obj.Thickness.Value/2, y=y_off-12.2+0, z=-18.6, dir=(1, 0, 0)))
+                           x=x_off-obj.Thickness.Value/2, y=y_off-12.2+0-5, z=-18.6, dir=(1, 0, 0)))
         obj.Shape = part
 
 class laser_base:
 
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, thickness=4*inch, width=3*inch, height=0.25*inch, mat_thickness=0.25*inch, part_number=''): #thickness=130-inch/2-1,
+    def __init__(self, obj, drill=True, thickness=94.95, width=102.88, height=0.25*inch, mat_thickness=0.25*inch, part_number=''):
+    #(self, obj, drill=True, thickness=4*inch, width=3*inch, height=0.25*inch, mat_thickness=0.25*inch, part_number=''): #thickness=130-inch/2-1,
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -2833,7 +2835,7 @@ class laser_mount_km100pm:
 #this is zhenyu editing
 class laser_mount_km100pm_LMR1:
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, slot_length=0, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=6, stage_length=20, mat_thickness=0, littrow_angle=43): #49 for 674
+    def __init__(self, obj, drill=True, slot_length=0, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=6, stage_length=20, mat_thickness=0, littrow_angle=53.43): #54 for 674
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -2864,7 +2866,7 @@ class laser_mount_km100pm_LMR1:
        # _add_linked_object(obj, "Box", laser_box, pos_offset=(-10, 0, 0), rot_offset=(0, 0, 0), mat_thickness=mat_thickness)
        # _add_linked_object(obj, "Base", laser_base, pos_offset=(0, 0, 0), rot_offset=(0, 0, 0), mat_thickness=mat_thickness)
 
-        gap = 18
+        gap = 23
         lit_angle = radians(90-obj.LittrowAngle.Value)
         beam_angle = radians(obj.LittrowAngle.Value)
         ref_len = gap/sin(2*beam_angle)
@@ -2902,7 +2904,7 @@ class laser_mount_km100pm_LMR1:
                                         fillet=bolt_4_40['head_dia']/2, dir=(-1, 0, 0)))
             
         extra_y = 0
-        gap = 18
+        gap = 23
         lit_angle = radians(90-obj.LittrowAngle.Value)
         beam_angle = radians(obj.LittrowAngle.Value)
         ref_len = gap/sin(2*beam_angle)

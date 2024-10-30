@@ -4,7 +4,7 @@ import Part
 import Draft
 from . import laser, optomech
 from pathlib import Path
-
+import MeshPart
 inch = 25.4
 
 cardinal = {"right":0,
@@ -445,7 +445,7 @@ class baseplate_cover:
         dx, yy (float): The dimentions of the table grid (in inches)
         z_off (float): The z offset of the top of the grid surface
     '''
-    def __init__(self, obj, baseplate, dz, wall_thickness=1, beam_tol=5, drill=True):
+    def __init__(self, obj, baseplate, dz, wall_thickness=10, beam_tol=5, drill=True):
         ViewProvider(obj.ViewObject)
         obj.Proxy = self
 
@@ -479,15 +479,30 @@ class baseplate_cover:
 
         if obj.Drill:
             for i in App.ActiveDocument.Objects:
-                if isinstance(i.Proxy, laser.beam_path) and i.Baseplate == baseplate:
+                # if isinstance(i.Proxy, laser.beam_path) and i.Baseplate == baseplate:
+                if isinstance(i, Part.Feature):
+                    obj.BeamTol.Value = 1
                     exploded = i.Shape.Solids
                     for shape in exploded:
-                        drill = optomech._bounding_box(shape, obj.BeamTol.Value, 2, z_tol=True, plate_off=-1)
+                        drill = optomech._bounding_box(shape, obj.BeamTol.Value, 1, z_tol=True, plate_off=-1)
                         drill.Placement = i.Placement
                         part = part.cut(drill)
+                elif isinstance(i, Mesh.Feature):
+                    obj.BeamTol.Value = 1
+                    mesh_data = i.Mesh
+                    if mesh_data:
+                        shape = Part.Shape()
+                        shape.makeShapeFromMesh(mesh_data.Topology, 2)
+                        if shape.isValid():
+                            exploded = shape.Solids
+                            for shape in exploded:
+                                drill = optomech._bounding_box(i.Mesh, obj.BeamTol.Value, 0, z_tol=True, plate_off=-1)
+                                drill.Placement = i.Placement
+                                part = part.cut(drill)
+                    
 
         if baseplate.CutLabel != "":
-            face = Draft.make_shapestring(baseplate.CutLabel, str(Path(__file__).parent.resolve()) + "/font/OpenSans-Regular.ttf", 5)
+            face = Draft.make_shapestring(baseplate.CutLabel, str(Path(__file__).parent.resolve()) + "/font/OpenSans-Regular.ttf", 15)
             if baseplate.InvertLabel:
                 face.Placement.Base = App.Vector(baseplate.Gap.Value, baseplate.dy.Value-baseplate.Gap.Value-2, -baseplate.OpticsDz.Value-6)
                 face.Placement.Rotation = App.Rotation(App.Vector(0, 0, 1), -90)*App.Rotation(App.Vector(1, 0, 0), 90)
