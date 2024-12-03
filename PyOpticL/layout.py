@@ -49,7 +49,7 @@ class baseplate:
         optics_dz (float): The optical height of baseplate
         invert_label (bool): Wheather to switch the face the label is embossed on
     '''
-    def __init__(self, dx=0, dy=0, dz=inch, x=0, y=0, angle=0, gap=0, name="Baseplate", drill=True, mount_holes=[], label="", x_offset=0, y_offset=0, optics_dz=inch/2, x_splits=[], y_splits=[], invert_label=False):
+    def __init__(self, dx=0, dy=0, dz=inch, x=0, y=0, angle=0, gap=0, name="Baseplate", drill=True, mount_holes=[], label="", x_offset=0, y_offset=0, optics_dz=inch/2, x_splits=[], y_splits=[], invert_label=False, z=0):
         obj = App.ActiveDocument.addObject('Part::FeaturePython', name)
         ViewProvider(obj.ViewObject)
         obj.Proxy = self
@@ -68,7 +68,7 @@ class baseplate:
         obj.addProperty('App::PropertyFloatList', 'ySplits').ySplits = y_splits
         obj.addProperty('App::PropertyLength', 'InvertLabel').InvertLabel = invert_label
 
-        obj.Placement = App.Placement(App.Vector(x*inch, y*inch, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
+        obj.Placement = App.Placement(App.Vector(x*inch, y*inch, z*inch), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
         self.active_baseplate = obj.Name
         obj.addProperty("App::PropertyLinkListHidden","ChildObjects")
         for x, y in mount_holes:
@@ -241,7 +241,7 @@ class baseplate:
             obj.GridComponent = True
         return obj
 
-    def add_beam_path(self, x, y, angle, name="Beam Path", color=(1.0, 0.0, 0.0)):
+    def add_beam_path(self, x, y, angle, name="Beam Path", color=(1.0, 0.0, 0.0), z = 0):
         '''
         Add a new dynamic beam path
 
@@ -258,7 +258,7 @@ class baseplate:
 
         obj.addProperty("App::PropertyLinkHidden","Baseplate").Baseplate = getattr(App.ActiveDocument, self.active_baseplate) 
         obj.addProperty("App::PropertyPlacement","BasePlacement")
-        obj.BasePlacement = App.Placement(App.Vector(x, y, 0), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
+        obj.BasePlacement = App.Placement(App.Vector(x, y, z), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
         obj.addProperty("App::PropertyLinkListHidden","PathObjects").PathObjects
         obj.ViewObject.ShapeColor = color
         return obj
