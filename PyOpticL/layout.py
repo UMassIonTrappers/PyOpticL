@@ -241,7 +241,7 @@ class baseplate:
             obj.GridComponent = True
         return obj
 
-    def add_beam_path(self, x, y, angle, name="Beam Path", color=(1.0, 0.0, 0.0)):
+    def add_beam_path(self, x, y, angle, name="Beam Path", color=(1.0, 0.0, 0.0), **args):
         '''
         Add a new dynamic beam path
 
@@ -254,7 +254,7 @@ class baseplate:
         obj = App.ActiveDocument.addObject('Part::FeaturePython', name)
         obj.Label = name
         laser.ViewProvider(obj.ViewObject)
-        laser.beam_path(obj)
+        laser.beam_path(obj, **args)
 
         obj.addProperty("App::PropertyLinkHidden","Baseplate").Baseplate = getattr(App.ActiveDocument, self.active_baseplate) 
         obj.addProperty("App::PropertyPlacement","BasePlacement")

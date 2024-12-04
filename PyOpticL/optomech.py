@@ -1408,6 +1408,73 @@ class EOM_:
         mesh = _import_stl("isomet_1205c.stl", (0, 0, 90), (0, 0, 0))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
+class rotation_stage_rsp1:
+    '''
+    Rotation stage, model RSP1
+
+    Args:
+        invert (bool) : Whether the mount should be offset 90 degrees from the component
+        mount_hole_dy (float) : The spacing between the two mount holes of it's adapter
+        wave_plate_part_num (string) : The Thorlabs part number of the wave plate being used
+
+    Sub-Parts:
+        surface_adapter (adapter_args)
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, invert=False, adapter_args=dict()):
+        adapter_args.setdefault("mount_hole_dy", 25)
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Invert').Invert = invert
+
+        obj.ViewObject.ShapeColor = misc_color
+        self.part_numbers = ['RSP1']
+
+        _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(5.461, 0, -27.73), rot_offset=(0, 0, 90*obj.Invert), **adapter_args)
+
+    def execute(self, obj):
+        mesh = _import_stl("RSP1-Step.stl", (180, -0, 90), (5.969, -0, 0))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+class mirror_mount_km100:
+    '''
+    Mirror mount, model KM100
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mirror (bool) : Whether to add a mirror component to the mount
+        thumbscrews (bool): Whether or not to add two HKTS 5-64 adjusters
+        bolt_length (float) : The length of the bolt used for mounting
+
+    Sub-Parts:
+        circular_mirror (mirror_args)
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = mount_color
+        self.part_numbers = ['KM100']
+
+    def execute(self, obj):
+        mesh = _import_stl("KM100-Step.stl", (-180, 0, -90), (4.972, 0.084, -1.089))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+        #part = _bounding_box(obj, 2, 3, min_offset=(4.35, 0, 0))
+        #part = part.fuse(_bounding_box(obj, 2, 3, max_offset=(0, -20, 0)))
+        #part = _fillet_all(part, 3)
+        #part = part.fuse(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=inch,
+        #                                  head_dia=bolt_8_32['head_dia'], head_dz=0.92*inch-obj.BoltLength.Value+drill_depth,
+        #                                  x=-7.29, y=0, z=-inch*3/2-drill_depth, dir=(0,0,1)))
+        #part.Placement = obj.Placement
+        #obj.DrillPart = part
         
 class mirror_mount_km05:
     '''
@@ -3265,8 +3332,99 @@ class isolator_405:
                            fillet=5, dir=(0, 0, 1))
         part.Placement = obj.Placement
         obj.DrillPart = part
+class rb_cell_holder_old:
+    '''
+    Rubidium Cell Holder
 
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
 
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = adapter_color
+
+    def execute(self, obj):
+        mesh = _import_stl("rb_cell_holder_middle.stl", (0, 0, 0), ([0, 5, 0]))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+        part = _bounding_box(obj, 6, 3)
+        dx = 90
+        for x, y in [(1,1), (-1,1), (1,-1), (-1,-1)]:
+            part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
+                                         x=x*dx/2, y=y*15.7, z=-layout.inch/2))
+        part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
+                                     x=45, y=-15.7, z=-layout.inch/2))
+        for x in [1,-1]:
+            part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
+                                         x=x*dx/2, y=25.7, z=-layout.inch/2))
+        part.Placement = obj.Placement
+        obj.DrillPart = part
+class photodiode_fds010:
+    '''
+    Photodiode, model FDS010
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = True
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = misc_color
+        self.part_numbers = ['FDS010']
+        self.max_angle = 0
+        self.max_width = 1
+
+    def execute(self, obj):
+        mesh = _import_stl("FDS010-Step.stl", (-90, -90, 0), (-0.7, 0, 0))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+        part = _custom_cylinder(dia=8.5, dz=4,
+                                x=0, y=0, z=0, dir=(1, 0, 0))
+        part.Placement = obj.Placement
+        obj.DrillPart = part
+class rb_cell_cube:
+    '''
+    Rubidium Cell Holder
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+    '''
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, cube_size=10, mount_type=None, mount_args=dict(), drill=True):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyLength', 'CubeSize').CubeSize = cube_size
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = glass_color
+        obj.ViewObject.Transparency=50
+        self.transmission = True
+        self.max_angle = 10
+        self.max_width = 1
+
+    def execute(self, obj):
+        part = _custom_box(dx=obj.CubeSize.Value, dy=obj.CubeSize.Value, dz=obj.CubeSize.Value,
+                           x=0, y=0, z=0, dir=(0, 0, 0))
+        obj.Shape = part
+        
+        part = _bounding_box(obj, 0, 0)
+        for x, y in [(-1,-1), (-1,1), (1,-1), (1,1)]:
+            part = part.fuse(_custom_cylinder(dia=5, dz=drill_depth,
+                                            x=x*obj.CubeSize.Value/2, y=y*obj.CubeSize.Value/2, z=-obj.CubeSize.Value/2, dir=(0, 0, 1)))
+        part.Placement = obj.Placement
+        obj.DrillPart = part
 class rb_cell:
     '''
     Rubidium Cell Holder

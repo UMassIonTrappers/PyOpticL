@@ -121,35 +121,17 @@ def check_interaction(x1, y1, a1, ref_obj):
 # beam path freecad object
 class beam_path:
 
-    def __init__(self, obj, drill=True, free=False):
-        self.onBaseplate = not free
+    def __init__(self, obj, drill=True, width=0.5, drill_width=1.5):
+
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+        obj.addProperty('App::PropertyLength', 'Width').Width = width
+        obj.addProperty('App::PropertyLength', 'DrillWidth').DrillWidth = drill_width
         self.components = [[]]
 
     def __getstate__(self):
         return None
-
-    # TODO clean and implement this for baseplate covers
-    def _get_drill(self, obj):
-        width = 50
-        part = Part.makeSphere(1)
-        for i in self.beams:
-            length = i[3]
-            if length == 0:
-                length = 50
-            temp = Part.makeBox(length+width, width, 100)
-            for x in temp.Edges:
-                if x.tangentAt(x.FirstParameter) == App.Vector(0, 0, 1):
-                    temp = temp.makeFillet(width/2-1e-3, [x])
-            temp.translate(App.Vector(-width/2, -width/2, -inch/2))
-            temp.rotate(App.Vector(0, 0, 0), App.Vector(0, 0, 1), degrees(i[2]))
-            temp.translate(App.Vector(i[0], i[1], 0))
-            part = part.fuse(temp)
-        part.translate(App.Vector(-self.x, -self.y, 0))
-        part.rotate(App.Vector(0, 0, 0),App.Vector(0, 0, 1), degrees(-self.a))
-        part = part.fuse(part)
-        return part
 
     def execute(self, obj):
         # get placement
@@ -168,13 +150,27 @@ class beam_path:
             length = i[3]
             if length == 0:
                 length = 50
-            temp = Part.makeCylinder(0.5, length, App.Vector(i[0], i[1], 0), App.Vector(cos(i[2]), sin(i[2]), 0))
+            temp = Part.makeCylinder(obj.Width.Value, length, App.Vector(i[0], i[1], 0), App.Vector(cos(i[2]), sin(i[2]), 0))
             shapes.append(temp)
         comp = Part.Compound(shapes)
         comp.translate(App.Vector(-self.x, -self.y, 0))
         comp.rotate(App.Vector(0, 0, 0),App.Vector(0, 0, 1), degrees(-self.a))
         comp = comp.fuse(comp)
         obj.Shape = comp
+
+        part = Part.makeSphere(0)
+        for i in self.beams:
+            length = i[3]
+            if length == 0:
+                length = 50
+            temp = Part.makeCylinder(obj.DrillWidth.Value, length, App.Vector(i[0], i[1], 0), App.Vector(cos(i[2]), sin(i[2]), 0))
+            part = part.fuse(temp)
+
+        part.translate(App.Vector(-self.x, -self.y, 0))
+        part.rotate(App.Vector(0, 0, 0),App.Vector(0, 0, 1), degrees(-self.a))
+        part = part.fuse(part)
+        part.Placement = obj.Placement
+        obj.DrillPart = part
 
     # compute full beam path given start point and angle
     def calculate_beam_path(self, selfobj, x1, y1, a1, beam_index=1):
@@ -193,9 +189,6 @@ class beam_path:
             for obj in selfobj.PathObjects:
                 if obj.BeamIndex == beam_index:
                     inline_comps.append(obj)
-
-            # print(inline_comps)
-            # print(comp_index)
             
             # get next inline component
             inline_obj = None
@@ -231,8 +224,6 @@ class beam_path:
                 if hasattr(obj, "Baseplate"):
                     if obj.Baseplate != selfobj.Baseplate:
                         continue
-                if hasattr(obj, "GridComponent") and obj.GridComponent:
-                    continue
                 check_objs.append(obj)
                 
             # find all interactions
@@ -240,11 +231,10 @@ class beam_path:
             comp_d =[]
             for obj in check_objs:
                 ref = check_interaction(x1, y1, a1, obj)
-                print(ref)
                 if ref != None:
                     refs.append(ref)
                     comp_d.append(sqrt((ref[1]-x1)**2+(ref[2]-y1)**2))
-
+            
             # pick nearest valid interaction
             inline_ref = False
             if len(refs) > 0:
@@ -256,8 +246,6 @@ class beam_path:
                     check_comp = final_ref[0].ParentObject
                 else:
                     check_comp = final_ref[0]
-
-                print(check_comp, inline_obj)
 
                 if check_comp == inline_obj:
                     inline_ref = True
@@ -293,7 +281,7 @@ class beam_path:
                 # restrict beam to baseplate
                 if selfobj.Baseplate.dx != 0 and selfobj.Baseplate.dy != 0:
                     intersect = []
-                    xf, yf = x1+11500*cos(a1), y1+11500*sin(a1) # TODO find a better way than this -- agreed
+                    xf, yf = x1+500*cos(a1), y1+500*sin(a1) # TODO find a better way than this
                     x_max = selfobj.Baseplate.dx.Value
                     y_max = selfobj.Baseplate.dy.Value
                     if x_max < xf:
