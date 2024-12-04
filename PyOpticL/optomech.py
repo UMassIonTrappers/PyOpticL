@@ -2009,8 +2009,8 @@ class mirror_mount_ks1t:
         mesh = _import_stl("KS1T-Step.stl", (90, -0, -90), (22.06, 13.37, -30.35))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
-
-        dz = -inch-obj.Mesh.BoundBox.ZMin
+        dz = -0.5
+        # dz = -inch-obj.Mesh.BoundBox.ZMin
         part = _bounding_box(obj, 3, 3, min_offset=(0, 0, dz))
         part = part.fuse(_bounding_box(obj, 3, 3, z_tol=True, max_offset=(-28, 0, 0)))
         part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
@@ -2103,8 +2103,8 @@ class mirror_mount_k1t1:
         mesh = _import_stl("Fiberport_mount_k1t1.stl", (90, -0, -90), (97.06, 17.87, -10.35))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
-
-        dz = -inch-obj.Mesh.BoundBox.ZMin
+        dz = -0.5
+        # dz = -inch-obj.Mesh.BoundBox.ZMin
         part = _bounding_box(obj, 3, 3, min_offset=(0, 0, dz))
         part = part.fuse(_bounding_box(obj, 3, 3, z_tol=True, max_offset=(-28, 0, 0)))
         part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
