@@ -2757,7 +2757,7 @@ class laser_base:
 
 class laser_mount_km100pm:
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, slot_length=0, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=6, stage_length=20, mat_thickness=10, littrow_angle=54): #49 for 674
+    def __init__(self, obj, drill=True, slot_length=0, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=6, stage_length=20, mat_thickness=10, littrow_angle=55): #49 for 674
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -2806,8 +2806,8 @@ class laser_mount_km100pm:
         #_add_linked_object(obj, "Box", laser_box, pos_offset=(0, 0, .25*inch), rot_offset=(0, 0, 0), mat_thickness=mat_thickness)
 
     def execute(self, obj):
-        dx = obj.ArmThickness.Value +10
-        dy = 55
+        dx = obj.ArmThickness.Value
+        dy = 45
         dz = 17
         stage_dx = obj.StageLength.Value
         stage_dz = obj.StageThickness.Value
