@@ -3551,34 +3551,41 @@ class rb_cell:
     Args:
         drill (bool) : Whether baseplate mounting for this part should be drilled
     '''
-    type = 'Mesh::FeaturePython'
-    def __init__(self, obj, drill=True):
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, mount_type=None, mount_args=dict(), drill=True):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty('Part::PropertyPartShape', 'DrillPart')
 
-        obj.ViewObject.ShapeColor = adapter_color
+        obj.ViewObject.ShapeColor = glass_color
         self.transmission = True
         self.max_angle = 10
         self.max_width = 1
 
-    def execute(self, obj):
-        mesh = _import_stl("rb_cell_holder_middle.stl", (0, 0, 0), ([0, 5, 0]))
-        mesh.Placement = obj.Mesh.Placement
-        obj.Mesh = mesh
+        if mount_type != None:
+            _add_linked_object(obj, "Mount", mount_type, **mount_args)
 
-        part = _bounding_box(obj, 6, 3)
-        dx = 90
-        for x, y in [(1,1), (-1,1), (1,-1), (-1,-1)]:
-            part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                                         x=x*dx/2, y=y*15.7, z=-layout.inch/2))
-        part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                                     x=45, y=-15.7, z=-layout.inch/2))
-        for x in [1,-1]:
-            part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                                         x=x*dx/2, y=25.7, z=-layout.inch/2))
+    def execute(self, obj):
+        cell_dx = 80
+        cell_dia = 22
+        end_dia = 26
+        part = _custom_cylinder(dia=cell_dia, dz=cell_dx,
+                                x=-cell_dx/2, y=0, z=0,
+                                dir=(1, 0, 0))
+        part = part.fuse(_custom_cylinder(dia=end_dia, dz=8,
+                                          x=-cell_dx/2, y=0, z=0,
+                                          dir=(1, 0, 0)))
+        part = part.fuse(_custom_cylinder(dia=end_dia, dz=8,
+                                          x=cell_dx/2, y=0, z=0,
+                                          dir=(-1, 0, 0)))
+        
+        obj.Shape = part
+
+        temp = _bounding_box(obj, 0, 0, min_offset=(0, 0, cell_dia/2))
+        part = part.fuse(temp)
+
         part.Placement = obj.Placement
         obj.DrillPart = part
 
