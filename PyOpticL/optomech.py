@@ -2073,10 +2073,14 @@ class fiberport_mount_k1t1:
         obj.ViewObject.ShapeColor = misc_color
 
         _add_linked_object(obj, "Mount", mirror_mount_k1t1, pos_offset=(0, 0, 0), **mount_args)
-        _add_linked_object(obj, "Fiber Adapter", fiber_adapter_sm05fca2, pos_offset=(1.524, 0, 0))
-        _add_linked_object(obj, "Lens Tube", lens_tube_sm05l05, pos_offset=(1.524+3.812, 0, 0))
-        _add_linked_object(obj, "Lens Adapter", lens_adapter_s05tm09, pos_offset=(1.524+5, 0, 0))
-        _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(1.524+3.167+5, 0, 0))
+        # _add_linked_object(obj, "Fiber Adapter", fiber_adapter_sm05fca2, pos_offset=(1.524, 0, 0))
+        # _add_linked_object(obj, "Lens Tube", lens_tube_sm05l05, pos_offset=(1.524+3.812, 0, 0))
+        # _add_linked_object(obj, "Lens Adapter", lens_adapter_s05tm09, pos_offset=(1.524+5, 0, 0))
+        # _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(1.524+3.167+5, 0, 0))
+        _add_linked_object(obj, "Fiber Adapter", fiber_adapter_sm1fca2, pos_offset=(-3, 0, 0))
+        _add_linked_object(obj, "Lens Tube", lens_tube_sm1l05, pos_offset=(0+10.6, 0, 0))
+        _add_linked_object(obj, "Lens Adapter", lens_adapter_s1tm09, pos_offset=(1.524+6+13.6, 0, 0))
+        _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(1.524+2, 0, 0))
 class mirror_mount_k1t1:
     '''
     Mirror mount, model K1t1
@@ -3120,7 +3124,9 @@ class lens_mount_MT3A:
 class lens_mount_fmp1:
     type = 'Mesh::FeaturePython'
     # type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True):#, thumbscrews=False):
+    def __init__(self, obj, drill=True, adapter_args = {}):#, thumbscrews=False):
+        adapter_args.setdefault("mount_hole_dy", 35)
+        adapter_args.setdefault("outer_thickness", 3)
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -3128,12 +3134,62 @@ class lens_mount_fmp1:
         # obj.addProperty('App::PropertyBool', 'ThumbScrews').ThumbScrews = thumbscrews
         obj.addProperty('Part::PropertyPartShape', 'DrillPart')
         obj.ViewObject.ShapeColor = mount_color
-        _add_linked_object(obj, 'surface_adapter', surface_adapter, pos_offset=(1.5 ,0 ,-22.1 ),rot_offset=(0, 0, 0))
+        _add_linked_object(obj, 'surface_adapter', surface_adapter_wide, pos_offset=(1.5 ,0 ,-22.1 ),rot_offset=(0, 0, 0), **adapter_args)
+
     def execute(self, obj):
         # mesh = _import_stl("POLARIS-K05S2-Step.stl", (90, -0, -90), (-4.514, 0.254-20, -0.254))
         mesh = _import_stl("lens_mount_FMP1.stl", (90,0, 90), (4.65,0,0))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
+
+class surface_adapter_wide:
+    '''
+    Surface adapter for post-mounted parts
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mount_hole_dy (float) : The spacing between the two mount holes of the adapter
+        adapter_height (float) : The height of the suface adapter
+        outer_thickness (float) : The thickness of the walls around the bolt holes
+    '''
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True, mount_hole_dy=20, adapter_height=8, outer_thickness=2):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'MountHoleDistance').MountHoleDistance = mount_hole_dy
+        obj.addProperty('App::PropertyLength', 'AdapterHeight').AdapterHeight = adapter_height
+        obj.addProperty('App::PropertyLength', 'OuterThickness').OuterThickness = outer_thickness
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = adapter_color
+        obj.setEditorMode('Placement', 2)
+        self.drill_tolerance = 1
+
+    def execute(self, obj):
+        dx = bolt_8_32['head_dia']+obj.OuterThickness.Value*2
+        dy = dx+obj.MountHoleDistance.Value
+        dz = obj.AdapterHeight.Value
+
+        part = _custom_box(dx=dx, dy=dy, dz=dz,
+                           x=0, y=0, z=0, dir=(0, 0, -1),
+                           fillet=5)
+        part = part.cut(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=dz,
+                                         head_dia=bolt_8_32['head_dia'], head_dz=bolt_8_32['head_dz'],
+                                         x=0, y=0, z=-dz, dir=(0,0,1)))
+        for i in [-1, 1]:
+            part = part.cut(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=dz,
+                                             head_dia=bolt_8_32['head_dia'], head_dz=bolt_8_32['head_dz'],
+                                             x=0, y=i*obj.MountHoleDistance.Value/2, z=0))
+        obj.Shape = part
+
+        part = _bounding_box(obj, self.drill_tolerance, 6)
+        for i in [-1, 1]:
+            part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
+                                              x=0, y=i*obj.MountHoleDistance.Value/2, z=0))
+        part.Placement = obj.Placement
+        obj.DrillPart = part
 #this is zhenyu editing
 class lens_mount_optosigma_TSD:
     type = 'Mesh::FeaturePython'
