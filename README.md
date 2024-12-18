@@ -1,7 +1,13 @@
 ## PyOpticL - Code-to-CAD optical design system for AMO experiments
 
-Example of design abstraction layers applied to a strontium trapped ion quantum computer: 
-![image](https://github.com/user-attachments/assets/75341182-ff6c-4106-bd7c-8fa9ee56bba2)
+Trapped Ion quantum computer at UMass Amherst made with PyOpticL:
+
+<img src="https://github.com/user-attachments/assets/1dbe2986-20e2-4f4e-9b4c-00dd31a4b656" width=50%>
+
+Design abstraction layers applied to a strontium trapped ion quantum computer:
+
+<img src="https://github.com/user-attachments/assets/75341182-ff6c-4106-bd7c-8fa9ee56bba2" width=50%>
+
 
 ## Useful Links
 
