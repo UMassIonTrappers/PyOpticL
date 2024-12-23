@@ -203,7 +203,7 @@ class baseplate_mount:
 
         part = _custom_cylinder(dia=bolt_14_20['tap_dia'], dz=bolt_len,
                                 head_dia=bolt_14_20['head_dia'], head_dz=bolt_14_20['head_dz'],
-                                x=0, y=0, z=-inch*3/2+bolt_len)
+                                x=0, y=0, z=-(obj.Baseplate.OpticsDz.Value + obj.Baseplate.dz.Value)+bolt_len)
         obj.Shape = part
 
         part = _custom_cylinder(dia=bolt_14_20['clear_dia'], dz=drill_depth,
@@ -1458,7 +1458,7 @@ class mirror_mount_km100:
 
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
         obj.addProperty('Part::PropertyPartShape', 'DrillPart')
-
+        obj.addProperty('App::PropertyLength', 'BoltLength').BoltLength = 15
         obj.ViewObject.ShapeColor = mount_color
         self.part_numbers = ['KM100']
 
@@ -1467,14 +1467,15 @@ class mirror_mount_km100:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
-        #part = _bounding_box(obj, 2, 3, min_offset=(4.35, 0, 0))
-        #part = part.fuse(_bounding_box(obj, 2, 3, max_offset=(0, -20, 0)))
-        #part = _fillet_all(part, 3)
-        #part = part.fuse(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=inch,
-        #                                  head_dia=bolt_8_32['head_dia'], head_dz=0.92*inch-obj.BoltLength.Value+drill_depth,
-        #                                  x=-7.29, y=0, z=-inch*3/2-drill_depth, dir=(0,0,1)))
-        #part.Placement = obj.Placement
-        #obj.DrillPart = part
+        part = _bounding_box(obj, 2, 3, min_offset=(4.35, 0, 0))
+        part = part.fuse(_bounding_box(obj, 2, 3, max_offset=(0, -20, 0)))
+        part = _fillet_all(part, 3)
+        part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=inch+100,
+                                        #  head_dia=bolt_8_32['head_dia'], head_dz=0.92*inch-obj.BoltLength.Value+drill_depth+10,
+                                         x=-7.29-1.19, y=0, z=-inch*3/2-drill_depth, dir=(0,0,1)))
+        part = part.fuse(_custom_box(dx = 20, dy= 22, dz= 6, x=-7.29-18.9, y=-7.29-11.9, z=-31, fillet=3, dir=(0,0,1), fillet_dir=None))
+        part.Placement = obj.Placement
+        obj.DrillPart = part
         
 class mirror_mount_km05:
     '''
@@ -2083,34 +2084,34 @@ class splitter_mount_b1g:
                                               x=-5, y=i*5, z=-layout.inch/2))
         part.Placement = obj.Placement
         obj.DrillPart = part
-class mirror_mount_km100:
-    '''
-    Mirror mount, model KM100
+# class mirror_mount_km100:
+#     '''
+#     Mirror mount, model KM100
 
-    Args:
-        drill (bool) : Whether baseplate mounting for this part should be drilled
-        mirror (bool) : Whether to add a mirror component to the mount
-        thumbscrews (bool): Whether or not to add two HKTS 5-64 adjusters
-        bolt_length (float) : The length of the bolt used for mounting
+#     Args:
+#         drill (bool) : Whether baseplate mounting for this part should be drilled
+#         mirror (bool) : Whether to add a mirror component to the mount
+#         thumbscrews (bool): Whether or not to add two HKTS 5-64 adjusters
+#         bolt_length (float) : The length of the bolt used for mounting
 
-    Sub-Parts:
-        circular_mirror (mirror_args)
-    '''
-    type = 'Mesh::FeaturePython'
-    def __init__(self, obj, drill=True):
-        obj.Proxy = self
-        ViewProvider(obj.ViewObject)
+#     Sub-Parts:
+#         circular_mirror (mirror_args)
+#     '''
+#     type = 'Mesh::FeaturePython'
+#     def __init__(self, obj, drill=True):
+#         obj.Proxy = self
+#         ViewProvider(obj.ViewObject)
 
-        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
-        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+#         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+#         obj.addProperty('Part::PropertyPartShape', 'DrillPart')
 
-        obj.ViewObject.ShapeColor = mount_color
-        self.part_numbers = ['KM100']
+#         obj.ViewObject.ShapeColor = mount_color
+#         self.part_numbers = ['KM100']
 
-    def execute(self, obj):
-        mesh = _import_stl("KM100-Step.stl", (-180, 0, -90), (4.972, 0.084, -1.089))
-        mesh.Placement = obj.Mesh.Placement
-        obj.Mesh = mesh
+#     def execute(self, obj):
+#         mesh = _import_stl("KM100-Step.stl", (-180, 0, -90), (4.972, 0.084, -1.089))
+#         mesh.Placement = obj.Mesh.Placement
+#         obj.Mesh = mesh
 #zhenyu editing
 class fiberport_mount_k1t1:
     '''
@@ -2141,7 +2142,7 @@ class fiberport_mount_k1t1:
         # _add_linked_object(obj, "Lens Adapter", lens_adapter_s05tm09, pos_offset=(1.524+5, 0, 0))
         # _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(1.524+3.167+5, 0, 0))
         _add_linked_object(obj, "Fiber Adapter", fiber_adapter_sm1fca2, pos_offset=(-3, 0, 0))
-        _add_linked_object(obj, "Lens Tube", lens_tube_sm1l05, pos_offset=(0+10.6, 0, 0))
+        _add_linked_object(obj, "Lens Tube", lens_tube_sm1l05, pos_offset=(0+10.6-2-2, 0, 0))
         _add_linked_object(obj, "Lens Adapter", lens_adapter_s1tm09, pos_offset=(1.524+6+13.6, 0, 0))
         _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(1.524+2, 0, 0))
 class mirror_mount_k1t1:
@@ -2173,7 +2174,7 @@ class mirror_mount_k1t1:
         dz = -0.5
         # dz = -inch-obj.Mesh.BoundBox.ZMin
         part = _bounding_box(obj, 3, 3, min_offset=(0, 0, dz))
-        part = part.fuse(_bounding_box(obj, 3, 3, z_tol=True, max_offset=(-28, 0, 0)))
+        part = part.fuse(_bounding_box(obj, 3, 3, z_tol=True, max_offset=(-28-2-5, 0, 0)))
         part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
                                           x=-16.94+1.18, y=0, z=-layout.inch/2, dir=(0,0,-1)))
         for i in [-1, 1]:
@@ -3325,7 +3326,7 @@ class square_hollow:
         # part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
         #                         x=-8.017, y=0, z=-layout.inch/2)
         # for i in [-1, 1]:
-        part = _bounding_box(obj, 20,3,x_tol=True, y_tol=True, z_tol=True,min_offset=(0, 0, -40), max_offset=(70, 1000, 0), plate_off=-28)
+        part = _bounding_box(obj, 20,3,x_tol=True, y_tol=True, z_tol=True,min_offset=(0, 0, -40), max_offset=(70, 1000, 0), plate_off=-48)
         part.Placement = obj.Placement
         obj.DrillPart = part
 
