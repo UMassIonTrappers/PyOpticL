@@ -484,6 +484,13 @@
     Sub-Parts:  
         surface_adapter  
     
+### rb_cell_cylindrical
+  
+    Rubidium Cell Holder  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+    
 ### rb_cell
   
     Rubidium Cell Holder  
