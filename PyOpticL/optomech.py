@@ -1947,8 +1947,8 @@ class isolator_405:
         part.Placement = obj.Placement
         obj.DrillPart = part
 
-
-class rb_cell:
+# this is cylindrical rb_cell version, more used in demo
+class rb_cell_cylindrical:
     '''
     Rubidium Cell Holder
 
@@ -1993,6 +1993,43 @@ class rb_cell:
         part.Placement = obj.Placement
         obj.DrillPart = part
 
+# this is rb_cell with mount
+class rb_cell:
+    '''
+    Rubidium Cell Holder
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill = True):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = adapter_color
+        self.transmission = True
+        self.max_angle = 10
+        self.max_width = 1
+    def execute(self, obj):
+        mesh = _import_stl("rb_cell_holder_middle.stl", (0, 0, 0), ([0, 5, 0]))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+        part = _bounding_box(obj, 6, 3)
+        dx = 90
+        for x, y in [(1,1), (-1,1), (1,-1), (-1,-1)]:
+            part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
+                                         x=x*dx/2, y=y*15.7, z=-layout.inch/2))
+        part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
+                                     x=45, y=-15.7, z=-layout.inch/2))
+        for x in [1,-1]:
+            part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
+                                         x=x*dx/2, y=25.7, z=-layout.inch/2))
+        part.Placement = obj.Placement
+        obj.DrillPart = part
 
 class rb_cell_cube:
     '''
