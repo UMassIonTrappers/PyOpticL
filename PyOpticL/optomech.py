@@ -2938,7 +2938,7 @@ class laser_mount_km100pm:
 
         upper_plate = _add_linked_object(obj, "Upper Plate", km05_tec_upper_plate, pos_offset=(2.032+13.96-3.8-13.96, 0, -inch/4-6.3), width=1.5*inch, drill_obj=mount)
         _add_linked_object(obj, "TEC", TEC, pos_offset=(grating_dx+20, 0, -33.7), rot_offset=(90, 90, 90))
-        #_add_linked_object(obj, "Box", laser_box, pos_offset=(0, 0, .25*inch), rot_offset=(0, 0, 0), mat_thickness=mat_thickness)
+        _add_linked_object(obj, "Box", laser_box, pos_offset=(0, 0, .25*inch), rot_offset=(0, 0, 0), mat_thickness=mat_thickness)
 
     def execute(self, obj):
         dx = obj.ArmThickness.Value
