@@ -19,8 +19,10 @@ Design abstraction layers applied to a strontium trapped ion quantum computer:
 * [Quickstart Guide](https://github.com/UMassIonTrappers/PyOpticL/wiki#quickstart-guide)
 * [Model Import Guide](https://github.com/UMassIonTrappers/PyOpticL/wiki#model-import-guide)
 * [ECDL Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/ECDL-Baseplate)
-* [Modular Doublepass Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Modular-Doublepass-Baseplate)
-* [Rb SAS Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Rb-SAS-Baseplate)
+* [Doublepass Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Doublepass-Baseplate)
+* [Singlepass Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Singlepass-Baseplate)
+* [Saturation Absorption Spectroscopy Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Saturation-Absoption-Spectroscopy-Baseplate)
+* [Periscope](https://github.com/UMassIonTrappers/PyOpticL/wiki/Periscope)
 
 
 ## Examples
