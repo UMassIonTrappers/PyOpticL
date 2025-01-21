@@ -9,18 +9,18 @@ date_time = datetime.now().strftime("%m/%d/%Y")
 label = name + " " +  date_time
 
 # Dimension of the baseplate
-base_dx = 8.25*layout.inch
-base_dy = 4.6*layout.inch
+base_dx = 9.25*layout.inch  # 8.25
+base_dy = 6*layout.inch   #4.6
 base_dz = layout.inch
 gap = layout.inch/4
 
-input_x = 2.75*layout.inch
+input_x = 3.05*layout.inch   #2.75
 
 # Combining the baseplate with the beam and all other optical componenets. 
 def singlepass(x=0, y=0, angle=270, mirror=optomech.mirror_mount_km05, x_split=False, thumbscrews=True):
     # Difining the baseplate
     baseplate = layout.baseplate(base_dx, base_dy, base_dz, x=x, y=y, angle=angle,
-                                 gap=gap, mount_holes=[(2,3.5),(6,3.5),(3,.5),(3,1.5),(2,1.5),(7,2.5)],
+                                 gap=gap, mount_holes=[(2,4.5),(8,3.5),(3,.5),(3,1.5),(2,1.5),(8,2.5)],
                                  name=name, label=label, x_splits=[0*layout.inch], y_offset =0)
     
     # Adding the beam to the baseplate
@@ -28,7 +28,7 @@ def singlepass(x=0, y=0, angle=270, mirror=optomech.mirror_mount_km05, x_split=F
     
     # Adding two mirrors to give the beam enough degree of freedom. Mirror 1
     baseplate.place_element_along_beam("Input Mirror 1", optomech.circular_mirror, beam,
-                                       beam_index=0b1, distance=1* layout.inch, angle=layout.turn['up-right'],
+                                       beam_index=0b1, distance=1.7* layout.inch, angle=layout.turn['up-right'],
                                        mount_type=mirror, mount_args=dict(thumbscrews=thumbscrews))
     
     # Mirror 2
@@ -84,10 +84,10 @@ def singlepass(x=0, y=0, angle=270, mirror=optomech.mirror_mount_km05, x_split=F
     
     # Fiberport to fiber the beam
     baseplate.place_element_along_beam("Fiberport", optomech.fiberport_mount_hca3, beam,
-                                      beam_index=0b111, distance=20-2, angle=layout.cardinal['right'])
+                                      beam_index=0b111, distance=20-2+.65*layout.inch, angle=layout.cardinal['right'])
 
     # Cover for the baseplate. 
-    #baseplate.add_cover(dz=60)      
+    baseplate.add_cover(dz=50)      
 
 if __name__ == "__main__":
     singlepass()

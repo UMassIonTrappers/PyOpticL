@@ -61,23 +61,21 @@ def _bounding_box(obj, tol, fillet, x_tol=True, y_tol=True, z_tol=False, min_off
         temp = obj
         while hasattr(temp, "ParentObject") and hasattr(temp.ParentObject, "RelativePlacement"):
             temp = temp.ParentObject
-            #obj_body.Placement *= temp.RelativePlacement
+        #    obj_body.Placement *= temp.RelativePlacement
     global_bound = obj_body.BoundBox
     obj_body.Placement = App.Placement()
     bound = obj_body.BoundBox
 
     x_min, x_max = bound.XMin-tol*x_tol+min_offset[0], bound.XMax+tol*x_tol+max_offset[0]
     y_min, y_max = bound.YMin-tol*y_tol+min_offset[1], bound.YMax+tol*y_tol+max_offset[1]
-    if obj.Baseplate != None:
-        z_min = min(global_bound.ZMin-tol*z_tol+min_offset[2], -obj.Baseplate.OpticsDz.Value+plate_off)-global_bound.ZMin+bound.ZMin
-        z_max = max(global_bound.ZMax+tol*z_tol+max_offset[2], -obj.Baseplate.OpticsDz.Value+plate_off)-global_bound.ZMax+bound.ZMax
-    else:
-        z_min = min(global_bound.ZMin-tol*z_tol+min_offset[2], -inch/2+plate_off)-global_bound.ZMin+bound.ZMin
-        z_max = max(global_bound.ZMax+tol*z_tol+max_offset[2], -inch/2+plate_off)-global_bound.ZMax+bound.ZMax
+    z_min = min(global_bound.ZMin-tol*z_tol+min_offset[2], -layout.inch/2+plate_off)-global_bound.ZMin+bound.ZMin
+    z_max = max(global_bound.ZMax+tol*z_tol+max_offset[2], -layout.inch/2+plate_off)-global_bound.ZMax+bound.ZMax
     bound_part = _custom_box(dx=x_max-x_min, dy=y_max-y_min, dz=z_max-z_min,
                     x=x_min, y=y_min, z=z_min, dir=(1, 1, 1),
                     fillet=fillet, fillet_dir=(0, 0, 1))
     return bound_part
+
+
 
 def _add_linked_object(obj, obj_name, obj_class, pos_offset=(0, 0, 0), rot_offset=(0, 0, 0), **args):
     new_obj = App.ActiveDocument.addObject(obj_class.type, obj_name)
@@ -1586,10 +1584,90 @@ class prism_mount_km100pm:
         part.Placement = obj.Placement
         obj.DrillPart = part
 
+class TEC:
+    '''
+    Nishat importing the room temperature schamber
+    Room_temperature_Chamber_version
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mirror (bool) : Whether to add a mirror component to the mount
+        thumbscrews (bool): Whether or not to add two HKTS 5-64 adjusters
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.ViewObject.ShapeColor = mount_color
+        self.part_numbers = ['TEC']
+
+    def execute(self, obj):
+        mesh =  _import_stl("TEC.stl", (180, 0, 90), (0, 0, 0))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh    
+
+
+class wire_tube:
+    '''
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = adapter_color
+        # self.part_numbers = ['HCA3', 'PAF2-5A']
+        self.max_angle = 0
+        self.max_width = 1
+
+    def execute(self, obj):
+        mesh = _import_stl("wire_tube.stl", (90, 90, 90), (-133, 0, -29.25))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+        part = _bounding_box(obj, 3, 3, min_offset=(0, 0, -3))
+        part.Placement = obj.Placement
+        obj.DrillPart = part      
+
+class brewster_window:
+    '''
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = glass_color
+        # self.part_numbers = ['HCA3', 'PAF2-5A']
+        self.max_angle = 0
+        self.max_width = 1
+
+    def execute(self, obj):
+        mesh = _import_stl("BW20M.stl", (90, 0, 90), (90, 20.79, -40.46))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+        part = _bounding_box(obj, 3, 3, min_offset=(0, 0, 0))
+        part.Placement = obj.Placement
+        obj.DrillPart = part            
+
+
 class laser_box:
 
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, thickness=130, width=100, height=110, mat_thickness=inch/2, part_number=''):
+    def __init__(self, obj, drill=True, thickness=115 + inch/4*2 +  inch, width=95 + inch, height=95, mat_thickness=0, part_number=''):
+        # (self, obj, drill=True, thickness=4.5*inch, width=3.5*inch, height=80, mat_thickness=0, part_number=''):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -1604,22 +1682,56 @@ class laser_box:
 
     def execute(self, obj):
         x_off = -2
-        y_off = 4
+        y_off = -4
         thickness = inch/4
         part = _custom_box(dx=obj.Thickness.Value, dy=obj.Width.Value, dz=obj.Height.Value,
-                           x=x_off, y=y_off, z=-3/2*inch-3.95-inch/2-obj.MatThickness.Value, dir=(0, 0, 1))
-        part = part.cut(_custom_box(dx=obj.Thickness.Value-inch/4*2, dy=obj.Width.Value-inch/4*2, dz=obj.Height.Value-inch/4,
-                           x=x_off, y=y_off, z=-3/2*inch-3.95-inch/2-obj.MatThickness.Value, dir=(0, 0, 1)))
-        part = part.cut(_custom_box(dx=obj.Thickness.Value/2, dy=10, dz=30,
-                           x=x_off-obj.Thickness.Value/2, y=y_off, z=-3/2*inch-3.95-inch, dir=(0, 0, 1)))
-        part = part.cut(_custom_cylinder(dia=15, dz=obj.Thickness.Value/2,
-                           x=x_off+obj.Thickness.Value/2, y=y_off+12, z=0, dir=(-1, 0, 0)))
+                           x=x_off, y=y_off, z=-3/2*inch-3.95, dir=(0, 0, 1))
         
+        # Bottom cuttout
+        part = part.cut(_custom_box(dx=obj.Thickness.Value-inch/4*2-.7*inch, dy=obj.Width.Value-.7*inch, dz=80,   #-2*inch+5
+                           x=x_off, y=y_off, z=-3/2*inch-3.95, dir=(0, 0, 1)))
+        
+        # Component cutouts
+        parent = obj.ParentObject
+        mount = parent.ChildObjects[0]
+        parent.Proxy.execute(parent)
+        for cutObj in [mount, parent]:
+            try:
+                temp = _bounding_box(cutObj, 19, 19, z_tol=False)
+                temp.translate(cutObj.Placement.Base)
+                temp.translate(App.Vector(-8,-7,0))
+                #temp.rotate(App.Vector(0,0,0),App.Vector(0,0,1),0)
+                part = part.cut(temp)
+                print("yup")
+            except Exception as e:
+                print(e)
+                pass
+        
+        #part = _custom_box(dx=obj.Thickness.Value, dy=obj.Width.Value, dz=obj.Height.Value,
+        #                   x=x_off, y=y_off, z=-3/2*inch-3.95-inch/2-obj.MatThickness.Value, dir=(0, 0, 1))
+        #part = part.cut(_custom_box(dx=obj.Thickness.Value-inch/4*2, dy=obj.Width.Value-inch/4*2, dz=obj.Height.Value-inch/4,
+        #                   x=x_off, y=y_off, z=-3/2*inch-3.95-inch/2-obj.MatThickness.Value, dir=(0, 0, 1)))
+        
+        # Cable opening
+        #Square cut 
+        #part = part.cut(_custom_box(dx=obj.Width.Value, dy=10, dz=50,
+        #                   x=x_off-obj.Thickness.Value/2, y=y_off+0, z=-2*inch-3.95-inch, dir=(0, 0, 1)))
+        
+        #Circular cut
+        part = part.cut(_custom_cylinder(dia=28, dz=obj.Thickness.Value/2,
+                           x=x_off-obj.Thickness.Value/2, y=y_off+4, z=-42, dir=(1, 0, 0)))
+
+        # Laser opening
+        part = part.cut(_custom_cylinder(dia=25.8, dz=obj.Thickness.Value/2,
+                           x=x_off+obj.Thickness.Value/2, y=y_off+24, z=-2, dir=(-1, 0, 0)))
+        
+        # Bolt openings
         part = part.cut(_custom_cylinder(dia=5, dz=obj.Thickness.Value/2,
-                           x=x_off-obj.Thickness.Value/2, y=y_off+19.5, z=19.1, dir=(1, 0, 0)))
+                           x=x_off-obj.Thickness.Value/2, y=y_off+25.5, z=12.9+6.4, dir=(1, 0, 0)))
         part = part.cut(_custom_cylinder(dia=5, dz=obj.Thickness.Value/2,
-                           x=x_off-obj.Thickness.Value/2, y=y_off-18.2, z=-18.6, dir=(1, 0, 0)))
+                           x=x_off-obj.Thickness.Value/2, y=y_off-12.2, z=-24.8+6.4, dir=(1, 0, 0)))
         obj.Shape = part
+
 
 class laser_base:
 
@@ -1650,9 +1762,10 @@ class laser_base:
         
         obj.Shape = part
 
+
 class laser_mount_km100pm:
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, slot_length=0, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=5, stage_length=18, mat_thickness=inch/2, littrow_angle=44.58768):
+    def __init__(self, obj, drill=True, slot_length=0, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=6, stage_length=20, mat_thickness=10, littrow_angle=56.6): 
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -1673,17 +1786,17 @@ class laser_mount_km100pm:
 
 
         dx = -5.334+2.032
+        mount = _add_linked_object(obj, "Mount KM100PM", prism_mount_km100pm, pos_offset=(2.032+13.96-3.8, -25.91+16, -18.67))
         _add_linked_object(obj, "Diode Adapter", diode_adapter_s05lm56, pos_offset=(0, 0, 0))
         _add_linked_object(obj, "Lens Tube", lens_tube_sm05l05, pos_offset=(dx+1.524+3.812, 0, 0))
         _add_linked_object(obj, "Lens Adapter", lens_adapter_s05tm09, pos_offset=(dx+1.524+5, 0, 0))
         _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(dx+1.524+3.167+5, 0, 0))
 
-        mount = _add_linked_object(obj, "Mount KM100PM", prism_mount_km100pm, pos_offset=(2.032+13.96-3.8, -25.91+16, -18.67))
         _add_linked_object(obj, "Mount", fixed_mount_smr05, pos_offset=(2.032, 0, 0), rot_offset=(90, 0, 0), drill=False)
-        _add_linked_object(obj, "Box", laser_box, pos_offset=(0, 0, 0), rot_offset=(0, 0, 0), mat_thickness=mat_thickness)
-        _add_linked_object(obj, "Base", laser_base, pos_offset=(0, 0, 0), rot_offset=(0, 0, 0), mat_thickness=mat_thickness)
+        _add_linked_object(obj, "Wire Tube", wire_tube, pos_offset=(0, 0, -.5*inch), rot_offset=(0, 0, 0), drill=False)
+        _add_linked_object(obj, "Brewster_window", brewster_window, pos_offset=(0, 20, 1*inch), rot_offset=(0, 0, 0), drill=False)
 
-        gap = 16
+        gap =22
         lit_angle = radians(90-obj.LittrowAngle.Value)
         beam_angle = radians(obj.LittrowAngle.Value)
         ref_len = gap/sin(2*beam_angle)
@@ -1693,17 +1806,19 @@ class laser_mount_km100pm:
         grating_dx = -(6*sin(lit_angle)+12.7/2*cos(lit_angle))-extra_x
         mirror_dx = grating_dx-ref_x
 
-        _add_linked_object(obj, "Grating", square_grating, pos_offset=(grating_dx+36, 0, -6-3.07+0.21+12.7/2), rot_offset=(0, 0, 180-obj.LittrowAngle.Value))
-        _add_linked_object(obj, "PZT", box, pos_offset=(grating_dx+36+4.2, -4.2, -6-3.07+0.21+12.7/2), rot_offset=(0, 0, 180-obj.LittrowAngle.Value))
-        _add_linked_object(obj, "Mirror", square_mirror, pos_offset=(mirror_dx+36, gap, -6-3.07+0.21+12.7/2), rot_offset=(0, 0, -obj.LittrowAngle.Value))
+        _add_linked_object(obj, "Grating", square_grating, pos_offset=(grating_dx+47, -2+5, -2.7), rot_offset=(0, 0, 180-obj.LittrowAngle.Value))
+        _add_linked_object(obj, "PZT", box, pos_offset=(grating_dx+48.6, -7+5, -2.7), rot_offset=(0, 0, 180-obj.LittrowAngle.Value))
+        _add_linked_object(obj, "Mirror", square_mirror, pos_offset=(mirror_dx+36.5, gap-3, -2.7), rot_offset=(0, 0, -obj.LittrowAngle.Value))
 
         upper_plate = _add_linked_object(obj, "Upper Plate", km05_tec_upper_plate, pos_offset=(2.032+13.96-3.8-13.96, 0, -inch/4-6.3), width=1.5*inch, drill_obj=mount)
-        _add_linked_object(obj, "Lower Plate", km05_tec_lower_plate, pos_offset=(2.032+13.96-3.8-13.96, 0, -inch/4-6.3-4-upper_plate.Thickness.Value), width=2.5*inch)
+        _add_linked_object(obj, "TEC", TEC, pos_offset=(grating_dx+20, 0, -33.7), rot_offset=(90, 90, 90))
+        _add_linked_object(obj, "Lower Plate", km05_tec_lower_plate, pos_offset=(2.032+13.96-3.8-13.96, 0, -.9*inch), width=3*inch)
+        _add_linked_object(obj, "Box", laser_box, pos_offset=(0, 0, 0*inch), rot_offset=(0, 0, 0), mat_thickness=mat_thickness)
 
     def execute(self, obj):
         dx = obj.ArmThickness.Value
-        dy = 38
-        dz = 16
+        dy = 45
+        dz = 17
         stage_dx = obj.StageLength.Value
         stage_dz = obj.StageThickness.Value
 
@@ -1720,45 +1835,38 @@ class laser_mount_km100pm:
                                         fillet=bolt_4_40['head_dia']/2, dir=(-1, 0, 0)))
             
         extra_y = 0
-        gap = 16
+        gap = 22
         lit_angle = radians(90-obj.LittrowAngle.Value)
         beam_angle = radians(obj.LittrowAngle.Value)
         ref_len = gap/sin(2*beam_angle)
         ref_x = ref_len*cos(2*beam_angle)
-        dx2 = ref_x+12.7*cos(lit_angle)+(6+3.2)*sin(lit_angle)
-        extra_x = 20-dx2
-        dy2 = gap+12.7*sin(lit_angle)+(6+3.2)*cos(lit_angle)
+        dx2 = ref_x+9.7*cos(lit_angle)+(6+3.2)*sin(lit_angle)
+        extra_x = 18-dx2
+        dy2 = gap+9.7*sin(lit_angle)+(6+3.2)*cos(lit_angle)
         dz2 = inch/2
-        cut_x = 12.7*cos(lit_angle)
+        cut_x = 18.7*cos(lit_angle)
 
-        part = part.fuse(_custom_box(dx=stage_dx+dx/2, dy=dy, dz=stage_dz+2.72+12.7-2.72,
-                                     x=-dx/2, y=4, z=dz+2.72+12.7-2.72, dir=(1, 0, -1)))
+        part = part.fuse(_custom_box(dx=stage_dx+dx/2, dy=dy, dz=stage_dz+12.7,
+                                     x=-dx/2, y=4, z=dz+12.7, dir=(1, 0, -1)))
 
         part.translate(App.Vector(dx/2, 25.4-15.2+obj.SlotLength.Value/2, -6.4))
         part.translate(App.Vector(2.032+13.96-3.8, -25.91+16, -18.67))
         part = part.fuse(part)
 
-        temp = _custom_box(dx=ref_len*cos(beam_angle)+6+3.2+3, dy=dy/sin(lit_angle)+15, dz=dz,
-                           x=-cut_x+3, y=-(dx-cut_x)*cos(lit_angle)-15, z=-6-3.07+0.21, dir=(-1, 1, 1))
+        temp = _custom_box(dx=ref_len*cos(beam_angle)+12.2, dy=dy/sin(lit_angle)+15, dz=dz,
+                           x=-cut_x+9, y=-(dx-cut_x)*cos(lit_angle)-15, z=-6-3.07, dir=(-1, 1, 1))
         temp.rotate(App.Vector(-cut_x, 0, 0), App.Vector(0, 0, 1), -obj.LittrowAngle.Value)
-        temp.translate(App.Vector(-extra_x+36, -12.7/2*sin(lit_angle)-6*cos(lit_angle), 0))
+        temp.translate(App.Vector(-extra_x+36, -20.7/2*sin(lit_angle)-6*cos(lit_angle), .2))
 
         part = part.cut(temp)
-
-        #part = _custom_box(dx=dx+extra_x, dy=dy+extra_y, dz=dz,
-        #                   x=extra_x, y=0, z=-10, dir=(-1, 1, 1))
-        #temp = _custom_box(dx=ref_len*cos(beam_angle)+6+3.2, dy=dy/sin(lit_angle)+10, dz=dz,
-        #                   x=-cut_x, y=-(dx-cut_x)*cos(lit_angle), z=-6, dir=(-1, 1, 1))
-        #temp.rotate(App.Vector(-cut_x, 0, 0), App.Vector(0, 0, 1), -obj.LittrowAngle.Value)
-        #part = part.cut(temp)
-        #part = part.cut(_custom_box(dx=8, dy=16, dz=dz-4,
-        #                   x=extra_x, y=dy+extra_y, z=-6, dir=(-1, -1, 1)))
-
         obj.Shape = part
 
         part = _bounding_box(obj, 3, 4, z_tol=True, min_offset=(0, 0, 0.668))
         part.Placement = obj.Placement
         obj.DrillPart = part
+
+        #_add_linked_object(obj, "Box", laser_box, pos_offset=(0, 5, 0), rot_offset=(0, 0, 0), mat_thickness=0)
+
 
 class mount_for_km100pm:
     '''
