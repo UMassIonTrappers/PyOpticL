@@ -1,7 +1,6 @@
 ## PyOpticL - Code-to-CAD optical system engineering
 
-Trapped Ion quantum computer at UMass Amherst engineered with PyOpticL:
-
+<!-- Trapped Ion quantum computer at UMass Amherst engineered with PyOpticL: -->
 <!-- <img src="https://github.com/user-attachments/assets/1dbe2986-20e2-4f4e-9b4c-00dd31a4b656" width=50%> -->
 
 <img src="https://github.com/user-attachments/assets/728fd555-c74e-45da-b026-38bfa01f9a87" width=500>
@@ -20,9 +19,6 @@ Trapped Ion quantum computer at UMass Amherst engineered with PyOpticL:
 * [Saturation Absorption Spectroscopy Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Saturation-Absoption-Spectroscopy-Baseplate)
 * [Periscope](https://github.com/UMassIonTrappers/PyOpticL/wiki/Periscope)
 
-Design abstraction layers applied to a strontium trapped ion quantum computer:
-
-<img src="https://github.com/user-attachments/assets/75341182-ff6c-4106-bd7c-8fa9ee56bba2" width=50%>
 
 ## About PyOpticL
 PyOpticL is a Python Library for Optical Layout which uses beam-path simulation and dynamic beam-path routing for quick and easy optical layout by placing optical elements along the beam path without a priori specification, enabling dynamic layouts with automatic routing and connectivity.
@@ -53,6 +49,13 @@ There are a few important things to ensure before you can use PyOpticL:
 
 5. **Check out the [wiki](https://github.com/UMassIonTrappers/PyOpticL/wiki) or the [docs](https://github.com/UMassIonTrappers/PyOpticL/tree/main/docs) for guides, examples, and library documentation**
 
+
+## Design abstraction layers applied to a strontium trapped ion quantum computer:
+
+<img src="https://github.com/user-attachments/assets/75341182-ff6c-4106-bd7c-8fa9ee56bba2" width=50%>
+
+<!-- MOVE TO WIKI -->
+<!--
 ### PyOptical Workbench Functions with FreeCAD:
 * **Re-Run Last Macro** - Clears and re-draws last baseplate, great for quickly checking changes
 * **Recalculate Beam Path** - Useful to check beam paths when applying in-editor modifications
@@ -63,7 +66,7 @@ There are a few important things to ensure before you can use PyOpticL:
 * **Reload Modules** - Reload all PyOpticL modules, great for debugging new parts
 * **Get Orientation** - Automatic orientation and importing of new components from STEP files
 * **Get Position** - Measure offsets and mount locations from oriented STEP file
-
+-->
 
 ## Examples
 
