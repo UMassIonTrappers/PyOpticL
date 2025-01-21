@@ -1,9 +1,11 @@
 ## PyOpticL - Code-to-CAD optical system engineering
 
+<img src="https://github.com/user-attachments/assets/728fd555-c74e-45da-b026-38bfa01f9a87" width=700>
+
+<img src="https://github.com/user-attachments/assets/b24b1d63-7b17-4de1-95dd-dcf176b8d9d6" width=700>
+
 <!-- Trapped Ion quantum computer at UMass Amherst engineered with PyOpticL: -->
 <!-- <img src="https://github.com/user-attachments/assets/1dbe2986-20e2-4f4e-9b4c-00dd31a4b656" width=50%> -->
-
-<img src="https://github.com/user-attachments/assets/728fd555-c74e-45da-b026-38bfa01f9a87" width=700>
 
 ### ReadMe
 * [Library Features and Information](https://github.com/UMassIonTrappers/PyOpticL#about-PyOpticL)
