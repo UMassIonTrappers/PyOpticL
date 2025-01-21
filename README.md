@@ -1,4 +1,4 @@
-## PyOpticL - Code-to-CAD optical design system for AMO experiments
+## PyOpticL - Code-to-CAD optical system engineering
 
 Trapped Ion quantum computer at UMass Amherst made with PyOpticL:
 
