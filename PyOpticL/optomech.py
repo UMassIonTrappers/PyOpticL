@@ -2377,7 +2377,7 @@ class km05_tec_upper_plate:
 
 class km05_tec_lower_plate:
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, width=3*inch, height=.25*inch, thickness=5*inch, part_number=''): #thickness=130-inch/2-1,
+    def __init__(self, obj, drill=True, width=3*inch, height=.25*inch, thickness=3*inch, part_number=''): #thickness=130-inch/2-1,
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -2396,7 +2396,7 @@ class km05_tec_lower_plate:
         part = _custom_box(dx=obj.Thickness.Value, dy=obj.Width.Value, dz=obj.Height.Value,
                            x=x_off, y=y_off, z=-3/2*inch-3.95-obj.Thickness.Value, dir=(0, 0, -1))
         
-        for x, y in [(0,0), (-1,1), (1,-1), (1,1)]:
+        for x, y in [(0,0)]:
             part = part.cut(_custom_cylinder(dia=bolt_14_20['clear_dia'], dz=drill_depth,
                                     head_dia=bolt_14_20["washer_dia"], head_dz=8,
                                     x=1.5*inch*x+x_off, y=inch*y+y_off-bolt_off, z=-3/2*inch-3.95-inch/2))
@@ -2723,7 +2723,7 @@ class prism_mount_km100pm:
 class laser_box:
 
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, thickness=125 + inch/4*2 + 1 * inch, width=93 + inch, height=85, mat_thickness=0, part_number=''):
+    def __init__(self, obj, drill=True, thickness=115 + inch/4*2 +  inch, width=95 + inch, height=95, mat_thickness=0, part_number=''):
         # (self, obj, drill=True, thickness=4.5*inch, width=3.5*inch, height=80, mat_thickness=0, part_number=''):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
@@ -2745,7 +2745,7 @@ class laser_box:
                            x=x_off, y=y_off, z=-3/2*inch-3.95, dir=(0, 0, 1))
         
         # Bottom cuttout
-        part = part.cut(_custom_box(dx=obj.Thickness.Value-inch/4*2-1*inch, dy=obj.Width.Value-inch, dz=70,   #-2*inch+5
+        part = part.cut(_custom_box(dx=obj.Thickness.Value-inch/4*2-.7*inch, dy=obj.Width.Value-.7*inch, dz=80,   #-2*inch+5
                            x=x_off, y=y_off, z=-3/2*inch-3.95, dir=(0, 0, 1)))
         
         # Component cutouts
@@ -2775,24 +2775,24 @@ class laser_box:
         #                   x=x_off-obj.Thickness.Value/2, y=y_off+0, z=-2*inch-3.95-inch, dir=(0, 0, 1)))
         
         #Circular cut
-        part = part.cut(_custom_cylinder(dia=18, dz=obj.Thickness.Value/2,
-                           x=x_off-obj.Thickness.Value/2, y=y_off+ 4.65, z=-40, dir=(1, 0, 0)))
+        part = part.cut(_custom_cylinder(dia=28, dz=obj.Thickness.Value/2,
+                           x=x_off-obj.Thickness.Value/2, y=y_off+4, z=-42, dir=(1, 0, 0)))
 
         # Laser opening
-        part = part.cut(_custom_cylinder(dia=12, dz=obj.Thickness.Value/2,
-                           x=x_off+obj.Thickness.Value/2, y=y_off+16.5, z=-7, dir=(-1, 0, 0)))
+        part = part.cut(_custom_cylinder(dia=25.8, dz=obj.Thickness.Value/2,
+                           x=x_off+obj.Thickness.Value/2, y=y_off+24, z=-2, dir=(-1, 0, 0)))
         
         # Bolt openings
         part = part.cut(_custom_cylinder(dia=5, dz=obj.Thickness.Value/2,
-                           x=x_off-obj.Thickness.Value/2, y=y_off+25.5, z=12.9, dir=(1, 0, 0)))
+                           x=x_off-obj.Thickness.Value/2, y=y_off+25.5, z=12.9+6.4, dir=(1, 0, 0)))
         part = part.cut(_custom_cylinder(dia=5, dz=obj.Thickness.Value/2,
-                           x=x_off-obj.Thickness.Value/2, y=y_off-12.2, z=-24.8, dir=(1, 0, 0)))
+                           x=x_off-obj.Thickness.Value/2, y=y_off-12.2, z=-24.8+6.4, dir=(1, 0, 0)))
         obj.Shape = part
 
 class laser_base:
 
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, thickness=125 + inch/4*2 + 1 * inch, width=93+ inch, height=0.25*inch, mat_thickness=0.25*inch, part_number=''):
+    def __init__(self, obj, drill=True, thickness=125 + inch/4*2 + 1 * inch, width=100+ inch, height=0.25*inch, mat_thickness=0.5*inch, part_number=''):
     #(self, obj, drill=True, thickness=4*inch, width=3*inch, height=0.25*inch, mat_thickness=0.25*inch, part_number=''): #thickness=130-inch/2-1,
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
@@ -2824,7 +2824,7 @@ class laser_base:
 
 class laser_mount_km100pm:
     type = 'Part::FeaturePython'
-    def __init__(self, obj, drill=True, slot_length=0, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=6, stage_length=20, mat_thickness=10, littrow_angle=55): #49 for 674
+    def __init__(self, obj, drill=True, slot_length=0, countersink=False, counter_depth=3, arm_thickness=8, arm_clearance=2, stage_thickness=6, stage_length=20, mat_thickness=10, littrow_angle=52): #49 for 674
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -2852,7 +2852,7 @@ class laser_mount_km100pm:
         _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(dx+1.524+3.167+5, 0, 0))
 
         _add_linked_object(obj, "Mount", fixed_mount_smr05, pos_offset=(2.032, 0, 0), rot_offset=(90, 0, 0), drill=False)
-        _add_linked_object(obj, "Base", laser_base, pos_offset=(0, 0, .75*inch), rot_offset=(0, 0, 0), mat_thickness=mat_thickness)
+        #_add_linked_object(obj, "Base", laser_base, pos_offset=(0, 0, -.5*inch), rot_offset=(0, 0, 0), mat_thickness=mat_thickness)
 
         gap =20
         lit_angle = radians(90-obj.LittrowAngle.Value)
@@ -2870,7 +2870,8 @@ class laser_mount_km100pm:
 
         upper_plate = _add_linked_object(obj, "Upper Plate", km05_tec_upper_plate, pos_offset=(2.032+13.96-3.8-13.96, 0, -inch/4-6.3), width=1.5*inch, drill_obj=mount)
         _add_linked_object(obj, "TEC", TEC, pos_offset=(grating_dx+20, 0, -33.7), rot_offset=(90, 90, 90))
-        #_add_linked_object(obj, "Box", laser_box, pos_offset=(0, 0, .25*inch), rot_offset=(0, 0, 0), mat_thickness=mat_thickness)
+        _add_linked_object(obj, "Lower Plate", km05_tec_lower_plate, pos_offset=(2.032+13.96-3.8-13.96, 0, 3.25*inch), width=3*inch)
+        _add_linked_object(obj, "Box", laser_box, pos_offset=(0, 0, 0*inch), rot_offset=(0, 0, 0), mat_thickness=mat_thickness)
 
     def execute(self, obj):
         dx = obj.ArmThickness.Value
