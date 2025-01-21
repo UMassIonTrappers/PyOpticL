@@ -1,6 +1,5 @@
 ## PyOpticL - Code-to-CAD optical system engineering
 
-<img src="https://github.com/user-attachments/assets/728fd555-c74e-45da-b026-38bfa01f9a87" width=700>
 
 <img src="https://github.com/user-attachments/assets/b24b1d63-7b17-4de1-95dd-dcf176b8d9d6" width=700>
 
@@ -10,7 +9,6 @@
 ### ReadMe
 * [Library Features and Information](https://github.com/UMassIonTrappers/PyOpticL#about-PyOpticL)
 * [Installation Guide](https://github.com/UMassIonTrappers/PyOpticL#getting-setup)
-* [Example Pictures](https://github.com/UMassIonTrappers/PyOpticL#examples)
 
 ### Wiki
 * [Quickstart Guide](https://github.com/UMassIonTrappers/PyOpticL/wiki#quickstart-guide)
@@ -22,6 +20,8 @@
 * [Singlepass Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Singlepass-Baseplate)
 * [Saturation Absorption Spectroscopy Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Saturation-Absoption-Spectroscopy-Baseplate)
 * [Periscope](https://github.com/UMassIonTrappers/PyOpticL/wiki/Periscope)
+
+<img src="https://github.com/user-attachments/assets/728fd555-c74e-45da-b026-38bfa01f9a87" width=700>
 
 
 ## About PyOpticL
@@ -55,27 +55,14 @@ PyOpticL is a Python Library for Optical Layout which uses beam-path simulation 
 
 ___
 
-### Design abstraction layers applied to a strontium trapped ion quantum computer:
-
-<img src="https://github.com/user-attachments/assets/75341182-ff6c-4106-bd7c-8fa9ee56bba2" width=50%>
-
-<!-- MOVE TO WIKI -->
-<!--
-### PyOptical Workbench Functions with FreeCAD:
-* **Re-Run Last Macro** - Clears and re-draws last baseplate, great for quickly checking changes
-* **Recalculate Beam Path** - Useful to check beam paths when applying in-editor modifications
-* **Toggle Component Visibility** - Easily hide all beams and components
-* **Toggle Draw Style** - Toggle wire-frame draw style to easily check for hidden issues
-* **Export STLs** - Export all baseplates and adapter components to STL for fabrication
-* **Export Cart** - Export all parts to both a spreadsheet and a csv compatible with Thorlabs upload-a-cart system
-* **Reload Modules** - Reload all PyOpticL modules, great for debugging new parts
-* **Get Orientation** - Automatic orientation and importing of new components from STEP files
-* **Get Position** - Measure offsets and mount locations from oriented STEP file
--->
 
 
+## Design abstraction layers applied to a strontium trapped ion quantum computer:
 
-### Dynamic layouts 
+<img src="https://github.com/user-attachments/assets/75341182-ff6c-4106-bd7c-8fa9ee56bba2" width=700>
+
+
+## Dynamic layouts 
 Same code compiled with different optical elements at different scales:
 ![image](https://github.com/user-attachments/assets/5340ac9b-0a6f-4758-803f-e5a5f15b18a3)
 
