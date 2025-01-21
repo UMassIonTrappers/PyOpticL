@@ -435,6 +435,26 @@
     Args:  
         drill (bool) : Whether baseplate mounting for this part should be drilled  
     
+### TEC
+  
+    Nishat importing the room temperature schamber  
+    Room_temperature_Chamber_version  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+        mirror (bool) : Whether to add a mirror component to the mount  
+        thumbscrews (bool): Whether or not to add two HKTS 5-64 adjusters  
+    
+### wire_tube
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+    
+### brewster_window
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+    
 ### mount_for_km100pm
   
     Adapter for mounting isomet AOMs to km100pm kinematic mount  
