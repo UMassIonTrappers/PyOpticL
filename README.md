@@ -1,15 +1,8 @@
 ## PyOpticL - Code-to-CAD optical system engineering
 
-Trapped Ion quantum computer at UMass Amherst made with PyOpticL:
+Trapped Ion quantum computer at UMass Amherst engineered with PyOpticL:
 
 <img src="https://github.com/user-attachments/assets/1dbe2986-20e2-4f4e-9b4c-00dd31a4b656" width=50%>
-
-Design abstraction layers applied to a strontium trapped ion quantum computer:
-
-<img src="https://github.com/user-attachments/assets/75341182-ff6c-4106-bd7c-8fa9ee56bba2" width=50%>
-
-
-## Useful Links
 
 ### ReadMe
 * [Library Features and Information](https://github.com/UMassIonTrappers/PyOpticL#about-PyOpticL)
@@ -18,11 +11,16 @@ Design abstraction layers applied to a strontium trapped ion quantum computer:
 ### Wiki
 * [Quickstart Guide](https://github.com/UMassIonTrappers/PyOpticL/wiki#quickstart-guide)
 * [Model Import Guide](https://github.com/UMassIonTrappers/PyOpticL/wiki#model-import-guide)
+### Modular baseplate examples
 * [ECDL Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/ECDL-Baseplate)
 * [Doublepass Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Doublepass-Baseplate)
 * [Singlepass Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Singlepass-Baseplate)
 * [Saturation Absorption Spectroscopy Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Saturation-Absoption-Spectroscopy-Baseplate)
 * [Periscope](https://github.com/UMassIonTrappers/PyOpticL/wiki/Periscope)
+
+Design abstraction layers applied to a strontium trapped ion quantum computer:
+
+<img src="https://github.com/user-attachments/assets/75341182-ff6c-4106-bd7c-8fa9ee56bba2" width=50%>
 
 
 ## Examples
