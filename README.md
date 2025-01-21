@@ -79,9 +79,9 @@ There are a few important things to ensure before you can use PyOpticL:
     In the Addon Manager _(Tools>Addon Manager),_ search for "PyOpticL" and click install.
 		
 4. **Check everything is setup correctly**  
-   You should now be able to re-launch FreeCAD and see the "PyOpticL" workbench in the dropdown  
-<img width="250" alt="Screenshot 2023-10-27 225345" src="https://github.com/UMassIonTrappers/PyOpticL/assets/103533593/6eeec81a-e7de-4bde-8509-0c30bda0b9b7">
+   You should now be able to re-launch FreeCAD and see the "PyOpticL" workbench in the dropdown
+<img width="250" alt="Screenshot 2023-10-27 225345" src="https://github.com/user-attachments/assets/7a43cac3-7d3b-4a3b-8e5f-189f39729251">
 
-5. **Check out the [wiki](https://github.com/UMassIonTrappers/PyOpticL/wiki) or the [docs](https://github.com/UMassIonTrappers/PyOpticL/tree/main/docs) for guides, examples, and library documentation**
+6. **Check out the [wiki](https://github.com/UMassIonTrappers/PyOpticL/wiki) or the [docs](https://github.com/UMassIonTrappers/PyOpticL/tree/main/docs) for guides, examples, and library documentation**
 
 #### We thank the MIT QUANTA LAB for sharing their C4PO ('CAD for Precision Optics') based on OpenSCAD which inspired this library.
