@@ -19,8 +19,10 @@ Design abstraction layers applied to a strontium trapped ion quantum computer:
 * [Quickstart Guide](https://github.com/UMassIonTrappers/PyOpticL/wiki#quickstart-guide)
 * [Model Import Guide](https://github.com/UMassIonTrappers/PyOpticL/wiki#model-import-guide)
 * [ECDL Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/ECDL-Baseplate)
-* [Modular Doublepass Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Modular-Doublepass-Baseplate)
-* [Rb SAS Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Rb-SAS-Baseplate)
+* [Doublepass Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Doublepass-Baseplate)
+* [Singlepass Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Singlepass-Baseplate)
+* [Saturation Absorption Spectroscopy Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Saturation-Absoption-Spectroscopy-Baseplate)
+* [Periscope](https://github.com/UMassIonTrappers/PyOpticL/wiki/Periscope)
 
 
 ## Examples
@@ -28,8 +30,10 @@ Design abstraction layers applied to a strontium trapped ion quantum computer:
 ### Modular Saturated Absorption Spectroscopy Baseplates compiled at different scales
 ![image](https://github.com/user-attachments/assets/5340ac9b-0a6f-4758-803f-e5a5f15b18a3)
 
-### Modular Doublepass Baseplate
-![image](https://github.com/user-attachments/assets/ad6c6617-a2f6-4cba-b60d-bde7d375bfb2)
+### Modular Doublepass Baseplate (f50 & f100 design)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/5d332f5a-defc-4eb4-8ca6-a720dad9cfe6" alt="doublepass_f50_f100" width="55%" />
+</p>
 
 ### Simple ECDL (all off-the-shelf components)
 ![image](https://github.com/user-attachments/assets/41fba0be-d6c5-48b3-9fd5-c1e4fdddcd74)
