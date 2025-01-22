@@ -181,10 +181,11 @@ class CutBox(Origin):
 
 class GenericStl:
     def __init__(
-        self, name, stl_name, rotate, translate, scale=1, placement=App.Matrix()
+        self, name, stl_name, rotate, translate, scale=1, placement=App.Matrix(), quality=1.
     ) -> None:
         self.obj = App.ActiveDocument.addObject("Mesh::FeaturePython", name)
         self.stl_name = stl_name
+        self.quality = quality
         self.obj.addProperty(
             "App::PropertyPlacement", "BasePlacement"
         ).BasePlacement = (
@@ -221,13 +222,14 @@ class GenericStl:
 
     def execute(self, obj):
         mesh = Mesh.read(STL_PATH + self.stl_name)
+        mesh.decimate(.1, self.quality)
         mesh.Placement = self.obj.Placement
         obj.Mesh = mesh
 
 
 class RectangularOptic:
     """
-    Defines a recangle in space
+    Defines a rectangle in space
 
     Args:
         name (string)
@@ -241,9 +243,9 @@ class RectangularOptic:
     def __init__(
         self,
         name,
-        position,
-        normal,
-        base_length,
+        position=(0, 0, 0),
+        normal=(1, 0, 0),
+        base_length=5,
         height_length=None,
         thickness=1.0,
         max_angle=45,
@@ -511,7 +513,7 @@ class CylindricalOptic:
             )  # , rotation=rotation))
 
     def execute(self, obj):
-        part = Part.makeCylinder(self.obj.Radius, self.obj.Thickness)
+        part = Part.makeCylinder(self.obj.Radius, self.obj.Thickness, App.Vector(0, 0, 0), App.Vector(-1, 0, 0))
         obj.Shape = part
 
     def calculate(
@@ -648,6 +650,37 @@ class CircularTransmission(CylindricalOptic):
         )
         self.obj.ViewObject.Transparency = 50
         self.obj.ViewObject.ShapeColor = (0.5, 0.5, 0.8)
+
+class CircularStopper(CylindricalOptic):
+    """Absorbs beams"""
+
+    def __init__(
+        self,
+        name,
+        position=(0, 0, 0),
+        normal=(1, 0, 0),
+        radius=0.5 * INCH,
+        thickness=1 / 8 * INCH,
+        max_angle=45,
+        drills=None,
+        mount_class=None,
+    ):
+        super().__init__(
+            name,
+            position,
+            normal,
+            radius,
+            thickness,
+            max_angle,
+            reflect=False,
+            transmit=False,
+            drills=drills,
+            mount_class=mount_class,
+            mount_pos=(-thickness, 0, 0),
+        )
+
+        self.obj.addProperty("App::PropertyBool", "Absorb").Absorb = True
+        self.obj.ViewObject.ShapeColor = (0, 0, 0)
 
 
 class Mount:
@@ -810,9 +843,11 @@ class Rsp05ForRedstone(Mount):
             )
 
     def execute(self, obj):
-        mesh = Mesh.read(STL_PATH + "RSP05-Step.stl")
-        mesh.Placement = self.obj.Placement
-        obj.Mesh = mesh
+        return
+        # mesh = Mesh.read(STL_PATH + "RSP05-Step.stl")
+        # mesh.Placement = self.obj.Placement
+        # mesh.decimate(.1, .9)
+        # obj.Mesh = mesh
 
 
 class PBSForRedstone(Mount):
@@ -863,7 +898,7 @@ class Km05(Mount):
     def __init__(
         self,
         name,
-        drill=True,
+        drills=None,
         thumbscrews=False,
         bolt_length=15,
         additional_placement=App.Matrix(),
@@ -928,9 +963,11 @@ class Km05ForRedstone(Mount):
             )
 
     def execute(self, obj):
-        mesh = Mesh.read(STL_PATH + "KM05-Step.stl")
-        mesh.Placement = self.obj.Placement
-        obj.Mesh = mesh
+        return
+        # mesh = Mesh.read(STL_PATH + "KM05-Step.stl")
+        # mesh.Placement = self.obj.Placement
+        # mesh.decimate(.1, .9)
+        # obj.Mesh = mesh
 
 
 class K05S2(Mount):
@@ -983,23 +1020,20 @@ class ViewProvider:
         else:
             return []
 
-    # def updateData(self, base_obj, prop):
-    #     if prop in "Children":
-    #
-    #
-    #     for obj in App.ActiveDocument.Objects:
-    #         if hasattr(obj, "BasePlacement") and obj.Baseplate != None:
-    #             obj.Placement.Base = (
-    #                 obj.BasePlacement.Base + obj.Baseplate.Placement.Base
-    #             )
-    #             obj.Placement = App.Placement(
-    #                 obj.Placement.Base,
-    #                 obj.Baseplate.Placement.Rotation,
-    #                 -obj.BasePlacement.Base,
-    #             )
-    #             obj.Placement.Rotation = obj.Placement.Rotation.multiply(
-    #                 obj.BasePlacement.Rotation
-    #             )
+    def updateData(self, obj, prop):
+        if str(prop) == "ParentPlacement":
+            obj.Position = obj.ParentPlacement.Base
+            if obj.OpticalShape == "circle":
+                obj.Normal = obj.ParentPlacement.Rotation * App.Vector(1, 0, 0)
+            elif obj.OpticalShape == "rectangle":
+                obj.Edge1 = obj.ParentPlacement.Rotation * obj.BaseEdge1
+                obj.Edge2 = obj.ParentPlacement.Rotation * obj.BaseEdge2
+            obj.Placement = obj.ParentPlacement
+            print('updated data')
+
+            if hasattr(obj, "Children"):
+                for child in obj.Children:
+                    child.ParentPlacement = obj.Placement
 
     # def onDelete(self, feature, subelements):
     # # delete all elements when baseplate is deleted
