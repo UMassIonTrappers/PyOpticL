@@ -2906,8 +2906,8 @@ class laser_mount_km100pm:
         _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(dx+1.524+3.167+5, 0, 0))
 
         _add_linked_object(obj, "Mount", fixed_mount_smr05, pos_offset=(2.032, 0, 0), rot_offset=(90, 0, 0), drill=False)
-        #_add_linked_object(obj, "Wire Tube", wire_tube, pos_offset=(0, 0, -.5*inch), rot_offset=(0, 0, 0), drill=False)
-        #_add_linked_object(obj, "Brewster_window", brewster_window, pos_offset=(0, 20, 1*inch), rot_offset=(0, 0, 0), drill=False)
+        _add_linked_object(obj, "Wire Tube", wire_tube, pos_offset=(0, 0, -.5*inch), rot_offset=(0, 0, 0), drill=False)
+        _add_linked_object(obj, "Brewster_window", brewster_window, pos_offset=(0, 20, 1*inch), rot_offset=(0, 0, 0), drill=False)
 
         gap =22
         lit_angle = radians(90-obj.LittrowAngle.Value)
@@ -2926,7 +2926,7 @@ class laser_mount_km100pm:
         upper_plate = _add_linked_object(obj, "Upper Plate", km05_tec_upper_plate, pos_offset=(2.032+13.96-3.8-13.96, 0, -inch/4-6.3), width=1.5*inch, drill_obj=mount)
         _add_linked_object(obj, "TEC", TEC, pos_offset=(grating_dx+20, 0, -33.7), rot_offset=(90, 90, 90))
         _add_linked_object(obj, "Lower Plate", km05_tec_lower_plate, pos_offset=(2.032+13.96-3.8-13.96, 0, 3.25*inch), width=3*inch)
-        #_add_linked_object(obj, "Box", laser_box, pos_offset=(0, 0, 0*inch), rot_offset=(0, 0, 0), mat_thickness=mat_thickness)
+        _add_linked_object(obj, "Box", laser_box, pos_offset=(0, 0, 0*inch), rot_offset=(0, 0, 0), mat_thickness=mat_thickness)
 
     def execute(self, obj):
         dx = obj.ArmThickness.Value

@@ -445,7 +445,7 @@ class baseplate_cover:
         dx, yy (float): The dimentions of the table grid (in inches)
         z_off (float): The z offset of the top of the grid surface
     '''
-    def __init__(self, obj, baseplate, dz, wall_thickness=10, beam_tol=1, drill=True):
+    def __init__(self, obj, baseplate, dz, wall_thickness=10, beam_tol=10, drill=True):
         ViewProvider(obj.ViewObject)
         obj.Proxy = self
 
@@ -482,13 +482,14 @@ class baseplate_cover:
                 if isinstance(i.Proxy, laser.beam_path) and i.Baseplate == baseplate:
                     exploded = i.Shape.Solids
                     for shape in exploded:
-                        drill = optomech._bounding_box(shape, obj.BeamTol.Value, 1, z_tol=True, plate_off=-1)
+                        drill = optomech._bounding_box(shape, obj.BeamTol.Value, 10, z_tol=True, plate_off=-1)
                         drill.Placement = i.Placement
                         part = part.cut(drill)
-                    
+        obj.Shape = part
+
 
         if baseplate.CutLabel != "":
-            face = Draft.make_shapestring(baseplate.CutLabel, str(Path(__file__).parent.resolve()) + "/font/OpenSans-Regular.ttf", 15)
+            face = Draft.make_shapestring(baseplate.CutLabel, str(Path(__file__).parent.resolve()) + "/font/OpenSans-Regular.ttf", 1)
             if baseplate.InvertLabel:
                 face.Placement.Base = App.Vector(baseplate.Gap.Value, baseplate.dy.Value-baseplate.Gap.Value-2, -baseplate.OpticsDz.Value-6)
                 face.Placement.Rotation = App.Rotation(App.Vector(0, 0, 1), -90)*App.Rotation(App.Vector(1, 0, 0), 90)
