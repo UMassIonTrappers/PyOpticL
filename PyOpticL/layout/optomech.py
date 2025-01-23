@@ -473,6 +473,7 @@ class CylindricalOptic:
         drills=None,
         mount_class=None,
         mount_pos=(0, 0, 0),
+        mount_rotation = (0,0,0),
     ):
         self.obj = App.ActiveDocument.addObject("Part::FeaturePython", name)
 
@@ -499,19 +500,21 @@ class CylindricalOptic:
         # self.max_angle = 90
         # self.max_width = diameter
 
-        if mount_class != None:
-            self.place(
-                mount_class(
-                    name=f"{name}_mount",
-                    additional_placement=App.Placement(
+         # Handle mount_class if provided
+        if mount_class is not None:
+            # Instead of passing additional arguments to the mount class,
+            # we simply call mount_class with the arguments it expects
+            mount_obj = mount_class(
+                name=f"{name}_mount",  # Mount name
+                additional_placement=App.Placement(
                         App.Vector(mount_pos),
                         App.Rotation(0, 0, 0),
                         App.Vector(0, 0, 0),
                     ),
-                    drills=drills,
-                )
-            )  # , rotation=rotation))
+                drills=drills,         # Passing drills as a possible argument
+            )
 
+            self.place(mount_obj)  
     def execute(self, obj):
         part = Part.makeCylinder(self.obj.Radius, self.obj.Thickness, App.Vector(0, 0, 0), App.Vector(-1, 0, 0))
         obj.Shape = part
@@ -551,16 +554,19 @@ class CylindricalOptic:
 
     def place(self, obj):
         """Place an object in the relative coordinate system"""
-
         if not hasattr(self.obj, "Children"):
             self.obj.addProperty("App::PropertyLinkList", "Children")
-
         self.obj.Children += [obj.obj]
-        obj.obj.addProperty(
-            "App::PropertyLinkHidden", "RelativeTo"
-        ).RelativeTo = self.obj
+
+        if not hasattr(obj.obj, "ParentPlacement"):
+            obj.obj.addProperty("App::PropertyPlacement", "ParentPlacement")
+            obj.obj.ParentPlacement = App.Placement()  # Initialize with default placement
+
+        # Now set the mount's position relative to the optic (parent)
+        obj.obj.addProperty("App::PropertyLinkHidden", "RelativeTo").RelativeTo = self.obj
 
         return obj
+
 
 
 class CircularMirror(CylindricalOptic):
@@ -694,7 +700,7 @@ class Mount:
         """
         Parent class for mounts
         """
-
+        
         self.obj = App.ActiveDocument.addObject("Mesh::FeaturePython", name)
         self.obj.addProperty(
             "App::PropertyPlacement", "OffsetPlacement"
@@ -710,7 +716,7 @@ class Mount:
             ),
             App.Vector(0, 0, 0),
         )
-
+        self.obj.addProperty("App::PropertyVector", "Position")
         self.obj.Proxy = self
         ViewProvider(self.obj.ViewObject)
 
@@ -718,7 +724,6 @@ class Mount:
 
     def place(self, obj):
         """Place an object in the relative coordinate system"""
-
         if not hasattr(self.obj, "Children"):
             self.obj.addProperty("App::PropertyLinkList", "Children")
 
@@ -906,10 +911,38 @@ class Km05(Mount):
         super().__init__(
             name, (2.084, -1.148, 0.498), (90, 0, 90), additional_placement
         )
-
+        if drills != None:
+            self.place(
+                Bolt(
+                    f"{name}_mountbolt",
+                    BOLT_8_32,
+                    0.75 * INCH + 30,
+                    "clear_dia",
+                    drills,
+                    (-7.29-4, 0, -6.7),
+                    (0, 180, 0),
+                    True,
+                    head_length=15
+                )
+            )
+            self.place(
+                CutBox(
+                    f"{name}_bounding_box",
+                    2 * INCH,
+                    1.5 * INCH,
+                    1.5 * INCH,
+                    drills,
+                    (-1 * INCH, -0.75 * INCH, -14.73),
+                )
+            )
+            
     def execute(self, obj):
         mesh = Mesh.read(STL_PATH + "KM05-Step.stl")
-        mesh.Placement = self.obj.Placement
+        mesh.Placement = self.obj.Placement * App.Placement(
+            App.Vector(2.084-4, -1.148, 0.498),  # Translation vector
+            App.Rotation(90, 0, 90)  # Rotation (in degrees, around the X, Y, Z axes respectively)
+        )
+
         obj.Mesh = mesh
 
 
@@ -961,7 +994,7 @@ class Km05ForRedstone(Mount):
                     (-1 * INCH, -0.75 * INCH, -14.73),
                 )
             )
-
+            
     def execute(self, obj):
         return
         # mesh = Mesh.read(STL_PATH + "KM05-Step.stl")
@@ -1022,18 +1055,46 @@ class ViewProvider:
 
     def updateData(self, obj, prop):
         if str(prop) == "ParentPlacement":
-            obj.Position = obj.ParentPlacement.Base
-            if obj.OpticalShape == "circle":
-                obj.Normal = obj.ParentPlacement.Rotation * App.Vector(1, 0, 0)
-            elif obj.OpticalShape == "rectangle":
-                obj.Edge1 = obj.ParentPlacement.Rotation * obj.BaseEdge1
-                obj.Edge2 = obj.ParentPlacement.Rotation * obj.BaseEdge2
-            obj.Placement = obj.ParentPlacement
-            print('updated data')
+            # Debug: Check if the object has ParentPlacement property, and if it should have OpticalShape
+            if not hasattr(obj, "ParentPlacement"):
+                print(f"Adding ParentPlacement to {obj.Name}")
+                obj.addProperty("App::PropertyPlacement", "ParentPlacement")
+                obj.ParentPlacement = App.Placement()  # Default placement (no position or rotation)
+            else:
+                print(f"{obj.Name} already has ParentPlacement")
 
+            print(f"Current ParentPlacement for {obj.Name}: {obj.ParentPlacement}")
+            obj.Position = obj.ParentPlacement.Base  # Update position based on parent placement
+            print(f"Updated Position for {obj.Name}: {obj.Position}")
+
+            # Only check for OpticalShape if the object is an optical element (e.g., CylindricalOptic, Beam, etc.)
+            if hasattr(obj, "OpticalShape"):  # Check if it has OpticalShape property
+                # Handle optical shapes (circle or rectangle)
+                if obj.OpticalShape == "circle":
+                    obj.Normal = obj.ParentPlacement.Rotation * App.Vector(1, 0, 0)
+                elif obj.OpticalShape == "rectangle":
+                    obj.Edge1 = obj.ParentPlacement.Rotation * obj.BaseEdge1
+                    obj.Edge2 = obj.ParentPlacement.Rotation * obj.BaseEdge2
+
+                # Print the normal and edges for debugging
+                print(f"Updated Normal for {obj.Name}: {obj.Normal}")
+                if obj.OpticalShape == "rectangle":
+                    print(f"Updated Edges for {obj.Name}: {obj.Edge1}, {obj.Edge2}")
+
+            obj.Placement = obj.ParentPlacement  # Update the object's placement
+            print(f"Updated Placement for {obj.Name}: {obj.Placement}")
+
+            # If the object has children, update their ParentPlacement recursively
             if hasattr(obj, "Children"):
+                print(f"{obj.Name} has {len(obj.Children)} children. Updating their ParentPlacement.")
                 for child in obj.Children:
-                    child.ParentPlacement = obj.Placement
+                    print(f"Setting ParentPlacement for child {child.Name}")
+                    child.ParentPlacement = obj.Placement  # Set child's ParentPlacement to parent's Placement
+
+            print(f"Data update complete for {obj.Name}")
+
+
+
 
     # def onDelete(self, feature, subelements):
     # # delete all elements when baseplate is deleted
