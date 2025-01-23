@@ -9,7 +9,11 @@ macros/
 redstone/*.stl
 redstone/*.step
 redstone/*.FCStd
-examples/*
+examples/ECDL.py
+examples/Rb_SAS.py
+examples/example_baseplate.py
+examples/modular_doublepass.py
+examples/table_demo.py
 baseplate_design_K/*
 redstone/stl_workflow/*.stl
 redstone/stl_workflow/*.step
