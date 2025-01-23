@@ -3,4 +3,15 @@
 PyOpticL/stl/Room Temp Chamber Mechanical.stl
 PyOpticL/stl/Room_temp_chamber_step.stl
 PyOpticL/stl/MT3A_translation_stage.stl
-PyOpticL/stl/room temperature chamber with chip.stl 
+PyOpticL/stl/room temperature chamber with chip.stl
+macros/
+PyOpticL/redstone/*.stl
+PyOpticL/redstone/*.step
+PyOpticL/redstone/*.FCStd
+PyOpticL/stl/baseplate_for_periscope_redstone.stl
+PyOpticL/stl/grid_beamsplitter_lying_down_baseplate_mount.stl
+PyOpticL/stl/periscope_for_redstone.stl
+PyOpticL/stl/grid_beamsplitter_lying_down_baseplate.stl
+PyOpticL/stl/grid_mirror_lying_down_baseplate.stl
+PyOpticL/stl/grid_optics_fast_baseplate.stl
+PyOpticL/stl/grid_waveplate_lying_down_baseplate.stl
