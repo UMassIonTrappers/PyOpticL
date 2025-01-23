@@ -26,3 +26,4 @@
 import FreeCAD as App
 import sys
 sys.path.append(App.getUserAppDataDir() + "/Mod/PyOpticL")
+sys.path.append(App.getUserAppDataDir() + "/Mod/PyOpticL/Baseplates/")
