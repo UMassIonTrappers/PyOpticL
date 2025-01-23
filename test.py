@@ -1,6 +1,5 @@
 from PyOpticL import laser, layout, optomech
 from datetime import datetime
-from examples import ECDL
 import numpy as np
 
 name = "Test Module"
@@ -12,6 +11,7 @@ dy = 10*layout.inch
 dz = layout.inch
 
 def main():
+    layout.place_element_on_table("cell", optomech.rb_cell_holder_old, 0,0,0)
     layout.redraw()
 
 if __name__ == "__main__":
