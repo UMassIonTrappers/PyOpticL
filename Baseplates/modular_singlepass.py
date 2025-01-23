@@ -7,28 +7,34 @@ from datetime import datetime
 name = "singlepass"
 date_time = datetime.now().strftime("%m/%d/%Y")
 label = name + " " +  date_time
-
-# Dimension of the baseplate
-base_dx = 9.25*layout.inch  # 8.25
-base_dy = 6*layout.inch   #4.6
-base_dz = layout.inch
-gap = layout.inch/4
-
-input_x = 3.05*layout.inch   #2.75
-
 # Combining the baseplate with the beam and all other optical componenets. 
-def singlepass(x=0, y=0, angle=270, mirror=optomech.mirror_mount_km05, x_split=False, thumbscrews=True):
+def singlepass(x=0, y=0, angle=270, mirror=optomech.mirror_mount_km05, x_split=False, thumbscrews=True, add_box = False):
+    D1 = 1 * layout.inch
+    D2 = 0
+        # Dimension of the baseplate
+    base_dx = 8.25*layout.inch  # 8.25
+    base_dy = 4.5*layout.inch   #4.6
+    base_dz = layout.inch
+    gap = layout.inch/4
+    mh = [(3,.5),(3,1.5),(2,1.5)]
+    input_x = 2.75*layout.inch   #2.75
+    if add_box:
+        base_dx = base_dx + 1 * layout.inch
+        base_dy = base_dy + 1.5 * layout.inch
+        input_x = 3.05 * layout.inch
+        D1 = 1.85 * layout.inch
+        D2 = 0.7 * layout.inch
+        mh = [(2,4.5),(8,3.5),(3,.5),(3,1.5),(2,1.5),(8,2.5)]
     # Difining the baseplate
     baseplate = layout.baseplate(base_dx, base_dy, base_dz, x=x, y=y, angle=angle,
-                                 gap=gap, mount_holes=[(2,4.5),(8,3.5),(3,.5),(3,1.5),(2,1.5),(8,2.5)],
-                                 name=name, label=label, x_splits=[0*layout.inch], y_offset =0)
-    
+                                gap=gap, mount_holes=mh,
+                                name=name, label=label, x_splits=[0*layout.inch], y_offset =0)
     # Adding the beam to the baseplate
     beam = baseplate.add_beam_path(base_dx-input_x,0 , layout.cardinal['up'])
     
     # Adding two mirrors to give the beam enough degree of freedom. Mirror 1
     baseplate.place_element_along_beam("Input Mirror 1", optomech.circular_mirror, beam,
-                                       beam_index=0b1, distance=1.7* layout.inch, angle=layout.turn['up-right'],
+                                       beam_index=0b1, distance=D1, angle=layout.turn['up-right'],
                                        mount_type=mirror, mount_args=dict(thumbscrews=thumbscrews))
     
     # Mirror 2
@@ -55,7 +61,8 @@ def singlepass(x=0, y=0, angle=270, mirror=optomech.mirror_mount_km05, x_split=F
     aom = baseplate.place_element_along_beam("AOM", optomech.isomet_1205c_on_km100pm, beam,
                                        beam_index=0b11, distance=50, angle=layout.cardinal['left'],
                                        forward_direction=-1, backward_direction=1)
-    
+    if add_box:
+        baseplate.add_beam_path(110, 130, layout.cardinal['up'], color = (0.0, 0.0, 0.0)) # used for a open window for RF port
     # Lens 2
     lens = baseplate.place_element_along_beam("Lens f100mm AB coat", optomech.circular_lens, beam,
                                          beam_index=0b111, distance=50, angle=layout.cardinal['left'],
@@ -84,11 +91,12 @@ def singlepass(x=0, y=0, angle=270, mirror=optomech.mirror_mount_km05, x_split=F
     
     # Fiberport to fiber the beam
     baseplate.place_element_along_beam("Fiberport", optomech.fiberport_mount_hca3, beam,
-                                      beam_index=0b111, distance=20-2+.65*layout.inch, angle=layout.cardinal['right'])
+                                      beam_index=0b111, distance=18+D2, angle=layout.cardinal['right'])
 
     # Cover for the baseplate. 
-    baseplate.add_cover(dz=50)      
+    if add_box:
+        baseplate.add_cover(dz=50)      
 
 if __name__ == "__main__":
-    singlepass()
+    singlepass(add_box=False)
     layout.redraw()

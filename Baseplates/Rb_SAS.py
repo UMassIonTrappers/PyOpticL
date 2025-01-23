@@ -72,6 +72,7 @@ def Rb_SAS(x=0, y=0, angle=0, mirror=optomech.mirror_mount_km05, thumbscrews=Tru
     # Adding the Rb Gas cell   
     baseplate.place_element_along_beam("Rb_gas_cell", optomech.rb_cell, beam,
                                        beam_index=0b11, distance=3*layout.inch, angle=layout.cardinal['right'])
+    # check rb_cell_holder series in stl/ for complete set.
 
     # Adding beam cube to send the pump and probe beam to the photodiode and to the fiberport
     baseplate.place_element_along_beam("Beam_Splitter_2", optomech.cube_splitter, beam,
