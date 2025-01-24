@@ -20,7 +20,7 @@ def doublepass_f50(x=0, y=0, angle=0, mirror=optomech.mirror_mount_k05s2, x_spli
     base_dz = layout.inch
     gap = layout.inch/8
 
-    input_x = 6.5*layout.inch
+    input_x = 6.5*layout.inch # should be in integer of grid. it is 6.5 * inch due to the defining or world origin is 0.5 inch offset from table grid
 
     mount_holes = [(0, 0),   (8, 3)]
     extra_mount_holes = [(2, 0), (1, 2), (4, 0),(4,4), (6, 2)]
@@ -34,12 +34,12 @@ def doublepass_f50(x=0, y=0, angle=0, mirror=optomech.mirror_mount_k05s2, x_spli
     beam = baseplate.add_beam_path(input_x, gap, layout.cardinal['up'])
 
     # Adding input fiberport to send the beam into the baseplate
-    baseplate.place_element("Input Fiberport", optomech.fiberport_mount_hca3, x = 165.10,y=2.6,
+    baseplate.place_element("Input Fiberport", optomech.fiberport_mount_hca3, x = 165.10, y=2.6,
                                        angle=layout.cardinal['up'])
     
     ## Adding two mirrors to give the beam enough degree of freedom. Mirror 1
     baseplate.place_element_along_beam("Input Mirror 1", optomech.circular_mirror, beam,
-                                       beam_index=0b1, distance=18-4+3, angle=layout.turn['up-right'],
+                                       beam_index=0b1, distance=17, angle=layout.turn['up-right'],
                                        mount_type=mirror, mount_args=dict(thumbscrews=thumbscrews))
     
     # Miror 2
@@ -49,7 +49,7 @@ def doublepass_f50(x=0, y=0, angle=0, mirror=optomech.mirror_mount_k05s2, x_spli
     
     # Adding a waveplate to control the ploarization
     baseplate.place_element_along_beam("Half waveplate", optomech.waveplate, beam,
-                                       beam_index=0b1, distance=50+4-3, angle=layout.cardinal['up'],
+                                       beam_index=0b1, distance=51, angle=layout.cardinal['up'],
                                        mount_type=optomech.rotation_stage_rsp05)
     
     # Adding beam splitter to divide the beam to : to saty on the baseplate and to to send to the next baseplate
@@ -74,7 +74,7 @@ def doublepass_f50(x=0, y=0, angle=0, mirror=optomech.mirror_mount_k05s2, x_spli
     
     # Adding iris to select the right order of beam
     baseplate.place_element_along_beam("Iris", optomech.pinhole_ida12, beam,
-                                       beam_index=0b111, distance=50- 24 - 13.5+5, angle=layout.cardinal['right'],
+                                       beam_index=0b111, distance=17.5, angle=layout.cardinal['right'],
                                        pre_refs=2, adapter_args=dict(drill_offset=-2))
     
     # Adding another mirror to send the beam back into the AOM
@@ -89,7 +89,7 @@ def doublepass_f50(x=0, y=0, angle=0, mirror=optomech.mirror_mount_k05s2, x_spli
     
     # Mirror 2
     baseplate.place_element_along_beam("Output Mirror 2", optomech.circular_mirror, beam,
-                                       beam_index=0b11110, distance=16 + 42-10, angle=layout.turn['down-left'], 
+                                       beam_index=0b11110, distance=48, angle=layout.turn['down-left'], 
                                        mount_type=mirror, mount_args=dict(thumbscrews=thumbscrews))
     
     # Adding half waveplate to control the polarization
@@ -187,7 +187,7 @@ def doublepass_f100(x=0, y=0, angle=0, mirror=optomech.mirror_mount_km05, x_spli
     
     # Mirror 2
     baseplate.place_element_along_beam("Output Mirror 2", optomech.circular_mirror, beam,
-                                       beam_index=0b11110, distance=58-10, angle=layout.turn['down-left'],  
+                                       beam_index=0b11110, distance=48, angle=layout.turn['down-left'],  
                                        mount_type=mirror, mount_args=dict(thumbscrews=thumbscrews))
     
     ## Adding half waveplate to control the polarization

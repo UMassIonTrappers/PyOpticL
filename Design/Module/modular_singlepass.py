@@ -77,19 +77,19 @@ def singlepass(x=0, y=0, angle=270, mirror=optomech.mirror_mount_km05, x_split=F
                                        mount_type=mirror, mount_args=dict(thumbscrews=thumbscrews))
     
     # Adding iris to select the right order of beam
-    z = 10
-    x = 25
+    z_ = 10 #distance of iris and half waveplate
+    x_ = 25 #distance of output mirror and iris
     baseplate.place_element_along_beam("Iris", optomech.pinhole_ida12, beam,
-                                       beam_index=0b111, distance=20+x-13-2-1-z, angle=layout.cardinal['up'])
+                                       beam_index=0b111, distance=4+x_-z_, angle=layout.cardinal['up'])
     
     # Adding half waveplate to control the polarization
     baseplate.place_element_along_beam("Half waveplate", optomech.waveplate, beam,
-                                       beam_index=0b111, distance=17-10+z, angle=layout.cardinal['up'],
+                                       beam_index=0b111, distance=7+z_, angle=layout.cardinal['up'],
                                        mount_type=optomech.rotation_stage_rsp05)
 
     # Mirror 2 
     baseplate.place_element_along_beam("Output Mirror 2", optomech.circular_mirror, beam,
-                                       beam_index=0b111, distance=25+20-x, angle=layout.turn['down-left'] + aom.DiffractionAngle.Value/2,
+                                       beam_index=0b111, distance=45-x_, angle=layout.turn['down-left'] + aom.DiffractionAngle.Value/2,
                                        mount_type=mirror, mount_args=dict(thumbscrews=thumbscrews))
     
     # Fiberport to fiber the beam
