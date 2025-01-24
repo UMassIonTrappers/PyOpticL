@@ -19,3 +19,4 @@ redstone/stl_workflow/*.stl
 redstone/stl_workflow/*.step
 redstone/stl_workflow/*.FCStd
 redstone/stl_workflow/*.FCBak
+redstone/*
