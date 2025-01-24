@@ -416,8 +416,6 @@ def place_element_on_table(name, obj_class, x, y, angle, z=0, **args):
         obj.BasePlacement = App.Placement(App.Vector(x*inch, y*inch, z*inch), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
         return obj
     
-# zhenyu editing for general rotation.
-# just a small change
 def place_element_on_table_general(name, obj_class, x, y, z=0,angle_x = 0, angle_y = 0, angle_z = 0,  **args):
         '''
         Place an element at a fixed coordinate on the baseplate

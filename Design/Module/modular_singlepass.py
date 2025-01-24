@@ -60,17 +60,20 @@ def singlepass(x=0, y=0, angle=270, mirror=optomech.mirror_mount_km05, x_split=F
     # Adding AOM
     aom = baseplate.place_element_along_beam("AOM", optomech.isomet_1205c_on_km100pm, beam,
                                        beam_index=0b11, distance=50, angle=layout.cardinal['left'],
-                                       forward_direction=-1, backward_direction=1)
+                                       forward_direction=-1, backward_direction=1, diffraction_angle = 0.01 ) #422*1e-9 / 0.0002)
+    # diffraction angle is roughtly wavelength_of_light/wavelength_of_sound 
+    # wavelength of sound is estimated in 20c in quartz
+    # but it is usually quite small
     if add_box:
         baseplate.add_beam_path(110, 130, layout.cardinal['up'], color = (0.0, 0.0, 0.0)) # used for a open window for RF port
     # Lens 2
     lens = baseplate.place_element_along_beam("Lens f100mm AB coat", optomech.circular_lens, beam,
-                                         beam_index=0b111, distance=50, angle=layout.cardinal['left'],
+                                         beam_index=0b111, distance=50, angle=layout.cardinal['left'] + aom.DiffractionAngle.Value,
                                          focal_length=50, part_number='LA1213-AB', mount_type=optomech.lens_holder_l05g)
     
     # Adding output mirror to send the beam properly to the fiberport. Mirror 1
     baseplate.place_element_along_beam("Output Mirror 1", optomech.circular_mirror, beam,
-                                       beam_index=0b111, distance=15, angle=layout.turn['left-down']-aom.DiffractionAngle.Value/2,
+                                       beam_index=0b111, distance=15, angle=layout.turn['left-down'] + aom.DiffractionAngle.Value,
                                        mount_type=mirror, mount_args=dict(thumbscrews=thumbscrews))
     
     # Adding iris to select the right order of beam
@@ -86,12 +89,12 @@ def singlepass(x=0, y=0, angle=270, mirror=optomech.mirror_mount_km05, x_split=F
 
     # Mirror 2 
     baseplate.place_element_along_beam("Output Mirror 2", optomech.circular_mirror, beam,
-                                       beam_index=0b111, distance=25+20-x, angle=layout.turn['down-left'],
+                                       beam_index=0b111, distance=25+20-x, angle=layout.turn['down-left'] + aom.DiffractionAngle.Value/2,
                                        mount_type=mirror, mount_args=dict(thumbscrews=thumbscrews))
     
     # Fiberport to fiber the beam
     baseplate.place_element_along_beam("Fiberport", optomech.fiberport_mount_hca3, beam,
-                                      beam_index=0b111, distance=18+D2, angle=layout.cardinal['right'])
+                                      beam_index=0b111, distance=19+D2, angle=layout.cardinal['right'])
 
     # Cover for the baseplate. 
     if add_box:
