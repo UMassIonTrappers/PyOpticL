@@ -5,10 +5,10 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'Module')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'Subsystem')))
 from PyOpticL import layout, optomech
-from subsystem_674 import subsystem_674
+from SPAM_subsystem import subsystem_674
 from laser_cooling_subsystem import laser_cooling_subsystem
 from Raman_subsystem import Raman_subsystem
-from PI_subsystem import PI_subsystem
+from Photoionization_subsystem import PI_subsystem
 
 #A full table has dx=44 and dy=92
 layout.table_grid(dx=50, dy=92)
