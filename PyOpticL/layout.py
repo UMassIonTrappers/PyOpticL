@@ -535,7 +535,6 @@ class table_grid:
         self.holes.Shape = temp
         obj.Shape = part
 
-# this is zhenyu editing
 class table_no_grid:
     '''
     Add an optical table without mounting grid
