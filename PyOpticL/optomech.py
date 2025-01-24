@@ -2516,25 +2516,6 @@ class laser_base:
         obj.Shape = part
 
 class ECDL:
-    type = 'Part::FeaturePython' # if importing from stl, this will be 'Mesh::FeaturePython'
-    def __init__(self, obj):
-        # required for all object classes
-        obj.Proxy = self
-        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
-        ViewProvider(obj.ViewObject)
-        obj.ViewObject.ShapeColor = adapter_color
-        self.mount_bolt = bolt_8_32
-
-        _add_linked_object(obj, "mount", laser_mount_km100pm, pos_offset=(0, 0, 0))
-    # this defines the component body and drilling
-    def execute(self, obj):
-        part = _custom_box(dx=0.01, dy=0.01, dz=0.01,
-                           x=0, y=0, z=0.01)
-        obj.Shape = part
-        part.Placement = obj.Placement
-        obj.DrillPart = part
-
-class laser_mount_km100pm:
     """
     ECDL device 
     """
