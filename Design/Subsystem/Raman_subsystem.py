@@ -8,9 +8,15 @@ from ECDL_Isolator_plate import ECDL_isolator_baseplate
 from modular_singlepass import singlepass
 from modular_beam_pickoff import Beam_pickoff
 from ECDL import ECDL
-def Raman_subsystem(x=0, y=0, angle=0, thumbscrews=True):
+import numpy as np
+wavelength = 422e-6   #wavelength in mm
+grating_pitch_d = 1/3600   # Lines per mm
+littrow_angle = np.arcsin(wavelength/(2*grating_pitch_d))*180/np.pi
+print("current wavelength is " + str(wavelength * 1e6) + " nm")
+print("current littrow angle is " + str(littrow_angle))
+def Raman_subsystem(x=0, y=0, angle=0, thumbscrews=True, littrow_angle = littrow_angle):
 # # #422 Raman 
-    ECDL(x = 6.7 + x, y = 26 + y, angle= 270 + angle)    
+    ECDL(x = 6.7 + x, y = 26 + y, angle= 270 + angle, littrow_angle = littrow_angle)    
     #layout.place_element_on_table("Periscope", optomech.periscope, x=22.5, y=14,z=0, angle=layout.cardinal['up'])
     ECDL_isolator_baseplate(x=4 + x, y=20.5 + y, angle=270+angle)
     singlepass(x=11 + x, y=14 + y, angle = 180+angle, thumbscrews=thumbscrews)

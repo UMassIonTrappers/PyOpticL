@@ -3,15 +3,15 @@ from datetime import datetime
 import numpy as np
 
 ##Adding name & date to the baseplate to keep a track of update
-name = "ECDL"
-date_time = datetime.now().strftime("%m/%d/%Y")
-label = name + " " + date_time
+# name = "ECDL"
+# date_time = datetime.now().strftime("%m/%d/%Y")
+# label = name + " " + date_time
 
 ## Calculating the littrow angle for the ECDL. THis part is not needed. It's here just to keep track of for what laser we are printing the isolation basplate
 wavelength = 422e-6   #wavelength in mm
 grating_pitch_d = 1/3600   # Lines per mm
 littrow_angle = np.arcsin(wavelength/(2*grating_pitch_d))*180/np.pi
-print(littrow_angle)
+label = "               "  + str(wavelength*1e6) + "nm"
 
 # Define the dimension of the baseplet
 base_dx = 6*layout.inch 
@@ -30,7 +30,7 @@ mount_holes=[[3,0],[0,2],[0,4],[4,2]]
 # Combining the baseplate with different optical components and the beam
 def ECDL_isolator_baseplate(x=0, y=0, angle=0, mirror=optomech.mirror_mount_km05):
     baseplate = layout.baseplate(base_dx, base_dy, base_dz, x=x, y=y, angle=angle,
-                                 gap=gap, mount_holes=[(1,1),(5,3),(0,3), (4,3),(4,2)], y_offset  = 9)
+                                 gap=gap, mount_holes=[(1,1),(5,3),(0,3), (4,3),(4,2)], y_offset  = 9, label=label)
     
     # Adding the beam to baseplate
     beam = baseplate.add_beam_path(x=input_x, y=input_y, angle=layout.cardinal['right'])

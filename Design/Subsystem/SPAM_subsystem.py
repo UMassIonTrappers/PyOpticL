@@ -7,10 +7,15 @@ from PyOpticL import layout, optomech
 from ECDL_Isolator_plate import ECDL_isolator_baseplate
 from modular_doublepass import doublepass_f50
 from modular_beam_pickoff import Beam_pickoff
-
-def subsystem_674(x=0, y=0, angle=0, mirror=optomech.mirror_mount_km05, x_split=False, thumbscrews=True):
-    
-    layout.place_element_on_table("test", optomech.laser_mount_km100pm, 6.7 + x, 32 + y, 270+angle, z=0)
+from ECDL import ECDL
+import numpy as np
+wavelength = 674e-6   #wavelength in mm
+grating_pitch_d = 1/3600   # Lines per mm
+littrow_angle = np.arcsin(wavelength/(2*grating_pitch_d))*180/np.pi
+print("current wavelength is " + str(wavelength * 1e6) + " nm")
+print("current littrow angle is " + str(littrow_angle))
+def subsystem_674(x=0, y=0, angle=0, littrow_angle = littrow_angle):
+    ECDL(6.7 + x, 32 + y, 270+angle, littrow_angle = littrow_angle)
     ECDL_isolator_baseplate(x=4+ x, y=26.5 + y, angle=270+angle)
     doublepass_f50(x=12+ x, y=20 + y, angle = 180+angle, thumbscrews=True)
     doublepass_f50(x=11+ x, y=14 + y, angle = 180+angle, thumbscrews=True)
