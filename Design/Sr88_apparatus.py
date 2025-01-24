@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'M
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'Subsystem')))
 from PyOpticL import layout, optomech
 from SPAM_subsystem import subsystem_674
-from laser_cooling_subsystem import laser_cooling_subsystem
+from Laser_cooling_subsystem import laser_cooling_subsystem
 from Raman_subsystem import Raman_subsystem
 from Photoionization_subsystem import PI_subsystem
 

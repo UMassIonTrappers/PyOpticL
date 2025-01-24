@@ -21,11 +21,11 @@ from modular_sourcebox import sourcebox
 def laser_cooling_subsystem(x=0, y=0, angle=0, thumbscrews=True):
 
     sourcebox(x=20 + x,y=2 + y, angle=0+angle)
-    layout.place_element_on_table("Periscope", optomech.periscope, x=22.5 + x, y= 14 + y,z=0, angle=layout.cardinal['up']+angle)
+    layout.place_element_on_table("Periscope", optomech.periscope, x=22.5 + x, y= 14 + y,z=0, angle=layout.cardinal['up']+angle, mirror_args=dict(mount_type=optomech.mirror_mount_k05s1))
     telescope(x=24 + x, y=16 + y, angle=90+angle)
     Rb_SAS(x=10 + x, y=20 + y, thumbscrews=thumbscrews)
     doublepass_f50(x=17 + x, y=26.5 + y, thumbscrews=thumbscrews)
 
 if __name__ == "__main__":
-    Doppler_cooling_subsystem()
+    laser_cooling_subsystem()
     layout.redraw()
