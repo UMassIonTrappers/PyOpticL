@@ -153,6 +153,7 @@ class beam_path:
             temp = Part.makeCylinder(obj.Width.Value, length, App.Vector(i[0], i[1], 0), App.Vector(cos(i[2]), sin(i[2]), 0))
             shapes.append(temp)
         comp = Part.Compound(shapes)
+        self.comp = comp
         comp.translate(App.Vector(-self.x, -self.y, 0))
         comp.rotate(App.Vector(0, 0, 0),App.Vector(0, 0, 1), degrees(-self.a))
         comp = comp.fuse(comp)
