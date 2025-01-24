@@ -14,13 +14,13 @@ grating_pitch_d = 1/3600   # Lines per mm
 littrow_angle = np.arcsin(wavelength/(2*grating_pitch_d))*180/np.pi
 print("current wavelength is " + str(wavelength * 1e6) + " nm")
 print("current littrow angle is " + str(littrow_angle))
-def subsystem_674(x=0, y=0, angle=0, littrow_angle = littrow_angle):
+def subsystem_spam(x=0, y=0, angle=0, littrow_angle = littrow_angle, thumbscrews = True):
     ECDL(6.7 + x, 32 + y, 270+angle, littrow_angle = littrow_angle)
     ECDL_isolator_baseplate(x=4+ x, y=26.5 + y, angle=270+angle)
-    doublepass_f50(x=12+ x, y=20 + y, angle = 180+angle, thumbscrews=True)
-    doublepass_f50(x=11+ x, y=14 + y, angle = 180+angle, thumbscrews=True)
-    Beam_pickoff(x=2.5+ x, y= 8.5+y, angle=-90+angle, thumbscrews= True)
+    doublepass_f50(x=12+ x, y=20 + y, angle = 180+angle, thumbscrews=thumbscrews)
+    doublepass_f50(x=11+ x, y=14 + y, angle = 180+angle, thumbscrews=thumbscrews)
+    Beam_pickoff(x=2.5+ x, y= 8.5+y, angle=-90+angle, thumbscrews= thumbscrews)
 
 if __name__ == "__main__":
-    subsystem_674()
+    subsystem_spam()
     layout.redraw()
