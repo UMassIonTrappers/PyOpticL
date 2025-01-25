@@ -21,10 +21,10 @@
 * [Saturation Absorption Spectroscopy Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Saturation-Absoption-Spectroscopy-Baseplate)
 * [Periscope](https://github.com/UMassIonTrappers/PyOpticL/wiki/Periscope)
 ### Modular Subsystems based on baseplates:
-* [Laser Cooling](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Laser-Cooling)
-* [Photoionization Laser](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Photoionization-Laser)
-* [Raman Laser](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Raman)
-* [SPAM Laser](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-SPAM)
+* [Laser Cooling and Detection](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Laser-Cooling)
+* [Raman Zeeman qubit](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Raman)
+* [Photoionization](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Photoionization-Laser)
+* [State Preparation and Measurement](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-SPAM)
 <img src="https://github.com/user-attachments/assets/728fd555-c74e-45da-b026-38bfa01f9a87" width=700>
 
 
