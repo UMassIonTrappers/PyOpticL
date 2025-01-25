@@ -14,13 +14,13 @@
 * [Quickstart Guide](https://github.com/UMassIonTrappers/PyOpticL/wiki#quickstart-guide)
 * [Model Import Guide](https://github.com/UMassIonTrappers/PyOpticL/wiki#model-import-guide)
   
-### Modular baseplate examples
+### Modular baseplate examples:
 * [ECDL Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/ECDL-Baseplate)
 * [Doublepass Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Doublepass-Baseplate)
 * [Singlepass Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Singlepass-Baseplate)
 * [Saturation Absorption Spectroscopy Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Saturation-Absoption-Spectroscopy-Baseplate)
 * [Periscope](https://github.com/UMassIonTrappers/PyOpticL/wiki/Periscope)
-### Modular Subsystem based on baseplate
+### Modular Subsystems based on baseplates:
 * [Laser Cooling](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Laser-Cooling)
 * [Photoionization Laser](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Photoionization-Laser)
 * [Raman Laser](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Raman)
