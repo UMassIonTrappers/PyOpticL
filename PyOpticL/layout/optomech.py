@@ -988,12 +988,14 @@ class Chamber_with_chip:
         self,
         name,
         position,
-        direction
+        rotation
     ):
+        self.position = position
+        self.rotation = rotation
         self.obj = App.ActiveDocument.addObject("Mesh::FeaturePython", name)
         self.obj.addProperty("App::PropertyPlacement", "ParentPlacement").ParentPlacement = App.Placement(App.Matrix())
         self.obj.addProperty("App::PropertyVector", "BaseOrigin").BaseOrigin = App.Vector(position)
-        self.obj.addProperty("App::PropertyVector", "BaseOffset").BaseOffset = App.Vector(direction).normalize()
+        self.obj.addProperty("App::PropertyVector", "BaseOffset").BaseOffset = App.Vector(rotation).normalize()
         self.obj.addProperty("App::PropertyVector", "Position")
         self.obj.Proxy = self
         ViewProvider(self.obj.ViewObject)
@@ -1014,7 +1016,15 @@ class Chamber_with_chip:
     def execute(self, obj):
         mesh = Mesh.read(STL_PATH + "room temperature chamber with chip.stl")
         
-        mesh.Placement = self.obj.Placement 
+        mesh.Placement = App.Placement(
+            App.Vector(self.position),
+            App.Rotation(
+                float(self.rotation[0]),
+                float(self.rotation[1]),
+                float(self.rotation[2]),
+            ),
+            App.Vector(0, 0, 0),
+        )
         obj.Mesh = mesh
 
 
