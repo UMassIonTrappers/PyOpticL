@@ -8,7 +8,7 @@ from PyOpticL import layout, optomech
 from SPAM_subsystem import subsystem_spam
 from Laser_cooling_subsystem import laser_cooling_subsystem
 from Raman_subsystem import Raman_subsystem
-from Photoionization_subsystem import PI_subsystem
+from Photoionization_subsystem import PI_subsystem_ECDL, PI_subsystem_commercial
 
 
 layout.table_grid(dx=50, dy=92)
@@ -16,6 +16,6 @@ layout.table_grid(dx=50, dy=92)
 # # there is a room temperature chamber in the center. it will increase loading time 
 laser_cooling_subsystem(x=-3, y=0, thumbscrews=True)
 Raman_subsystem(x=-1 , y=25, thumbscrews=True)
-PI_subsystem(x=27 , y=8, angle = 0, thumbscrews=True) #405 for sr88+ 
-PI_subsystem(x=36 , y=8, thumbscrews=True) # 461 for sr88+
+PI_subsystem_commercial(x=27 , y=8, angle = 0, thumbscrews=True) #405 for sr88+ 
+PI_subsystem_ECDL(x=36 , y=8, thumbscrews=True) # 461 for sr88+
 subsystem_spam(x=30 , y=50, thumbscrews=True)

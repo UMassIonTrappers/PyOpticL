@@ -5,7 +5,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'M
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'Subsystem')))
 from Rb_SAS import Rb_SAS
 from modular_doublepass import doublepass_f50
-# to check out table layout.
+# an example to check out table layout.
 # loading time would be long if multiple modules are imported
 layout.table_grid(dx=18, dy=15)
 
