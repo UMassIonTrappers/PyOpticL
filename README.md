@@ -9,7 +9,6 @@
 ### ReadMe
 * [Library Features and Information](https://github.com/UMassIonTrappers/PyOpticL#about-PyOpticL)
 * [Installation Guide](https://github.com/UMassIonTrappers/PyOpticL#getting-setup)
-* [_Qubit Operation Using PyOpticL_](https://arxiv.org/abs/2501.14957)
 
 ### Wiki
 * [Quickstart Guide](https://github.com/UMassIonTrappers/PyOpticL/wiki#quickstart-guide)
