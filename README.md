@@ -31,10 +31,18 @@
 ## About PyOpticL
 PyOpticL is a Python Library for Optical Layout which uses beam-path simulation and dynamic beam-path routing for quick and easy optical layout by placing optical elements along the beam path without a priori specification, enabling dynamic layouts with automatic routing and connectivity. This opens a new paradigm of optical system engineering using modular sub-systems of modular baseplates with commerical optical elements (see abstraction layers below).
 
+See our recent preprint for more details about our results using these laser sources and baseplates in our lab: </br>
+<a href="https://arxiv.org/abs/2501.14957">Qubit operations using a modular optical system engineered with PyOpticL: a code-to-CAD optical layout tool</a>
+   
+   
+
+
 ### Beam Simulation
 * Beam paths are automatically calculated based on component placement
 * Component placement can be defined "along beam" to remove the need for hard-coded coordinates
 * Beam calculations include reflection, transmission, refraction, and diffraction (limited)
+
+## Qubit operations using a modular optical system engineered with PyOpticL: a code-to-CAD optical layout tool
 
 
 ## Getting Setup
