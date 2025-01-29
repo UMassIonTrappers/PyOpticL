@@ -22,7 +22,7 @@ def doublepass_f50(x=0, y=0, angle=0, mirror=optomech.mirror_mount_k05s2, x_spli
 
     input_x = 6.5*layout.inch # should be in integer of grid. it is 6.5 * inch due to the defining or world origin is 0.5 inch offset from table grid
 
-    mount_holes = [(0, 0),   (8, 3)]
+    mount_holes = [(0, 0), (8, 3), (0, 2), (0, 1)]
     extra_mount_holes = [(2, 0), (1, 2), (4, 0),(4,4), (6, 2)]
     
     # Difining the baseplate
@@ -49,12 +49,12 @@ def doublepass_f50(x=0, y=0, angle=0, mirror=optomech.mirror_mount_k05s2, x_spli
     
     # Adding a waveplate to control the ploarization
     baseplate.place_element_along_beam("Half waveplate", optomech.waveplate, beam,
-                                       beam_index=0b1, distance=51, angle=layout.cardinal['up'],
+                                       beam_index=0b1, distance=55, angle=layout.cardinal['up'],
                                        mount_type=optomech.rotation_stage_rsp05)
     
     # Adding beam splitter to divide the beam to : to saty on the baseplate and to to send to the next baseplate
     baseplate.place_element_along_beam("Beam Splitter", optomech.cube_splitter, beam,
-                                       beam_index=0b1, distance=32, angle=layout.cardinal['up'],
+                                       beam_index=0b1, distance=28, angle=layout.cardinal['up'],
                                        mount_type=optomech.skate_mount)
     
     # Adding AOM
@@ -89,7 +89,7 @@ def doublepass_f50(x=0, y=0, angle=0, mirror=optomech.mirror_mount_k05s2, x_spli
     
     # Mirror 2
     baseplate.place_element_along_beam("Output Mirror 2", optomech.circular_mirror, beam,
-                                       beam_index=0b11110, distance=48, angle=layout.turn['down-left'], 
+                                       beam_index=0b11110, distance=39.3, angle=layout.turn['down-left'], 
                                        mount_type=mirror, mount_args=dict(thumbscrews=thumbscrews))
     
     # Adding half waveplate to control the polarization
@@ -147,12 +147,12 @@ def doublepass_f100(x=0, y=0, angle=0, mirror=optomech.mirror_mount_km05, x_spli
     
     # Adding a waveplate to control the ploarization
     baseplate.place_element_along_beam("Half waveplate", optomech.waveplate, beam,
-                                       beam_index=0b1, distance=50, angle=layout.cardinal['up'],
+                                       beam_index=0b1, distance=54, angle=layout.cardinal['up'],
                                        mount_type=optomech.rotation_stage_rsp05)
     
     # Adding beam splitter to divide the beam to : to saty on the baseplate and to to send to the next baseplate
     baseplate.place_element_along_beam("Beam Splitter", optomech.cube_splitter, beam,
-                                       beam_index=0b1, distance=32, angle=layout.cardinal['up'],
+                                       beam_index=0b1, distance=28, angle=layout.cardinal['up'],
                                        mount_type=optomech.skate_mount)
     
     # Adding AOM
@@ -187,7 +187,7 @@ def doublepass_f100(x=0, y=0, angle=0, mirror=optomech.mirror_mount_km05, x_spli
     
     # Mirror 2
     baseplate.place_element_along_beam("Output Mirror 2", optomech.circular_mirror, beam,
-                                       beam_index=0b11110, distance=48, angle=layout.turn['down-left'],  
+                                       beam_index=0b11110, distance=39.3, angle=layout.turn['down-left'],  
                                        mount_type=mirror, mount_args=dict(thumbscrews=thumbscrews))
     
     ## Adding half waveplate to control the polarization
@@ -208,5 +208,5 @@ def doublepass_f100(x=0, y=0, angle=0, mirror=optomech.mirror_mount_km05, x_spli
 
 if __name__ == "__main__":
     doublepass_f50()  # changne the f__ depending on which lens you want
-    # doublepass_f100(y = 6)
+    doublepass_f100(y = 6)
     layout.redraw()

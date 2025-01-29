@@ -16,7 +16,7 @@ def singlepass(x=0, y=0, angle=270, mirror=optomech.mirror_mount_km05, x_split=F
     base_dy = 4.5*layout.inch   #4.6
     base_dz = layout.inch
     gap = layout.inch/4
-    mh = [(3,.5),(3,1.5),(2,1.5)]
+    mh = [(3,.5),(3,1.5),(2,1.5), (0,0.5)]
     input_x = 2.75*layout.inch   #2.75
     if add_box:
         base_dx = base_dx + 1 * layout.inch
@@ -89,7 +89,7 @@ def singlepass(x=0, y=0, angle=270, mirror=optomech.mirror_mount_km05, x_split=F
 
     # Mirror 2 
     baseplate.place_element_along_beam("Output Mirror 2", optomech.circular_mirror, beam,
-                                       beam_index=0b111, distance=45-x_, angle=layout.turn['down-left'] + aom.DiffractionAngle.Value/2,
+                                       beam_index=0b111, distance=43.5-x_, angle=layout.turn['down-left'] + aom.DiffractionAngle.Value/2,
                                        mount_type=mirror, mount_args=dict(thumbscrews=thumbscrews))
     
     # Fiberport to fiber the beam
