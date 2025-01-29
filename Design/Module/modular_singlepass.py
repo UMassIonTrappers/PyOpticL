@@ -16,7 +16,7 @@ def singlepass(x=0, y=0, angle=270, mirror=optomech.mirror_mount_km05, x_split=F
     base_dy = 4.5*layout.inch   #4.6
     base_dz = layout.inch
     gap = layout.inch/4
-    mh = [(3,.5),(3,1.5),(2,1.5), (0,0.5)]
+    mh = [(3,.5),(3,1.5),(2,1.5)]
     input_x = 2.75*layout.inch   #2.75
     if add_box:
         base_dx = base_dx + 1 * layout.inch

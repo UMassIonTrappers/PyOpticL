@@ -22,7 +22,7 @@ def doublepass_f50(x=0, y=0, angle=0, mirror=optomech.mirror_mount_k05s2, x_spli
 
     input_x = 6.5*layout.inch # should be in integer of grid. it is 6.5 * inch due to the defining or world origin is 0.5 inch offset from table grid
 
-    mount_holes = [(0, 0), (8, 3), (0, 2), (0, 1)]
+    mount_holes = [(0, 0), (8, 3), ]
     extra_mount_holes = [(2, 0), (1, 2), (4, 0),(4,4), (6, 2)]
     
     # Difining the baseplate
