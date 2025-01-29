@@ -2805,7 +2805,7 @@ class lens_mount_fmp1:
 
     def execute(self, obj):
         # mesh = _import_stl("POLARIS-K05S2-Step.stl", (90, -0, -90), (-4.514, 0.254-20, -0.254))
-        mesh = _import_stl("lens_mount_FMP1.stl", (90,0, 90), (4.65,0,0))
+        mesh = _import_stl("FMP1-Step.stl", (90,0, 90), (4.65,0,0))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
