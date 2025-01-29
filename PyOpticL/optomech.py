@@ -2805,9 +2805,40 @@ class lens_mount_fmp1:
 
     def execute(self, obj):
         # mesh = _import_stl("POLARIS-K05S2-Step.stl", (90, -0, -90), (-4.514, 0.254-20, -0.254))
-        mesh = _import_stl("FMP1-Step.stl", (90,0, 90), (4.65,0,0))
+        mesh = _import_stl("FMP1-Step.stl", (180,180, 0), (4.65,0,0))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
+
+class lens_mount_sm1tc:
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True, adapter_args = {}):#, thumbscrews=False):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+        obj.addProperty('App::PropertyLength', 'BoltLength').BoltLength = 15
+        obj.ViewObject.ShapeColor = mount_color
+
+    def execute(self, obj):        
+        mesh = _import_stl("SM1TC_SM1L03.stl", (90,0,90), (1.3,0,0,)) # clamp for tube for lens
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh       
+        
+        part = _custom_cylinder(dia=bolt_8_32['clear_dia']+0.35, dz=inch + 15, #  dia is expanded since it is M4
+                                          head_dia= 25.4 , head_dz=0.92*inch-obj.BoltLength.Value +1 , # head_dia = bolt_8_32['head_dia']
+                                          x=1.3, y=0, z=-inch*3/2-13, dir=(0,0,1))
+        
+        for i in [-1, 1]:
+            part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
+                                              x=-5.75, y=i*5, z=-layout.inch))
+        
+        for i in [-1, 1]:
+            part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
+                                              x=7.95, y=i*5, z=-layout.inch))
+
+        part.Placement = obj.Placement
+        obj.DrillPart = part
 
 class surface_adapter_wide:
     '''
@@ -3353,7 +3384,8 @@ class lens_tube_SM1L03:
     SM1 Lens Tube, model SM1L03
     '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, drill=True):
+    def __init__(self, obj, drill=True, bounding_box = True):
+        self.bounding_box = bounding_box
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -3369,10 +3401,10 @@ class lens_tube_SM1L03:
         mesh = _import_stl("SM1L03-Step.stl", (90, -0, 0), (8.382, 0, 0))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
-
-        part = _bounding_box(obj, 2, 3, z_tol=True, min_offset=(0, 4, 0), max_offset=(0, -4, 0))
-        part.Placement = obj.Placement
-        obj.DrillPart = part
+        # if self.bounding_box:
+        #     part = _bounding_box(obj, 2, 3, z_tol=True, min_offset=(0, 4, 0), max_offset=(0, -4, 0))
+        #     part.Placement = obj.Placement
+        #     obj.DrillPart = part
 
 
 class periscope:
