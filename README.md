@@ -78,7 +78,7 @@ ___
 Same code compiled with different optical elements at different scales:
 ![image](https://github.com/user-attachments/assets/5340ac9b-0a6f-4758-803f-e5a5f15b18a3)
 
-## 3D Model and Tech Drawing 
+## 3D Models and Technical Drawings
 * [Click Here for 3D Model and Tech Drawing for All Modules](https://github.com/UMassIonTrappers/PyOpticL/tree/main/Design/Module/3DModel)
 
 <!--
