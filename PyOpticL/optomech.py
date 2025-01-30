@@ -1752,11 +1752,26 @@ class mirror_mount_k1t1:
         # dz = -inch-obj.Mesh.BoundBox.ZMin
         part = _bounding_box(obj, 3, 3, min_offset=(0, 0, dz))
         part = part.fuse(_bounding_box(obj, 3, 3, z_tol=True, max_offset=(-28-2-5, 0, 0)))
+
+        # part for a square washer
+        # https://www.mcmaster.com/99041A204/
+        # Zinc-Plated Steel Square Washer
+        # for Number 6 Screw Size, 0.156" ID, 0.500" Wide
+        part = part.fuse(_custom_box(dx=0.51 * inch, dy=0.51 * inch, dz=11, x=-15.76, y = 0, z = -42,fillet=0, dir=(0,0,-1), fillet_dir=None))
+        # for cnc machining
+        for j in [1,-1]:
+            for k in [1, -1]:
+                part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
+                                x=-15.76 + j * 0.25 * inch , y=0 + k * 0.25*inch, z=-42, dir=(0,0,-1)))
+
         part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
-                                          x=-16.94+1.18, y=0, z=-layout.inch/2, dir=(0,0,-1)))
+                                          x=-15.76, y=0, z=-layout.inch/2, dir=(0,0,-1)))
         for i in [-1, 1]:
             part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
                                               x=-15.667, y=i*5.05, z=-layout.inch/2-12.5))
+        
+       
+
         part.Placement = obj.Placement
         obj.DrillPart = part  
 
@@ -2826,16 +2841,27 @@ class lens_mount_sm1tc:
         obj.Mesh = mesh       
         
         part = _custom_cylinder(dia=bolt_8_32['clear_dia']+0.35, dz=inch + 15, #  dia is expanded since it is M4
-                                          head_dia= 25.4 , head_dz=0.92*inch-obj.BoltLength.Value +1 , # head_dia = bolt_8_32['head_dia']
+                                          head_dia= bolt_8_32['head_dia'] , head_dz=0.92*inch-obj.BoltLength.Value +1 , # head_dia = bolt_8_32['head_dia']
                                           x=1.3, y=0, z=-inch*3/2-13, dir=(0,0,1))
         
         for i in [-1, 1]:
             part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
-                                              x=-5.75, y=i*5, z=-layout.inch))
+                                              x=-5.75, y=i*5, z=-layout.inch)) # pinholes for assistance of the accurate position 
         
         for i in [-1, 1]:
             part = part.fuse(_custom_cylinder(dia=2, dz=2.2,
                                               x=7.95, y=i*5, z=-layout.inch))
+
+        # part for a square washer
+        # https://www.mcmaster.com/99041A204/
+        # Zinc-Plated Steel Square Washer
+        # for Number 6 Screw Size, 0.156" ID, 0.500" Wide
+        part = part.fuse(_custom_box(dx=0.51 * inch, dy=0.51 * inch, dz=11, x=1.3, y = 0, z = -42,fillet=0, dir=(0,0,-1), fillet_dir=None))
+        # for cnc machining
+        for j in [1,-1]:
+            for k in [1, -1]:
+                part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
+                                x=1.3 + j * 0.25 * inch , y=0 + k * 0.25*inch, z=-42, dir=(0,0,-1)))
 
         part.Placement = obj.Placement
         obj.DrillPart = part
