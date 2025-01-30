@@ -105,7 +105,7 @@ def doublepass_f50(x=0, y=0, angle=0, mirror=optomech.mirror_mount_k05s2, x_spli
 # If we use a 100mm lens instead of 50 mm
 #same input and output position
 # Combining the baseplate with the beam and all other optical componenets. 
-def doublepass_f100(x=0, y=0, angle=0, mirror=optomech.mirror_mount_km05, x_split=True, thumbscrews=True):
+def doublepass_f100(x=0, y=0, angle=0, mirror=optomech.mirror_mount_km05, x_split=False, thumbscrews=True):
     
     # Adding name and date to keep a track of the updates
     name = "Doublepass"
@@ -120,7 +120,7 @@ def doublepass_f100(x=0, y=0, angle=0, mirror=optomech.mirror_mount_km05, x_spli
 
     input_x = 10.5*layout.inch
 
-    mount_holes = [(0, 0),   (8, 3)]
+    mount_holes = [(0, 0),  (8, 3)]
     extra_mount_holes = [(2, 0), (1, 2), (4, 0), (6, 2)]
 
     # Difining the baseplate
@@ -208,5 +208,5 @@ def doublepass_f100(x=0, y=0, angle=0, mirror=optomech.mirror_mount_km05, x_spli
 
 if __name__ == "__main__":
     doublepass_f50()  # changne the f__ depending on which lens you want
-    doublepass_f100(y = 6)
+    # doublepass_f100(y = 6)
     layout.redraw()

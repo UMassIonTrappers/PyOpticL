@@ -84,12 +84,12 @@ def singlepass(x=0, y=0, angle=270, mirror=optomech.mirror_mount_km05, x_split=F
     
     # Adding half waveplate to control the polarization
     baseplate.place_element_along_beam("Half waveplate", optomech.waveplate, beam,
-                                       beam_index=0b111, distance=7+z_, angle=layout.cardinal['up'],
+                                       beam_index=0b111, distance=4+z_, angle=layout.cardinal['up'],
                                        mount_type=optomech.rotation_stage_rsp05)
 
     # Mirror 2 
     baseplate.place_element_along_beam("Output Mirror 2", optomech.circular_mirror, beam,
-                                       beam_index=0b111, distance=43.5-x_, angle=layout.turn['down-left'] + aom.DiffractionAngle.Value/2,
+                                       beam_index=0b111, distance=46.5-x_, angle=layout.turn['down-left'] + aom.DiffractionAngle.Value/2,
                                        mount_type=mirror, mount_args=dict(thumbscrews=thumbscrews))
     
     # Fiberport to fiber the beam
