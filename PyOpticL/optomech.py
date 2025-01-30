@@ -1757,11 +1757,11 @@ class mirror_mount_k1t1:
         # https://www.mcmaster.com/99041A204/
         # Zinc-Plated Steel Square Washer
         # for Number 6 Screw Size, 0.156" ID, 0.500" Wide
-        part = part.fuse(_custom_box(dx=0.51 * inch, dy=0.51 * inch, dz=11, x=-15.76, y = 0, z = -42,fillet=0, dir=(0,0,-1), fillet_dir=None))
+        part = part.fuse(_custom_box(dx=0.55 * inch, dy=0.55 * inch, dz=11, x=-15.76, y = 0, z = -42,fillet=0, dir=(0,0,-1), fillet_dir=None))
         # for cnc machining
         for j in [1,-1]:
             for k in [1, -1]:
-                part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
+                part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'] * 2, dz=drill_depth,
                                 x=-15.76 + j * 0.25 * inch , y=0 + k * 0.25*inch, z=-42, dir=(0,0,-1)))
 
         part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
@@ -2841,7 +2841,7 @@ class lens_mount_sm1tc:
         obj.Mesh = mesh       
         
         part = _custom_cylinder(dia=bolt_8_32['clear_dia']+0.35, dz=inch + 15, #  dia is expanded since it is M4
-                                          head_dia= bolt_8_32['head_dia'] , head_dz=0.92*inch-obj.BoltLength.Value +1 , # head_dia = bolt_8_32['head_dia']
+                                          head_dia= bolt_8_32['clear_dia']+0.35 , head_dz=0.92*inch-obj.BoltLength.Value +1 , # head_dia = bolt_8_32['head_dia']
                                           x=1.3, y=0, z=-inch*3/2-13, dir=(0,0,1))
         
         for i in [-1, 1]:
@@ -2856,11 +2856,11 @@ class lens_mount_sm1tc:
         # https://www.mcmaster.com/99041A204/
         # Zinc-Plated Steel Square Washer
         # for Number 6 Screw Size, 0.156" ID, 0.500" Wide
-        part = part.fuse(_custom_box(dx=0.51 * inch, dy=0.51 * inch, dz=11, x=1.3, y = 0, z = -42,fillet=0, dir=(0,0,-1), fillet_dir=None))
+        part = part.fuse(_custom_box(dx=0.55 * inch, dy=0.55 * inch, dz=11, x=1.3, y = 0, z = -42,fillet=0, dir=(0,0,-1), fillet_dir=None))
         # for cnc machining
         for j in [1,-1]:
             for k in [1, -1]:
-                part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
+                part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'] * 2, dz=drill_depth,
                                 x=1.3 + j * 0.25 * inch , y=0 + k * 0.25*inch, z=-42, dir=(0,0,-1)))
 
         part.Placement = obj.Placement
