@@ -26,7 +26,8 @@
 * [Raman Zeeman qubit](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Raman)
 * [Photoionization](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Photoionization-Laser)
 * [State Preparation and Measurement](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-SPAM)
-<img src="https://github.com/user-attachments/assets/728fd555-c74e-45da-b026-38bfa01f9a87" width=700>
+
+<img src="https://github.com/user-attachments/assets/728fd555-c74e-45da-b026-38bfa01f9a87">
 
 ## About PyOpticL (Python Optics Layout)
 PyOpticL is a python library for optics layout which uses beam-path simulation and dynamic beam-path routing for quick and easy optical layout by placing optical elements along the beam path without a priori specification, enabling dynamic layouts with automatic routing and connectivity. This opens a new paradigm of optical system engineering using modular sub-systems of modular baseplates with commerical optical elements (see abstraction layers below).
