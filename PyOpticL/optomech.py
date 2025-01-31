@@ -1,11 +1,12 @@
+from math import *
+from pathlib import Path
+
 import FreeCAD as App
 import Mesh
-import Part
-from math import *
-from . import layout
 import numpy as np
+import Part
 
-from pathlib import Path
+from . import layout
 
 stl_path = str(Path(__file__).parent.resolve()) + "/stl/"
 drill_depth = 100
@@ -808,8 +809,9 @@ class fiberport_mount_hca3:
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
-        part = Part.Shape()
-        for i in [-1, 0, 1]:
+        part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=inch,
+                                              x=0, y=0, z=-20.65, dir=(1,0,0))
+        for i in [-1, 1]:
             part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=inch,
                                               x=0, y=i*12.7, z=-20.65, dir=(1,0,0)))
         part.Placement = obj.Placement
