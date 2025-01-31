@@ -26,10 +26,11 @@
 * [Raman Zeeman qubit](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Raman)
 * [Photoionization](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Photoionization-Laser)
 * [State Preparation and Measurement](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-SPAM)
-<img src="https://github.com/user-attachments/assets/728fd555-c74e-45da-b026-38bfa01f9a87" width=700>
 
-## About PyOpticL
-PyOpticL is a Python Library for Optical Layout which uses beam-path simulation and dynamic beam-path routing for quick and easy optical layout by placing optical elements along the beam path without a priori specification, enabling dynamic layouts with automatic routing and connectivity. This opens a new paradigm of optical system engineering using modular sub-systems of modular baseplates with commerical optical elements (see abstraction layers below).
+<img src="https://github.com/user-attachments/assets/728fd555-c74e-45da-b026-38bfa01f9a87">
+
+## About PyOpticL (Python Optics Layout)
+PyOpticL is a python library for optics layout which uses beam-path simulation and dynamic beam-path routing for quick and easy optical layout by placing optical elements along the beam path without a priori specification, enabling dynamic layouts with automatic routing and connectivity. This opens a new paradigm of optical system engineering using modular sub-systems of modular baseplates with commerical optical elements (see abstraction layers below).
 
 See our recent preprint for more details about our results using these laser sources and baseplates in our lab: </br>
 <a href="https://arxiv.org/abs/2501.14957">Qubit operations using a modular optical system engineered with PyOpticL: a code-to-CAD optical layout tool</a>
@@ -78,7 +79,7 @@ ___
 Same code compiled with different optical elements at different scales:
 ![image](https://github.com/user-attachments/assets/5340ac9b-0a6f-4758-803f-e5a5f15b18a3)
 
-## 3D Model and Tech Drawing 
+## 3D Models and Technical Drawings
 * [Click Here for 3D Model and Tech Drawing for All Modules](https://github.com/UMassIonTrappers/PyOpticL/tree/main/Design/Module/3DModel)
 
 <!--

@@ -1,10 +1,13 @@
+from pathlib import Path
+
+import Draft
 import FreeCAD as App
 import Mesh
-import Part
-import Draft
-from . import laser, optomech
-from pathlib import Path
 import MeshPart
+import Part
+
+from . import laser, optomech
+
 inch = 25.4
 
 cardinal = {"right":0,
@@ -262,60 +265,6 @@ class baseplate:
         obj.addProperty("App::PropertyLinkListHidden","PathObjects").PathObjects
         obj.ViewObject.ShapeColor = color
         return obj
-    
-    def execute(self, obj):
-        if obj.dx == 0 and obj.dy == 0:
-            for i in App.ActiveDocument.Objects:
-                if hasattr(i, "Baseplate") and i.Baseplate == obj:
-                    if hasattr(i, "Shape"):
-                        obj_body = i.Shape.copy()
-                    elif hasattr(i, "Mesh"):
-                        obj_body = i.Mesh.copy()
-                    else:
-                        obj_body = i
-                    if hasattr(obj_body, "BoundBox") and hasattr(i, "BasePlacement"):
-                        obj_body.Placement = i.BasePlacement
-                        bound = obj_body.BoundBox
-                        obj.xOffset = min(obj.xOffset.Value, bound.XMin-obj.AutosizeTol.Value)
-                        obj.yOffset = min(obj.yOffset.Value, bound.YMin-obj.AutosizeTol.Value)
-                        obj.dx = max(obj.dx.Value, bound.XMax+obj.AutosizeTol.Value-obj.xOffset.Value)
-                        obj.dy = max(obj.dy.Value, bound.YMax+obj.AutosizeTol.Value-obj.yOffset.Value)
-                        print(i.Name, obj.dy)
-
-        if obj.dx == 0 and obj.dy == 0:
-            return
-        
-        part = Part.makeBox(obj.dx.Value-2*obj.Gap.Value, obj.dy.Value-2*obj.Gap.Value, obj.dz.Value,
-                            App.Vector(obj.Gap.Value+obj.xOffset.Value, obj.Gap.Value+obj.yOffset.Value, -obj.dz.Value-obj.OpticsDz.Value))
-
-        if len(obj.xSplits) > 0:
-            for i in obj.xSplits:
-                part = part.cut(Part.makeBox(2*obj.Gap.Value, obj.dy.Value-2*obj.Gap.Value, obj.dz.Value, 
-                                            App.Vector(i-obj.Gap.Value+obj.xOffset.Value, obj.Gap.Value+obj.yOffset.Value, -obj.dz.Value-obj.OpticsDz.Value)))
-        if len(obj.ySplits) > 0:
-            for i in obj.ySplits:
-                part = part.cut(Part.makeBox(obj.dx.Value-2*obj.Gap.Value, 2*obj.Gap.Value, obj.dz.Value, 
-                                            App.Vector(obj.Gap.Value+obj.xOffset.Value, i-obj.Gap.Value+obj.yOffset.Value, -obj.dz.Value-obj.OpticsDz.Value)))
-        if obj.Drill:
-            for i in App.ActiveDocument.Objects:
-                if hasattr(i, 'DrillPart'):
-                    if i.Drill and i.Baseplate == obj:
-                        drill = i.DrillPart.copy()
-                        drill.Placement = obj.Placement.inverse()*drill.Placement
-                        part = part.cut(drill)
-        if obj.CutLabel != "":
-            face = Draft.make_shapestring(obj.CutLabel, str(Path(__file__).parent.resolve()) + "/font/OpenSans-Regular.ttf", 5)
-            if obj.InvertLabel:
-                face.Placement.Base = App.Vector(obj.Gap.Value+obj.xOffset.Value, obj.dy.Value+obj.yOffset.Value-obj.Gap.Value-2, -obj.OpticsDz.Value-6)
-                face.Placement.Rotation = App.Rotation(App.Vector(0, 0, 1), -90)*App.Rotation(App.Vector(1, 0, 0), 90)
-                text = face.Shape.extrude(App.Vector(0.5, 0, 0))
-            else:
-                face.Placement.Base = App.Vector(obj.Gap.Value+obj.xOffset.Value+2, obj.Gap.Value+obj.yOffset.Value, -obj.OpticsDz.Value-6)
-                face.Placement.Rotation = App.Rotation(App.Vector(1, 0, 0), 90)
-                text = face.Shape.extrude(App.Vector(0, 0.5, 0))
-            part = part.cut(text)
-            App.ActiveDocument.removeObject(face.Label)
-        obj.Shape = part.removeSplitter()
 
     def add_beam_path_general(self, x, y, z, angle_x, angle_y, angle_z, name="Beam Path", color=(1.0, 0.0, 0.0)):
         '''
@@ -375,7 +324,7 @@ class baseplate:
         if obj.Drill:
             for i in App.ActiveDocument.Objects:
                 if hasattr(i, 'DrillPart'):
-                    if i.Drill and i.Baseplate == obj:
+                    if not i.DrillPart.isNull() and i.Drill and i.Baseplate == obj:
                         drill = i.DrillPart.copy()
                         drill.Placement = obj.Placement.inverse()*drill.Placement
                         part = part.cut(drill)
