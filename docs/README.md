@@ -103,7 +103,7 @@
             name (string): Label for the beam path object  
             color (float[3]): Color of the beam path object in RGB format  
         
-### baseplate.execute
+### baseplate.add_beam_path_general
   
         Add a new dynamic beam path  
   
