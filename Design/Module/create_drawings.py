@@ -17,6 +17,7 @@ bolt_4_40 = {
     "tap_dia": 0.089 * inch,
     "head_dia": 5.50,
     "head_dz": 2.5,
+    "clear_dia_string": '3.05 mm, unthreaded'
 }
 
 bolt_8_32 = {
@@ -25,6 +26,7 @@ bolt_8_32 = {
     "tap_dia": 0.136 * inch,
     "head_dia": 7,
     "head_dz": 4.4,
+    "clear_dia_string": '4.37 mm, unthreaded'
 }
 
 bolt_14_20 = {
@@ -34,6 +36,7 @@ bolt_14_20 = {
     "head_dia": 9.8,
     "head_dz": 8,
     "washer_dia": 9 / 16 * inch,
+    "clear_dia_string": '6.60 mm, unthreaded'
 }
 
 bolts = [bolt_4_40, bolt_8_32, bolt_14_20]
@@ -98,7 +101,7 @@ else:
                         label = bolt["name"] + "\n(thread)"
                         break
                     if isclose(bolt["clear_dia"], 2 * radius):
-                        label = bolt["name"] + "\n(clear)"
+                        label = bolt["clear_dia_string"]#bolt["name"] + "\n(clear)"
                         break
                 if label != None:
                     x, y, _ = edge.Curve.Center
