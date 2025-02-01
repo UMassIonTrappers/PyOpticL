@@ -207,6 +207,6 @@ def doublepass_f100(x=0, y=0, angle=0, mirror=optomech.mirror_mount_km05, x_spli
     #baseplate.add_cover(dz=45)
 
 if __name__ == "__main__":
-    #doublepass_f50()  # changne the f__ depending on which lens you want
-    doublepass_f100(y = 6)
+    doublepass_f50()  # changne the f__ depending on which lens you want
+    # doublepass_f100(y = 6)
     layout.redraw()

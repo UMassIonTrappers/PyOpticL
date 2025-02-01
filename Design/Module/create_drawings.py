@@ -55,10 +55,10 @@ else:
     # Create a TechDraw page
     directions = [
         ("Top", (0, 0, 1)),
-        ("Front", (0, -1, 0)),
-        ("Back", (0, 1, 0)),
-        ("Left", (-1, 0, 0)),
-        ("Right", (1, 0, 0)),
+        # ("Front", (0, -1, 0)),
+        # ("Back", (0, 1, 0)),
+        # ("Left", (-1, 0, 0)),
+        # ("Right", (1, 0, 0)),
     ]
 
     for name, direction in directions:
@@ -103,6 +103,15 @@ else:
                     if isclose(bolt["clear_dia"], 2 * radius):
                         label = bolt["clear_dia_string"]#bolt["name"] + "\n(clear)"
                         break
+                    if isclose(bolt_14_20["clear_dia"], 2 * radius): # these large bolts are only for bolts into optical table
+                        label = "A"
+                        break
+                    if isclose(bolt_8_32["clear_dia"], 2 * radius):
+                        label = "B"
+                        break
+                    if isclose(bolt_8_32["tap_dia"], 2 * radius):
+                        label = "C"
+                        break
                 if label != None:
                     x, y, _ = edge.Curve.Center
                     balloon = FreeCAD.ActiveDocument.addObject(
@@ -121,6 +130,24 @@ else:
                     balloon.ViewObject.Fontsize = 4
                     page.addView(balloon)
 
+    #    # Create an annotation object
+    #     blockObj = FreeCAD.ActiveDocument.addObject('TechDraw::DrawRichAnno','DrawRichAnno')
+    #     page.addView(blockObj)
+    #     blockObj.X = 45
+    #     blockObj.Y = 145
+    #     blockObj.ShowFrame = False
+    #     blockObj.Scale = 15
+    #     # print(vars(blockObj.AnnoText))
+    #     # blockObj.Fontsize = 8
+    #     blockObj.AnnoText = "dd \n dd"
+        anno = FreeCAD.ActiveDocument.addObject('TechDraw::DrawViewAnnotation','Symbol Annotation')
+        anno.Text = ['A -- \u00F8 6.60mm, \u2334 \u00F8 13.20mm, \u2193 10mm', 'B -- \u00F8 4.37 mm, through',  'C -- 8-32, thread']
+        anno.TextStyle = 'Bold'
+        anno.X = 45
+        anno.Y = 145
+        anno.MaxWidth = 115
+        rc = page.addView(anno)
+        print(anno.Content)
         view.touch()
         view.recompute()
         doc.recompute()

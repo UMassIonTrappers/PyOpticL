@@ -8,7 +8,7 @@ name = "singlepass"
 date_time = datetime.now().strftime("%m/%d/%Y")
 label = name + " " +  date_time
 # Combining the baseplate with the beam and all other optical componenets. 
-def singlepass(x=0, y=0, angle=270, mirror=optomech.mirror_mount_km05, x_split=False, thumbscrews=True, add_box = True):
+def singlepass(x=0, y=0, angle=270, mirror=optomech.mirror_mount_km05, x_split=False, thumbscrews=True, add_box = False):
     D1 = 1 * layout.inch
     D2 = 0
         # Dimension of the baseplate

@@ -23,13 +23,13 @@ grating_pitch_d = 1/3600   # Lines per mm
 littrow_angle = np.arcsin(wavelength/(2*grating_pitch_d))*180/np.pi
 print("current wavelength is " + str(wavelength * 1e6) + " nm")
 print("current littrow angle is " + str(littrow_angle))
-def laser_cooling_subsystem(x=0, y=0, angle=0, thumbscrews=True, littrow_angle = littrow_angle):
+def laser_cooling_subsystem(x=0, y=0, angle=0, thumbscrews=True, littrow_angle = littrow_angle, **args_for_doublepass):
 
     ECDL(x=21.3 + x,y=4 + y, angle=90+angle, littrow_angle = littrow_angle)
     ECDL_isolator_baseplate(x=24 + x, y= 9 + y, angle=layout.cardinal['up']+angle)
     telescope(x=24 + x, y=16 + y, angle=90+angle)
     Rb_SAS(x=10 + x, y=20 + y, thumbscrews=thumbscrews)
-    doublepass_f50(x=17 + x, y=26 + y, thumbscrews=thumbscrews)
+    doublepass_f50(x=17 + x, y=26 + y, thumbscrews=thumbscrews, **args_for_doublepass)
 
     # this version is for commercial laser
     # sourcebox(x=20 + x,y=2 + y, angle=0+angle) # model for toptica
