@@ -7,7 +7,7 @@
 <!-- <img src="https://github.com/user-attachments/assets/1dbe2986-20e2-4f4e-9b4c-00dd31a4b656" width=50%> -->
 
 ### ReadMe
-* [Library Features and Information](https://github.com/UMassIonTrappers/PyOpticL#about-PyOpticL)
+* [Library Features and Information](https://github.com/UMassIonTrappers/PyOpticL#about-pyopticl-python-optics-layout)
 * [Installation Guide](https://github.com/UMassIonTrappers/PyOpticL#getting-setup)
 
 ### Wiki
