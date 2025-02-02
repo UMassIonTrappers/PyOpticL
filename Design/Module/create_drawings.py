@@ -55,10 +55,10 @@ else:
     # Create a TechDraw page
     directions = [
         ("Top", (0, 0, 1)),
-        # ("Front", (0, -1, 0)),
-        # ("Back", (0, 1, 0)),
-        # ("Left", (-1, 0, 0)),
-        # ("Right", (1, 0, 0)),
+        ("Front", (0, -1, 0)),
+        ("Back", (0, 1, 0)),
+        ("Left", (-1, 0, 0)),
+        ("Right", (1, 0, 0)),
     ]
 
     for name, direction in directions:
@@ -147,7 +147,7 @@ else:
         anno.Y = 145
         anno.MaxWidth = 115
         rc = page.addView(anno)
-        print(anno.Content)
+        
         view.touch()
         view.recompute()
         doc.recompute()
