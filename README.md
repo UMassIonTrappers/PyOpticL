@@ -15,35 +15,29 @@
 * [Model Import Guide](https://github.com/UMassIonTrappers/PyOpticL/wiki#model-import-guide)
   
 ### Modular baseplate examples:
-* [ECDL Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-ECDL-with-Isolation-Baseplate)
-* [Doublepass Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-Doublepass-Baseplate)
-* [Singlepass Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-Singlepass-Baseplate)
+* [Laser - Extended Cavity Diode Laser (with optical isolator)](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-ECDL-with-Isolation-Baseplate)
+* [Doublepass AOM Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-Doublepass-Baseplate)
+* [Singlepass AOM Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-Singlepass-Baseplate)
 * [Saturation Absorption Spectroscopy Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-Saturation-Absoption-Spectroscopy-Baseplate)
 * [Periscope](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-Periscope)
-* [CoverBox](https://github.com/UMassIonTrappers/PyOpticL/wiki/CoverBox). 
+* [CoverBox](https://github.com/UMassIonTrappers/PyOpticL/wiki/CoverBox)
+
 ### Modular Subsystems based on baseplates:
 * [Laser Cooling and Detection](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-‐-Laser-Cooling-and-Detection)
 * [Raman Zeeman qubit](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Raman)
 * [Photoionization](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Photoionization-Laser)
 * [State Preparation and Measurement](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-SPAM)
 
-<img src="https://github.com/user-attachments/assets/728fd555-c74e-45da-b026-38bfa01f9a87">
+## 3D Models and Technical Drawings
+* [Click Here for 3D Models and Technical Drawings for All Modules](https://github.com/UMassIonTrappers/PyOpticL/tree/main/Design/Module/3DModel)
 
 ## About PyOpticL (Python Optics Layout)
-PyOpticL is a python library for optics layout which uses beam-path simulation and dynamic beam-path routing for quick and easy optical layout by placing optical elements along the beam path without a priori specification, enabling dynamic layouts with automatic routing and connectivity. This opens a new paradigm of optical system engineering using modular sub-systems of modular baseplates with commerical optical elements (see abstraction layers below).
+PyOpticL is a Python library for optics layout which uses beam-path simulation and dynamic beam-path routing for quick and easy optical layout by placing optical elements along the beam path without a priori specification, enabling dynamic layouts with automatic routing and connectivity.
+The beam paths are automatically calculated as components are placed in the layout. Component placement can be defined "along beam" to remove the need for hard-coded coordinates. Beam calculations include reflection, transmission, refraction, and diffraction (limited). This library enables a new paradigm of optical engineering using modular sub-systems of modular baseplates with commerical optical elements (see abstraction layers below).
 
+## Demonstration with Trapped Ion Qubits:
 See our recent preprint for more details about our results using these laser sources and baseplates in our lab: </br>
-<a href="https://arxiv.org/abs/2501.14957">Qubit operations using a modular optical system engineered with PyOpticL: a code-to-CAD optical layout tool</a>
-   
-   
-
-
-### Beam Simulation
-* Beam paths are automatically calculated based on component placement
-* Component placement can be defined "along beam" to remove the need for hard-coded coordinates
-* Beam calculations include reflection, transmission, refraction, and diffraction (limited)
-
-## Qubit operations using a modular optical system engineered with PyOpticL: a code-to-CAD optical layout tool
+<a href="https://arxiv.org/abs/2501.14957"> arXiv:2501.14957 - Qubit operations using a modular optical system engineered with PyOpticL: a code-to-CAD optical layout tool</a>
 
 
 ## Getting Setup
@@ -66,21 +60,62 @@ See our recent preprint for more details about our results using these laser sou
 
 6. **Read the [docs](https://github.com/UMassIonTrappers/PyOpticL/tree/main/docs) library documentation**
 
+
 ___
 
+
+### Example - Laser cooling and detection:
+
+```python
+from PyOpticL import layout, optomech
+from ECDL import ECDL
+from Rb_SAS_V2 import Rb_SAS
+from modular_doublepass import doublepass
+from modular_singlepass import singlepass
+
+def laser_cooling_subsystem():
+    layout.table_grid(dx=36, dy=22)
+    ECDL(x=27, y=20, angle=180)
+    Rb_SAS(x=20, y=1, angle=90)
+    singlepass(x=14, y=12, angle=90)
+    doublepass(x=1, y=21, angle=270)
+```
+
+![full_setup](https://github.com/user-attachments/assets/98261868-0474-4b8d-a73f-8785c20799b5)
+
+ 
+## Dynamic layouts:
+
+```python
+Rb_SAS(0, 16, optic_type=one_inch_mounted)
+Rb_SAS(0, 8, optic_type=half_inch_mounted)
+Rb_SAS(0, 3, optic_type=half_inch_unmounted)
+Rb_SAS(0, 0, optic_type=mini_optics)
+```
+
+Same code compiled with different optical elements at different scales:
+![image](https://github.com/user-attachments/assets/5340ac9b-0a6f-4758-803f-e5a5f15b18a3)
 
 
 ## Design abstraction layers applied to a strontium trapped ion quantum computer:
 
+```python
+from PyOpticL import layout, optomech
+from SPAM_subsystem import subsystem_spam
+from Laser_cooling_subsystem import laser_cooling_subsystem
+from Raman_subsystem import Raman_subsystem
+from Photoionization_subsystem import PI_subsystem_ECDL, PI_subsystem_commercial
+
+layout.table_grid(dx=52, dy=92)
+laser_cooling_subsystem(x=-1, y=0, thumbscrews=True)
+Raman_subsystem(x=1 , y=26.5, thumbscrews=True)
+PI_subsystem_commercial(x=29 , y=8, angle = 0, thumbscrews=True) #405 for sr88+ 
+PI_subsystem_ECDL(x=38 , y=8, thumbscrews=True) # 461 for sr88+
+subsystem_spam(x=32 , y=50, thumbscrews=True)
+```
+
 <img src="https://github.com/user-attachments/assets/75341182-ff6c-4106-bd7c-8fa9ee56bba2" width=700>
 
-
-## Dynamic layouts 
-Same code compiled with different optical elements at different scales:
-![image](https://github.com/user-attachments/assets/5340ac9b-0a6f-4758-803f-e5a5f15b18a3)
-
-## 3D Models and Technical Drawings
-* [Click Here for 3D Model and Tech Drawing for All Modules](https://github.com/UMassIonTrappers/PyOpticL/tree/main/Design/Module/3DModel)
 
 <!--
 ### Modular Doublepass Baseplate (f50 & f100 design)
