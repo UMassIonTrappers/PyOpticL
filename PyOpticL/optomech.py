@@ -3215,6 +3215,43 @@ class rb_cell_cylindrical:
         part.Placement = obj.Placement
         obj.DrillPart = part
 
+class rotation_stage_rsp05_vertical:
+    '''
+    Rotation stage, model RSP05
+
+    Args:
+        invert (bool) : Whether the mount should be offset 90 degrees from the component
+        mount_hole_dy (float) : The spacing between the two mount holes of it's adapter
+        wave_plate_part_num (string) : The Thorlabs part number of the wave plate being used
+
+    Sub-Parts:
+        surface_adapter (adapter_args)
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True, thumbscrews=False, bolt_length=15):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyBool', 'ThumbScrews').ThumbScrews = thumbscrews
+        obj.addProperty('App::PropertyLength', 'BoltLength').BoltLength = bolt_length
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = mount_color
+        self.part_numbers = ['RSP05']
+
+    def execute(self, obj):
+        mesh = _import_stl("RSP05-Step.stl", (90, -0, 90), (2.084, -1.148, 0.498))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+        part = _bounding_box(obj, 0, 0, min_offset=(0, 0, 0))
+        part = part.fuse(_bounding_box(obj, 0, 0, max_offset=(0, 0, 0)))
+        part = _fillet_all(part, 0)
+        part = part.fuse(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=inch,head_dia=bolt_8_32['head_dia'], head_dz=0.92*inch-obj.BoltLength.Value,x=1.4, y=-1.1, z=-inch*3/2, dir=(0,0,1)))
+        part.Placement = obj.Placement
+        obj.DrillPart = part
+
 # this is rb_cell with mount
 class rb_cell:
     '''

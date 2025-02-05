@@ -4,7 +4,7 @@ from PyOpticL import layout, optomech
 from datetime import datetime
 
 # Adding name and date to keep track of updates
-name = "Beam_Combiner"
+name = "Beam_Pickoff"
 date_time = datetime.now().strftime("%m/%d/%Y")
 label = name + " " +  date_time
 
