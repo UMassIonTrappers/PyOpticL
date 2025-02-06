@@ -17,3 +17,9 @@ PyOpticL/stl/grid_beamsplitter_lying_down_baseplate.stl
 PyOpticL/stl/grid_mirror_lying_down_baseplate.stl
 PyOpticL/stl/grid_optics_fast_baseplate.stl
 PyOpticL/stl/grid_waveplate_lying_down_baseplate.stl
+*.egg-info/
+__pycache__/
+*.pyc
+build/
+dist/
+.DS_Store
