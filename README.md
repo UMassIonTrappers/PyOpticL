@@ -1,7 +1,8 @@
 ## PyOpticL - Code-to-CAD optical system engineering
 
+![image](https://github.com/user-attachments/assets/39065a36-9f22-4f2a-a70f-08684ac68f45)
 
-<img src="https://github.com/user-attachments/assets/b24b1d63-7b17-4de1-95dd-dcf176b8d9d6" width=700>
+
 
 <!-- Trapped Ion quantum computer at UMass Amherst engineered with PyOpticL: -->
 <!-- <img src="https://github.com/user-attachments/assets/1dbe2986-20e2-4f4e-9b4c-00dd31a4b656" width=50%> -->
@@ -30,6 +31,8 @@
 
 ## 3D Models and Technical Drawings
 * [Click Here for 3D Models and Technical Drawings for All Modules](https://github.com/UMassIonTrappers/PyOpticL/tree/main/Design/Module/3DModel)
+
+<img src="https://github.com/user-attachments/assets/b24b1d63-7b17-4de1-95dd-dcf176b8d9d6" width=500>
 
 ## About PyOpticL (Python Optics Layout)
 PyOpticL is a Python library for optics layout which uses beam-path simulation and dynamic beam-path routing for quick and easy optical layout by placing optical elements along the beam path without a priori specification, enabling dynamic layouts with automatic routing and connectivity.
