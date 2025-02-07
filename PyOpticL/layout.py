@@ -47,7 +47,7 @@ class baseplate:
         label (string): The label to be embossed into the side of the baseplate
         x_offset, y_offset (float): Additional offset from the grid in the x and y directions
         optics_dz (float): The optical height of baseplate
-        invert_label (bool): Wheather to switch the face the label is embossed on
+        invert_label (bool): Whether to switch the face the label is embossed on
     '''
     def __init__(self, dx=0, dy=0, dz=inch, x=0, y=0, angle=0, gap=0, name="Baseplate", drill=True, mount_holes=[], label="", x_offset=0, y_offset=0, optics_dz=inch/2, x_splits=[], y_splits=[], invert_label=False, z=0):
         obj = App.ActiveDocument.addObject('Part::FeaturePython', name)
@@ -75,11 +75,11 @@ class baseplate:
             mount = self.place_element("Mount Hole (%d, %d)"%(x, y), optomech.baseplate_mount, (x+0.5)*inch, (y+0.5)*inch, 0)
             obj.ChildObjects += [mount]
     
-    def add_cover(self, dz):
-        obj = App.ActiveDocument.addObject('Part::FeaturePython', "Table Grid")
+    def add_cover(self, dz, **args):
+        obj = App.ActiveDocument.addObject('Part::FeaturePython', f"{self.active_baseplate} Cover")
         baseplate = getattr(App.ActiveDocument, self.active_baseplate)
         obj.Placement = baseplate.Placement
-        baseplate_cover(obj, baseplate, dz=dz)
+        baseplate_cover(obj, baseplate, dz=dz, **args)
 
 
     def place_element(self, name, obj_class, x, y, angle, optional=False, **args):
@@ -445,7 +445,7 @@ class baseplate_cover:
         dx, yy (float): The dimentions of the table grid (in inches)
         z_off (float): The z offset of the top of the grid surface
     '''
-    def __init__(self, obj, baseplate, dz, wall_thickness=10, beam_tol=10, drill=True):
+    def __init__(self, obj, baseplate, dz, wall_thickness=10, beam_tol=6, drill=True):
         ViewProvider(obj.ViewObject)
         obj.Proxy = self
 
@@ -480,11 +480,12 @@ class baseplate_cover:
         if obj.Drill:
             for i in App.ActiveDocument.Objects:
                 if isinstance(i.Proxy, laser.beam_path) and i.Baseplate == baseplate:
-                    exploded = i.Shape.Solids
+                    exploded = i.Proxy.comp.Solids
                     for shape in exploded:
-                        drill = optomech._bounding_box(shape, obj.BeamTol.Value, 10, z_tol=True, plate_off=-1)
-                        drill.Placement = i.Placement
+                        drill = optomech._bounding_box(shape, obj.BeamTol.Value, obj.BeamTol.Value, z_tol=True, plate_off=-1)
+                        #drill.Placement = i.Placement
                         part = part.cut(drill)
+                        print("running")
         obj.Shape = part
 
 

@@ -982,6 +982,7 @@ class fiberport_mount_hca3:
         self.part_numbers = ['HCA3', 'PAF2-5A']
         self.max_angle = 0
         self.max_width = 1
+        #_add_linked_object(obj, "fiberport_collimator", fiberport_collimator, pos_offset=(1.397, 0, -13.97))
 
     def execute(self, obj):
         mesh = _import_stl("HCA3-Step.stl", (90, -0, 90), (-6.35, 19.05, -26.87))
@@ -1028,7 +1029,60 @@ class rotation_stage_rsp05:
         mesh = _import_stl("RSP05-Step.stl", (90, -0, 90), (2.032, -0, 0))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
-#This is zhenyu editing
+
+# Nishat's editing
+class rotation_stage_rsp05_vertical:
+    '''
+    Rotation stage, model RSP05
+
+    Args:
+        invert (bool) : Whether the mount should be offset 90 degrees from the component
+        mount_hole_dy (float) : The spacing between the two mount holes of it's adapter
+        wave_plate_part_num (string) : The Thorlabs part number of the wave plate being used
+
+    Sub-Parts:
+        surface_adapter (adapter_args)
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True, thumbscrews=False, bolt_length=15):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyBool', 'ThumbScrews').ThumbScrews = thumbscrews
+        obj.addProperty('App::PropertyLength', 'BoltLength').BoltLength = bolt_length
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = mount_color
+        self.part_numbers = ['RSP05']
+
+    def execute(self, obj):
+        mesh = _import_stl("RSP05-Step.stl", (90, -0, 90), (2.084, -1.148, 0.498))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+        part = _bounding_box(obj, 0, 0, min_offset=(0, 0, 0))
+        part = part.fuse(_bounding_box(obj, 0, 0, max_offset=(0, 0, 0)))
+        part = _fillet_all(part, 0)
+        part = part.fuse(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=inch,
+                                          head_dia=bolt_8_32['head_dia'], head_dz=0.92*inch-obj.BoltLength.Value,
+                                          x=1.4, y=-1.1, z=-inch*3/2, dir=(0,0,1)))
+        part.Placement = obj.Placement
+        obj.DrillPart = part
+         # part for a square washer
+        # https://www.mcmaster.com/99041A204/
+        # Zinc-Plated Steel Square Washer
+        # for Number 6 Screw Size, 0.156" ID, 0.500" Wide
+        # part = part.fuse(_custom_box(dx=0.55 * inch, dy=0.55 * inch, dz=11, x=1.3, y = 0, z = -42,fillet=0, dir=(0,0,-1), fillet_dir=None))
+        # # for cnc machining
+        # for j in [1,-1]:
+        #     for k in [1, -1]:
+        #         part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'] * 2, dz=drill_depth,
+        #                         x=1.3 + j * 0.25 * inch , y=0 + k * 0.25*inch, z=-42, dir=(0,0,-1)))
+
+        # part.Placement = obj.Placement
+        # obj.DrillPart = part
+
 
 class pinhole_p2000k05_LMR05:
     '''
@@ -1434,7 +1488,7 @@ class rotation_stage_rsp1:
         _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(5.461, 0, -27.73), rot_offset=(0, 0, 90*obj.Invert), **adapter_args)
 
     def execute(self, obj):
-        mesh = _import_stl("RSP1-Step.stl", (180, -0, 90), (5.969, -0, 0))
+        mesh = _import_stl("RSP1-Step.stl", (180, -0, 0), (12.069, -0, 0))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1463,7 +1517,7 @@ class mirror_mount_km100:
         self.part_numbers = ['KM100']
 
     def execute(self, obj):
-        mesh = _import_stl("KM100-Step.stl", (-180, 0, -90), (4.972, 0.084, -1.089))
+        mesh = _import_stl("KM100-Step.stl", (0, 0, 0), (4.972, 0.084, -1.089))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
 
@@ -1769,6 +1823,48 @@ class fixed_mount_smr05:
         part.Placement = obj.Placement
         obj.DrillPart = part
 
+class kinematic_pbs_mount:
+    '''
+    Fixed mount, model KM05PM and PM3
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        bolt_length (float) : The length of the bolt used for mounting
+
+    Sub-Parts:
+        circular_mirror (mirror_args)
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True, thumbscrews=False, bolt_length=15):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyBool', 'ThumbScrews').ThumbScrews = thumbscrews       
+        obj.addProperty('App::PropertyLength', 'BoltLength').BoltLength = bolt_length
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = mount_color
+        self.part_numbers = ['KM05PM']
+
+        if thumbscrews:
+            _add_linked_object(obj, "Upper Thumbscrew", thumbscrew_hkts_5_64, pos_offset=(-22.54, 9.906, 10.906))
+            _add_linked_object(obj, "Lower Thumbscrew", thumbscrew_hkts_5_64, pos_offset=(-22.54, -9.906, -8.906))
+
+    def execute(self, obj):
+        mesh = _import_stl("KM05PM_cube_mount.stl", (0, 0, 90), (-26.23, -0.894, 6.8))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+        part = _bounding_box(obj, 0, 0, min_offset=(0, 0, 0))
+        part = part.fuse(_bounding_box(obj, 0, 0, max_offset=(0, 5, 0)))
+        part = part.fuse(_bounding_box(obj, 0, 0, min_offset=(-18, 0, 0)))
+        part = _fillet_all(part, 1)
+        part = part.fuse(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=inch + drill_depth,
+                                          head_dia=bolt_8_32['head_dia'], head_dz=0.92*inch-obj.BoltLength.Value+10 ,
+                                          x=-21.75, y=0.2, z=-inch*1.25 - 10, dir=(0,0,1)))
+        part.Placement = obj.Placement
+        obj.DrillPart = part
 
 class prism_mount_km05pm:
     '''
@@ -2045,9 +2141,9 @@ class fiberport_mount_km05:
 
         _add_linked_object(obj, "Mount", mirror_mount_km05, pos_offset=(0, 0, 0), **mount_args)
         _add_linked_object(obj, "Fiber Adapter", fiber_adapter_sm05fca2, pos_offset=(1.524, 0, 0))
-        _add_linked_object(obj, "Lens Tube", lens_tube_sm05l05, pos_offset=(1.524+3.812, 0, 0))
-        _add_linked_object(obj, "Lens Adapter", lens_adapter_s05tm09, pos_offset=(1.524+5, 0, 0))
-        _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(1.524+3.167+5, 0, 0))
+        _add_linked_object(obj, "Lens Tube", lens_tube_sm05l05, pos_offset=(1.624+3.812, 0, 0))
+        _add_linked_object(obj, "Lens Adapter", lens_adapter_s05tm09, pos_offset=(1.624+5, 0, 0))
+        _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(1.624+3.167+5, 0, 0))
 class splitter_mount_b1g:
     '''
     Splitter mount, model B1G
@@ -2136,15 +2232,15 @@ class fiberport_mount_k1t1:
 
         obj.ViewObject.ShapeColor = misc_color
 
-        _add_linked_object(obj, "Mount", mirror_mount_k1t1, pos_offset=(0, 0, 0), **mount_args)
+        _add_linked_object(obj, "Mount", mirror_mount_k1t1, pos_offset=(0, -2, 0), **mount_args)
         # _add_linked_object(obj, "Fiber Adapter", fiber_adapter_sm05fca2, pos_offset=(1.524, 0, 0))
         # _add_linked_object(obj, "Lens Tube", lens_tube_sm05l05, pos_offset=(1.524+3.812, 0, 0))
         # _add_linked_object(obj, "Lens Adapter", lens_adapter_s05tm09, pos_offset=(1.524+5, 0, 0))
         # _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(1.524+3.167+5, 0, 0))
         _add_linked_object(obj, "Fiber Adapter", fiber_adapter_sm1fca2, pos_offset=(-3, 0, 0))
         _add_linked_object(obj, "Lens Tube", lens_tube_sm1l05, pos_offset=(0+10.6-2-2, 0, 0))
-        _add_linked_object(obj, "Lens Adapter", lens_adapter_s1tm09, pos_offset=(1.524+6+13.6, 0, 0))
-        _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(1.524+2, 0, 0))
+        _add_linked_object(obj, "Lens Adapter", lens_adapter_s1tm09, pos_offset=(1.524+6+13.6, -1, .5))
+        _add_linked_object(obj, "Lens", mounted_lens_c220tmda, pos_offset=(1.524+2, -1, 0))
 class mirror_mount_k1t1:
     '''
     Mirror mount, model K1t1
@@ -2168,7 +2264,7 @@ class mirror_mount_k1t1:
         self.part_numbers = ['KM1T']
 
     def execute(self, obj):
-        mesh = _import_stl("Fiberport_mount_k1t1.stl", (90, -0, -90), (97.06, 17.87, -10.35))
+        mesh = _import_stl("Fiberport_mount_k1t1.stl", (0, -0, 0), (20.06, 0.87, 0.35))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
         dz = -0.5
@@ -3258,9 +3354,28 @@ class lens_mount_fmp1:
 
     def execute(self, obj):
         # mesh = _import_stl("POLARIS-K05S2-Step.stl", (90, -0, -90), (-4.514, 0.254-20, -0.254))
-        mesh = _import_stl("lens_mount_FMP1.stl", (90,0, 90), (4.65,0,0))
+        mesh = _import_stl("FMP1-Step.stl", (0,0, 180), (4.65,0,0))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
+
+
+class fiberport_collimator:
+    '''
+    Lens Tube, model SM05L05
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.ViewObject.ShapeColor = misc_color
+        self.part_numbers = ['PAF2A']
+
+    def execute(self, obj):
+        mesh = _import_stl("PAF2A-A10A-Step.stl", (-0, 0, 0), (-7, 0, 14))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
 
 class surface_adapter_wide:
     '''
