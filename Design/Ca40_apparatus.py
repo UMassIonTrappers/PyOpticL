@@ -37,5 +37,4 @@ laser_cooling_subsystem(x=-1, y=0, thumbscrews=True, littrow_angle = littrow_ang
 Raman_subsystem(x=1 , y=26.5, thumbscrews=True, littrow_angle = littrow_angle_cooling)
 PI_subsystem_commercial(x=29 , y=8.5, angle = 0, thumbscrews=True)
 PI_subsystem_ECDL(x=41 , y=8.5, thumbscrews=True, littrow_angle = littrow_angle_photoionization_step2) 
-
 subsystem_spam(x=32 , y=50, thumbscrews=True, littrow_angle = littrow_angle_optical_qubit)
