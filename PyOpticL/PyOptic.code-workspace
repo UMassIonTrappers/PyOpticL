@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../../../../../Dropbox/UMass Ions/FreeCAD/Baseplate Designs"
+		}
+	],
+	"settings": {
+		"workbench.colorCustomizations": {
+			"minimap.background": "#00000000",
+			"scrollbar.shadow": "#00000000"
+		}
+	}
+}

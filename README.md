@@ -1,69 +1,138 @@
-## PyOpticL - A FreeCAD Workbench and Python Library for Creating Optical Layouts
+## PyOpticL - Code-to-CAD optical system engineering
 
-<img width="624" alt="Screenshot 2023-10-27 221107" src="https://github.com/UMassIonTrappers/PyOpticL/assets/103533593/bb37373c-c2fe-4d69-8a45-c3edd08fe944">
+![image](https://github.com/user-attachments/assets/39065a36-9f22-4f2a-a70f-08684ac68f45)
 
-## Useful Links
+
+
+<!-- Trapped Ion quantum computer at UMass Amherst engineered with PyOpticL: -->
+<!-- <img src="https://github.com/user-attachments/assets/1dbe2986-20e2-4f4e-9b4c-00dd31a4b656" width=50%> -->
 
 ### ReadMe
-* [Library Features and Information](https://github.com/UMassIonTrappers/PyOpticL#about-PyOpticL)
+* [Library Features and Information](https://github.com/UMassIonTrappers/PyOpticL#about-pyopticl-python-optics-layout)
 * [Installation Guide](https://github.com/UMassIonTrappers/PyOpticL#getting-setup)
-* [Example Pictures](https://github.com/UMassIonTrappers/PyOpticL#examples)
+
 ### Wiki
 * [Quickstart Guide](https://github.com/UMassIonTrappers/PyOpticL/wiki#quickstart-guide)
 * [Model Import Guide](https://github.com/UMassIonTrappers/PyOpticL/wiki#model-import-guide)
-* [ECDL Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/ECDL-Baseplate)
-* [Modular Doublepass Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Modular-Doublepass-Baseplate)
-* [Rb SAS Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Rb-SAS-Baseplate)
+  
+### Modular baseplate examples:
+* [Laser - Extended Cavity Diode Laser (with optical isolator)](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-ECDL-with-Isolation-Baseplate)
+* [Doublepass AOM Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-Doublepass-Baseplate)
+* [Singlepass AOM Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-Singlepass-Baseplate)
+* [Saturation Absorption Spectroscopy Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-Saturation-Absoption-Spectroscopy-Baseplate)
+* [Periscope](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-Periscope)
+* [CoverBox](https://github.com/UMassIonTrappers/PyOpticL/wiki/CoverBox)
 
-## About PyOpticL
-### Based on MIT QUANTA LAB repo - C4PO ('CAD for Precision Optics') which is written for OpenSCAD
-FreeCAD is based on python with built-in support for python scripts etc. It also has:
-* Support for custom workbenches and python libraries
-* Fully featured and customizable GUI
-* Ability to work with various object formats
+### Modular Subsystems based on baseplates:
+* [Laser Cooling and Detection](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-‐-Laser-Cooling-and-Detection)
+* [Raman Zeeman qubit](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Raman)
+* [Photoionization](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Photoionization-Laser)
+* [State Preparation and Measurement](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-SPAM)
 
-### Beam Simulation
-* Beam paths are automatically calculated based on component placement
-* Component placement can be defined "along beam" to remove the need for hard-coded coordinates
-* Beam calculations include reflection, transmission, refraction, and diffraction (limited)
+### AMO Apparatus based on modular subsystems:
+* [Trapped Ions - Strontium](https://github.com/UMassIonTrappers/PyOpticL/wiki/Apparatus-%E2%80%90-Trapped-Ions-%E2%80%90-Strontium)
+* [Trapped Ions - Calcium](https://github.com/UMassIonTrappers/PyOpticL/wiki/Apparatus-%E2%80%90-Trapped-Ions-%E2%80%90-Calcium)
 
-### Workbench Functions
+## 3D Models and Technical Drawings
+* [Click Here for 3D Models and Technical Drawings for All Modules](https://github.com/UMassIonTrappers/PyOpticL/tree/main/Design/Module/3DModel)
 
-Some GUI accessable functions have been implemented to perform various helpful actions:
-* **Re-Run Last Macro** - Clears and re-draws last baseplate, great for quickly checking changes
-* **Recalculate Beam Path** - Useful to check beam paths when applying in-editor modifications
-* **Toggle Component Visibility** - Easily hide all beams and components
-* **Toggle Draw Style** - Toggle wire-frame draw style to easily check for hidden issues
-* **Export STLs** - Export all baseplates and adapter components to STL for fabrication
-* **Export Cart** - Export all parts to both a spreadsheet and a csv compatible with Thorlabs upload-a-cart system
-* **Reload Modules** - Reload all PyOpticL modules, great for debugging new parts
-* **Get Orientation** - Automatic orientation and importing of new components from STEP files
-* **Get Position** - Measure offsets and mount locations from oriented STEP file
+<img src="https://github.com/user-attachments/assets/b24b1d63-7b17-4de1-95dd-dcf176b8d9d6" width=500>
 
-These functions can also be scripted into macros if desired
+## About PyOpticL (Python Optics Layout)
+PyOpticL is a Python library for optics layout which uses beam-path simulation and dynamic beam-path routing for quick and easy optical layout by placing optical elements along the beam path without a priori specification, enabling dynamic layouts with automatic routing and connectivity.
+The beam paths are automatically calculated as components are placed in the layout. Component placement can be defined "along beam" to remove the need for hard-coded coordinates. Beam calculations include reflection, transmission, refraction, and diffraction (limited). This library enables a new paradigm of optical engineering using modular sub-systems of modular baseplates with commerical optical elements (see abstraction layers below).
+
+## Demonstration with Trapped Ion Qubits:
+See our recent preprint for more details about our results using these laser sources and baseplates in our lab: </br>
+<a href="https://arxiv.org/abs/2501.14957"> arXiv:2501.14957 - Qubit operations using a modular optical system engineered with PyOpticL: a code-to-CAD optical layout tool</a>
+
 
 ## Getting Setup
-There are a few important things to ensure before you can use PyOpticL:
 
 1. **Install FreeCAD, Python, and Git**
 
-2. **Clone the GitHub repo into your FreeCAD user folder**  
-	To do this on windows, run the following in a terminal:  
-	```cd "C:/Users/<username goes here>/AppData/Roaming/FreeCAD/Mod"```   
-	```git clone "https://github.com/UMassIonTrappers/PyOpticL.git"```  
-	```git config --global --add safe.directory "C:/Users/<username goes here>/AppData/Roaming/FreeCAD/Mod/PyOpticL"```
+2. **Add PyOpticL as an custom addon repository in FreeCAD**  
+	Under _Edit>Preferences>Addons>Custom Repositories,_ enter the following information: \
+    _Repository URL:_ https://github.com/UMassIonTrappers/PyOpticL.git \
+    _Branch:_ main
+
+3. **Install the PyOpticL library**
+    In the Addon Manager _(Tools>Addon Manager),_ search for "PyOpticL" and click install.
 		
 4. **Check everything is setup correctly**  
-   You should now be able to re-launch FreeCAD and see the "PyOpticL" workbench in the dropdown  
-<img width="250" alt="Screenshot 2023-10-27 225345" src="https://github.com/UMassIonTrappers/PyOpticL/assets/103533593/6eeec81a-e7de-4bde-8509-0c30bda0b9b7">
+   You should now be able to re-launch FreeCAD and see the "PyOpticL" workbench in the dropdown
+   <!-- <img width="250" alt="Screenshot 2023-10-27 225345" src="https://github.com/user-attachments/assets/7a43cac3-7d3b-4a3b-8e5f-189f39729251"> -->
 
-5. **Check out the [wiki](https://github.com/UMassIonTrappers/PyOpticL/wiki) or the [docs](https://github.com/UMassIonTrappers/PyOpticL/tree/main/docs) for guides, examples, and library documentation**
+5. **Check out the [wiki](https://github.com/UMassIonTrappers/PyOpticL/wiki) for guides on how to [get started](https://github.com/UMassIonTrappers/PyOpticL/wiki#quickstart-guide) and examples**
 
-## Examples
-### Modular Doublepass Baseplate
-<img width="900" alt="image" src="https://github.com/UMassIonTrappers/PyOpticL/assets/103533593/6677d37d-d2ab-4938-b119-7d9bdd488a76">
-<img width="900" alt="image" src="https://github.com/UMassIonTrappers/PyOpticL/assets/103533593/bcec73b6-b197-4c15-ab84-5962ccb32dcf">
+6. **Read the [docs](https://github.com/UMassIonTrappers/PyOpticL/tree/main/docs) library documentation**
 
-### ECDL Baseplate
-<img width="900" alt="image" src="https://github.com/UMassIonTrappers/PyOpticL/assets/103533593/9b169333-a5e8-4257-9e03-2dce2c6f0db3">
-<img width="900" alt="image" src="https://github.com/UMassIonTrappers/PyOpticL/assets/103533593/ade01d2c-99c3-4e50-8a99-1446ed10fab9">  
+
+___
+
+
+### Example - Laser cooling and detection:
+
+```python
+from PyOpticL import layout, optomech
+from ECDL import ECDL
+from Rb_SAS_V2 import Rb_SAS
+from modular_doublepass import doublepass
+from modular_singlepass import singlepass
+
+def laser_cooling_subsystem():
+    layout.table_grid(dx=36, dy=22)
+    ECDL(x=27, y=20, angle=180)
+    Rb_SAS(x=20, y=1, angle=90)
+    singlepass(x=14, y=12, angle=90)
+    doublepass(x=1, y=21, angle=270)
+```
+
+![full_setup](https://github.com/user-attachments/assets/98261868-0474-4b8d-a73f-8785c20799b5)
+
+ 
+## Dynamic layouts:
+
+```python
+Rb_SAS(0, 16, optic_type=one_inch_mounted)
+Rb_SAS(0, 8, optic_type=half_inch_mounted)
+Rb_SAS(0, 3, optic_type=half_inch_unmounted)
+Rb_SAS(0, 0, optic_type=mini_optics)
+```
+
+Same code compiled with different optical elements at different scales:
+![image](https://github.com/user-attachments/assets/5340ac9b-0a6f-4758-803f-e5a5f15b18a3)
+
+
+## Design abstraction layers applied to a strontium trapped ion quantum computer:
+
+```python
+from PyOpticL import layout, optomech
+from SPAM_subsystem import subsystem_spam
+from Laser_cooling_subsystem import laser_cooling_subsystem
+from Raman_subsystem import Raman_subsystem
+from Photoionization_subsystem import PI_subsystem_ECDL, PI_subsystem_commercial
+
+layout.table_grid(dx=52, dy=92)
+laser_cooling_subsystem(x=-1, y=0, thumbscrews=True)
+Raman_subsystem(x=1 , y=26.5, thumbscrews=True)
+PI_subsystem_commercial(x=29 , y=8, angle = 0, thumbscrews=True) #405 for sr88+ 
+PI_subsystem_ECDL(x=38 , y=8, thumbscrews=True) # 461 for sr88+
+subsystem_spam(x=32 , y=50, thumbscrews=True)
+```
+
+<img src="https://github.com/user-attachments/assets/75341182-ff6c-4106-bd7c-8fa9ee56bba2" width=700>
+
+
+<!--
+### Modular Doublepass Baseplate (f50 & f100 design)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/5d332f5a-defc-4eb4-8ca6-a720dad9cfe6" alt="doublepass_f50_f100" width="55%" />
+</p>
+
+
+### Simple ECDL (all off-the-shelf components)
+![image](https://github.com/user-attachments/assets/41fba0be-d6c5-48b3-9fd5-c1e4fdddcd74)
+-->
+
+#### We thank the MIT QUANTA LAB for sharing their C4PO ('CAD for Precision Optics') based on OpenSCAD which inspired this library.

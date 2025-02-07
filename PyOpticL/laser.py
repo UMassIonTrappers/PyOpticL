@@ -121,35 +121,17 @@ def check_interaction(x1, y1, a1, ref_obj):
 # beam path freecad object
 class beam_path:
 
-    def __init__(self, obj, drill=True):
+    def __init__(self, obj, drill=True, width=0.5, drill_width=1.5):
 
         obj.Proxy = self
         obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+        obj.addProperty('App::PropertyLength', 'Width').Width = width
+        obj.addProperty('App::PropertyLength', 'DrillWidth').DrillWidth = drill_width
         self.components = [[]]
 
     def __getstate__(self):
         return None
-
-    # TODO clean and implement this for baseplate covers
-    def _get_drill(self, obj):
-        width = 50
-        part = Part.makeSphere(1)
-        for i in self.beams:
-            length = i[3]
-            if length == 0:
-                length = 50
-            temp = Part.makeBox(length+width, width, 100)
-            for x in temp.Edges:
-                if x.tangentAt(x.FirstParameter) == App.Vector(0, 0, 1):
-                    temp = temp.makeFillet(width/2-1e-3, [x])
-            temp.translate(App.Vector(-width/2, -width/2, -inch/2))
-            temp.rotate(App.Vector(0, 0, 0), App.Vector(0, 0, 1), degrees(i[2]))
-            temp.translate(App.Vector(i[0], i[1], 0))
-            part = part.fuse(temp)
-        part.translate(App.Vector(-self.x, -self.y, 0))
-        part.rotate(App.Vector(0, 0, 0),App.Vector(0, 0, 1), degrees(-self.a))
-        part = part.fuse(part)
-        return part
 
     def execute(self, obj):
         # get placement
@@ -168,13 +150,28 @@ class beam_path:
             length = i[3]
             if length == 0:
                 length = 50
-            temp = Part.makeCylinder(0.5, length, App.Vector(i[0], i[1], 0), App.Vector(cos(i[2]), sin(i[2]), 0))
+            temp = Part.makeCylinder(obj.Width.Value, length, App.Vector(i[0], i[1], 0), App.Vector(cos(i[2]), sin(i[2]), 0))
             shapes.append(temp)
         comp = Part.Compound(shapes)
+        self.comp = comp
         comp.translate(App.Vector(-self.x, -self.y, 0))
         comp.rotate(App.Vector(0, 0, 0),App.Vector(0, 0, 1), degrees(-self.a))
         comp = comp.fuse(comp)
         obj.Shape = comp
+
+        part = Part.makeSphere(0)
+        for i in self.beams:
+            length = i[3]
+            if length == 0:
+                length = 50
+            temp = Part.makeCylinder(obj.DrillWidth.Value, length, App.Vector(i[0], i[1], 0), App.Vector(cos(i[2]), sin(i[2]), 0))
+            part = part.fuse(temp)
+
+        part.translate(App.Vector(-self.x, -self.y, 0))
+        part.rotate(App.Vector(0, 0, 0),App.Vector(0, 0, 1), degrees(-self.a))
+        part = part.fuse(part)
+        part.Placement = obj.Placement
+        obj.DrillPart = part
 
     # compute full beam path given start point and angle
     def calculate_beam_path(self, selfobj, x1, y1, a1, beam_index=1):
