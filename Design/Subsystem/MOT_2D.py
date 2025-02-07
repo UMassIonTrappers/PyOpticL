@@ -1,6 +1,7 @@
 # using refactor branch, we also have 3d preliminary results
 # check:
 # https://github.com/UMassIonTrappers/PyOpticL/blob/main/Design/Module/3DModel/MOT_3d_routing.step
+# https://github.com/UMassIonTrappers/PyOpticL/blob/main/Design/Module/3DModel/MOT_preliminary/MOT_3d_routing.stl
 # code:
 # https://github.com/UMassIonTrappers/PyOpticL/blob/refactor/justin_example_macros/MOT.py
 
