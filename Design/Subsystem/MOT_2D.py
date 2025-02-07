@@ -30,13 +30,15 @@ from ECDL_Isolator_plate import ECDL_isolator_baseplate
 # layout.table_grid(dx=10, dy=20)
 
 ################################################## laser system ######################################
+# cooling
 # ECDL(x=11.3 ,y=4 , angle=90, littrow_angle = littrow_angle) # ECDL for 780.24 nm
 # ECDL_isolator_baseplate(x=14, y= 9 , angle=layout.cardinal['up'])
 # telescope(x=14 , y=16 , angle=90) # reduce beam size
 # Rb_SAS(x=0 , y=20, thumbscrews=True) # lock scheme
 # telescope(x=0 , y=0 , angle=0) # expand beam size
 
-# sourcebox(x=0 , y=0, angle=0) # sourcebox for 780.24 nm repumping
+# repump
+# sourcebox(x=0 , y=0, angle=0) # sourcebox for 780.24 nm 
 # periscope 
 # doublepass_f50
 # telescope
