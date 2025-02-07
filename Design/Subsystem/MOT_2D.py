@@ -53,7 +53,7 @@ from ECDL_Isolator_plate import ECDL_isolator_baseplate
 # retro unit
 def retro_unit(x, y, angle, mirror_mount_type = optomech.mirror_mount_km100, optic_size = 1 * layout.inch):
     baseplate = layout.baseplate(dx = 4.6 * layout.inch, dy = 4 * layout.inch, dz = 2 * layout.inch, x=x, y=y, angle=angle, 
-                               mount_holes=[(2,1),(1,1)], x_offset=0.4*layout.inch, y_offset=1*layout.inch, gap=1/4 * layout.inch)
+                               mount_holes=[(2,1),(1,1)], x_offset=0.4*layout.inch, y_offset=1*layout.inch, gap=1/4 * layout.inch, optics_dz=optic_size)
     baseplate.place_element("quarter_waveplate", optomech.waveplate, x=1.8 * layout.inch, y=3 * layout.inch, angle=0, 
                           mount_type = optomech.rotation_stage_rsp1, diameter = optic_size)
     baseplate.place_element("retro mirror", optomech.circular_mirror, x=3.5 * layout.inch, y=3 * layout.inch, angle=180, 
@@ -63,7 +63,7 @@ def retro_unit(x, y, angle, mirror_mount_type = optomech.mirror_mount_km100, opt
 # turn unit
 def turn_unit(x, y, angle, type = 'left', mirror_mount_type = optomech.mirror_mount_km100, optic_size = 1 * layout.inch):
     baseplate = layout.baseplate(dx = 6.2 * layout.inch, dy = 4.4 * layout.inch, dz = 2 *layout.inch, x=x, y=y, angle=angle, 
-                               mount_holes=[(5,1),(3,1)], x_offset=2.4*layout.inch, y_offset=0.2*layout.inch, gap = layout.inch/4)
+                               mount_holes=[(5,1),(3,1)], x_offset=2.4*layout.inch, y_offset=0.2*layout.inch, gap = layout.inch/4, optics_dz=optic_size)
     if type == 'left': angle_ = 135
     elif type == 'right': angle_ = -135
     baseplate.place_element("turn mirror", optomech.circular_mirror, x=5 * layout.inch, y=3 * layout.inch, angle=angle_, 
@@ -75,7 +75,7 @@ def turn_unit(x, y, angle, type = 'left', mirror_mount_type = optomech.mirror_mo
 # input baseplate
 def input_baseplate(x, y, angle, mirror_mount_type = optomech.mirror_mount_km05, addition_length = 0, optic_size = 1 * layout.inch):
     baseplate = layout.baseplate(dx = 8 * layout.inch, dy = 10 * layout.inch + addition_length, dz = 2 *layout.inch, x=x, y=y, angle=angle, 
-                               mount_holes=[(1,0), (1,2), (3,0), (3,4)], gap=layout.inch/4, x_offset=1*layout.inch)
+                               mount_holes=[(1,0), (1,2), (3,0), (3,4)], gap=layout.inch/4, x_offset=1*layout.inch, optics_dz=optic_size)
     beam = baseplate.add_beam_path(x = 3 *layout.inch, y = 10*layout.inch, angle = -90)
     baseplate.place_element_along_beam("input mirror 1", optomech.circular_mirror, beam,beam_index=0b1, 
                                      distance=2 * layout.inch, angle=45, mount_type = mirror_mount_type, diameter = optic_size)
@@ -84,9 +84,11 @@ def input_baseplate(x, y, angle, mirror_mount_type = optomech.mirror_mount_km05,
     baseplate.place_element_along_beam("waveplate", optomech.waveplate, beam,beam_index=0b1, 
                                      distance=2 * layout.inch, angle=90, mount_type = optomech.rotation_stage_rsp1, diameter = optic_size)
     baseplate.place_element_along_beam("pbs", optomech.cube_splitter, beam,beam_index=0b1, 
-                                     distance=1 * layout.inch, angle=90, mount_type = optomech.skate_mount_crossholes, cube_size = optic_size)
+                                     distance=1 * layout.inch, angle=90,  cube_size = optic_size)
+    baseplate.place_element_along_beam("waveplate_", optomech.waveplate, beam,beam_index=0b10, 
+                                     distance=1.5 * layout.inch, angle=90, mount_type = optomech.rotation_stage_rsp1, diameter = optic_size)
     baseplate.place_element_along_beam("output mirror 1", optomech.circular_mirror, beam,beam_index=0b10, 
-                                     distance=3 * layout.inch, angle=135, mount_type = mirror_mount_type, diameter = optic_size)
+                                     distance=2 * layout.inch, angle=135, mount_type = mirror_mount_type, diameter = optic_size)
     baseplate.place_element_along_beam("output mirror 2", optomech.circular_mirror, beam,beam_index=0b10, 
                                      distance=2 * layout.inch + addition_length, angle=-45, mount_type = mirror_mount_type, diameter = optic_size)
     baseplate.place_element_along_beam("output mirror 3", optomech.circular_mirror, beam,beam_index=0b11, 
