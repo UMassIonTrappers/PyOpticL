@@ -54,8 +54,14 @@ beam.placeAlong(
 )
 
 beam.placeAlong(
+    optomech.CircularTransmission("vert_waveplate__", radius=INCH),
+    2 * INCH,
+    (0, 0, -1),
+    beam_index=0b11,
+)
+beam.placeAlong(
     optomech.CircularTransmission("vert_waveplate", radius=INCH),
-    18 * INCH,
+    16 * INCH,
     (0, 0, -1),
     beam_index=0b11,
 )
@@ -100,8 +106,15 @@ beam.placeAlong(
 )
 
 beam.placeAlong(
+    optomech.CircularTransmission("x_waveplate_", radius=INCH),
+    2 * INCH,
+    (1, 0, 0),
+    beam_index=0b101,
+)
+
+beam.placeAlong(
     optomech.CircularTransmission("x_waveplate", radius=INCH),
-    18 * INCH,
+    16 * INCH,
     (1, 0, 0),
     beam_index=0b101,
 )
@@ -130,8 +143,15 @@ beam.placeAlong(
 )
 
 beam.placeAlong(
+    optomech.CircularTransmission("y_waveplate_", radius=INCH),
+    2 * INCH,
+    (0, 1, 0),
+    beam_index=0b100,
+)
+
+beam.placeAlong(
     optomech.CircularTransmission("y_waveplate", radius=INCH),
-    18 * INCH,
+    16 * INCH,
     (0, 1, 0),
     beam_index=0b100,
 )
