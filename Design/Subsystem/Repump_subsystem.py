@@ -14,7 +14,7 @@ import numpy as np
 #sr 1033(quench) / 1092(repump)
 #ca 854(quench) / 866(repump)
 
-wavelength = 866e-6   #wavelength in mm
+wavelength = 1092e-6 #866e-6   #wavelength in mm
 grating_pitch_d = 1/1800   # Lines per mm
 littrow_angle = np.arcsin(wavelength/(2*grating_pitch_d))*180/np.pi
 print("current wavelength is " + str(wavelength * 1e6) + " nm")
@@ -26,7 +26,7 @@ def repump_subsystem_ECDL_mirrored(x=4, y=0, angle=0, thumbscrews=True, littrow_
       singlepass_mirrored(x=7 + x, y=12 + y, angle = 180+angle, thumbscrews=thumbscrews)
       Beam_pickoff(x=1.5 + x, y= 12 + y, angle=90+angle, thumbscrews= thumbscrews)
 
-wavelength = 854e-6   #wavelength in mm
+wavelength = 1033e-6 #854e-6   #wavelength in mm
 grating_pitch_d = 1/1800   # Lines per mm
 littrow_angle = np.arcsin(wavelength/(2*grating_pitch_d))*180/np.pi
 print("current wavelength is " + str(wavelength * 1e6) + " nm")

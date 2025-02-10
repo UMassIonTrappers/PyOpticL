@@ -10,7 +10,7 @@ from modular_beam_pickoff import Beam_pickoff
 from ECDL import ECDL
 import numpy as np
 wavelength = 674e-6   #wavelength in mm
-grating_pitch_d = 1/3600   # Lines per mm
+grating_pitch_d = 1/1800   # Lines per mm
 littrow_angle = np.arcsin(wavelength/(2*grating_pitch_d))*180/np.pi
 print("current wavelength is " + str(wavelength * 1e6) + " nm")
 print("current littrow angle is " + str(littrow_angle))
