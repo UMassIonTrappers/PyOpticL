@@ -2,7 +2,7 @@
 
 ![image](https://github.com/user-attachments/assets/39065a36-9f22-4f2a-a70f-08684ac68f45)
 
-
+#### Discord Server: https://discord.gg/y8aqDe8RxN
 
 <!-- Trapped Ion quantum computer at UMass Amherst engineered with PyOpticL: -->
 <!-- <img src="https://github.com/user-attachments/assets/1dbe2986-20e2-4f4e-9b4c-00dd31a4b656" width=50%> -->
