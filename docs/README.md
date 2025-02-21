@@ -883,6 +883,25 @@
         invert (bool) : Invert pick-off direction, false is left, true is right  
         cube_part_number (string) : The Thorlabs part number of the splitter cube being used  
     
+### waveplate_with_cube
+  
+    Beam-splitter cube  
+  
+    Args:  
+        cube_size (float) : The side length of the splitter cube  
+        invert (bool) : Invert pick-off direction, false is left, true is right  
+        cube_part_number (string) : The Thorlabs part number of the splitter cube being used  
+    
+### surface_adapter_for_waveplate_cube
+  
+    Surface adapter for post-mounted parts  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+        mount_hole_dy (float) : The spacing between the two mount holes of the adapter  
+        adapter_height (float) : The height of the suface adapter  
+        outer_thickness (float) : The thickness of the walls around the bolt holes  
+    
 ### ruler_125mm
   
     125mm ruler  
