@@ -97,6 +97,10 @@ def doublepass_f50(x=0, y=0, angle=0, mirror=optomech.mirror_mount_k05s2, x_spli
                                        beam_index=0b11110, distance=110, angle=layout.cardinal['left'],
                                        mount_type=optomech.rotation_stage_rsp05)
     
+    # Adding iris
+    baseplate.place_element_along_beam("Iris Out", optomech.pinhole_ida12, beam,
+                                       beam_index=0b11110, distance=30, angle=layout.cardinal['right'])
+    
     # Fiberport to fiber the beam
     baseplate.place_element_along_beam("Output Fiberport", optomech.fiberport_mount_hca3, beam,
                                       beam_index=0b11110, x=gap-1, angle=layout.cardinal['right'])
