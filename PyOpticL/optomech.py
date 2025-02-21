@@ -831,7 +831,7 @@ class rotation_stage_rsp05:
         surface_adapter (adapter_args)
     '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, invert=False, adapter_args=dict()):
+    def __init__(self, obj, invert=False, adapter_args=dict(), adapter = True):
         adapter_args.setdefault("mount_hole_dy", 25)
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
@@ -844,7 +844,8 @@ class rotation_stage_rsp05:
         self.max_angle = 90
         self.max_width = inch/2
 
-        _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(1.397, 0, -13.97), rot_offset=(0, 0, 90*obj.Invert), **adapter_args)
+        if adapter:
+            _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(1.397, 0, -13.97), rot_offset=(0, 0, 90*obj.Invert), **adapter_args)
 
     def execute(self, obj):
         mesh = _import_stl("RSP05-Step.stl", (90, -0, 90), (2.032, -0, 0))
@@ -1249,6 +1250,16 @@ class mirror_mount_km100:
         part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=inch+100,
                                         #  head_dia=bolt_8_32['head_dia'], head_dz=0.92*inch-obj.BoltLength.Value+drill_depth+10,
                                          x=-7.29-1.19, y=0, z=-inch*3/2-drill_depth, dir=(0,0,1)))
+        
+        #########
+        part = part.fuse(_custom_box(dx=0.55 * inch, dy=0.55 * inch, dz=11, x=-7.29-1.19, y = 0, z = -42,fillet=0, dir=(0,0,-1), fillet_dir=None))
+        # for cnc machining
+        for j in [1,-1]:
+            for k in [1, -1]:
+                part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'] * 2, dz=drill_depth,
+                                x=-7.29-1.19 + j * 0.25 * inch , y=0 + k * 0.25*inch, z=-42, dir=(0,0,-1)))
+        #########
+
         part = part.fuse(_custom_box(dx = 20, dy= 22, dz= 6, x=-7.29-18.9, y=-7.29-11.9, z=-31, fillet=3, dir=(0,0,1), fillet_dir=None))
         part.Placement = obj.Placement
         obj.DrillPart = part
@@ -2950,7 +2961,7 @@ class square_hollow:
         # part = _custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
         #                         x=-8.017, y=0, z=-layout.inch/2)
         # for i in [-1, 1]:
-        part = _bounding_box(obj, 20,3,x_tol=True, y_tol=True, z_tol=True,min_offset=(0, 0, -40), max_offset=(70, 1000, 0), plate_off=-48)
+        part = _bounding_box(obj, 20,fillet = 0,x_tol=True, y_tol=True, z_tol=True,min_offset=(0, 0, -40), max_offset=(70, 1000, 0), plate_off=-48)
         part.Placement = obj.Placement
         obj.DrillPart = part
 
@@ -3991,6 +4002,109 @@ class cube_splitter:
         temp.rotate(App.Vector(0, 0, 0), App.Vector(0, 0, 1), -self.reflection_angle)
         part = part.cut(temp)
         obj.Shape = part
+
+class waveplate_with_cube:
+    '''
+    Beam-splitter cube
+
+    Args:
+        cube_size (float) : The side length of the splitter cube
+        invert (bool) : Invert pick-off direction, false is left, true is right
+        cube_part_number (string) : The Thorlabs part number of the splitter cube being used
+    '''
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, cube_size=0.5 * inch, invert=False, cube_part_number='', mount_type=None, mount_args=dict()):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyLength', 'CubeSize').CubeSize = cube_size
+        obj.addProperty('App::PropertyBool', 'Invert').Invert = invert
+
+        obj.ViewObject.ShapeColor = glass_color
+        obj.ViewObject.Transparency=50
+        self.part_numbers = [cube_part_number]
+        
+        if invert:
+            self.reflection_angle = -135
+        else:
+            self.reflection_angle = 135
+        self.transmission = True
+        self.max_angle = 90
+        self.max_width = sqrt(200)
+
+        _add_linked_object(obj, "rotational stage", rotation_stage_rsp05 , pos_offset=(-1/2 + 15, 0, 0),adapter = False)
+        _add_linked_object(obj, "Surface Adapter", surface_adapter_for_waveplate_cube, pos_offset=(1.397 + 15, 0, -13.97), rot_offset=(0, 0, 90*obj.Invert))
+    def execute(self, obj):
+        part = _custom_box(dx=obj.CubeSize.Value, dy=obj.CubeSize.Value, dz=obj.CubeSize.Value,
+                           x=0, y=0, z=0, dir=(0, 0, 0))
+        part = part.fuse(_custom_cylinder(dia=inch/2, dz=1,
+                                x=15, y=0, z=0, dir=(1, 0, 0)))
+        temp = _custom_box(dx=sqrt(500)-0.25, dy=0.1, dz=obj.CubeSize.Value-0.25,
+                           x=0, y=0, z=0, dir=(0, 0, 0))
+        temp.rotate(App.Vector(0, 0, 0), App.Vector(0, 0, 1), -self.reflection_angle)
+        part = part.cut(temp)
+        
+        obj.Shape = part
+
+class surface_adapter_for_waveplate_cube:
+    '''
+    Surface adapter for post-mounted parts
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        mount_hole_dy (float) : The spacing between the two mount holes of the adapter
+        adapter_height (float) : The height of the suface adapter
+        outer_thickness (float) : The thickness of the walls around the bolt holes
+    '''
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True, mount_hole_dy=20, adapter_height=11.4, outer_thickness=2):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'MountHoleDistance').MountHoleDistance = mount_hole_dy
+        obj.addProperty('App::PropertyLength', 'AdapterHeight').AdapterHeight = adapter_height
+        obj.addProperty('App::PropertyLength', 'OuterThickness').OuterThickness = outer_thickness
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = adapter_color
+        obj.setEditorMode('Placement', 2)
+        self.drill_tolerance = 1
+
+        
+    def execute(self, obj):
+        dx = bolt_8_32['head_dia']+obj.OuterThickness.Value*2
+        dy = dx+obj.MountHoleDistance.Value
+        dz = obj.AdapterHeight.Value
+
+        part = _custom_box(dx=dx, dy=dy, dz=dz,
+                           x=0, y=0, z=0, dir=(0, 0, -1),
+                           fillet=5)
+        part = part.fuse(_custom_box(dx=dx*2.1, dy=dy/2.5, dz=0.5 * dz,
+                           x=-10, y=0, z=0, dir=(0, 0, -1),
+                           fillet=0))
+        part = part.fuse(_custom_box(dx=dx*1.4, dy=dy/1.6, dz=1.79* dz,
+                           x=-17, y=0, z=9, dir=(0, 0, -1),
+                           fillet=0))
+        part = part.cut(_custom_box(dx=0.5 * inch+1, dy=0.5 * inch+1, dz=0.5 * inch+1,
+                           x=-16.5, y=0, z=21.2, dir=(0, 0, -1),
+                           fillet=0))
+        part = part.cut(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=dz+3,
+                                         head_dia=bolt_8_32['head_dia'], head_dz=bolt_8_32['head_dz']+5,
+                                         x=0, y=0, z=-dz-2, dir=(0,0,1)))
+        for i in [-1, 1]:
+            part = part.cut(_custom_cylinder(dia=bolt_8_32['clear_dia'], dz=dz+3,
+                                             head_dia=bolt_8_32['head_dia'], head_dz=bolt_8_32['head_dz']+5,
+                                             x=0, y=i*obj.MountHoleDistance.Value/2, z=0+1))
+        obj.Shape = part
+
+
+        part = _bounding_box(obj, self.drill_tolerance, 6)
+        for i in [-1, 1]:
+            part = part.fuse(_custom_cylinder(dia=bolt_8_32['tap_dia'], dz=drill_depth,
+                                              x=0, y=i*obj.MountHoleDistance.Value/2, z=0))
+        part.Placement = obj.Placement
+        obj.DrillPart = part
 
 class ruler_125mm:
     '''
