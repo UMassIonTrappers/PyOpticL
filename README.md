@@ -135,4 +135,13 @@ subsystem_spam(x=32 , y=50, thumbscrews=True)
 ![image](https://github.com/user-attachments/assets/41fba0be-d6c5-48b3-9fd5-c1e4fdddcd74)
 -->
 
-#### We thank the MIT QUANTA LAB for sharing their C4PO ('CAD for Precision Optics') based on OpenSCAD which inspired this library.
+
+## PyOpticL Community Members:
+
+ * MIT QUANTA LAB (Prof. Isaac Chuang founded the C4PO library which inspired thi project)
+ * MIT Quantum Photonics & AI Group (Prof. Dirk Englund)
+ * UCONN - Prof. Simone Colombo
+ * UC Berkeley 
+ * Quera
+
+#### Again we thank the MIT QUANTA LAB for sharing their C4PO ('CAD for Precision Optics') based on OpenSCAD which inspired this library.
