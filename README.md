@@ -1,3 +1,5 @@
+<img src="https://github.com/user-attachments/assets/d20bf57a-f602-48b8-b033-8d03141b6e97" width=300>
+
 ## PyOpticL - Code-to-CAD optical system engineering
 
 ![image](https://github.com/user-attachments/assets/39065a36-9f22-4f2a-a70f-08684ac68f45)
