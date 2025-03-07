@@ -143,7 +143,11 @@ subsystem_spam(x=32 , y=50, thumbscrews=True)
  * MIT QUANTA LAB (Prof. Isaac Chuang founded the C4PO library which inspired thi project)
  * MIT Quantum Photonics & AI Group (Prof. Dirk Englund)
  * UCONN - Prof. Simone Colombo
+ * Montana St. - Prof. Matt Jaffe
  * UC Berkeley 
  * Quera
+
+![image](https://github.com/user-attachments/assets/e1050729-14f9-4578-9b55-cb316555838e)
+
 
 #### Again we thank the MIT QUANTA LAB for sharing their C4PO ('CAD for Precision Optics') based on OpenSCAD which inspired this library.
