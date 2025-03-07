@@ -2,7 +2,7 @@
 
 ## PyOpticL - Code-to-CAD optical system engineering
 
-![image](https://github.com/user-attachments/assets/39065a36-9f22-4f2a-a70f-08684ac68f45)
+![image](https://github.com/user-attachments/assets/780dbadd-5971-4b00-a471-07538e7d65ba)
 
 #### Discord Server: https://discord.gg/y8aqDe8RxN
 
