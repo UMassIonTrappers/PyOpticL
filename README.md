@@ -4,7 +4,7 @@
 
 ![image](https://github.com/user-attachments/assets/780dbadd-5971-4b00-a471-07538e7d65ba)
 
-#### Discord Server: https://discord.gg/y8aqDe8RxN
+#### Discord Server: https://discord.gg/vV4NP6rXmp
 
 <!-- Trapped Ion quantum computer at UMass Amherst engineered with PyOpticL: -->
 <!-- <img src="https://github.com/user-attachments/assets/1dbe2986-20e2-4f4e-9b4c-00dd31a4b656" width=50%> -->
@@ -144,11 +144,11 @@ subsystem_spam(x=32 , y=50, thumbscrews=True)
  * MIT Quantum Photonics & AI Group (Prof. Dirk Englund)
  * UCONN - Prof. Simone Colombo
  * Montana St. - Prof. Matt Jaffe
- * UC Berkeley
- * Stanford
+ * UC Berkeley - Prof. Aziza Suleymanzade
+ * UW Madison - Prof. Josiah Sinclair
+ * Stanford - Prof. Jon Simon
  * Quera
 
-![image](https://github.com/user-attachments/assets/d3b5ad85-33ed-4655-9377-891c7e96972d)
-
+<img src="https://github.com/user-attachments/assets/3021d769-022d-422e-958a-d889432b090a" width=700>
 
 #### Again we thank the MIT QUANTA LAB for sharing their C4PO ('CAD for Precision Optics') based on OpenSCAD which inspired this library.
