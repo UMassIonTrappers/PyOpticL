@@ -1352,6 +1352,38 @@ class mirror_mount_km05_rot90:
         part.Placement = obj.Placement
         obj.DrillPart = part
 
+
+class fixed_mount_smr1:
+    '''
+    Fixed threaded mount, model SMR1
+
+    Args:
+        mount_hole_dy (float) : The spacing between the two mount holes of it's adapter
+
+    Sub-Parts:
+        surface_adapter (adapter_args)
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, adapter_args=dict(), adapter = True):
+        adapter_args.setdefault("mount_hole_dy", 28)
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.ViewObject.ShapeColor = misc_color
+        self.part_numbers = ['SMR1']
+        self.transmission = True
+        self.max_angle = 90
+        self.max_width = inch/2
+
+        if adapter:
+            _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(-5.08, 0, -22.08), rot_offset=(0, 0, 0), **adapter_args)
+
+    def execute(self, obj):
+        mesh = _import_stl("SMR1-Step.stl", (90, 0, 90), (0, 0, 0))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+
 class fixed_mount_smr05:
     '''
     Fixed mount, model SMR05
@@ -1364,7 +1396,11 @@ class fixed_mount_smr05:
         circular_mirror (mirror_args)
     '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, drill=True, thumbscrews=False, bolt_length=15):
+    def __init__(self, obj, drill=True, thumbscrews=False, bolt_length=15, adapter_args=None, adapter=False):
+        if adapter_args is None:
+            adapter_args = {}
+        
+        adapter_args.setdefault("mount_hole_dy", 20)
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -1374,6 +1410,9 @@ class fixed_mount_smr05:
 
         obj.ViewObject.ShapeColor = mount_color
         self.part_numbers = ['SMR05']
+
+        if adapter:
+            _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(-3.81, 0, -16), rot_offset=(0, 0, 0), **adapter_args)
 
 
     def execute(self, obj):
@@ -3376,6 +3415,100 @@ class rb_cell_new:
    
         obj.Shape = Part.Compound([base, cover])
 
+
+class variable_size_rb_cell:
+    '''
+    custom sized rb cylindrcal cell to be called by variable_size_rb_cell_vbc2
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        tube_diameter (float) : The tubes diameter
+        tube_length (float) : The tubes length
+    '''
+    type = 'Part::FeaturePython'
+    def __init__(self, obj, drill=True, tube_diameter=0, tube_length=0):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+        obj.ViewObject.ShapeColor = glass_color
+        obj.ViewObject.Transparency = 70
+        self.tube_diameter=tube_diameter
+        self.tube_length=tube_length
+        self.transmission = True
+        self.max_angle = 90
+        self.max_width = 1*inch
+
+
+    def execute(self, obj):
+        z=0
+        
+        part = _custom_cylinder(dia=self.tube_diameter, dz=self.tube_length, x=-self.tube_length/2, y=0, z=z, dir=(1,0,0))
+        part = part.fuse(_custom_cylinder(dia=self.tube_diameter+2, dz=2.5, x=-self.tube_length/2-2.5, y=0, z=z, dir=(1,0,0)))
+        part = part.fuse(_custom_cylinder(dia=self.tube_diameter+2, dz=2.5, x=-self.tube_length/2+self.tube_length, y=0, z=z, dir=(1,0,0)))
+        obj.Shape = part
+
+        part = _bounding_box(obj, 3, 4)
+        part.Placement = obj.Placement
+        obj.DrillPart = part
+
+
+class variable_size_rb_cell_vbc2:
+    '''
+    rb cell holder thorlabs part vbc2
+    calls variable_size_rb_cell so you can fit your own sized rb cell
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        side_length (float) : The side length of the cube
+        tube_args["tube_diameter"] (float) : the cells diamter, the cell mount shifts down to ensure the optical access of the cell is always centerd
+
+    Sub-Parts:
+        surface_adapter (adapter_args)
+        variable_size_rb_cell (tube_args)
+    '''
+    type = 'Mesh::FeaturePython'
+    def __init__(self, obj, drill=True, adapter_args=dict(), tube_args=dict()):
+        adapter_args.setdefault("mount_hole_dy", 30)
+        tube_args.setdefault("tube_diameter", 0)
+        tube_args.setdefault("tube_length", 0)
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        #obj.addProperty('Part::PropertyPartShape', 'Shape')
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+
+
+        obj.ViewObject.ShapeColor = misc_color
+        self.part_numbers = ['VBC2']
+        self.tube_diameter = tube_args["tube_diameter"]
+        self.transmission = True
+        self.max_angle = 90
+        self.max_width = 50*inch
+
+        theta=25/72*np.pi #62.5 degrees
+        x0=3.17
+        self.optical_axis_offset = 0.5/np.sin(theta)*self.tube_diameter - 0.5*np.cos(theta)/np.sin(theta)*x0 #0.5636909734*tube_diameter-0.8250987751  
+
+        _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(0, 0, -self.optical_axis_offset-15.97), rot_offset=(0, 0, 0), **adapter_args)
+        _add_linked_object(obj, "Rb Cell", variable_size_rb_cell, pos_offset=(0, 0, 0), rot_offset=(0, 0, 0), **tube_args)
+
+    def execute(self, obj):
+        mesh = _import_stl("VBC2-Step.stl", (90, 0, 0), (0, 0, -self.optical_axis_offset))
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+
+        part = _bounding_box(obj, 3, 4, min_offset=(0, 0, 14.22), max_offset=(0, 0, 0))
+        #part = part.fuse(_custom_cylinder(dia=19, dz=20, head_dia=30, head_dz=4, x=0, y=0, z=0))
+        part.Placement = obj.Placement
+        obj.DrillPart = part
+
+
+
 class telescope_track:
     '''
     a long track enables us to walk the distance of the lens of the telescope
@@ -3427,11 +3560,16 @@ class photodetector_pda10a2:
 
     Sub-Parts:
         surface_adapter (adapter_args)
+        lens_tube_SM1L03 (tube_args)
     
     '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, drill=True, adapter_args=dict()):
+    def __init__(self, obj, drill=True, adapter_args=dict(), tube_args=None):
+        if tube_args is None:
+            tube_args = {}
+
         adapter_args.setdefault("mount_hole_dy", 60)
+        tube_args.setdefault("lens_tube_footprint", 0)
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -3444,7 +3582,7 @@ class photodetector_pda10a2:
         self.max_width = 5
 
         _add_linked_object(obj, "Surface Adapter", surface_adapter, pos_offset=(-10.54, 0, -25), **adapter_args)
-        _add_linked_object(obj, "Lens Tube", lens_tube_SM1L03, pos_offset=(-0.124, 0, -0))
+        _add_linked_object(obj, "Lens Tube", lens_tube_SM1L03, pos_offset=(-0.124, 0, -0), **tube_args)
 
     def execute(self, obj):
         mesh = _import_stl("PDA10A2-Step.stl", (90, 0, -90), (-19.87, -0, -0))
@@ -3458,10 +3596,14 @@ class photodetector_pda10a2:
 class lens_tube_SM1L03:
     '''
     SM1 Lens Tube, model SM1L03
+
+    Args:
+        lens_tube_footprint (float) : adds extra length to the lens tube bounding box, in the event the user want to add extra lens tubes
     '''
     type = 'Mesh::FeaturePython'
-    def __init__(self, obj, drill=True, bounding_box = True):
+    def __init__(self, obj, drill=True, bounding_box = True, lens_tube_footprint = 0):
         self.bounding_box = bounding_box
+        self.lens_tube_footprint = lens_tube_footprint
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -3477,10 +3619,10 @@ class lens_tube_SM1L03:
         mesh = _import_stl("SM1L03-Step.stl", (90, -0, 0), (8.382, 0, 0))
         mesh.Placement = obj.Mesh.Placement
         obj.Mesh = mesh
-        # if self.bounding_box:
-        #     part = _bounding_box(obj, 2, 3, z_tol=True, min_offset=(0, 4, 0), max_offset=(0, -4, 0))
-        #     part.Placement = obj.Placement
-        #     obj.DrillPart = part
+        if self.bounding_box:
+            part = _bounding_box(obj, 2, 3, z_tol=True, min_offset=(0, 4, 0), max_offset=(self.lens_tube_footprint, -4, 0))
+            part.Placement = obj.Placement
+            obj.DrillPart = part
 
 
 class periscope:

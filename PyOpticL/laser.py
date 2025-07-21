@@ -27,7 +27,7 @@ def check_interaction(x1, y1, a1, ref_obj):
     if a_rel > pi/2:
         return
 
-    # limits on incomming beam
+    # limits on incoming beam
     max_angle = radians(ref_obj.Proxy.max_angle)
     max_width = ref_obj.Proxy.max_width
 
