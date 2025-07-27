@@ -366,6 +366,16 @@
     Sub-Parts:  
         circular_mirror (mirror_args)  
     
+### fixed_mount_smr1
+  
+    Fixed threaded mount, model SMR1  
+  
+    Args:  
+        mount_hole_dy (float) : The spacing between the two mount holes of it's adapter  
+  
+    Sub-Parts:  
+        surface_adapter (adapter_args)  
+    
 ### fixed_mount_smr05
   
     Fixed mount, model SMR05  
@@ -727,6 +737,29 @@
     Args:  
         drill (bool) : Whether baseplate mounting for this part should be drilled  
     
+### rb_cell_vbc2
+  
+    rb cell holder thorlabs part vbc2  
+    calls variable_size_rb_cell so you can fit your own sized rb cell  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+        tube_diameter (float) : Diameter of the tube to hold the rb cell  
+        tube_length (float) : Length of the tube to hold the rb cell  
+  
+    Sub-Parts:  
+        clamp_vbc2 : Clamp for holding rb cell  
+    
+### clamp_vbc2
+  
+    Post-mountable v-clamp, modeol VBC2  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+  
+    Sub-Parts:  
+        surface_adapter (adapter_args)  
+    
 ### telescope_track
   
     a long track enables us to walk the distance of the lens of the telescope  
@@ -740,11 +773,15 @@
   
     Sub-Parts:  
         surface_adapter (adapter_args)  
+        lens_tube_SM1L03 (tube_args)  
       
     
 ### lens_tube_SM1L03
   
     SM1 Lens Tube, model SM1L03  
+  
+    Args:  
+        lens_tube_footprint (float) : adds extra length to the lens tube bounding box, in the event the user want to add extra lens tubes  
     
 ### periscope
   
@@ -882,25 +919,6 @@
         cube_size (float) : The side length of the splitter cube  
         invert (bool) : Invert pick-off direction, false is left, true is right  
         cube_part_number (string) : The Thorlabs part number of the splitter cube being used  
-    
-### waveplate_with_cube
-  
-    Beam-splitter cube  
-  
-    Args:  
-        cube_size (float) : The side length of the splitter cube  
-        invert (bool) : Invert pick-off direction, false is left, true is right  
-        cube_part_number (string) : The Thorlabs part number of the splitter cube being used  
-    
-### surface_adapter_for_waveplate_cube
-  
-    Surface adapter for post-mounted parts  
-  
-    Args:  
-        drill (bool) : Whether baseplate mounting for this part should be drilled  
-        mount_hole_dy (float) : The spacing between the two mount holes of the adapter  
-        adapter_height (float) : The height of the suface adapter  
-        outer_thickness (float) : The thickness of the walls around the bolt holes  
     
 ### ruler_125mm
   
