@@ -34,13 +34,24 @@ def Rb_SAS(x=0, y=0, angle=0):
     # add input fiberport, defined at the same coordinates as beam
     baseplate.place_element("Input Fiberport", obj_class=optomech.fixed_mount_smr1, x=input_x, y=input_y+10, angle=input_dir)
 
-    # add half waveplate and PBS
+    # add half waveplate
     baseplate.place_element_along_beam(
-        "PBS_0",
-        optomech.waveplate_with_cube,
+        "PBS Waveplate",
+        optomech.waveplate,
         beam,
         beam_index=0b1,
-        distance=58,
+        distance=30,
+        angle=-90,
+        mount_type=optomech.rotation_stage_rsp05,
+    )
+
+    # add PBS
+    baseplate.place_element_along_beam(
+        "PBS",
+        optomech.cube_splitter,
+        beam,
+        beam_index=0b1,
+        y=base_dy/2,
         angle=-90,
         mount_type=optomech.skate_mount,
     )
@@ -48,12 +59,13 @@ def Rb_SAS(x=0, y=0, angle=0):
     # Rubidium Cell
     baseplate.place_element_along_beam(
         name="Rb gas cell",
-        obj_class=optomech.variable_size_rb_cell_vbc2,
+        obj_class=optomech.rb_cell_vbc2,
         beam_obj=beam,
         beam_index=0b11,
         distance= 75/2+1*layout.inch,
         angle=layout.cardinal["right"],
-        tube_args={"tube_diameter":19, "tube_length":75},
+        tube_diameter=19,
+        tube_length=75,
     )
 
     # quarter waveplate
@@ -72,7 +84,7 @@ def Rb_SAS(x=0, y=0, angle=0):
         obj_class=optomech.waveplate,
         beam_obj=beam,
         beam_index=0b11,
-        distance=15.25,
+        distance=19,
         mount_type=optomech.fixed_mount_smr05,
         angle=0,
         mount_args={"adapter":True}
@@ -84,7 +96,7 @@ def Rb_SAS(x=0, y=0, angle=0):
         obj_class=optomech.circular_mirror,
         beam_obj=beam,
         beam_index=0b11,
-        distance=18.25,
+        distance=16,
         #x=gap + 0.75 * layout.inch,
         angle=0,
         mount_type=optomech.mirror_mount_km05,
@@ -111,7 +123,7 @@ def Rb_SAS(x=0, y=0, angle=0):
         beam_index=0b110,
         angle=180,
         x=base_dx - gap - 1.5 * layout.inch,
-        tube_args={"lens_tube_footprint":40}
+        tube_args={"lens_tube_footprint":8}
     )
 
 
