@@ -123,7 +123,7 @@ def Rb_SAS(x=0, y=0, angle=0):
         beam_index=0b110,
         angle=180,
         x=base_dx - gap - 1.5 * layout.inch,
-        tube_args={"lens_tube_footprint":8}
+        tube_args=dict(lens_tube_footprint=8)
     )
 
 
