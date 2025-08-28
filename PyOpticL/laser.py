@@ -293,7 +293,8 @@ class beam_path:
                         intersect.append(-(x1-0)/cos(a1))
                     if yf < 0:
                         intersect.append(-(y1-0)/sin(a1))
-                    self.beams.append([x1, y1, a1, min(intersect), beam_index])
+                    if len(intersect) > 0: # sometimes intersect is empty ... skip to avoid ValueError exception
+                        self.beams.append([x1, y1, a1, min(intersect), beam_index])
                 return
             
             if block:
