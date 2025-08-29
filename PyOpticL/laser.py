@@ -282,7 +282,8 @@ class beam_path:
                 # restrict beam to baseplate
                 if selfobj.Baseplate.dx != 0 and selfobj.Baseplate.dy != 0:
                     intersect = []
-                    xf, yf = x1+500*cos(a1), y1+500*sin(a1) # TODO find a better way than this
+                    max_len = sqrt(selfobj.Baseplate.dx.Value**2+selfobj.Baseplate.dy.Value**2)
+                    xf, yf = x1+max_len*cos(a1), y1+max_len*sin(a1)
                     x_max = selfobj.Baseplate.dx.Value
                     y_max = selfobj.Baseplate.dy.Value
                     if x_max < xf:
