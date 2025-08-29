@@ -147,9 +147,10 @@ subsystem_spam(x=32 , y=50, thumbscrews=True)
  * Montana St. - Prof. Matt Jaffe
  * UC Berkeley - Prof. Aziza Suleymanzade
  * UW Madison - Prof. Josiah Sinclair
- * Stanford - Prof. Jon Simon
+ * NUS - Prof. Dzmitry Matsukevich
+ * Stanford - Prof. Jonathan Simon
  * Quera
 
-<img src="https://github.com/user-attachments/assets/3021d769-022d-422e-958a-d889432b090a" width=700>
+<img src="https://github.com/user-attachments/assets/ff290700-2e48-4404-ba55-5830340bf4d4" width=700>
 
 #### Again we thank the MIT QUANTA LAB for sharing their C4PO ('CAD for Precision Optics') based on OpenSCAD which inspired this library.
