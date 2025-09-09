@@ -4,6 +4,7 @@ from math import *
 import numpy as np
 
 inch = 25.4
+max_beam_index = 1024
 
 def is_mult(x, factor, tol=1e-5):
     return isclose((abs(x)+tol/2)%factor, 0, abs_tol=tol)
@@ -175,7 +176,7 @@ class beam_path:
 
     # compute full beam path given start point and angle
     def calculate_beam_path(self, selfobj, x1, y1, a1, beam_index=1):
-        if beam_index > 200:
+        if beam_index > max_beam_index:
             return
         
         count = 0 # number of interactions per beam
