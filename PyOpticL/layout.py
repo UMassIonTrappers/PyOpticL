@@ -27,6 +27,13 @@ turn = {"up-right":-45,
         "down-left":135,
         "left-down":-45}
 
+def set_max_beam_index(index):
+    '''
+    Set a maximum beam index. Default is 1024. 
+
+    '''
+    laser.max_beam_index = index
+
 def check_bound(obj1, obj2):
     bound1 = obj1.BoundBox
     bound2 = obj2.BoundBox
