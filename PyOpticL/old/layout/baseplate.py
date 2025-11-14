@@ -3,7 +3,7 @@ import FreeCAD as App
 import Mesh
 import Part
 
-from .origin import Origin
+from ...layout import Origin
 
 
 class Baseplate(Origin):
@@ -56,20 +56,22 @@ class Baseplate(Origin):
         # self.# obj.addProperty("App::PropertyDistance", "OpticsDz").OpticsDz = optics_dz
         self.obj.addProperty("App::PropertyFloatList", "xSplits").xSplits = x_splits
         self.obj.addProperty("App::PropertyFloatList", "ySplits").ySplits = y_splits
-        self.obj.addProperty(
-            "App::PropertyLength", "InvertLabel"
-        ).InvertLabel = invert_label
+        self.obj.addProperty("App::PropertyLength", "InvertLabel").InvertLabel = (
+            invert_label
+        )
 
     def execute(self, obj):
         part = Part.makeBox(obj.lx.Value, obj.ly.Value, obj.lz.Value)
 
-        part.Placement = self.obj.Placement # drill objects are in absolute coordinates
+        part.Placement = self.obj.Placement  # drill objects are in absolute coordinates
 
         if hasattr(self.obj, "DrilledBy"):
             for i in self.obj.DrilledBy:
                 part = part.cut(i.Proxy.getDrillObj())
 
-        part.Placement = self.obj.Placement.inverse() * part.Placement # revert to relative coord
+        part.Placement = (
+            self.obj.Placement.inverse() * part.Placement
+        )  # revert to relative coord
 
         obj.Shape = part.removeSplitter()
 
@@ -87,7 +89,7 @@ class ViewProvider:
 
     def updateData(self, obj, prop):
         if str(prop) == "ParentPlacement":
-            print('did updatedata')
+            print("did updatedata")
             obj.Placement = obj.ParentPlacement * obj.BasePlacement
 
             if hasattr(obj, "Children"):

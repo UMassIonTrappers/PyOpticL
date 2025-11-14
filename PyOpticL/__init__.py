@@ -1,1 +1,0 @@
-from .laser import Beam

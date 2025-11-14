@@ -1,59 +1,72 @@
+import csv
+import math
+import re
+from pathlib import Path
+
 import FreeCAD as App
 import FreeCADGui as Gui
-from PySide import QtGui
 import Mesh
-
-import csv
-import re
-import math
 import numpy as np
-from pathlib import Path
-from PyOpticL import laser, layout, optomech
+from PySide import QtGui
 
-class Rerun_Macro():
+from PyOpticL import beam_path, layout, optomech, utils
+
+
+class Rerun_Macro:
     def GetResources(self):
-        return {"Pixmap"  : ":/icons/view-refresh.svg",
-                "Accel"   : "Ctrl+Shift+R",
-                "MenuText": "Clear Document and Re-run Last Macro"}
+        return {
+            "Pixmap": ":/icons/view-refresh.svg",
+            "Accel": "Ctrl+Shift+R",
+            "MenuText": "Clear Document and Re-run Last Macro",
+        }
 
     def Activated(self):
         for i in App.ActiveDocument.Objects:
             App.ActiveDocument.removeObject(i.Name)
-        Gui.runCommand('Std_RecentMacros',0)
+        Gui.runCommand("Std_RecentMacros", 0)
         return
 
-class Redraw_Baseplate():
+
+class Redraw_Baseplate:
 
     def GetResources(self):
-        return {"Pixmap"  : ":/icons/tree-sync-pla.svg",
-                "Accel"   : "Shift+B",
-                "MenuText": "Redraw Baseplate After Editing Parameters in GUI"}
+        return {
+            "Pixmap": ":/icons/tree-sync-pla.svg",
+            "Accel": "Shift+B",
+            "MenuText": "Redraw Baseplate After Editing Parameters in GUI",
+        }
 
     def Activated(self):
         layout.redraw()
         return
-    
-class Show_Components():
+
+
+class Show_Components:
 
     def __init__(self):
         self.state = True
 
     def GetResources(self):
-        return {"Pixmap"  : ":/icons/dagViewVisible.svg",
-                "Accel"   : "Shift+V",
-                "MenuText": "Toggle Component Visibility"}
+        return {
+            "Pixmap": ":/icons/dagViewVisible.svg",
+            "Accel": "Shift+V",
+            "MenuText": "Toggle Component Visibility",
+        }
 
     def Activated(self):
         self.state = not self.state
         layout.show_components(self.state)
         return
-    
-class Toggle_Draw_Style():
+
+
+class Toggle_Draw_Style:
 
     def GetResources(self):
-        return {"Pixmap"  : ":/icons/DrawStyleWireFrame.svg",
-                "Accel"   : "Shift+D",
-                "MenuText": "Toggle Between Wireframe and As-Is Draw Styles"}
+        return {
+            "Pixmap": ":/icons/DrawStyleWireFrame.svg",
+            "Accel": "Shift+D",
+            "MenuText": "Toggle Between Wireframe and As-Is Draw Styles",
+        }
 
     def Activated(self):
         mw = Gui.getMainWindow()
@@ -64,25 +77,30 @@ class Toggle_Draw_Style():
         else:
             asis.trigger()
         return
-    
-class Export_STLs():
+
+
+class Export_STLs:
 
     def GetResources(self):
-        return {"Pixmap"  : ":/icons/LinkSelect.svg",
-                "Accel"   : "Shift+E",
-                "MenuText": "Export Baselplate and Adapter STLs to Downloads Folder"}
+        return {
+            "Pixmap": ":/icons/LinkSelect.svg",
+            "Accel": "Shift+E",
+            "MenuText": "Export Baselplate and Adapter STLs to Downloads Folder",
+        }
 
     def Activated(self):
         export_path = str(Path.home() / "Downloads" / "FreeCAD_Optics_Export_")
         n = 0
-        while Path(export_path+str(n)).is_dir():
+        while Path(export_path + str(n)).is_dir():
             n += 1
 
-        path = Path(export_path+str(n))
+        path = Path(export_path + str(n))
         path.mkdir()
         doc = App.activeDocument()
         for obj in doc.Objects:
-            if isinstance(obj.Proxy, layout.baseplate) or all(np.isclose(obj.ViewObject.ShapeColor[:3], optomech.adapter_color)):
+            if isinstance(obj.Proxy, layout.baseplate) or all(
+                np.isclose(obj.ViewObject.ShapeColor[:3], optomech.adapter_color)
+            ):
                 if hasattr(obj, "Shape"):
                     exploded = obj.Shape.Solids
                     for i, shape in enumerate(exploded):
@@ -92,24 +110,26 @@ class Export_STLs():
                         shape.exportStl(name + ".stl")
                 else:
                     Mesh.export([obj], str(path / obj.Name) + ".stl")
-        App.Console.PrintMessage("STLs Exported to '%s'\n"%(str(path)))
+        App.Console.PrintMessage("STLs Exported to '%s'\n" % (str(path)))
         return
-    
-    
-class Export_Cart():
+
+
+class Export_Cart:
 
     def GetResources(self):
-        return {"Pixmap"  : ":/icons/edit-paste.svg",
-                "Accel"   : "Shift+O",
-                "MenuText": "Export Optomech Parts to Order List"}
+        return {
+            "Pixmap": ":/icons/edit-paste.svg",
+            "Accel": "Shift+O",
+            "MenuText": "Export Optomech Parts to Order List",
+        }
 
     def Activated(self):
         export_path = str(Path.home() / "Downloads" / "FreeCAD_Optics_Cart_")
         n = 0
-        while Path(export_path+str(n)).is_dir():
+        while Path(export_path + str(n)).is_dir():
             n += 1
 
-        path = Path(export_path+str(n))
+        path = Path(export_path + str(n))
         path.mkdir()
 
         doc = App.activeDocument()
@@ -117,8 +137,8 @@ class Export_Cart():
         types = []
         objs = []
         for obj in doc.Objects:
-            if hasattr(obj.Proxy, 'part_numbers'):
-                if '' in obj.Proxy.part_numbers:
+            if hasattr(obj.Proxy, "part_numbers"):
+                if "" in obj.Proxy.part_numbers:
                     name = obj.Label
                     temp = obj
                     while True:
@@ -131,17 +151,17 @@ class Export_Cart():
                 parts.extend(obj.Proxy.part_numbers)
                 for num in obj.Proxy.part_numbers:
                     types.append((type(obj.Proxy).__name__, num))
-                objs.extend([obj]*len(obj.Proxy.part_numbers))
+                objs.extend([obj] * len(obj.Proxy.part_numbers))
 
-        cart = open(str(path / "Thorlabs_Cart.csv"), 'w', newline='')
-        list = open(str(path / "Parts_List.csv"), 'w', newline='')
-        cart_w= csv.writer(cart)
-        list_w= csv.writer(list)
+        cart = open(str(path / "Thorlabs_Cart.csv"), "w", newline="")
+        list = open(str(path / "Parts_List.csv"), "w", newline="")
+        cart_w = csv.writer(cart)
+        list_w = csv.writer(list)
         cart_w.writerow(["Part Number", "Qty"])
         list_w.writerow(["Part Class / Name", "Part Number", "Qty"])
 
         for i in set(parts):
-            if i != '':
+            if i != "":
                 number = i
                 test1 = re.match(".*-P([0-9]+)$", i)
                 test2 = re.match(".*\(P([0-9]+)\)$", i)
@@ -150,10 +170,10 @@ class Export_Cart():
                     pack = int(test1.group(1))
                 if test2 != None:
                     pack = int(test2.group(1))
-                    number = number[:-(4+len(test2.group(1)))]
-                cart_w.writerow([number, math.ceil(parts.count(i)/pack)])
+                    number = number[: -(4 + len(test2.group(1)))]
+                cart_w.writerow([number, math.ceil(parts.count(i) / pack)])
         for i in set(types):
-            if i[1] != '':
+            if i[1] != "":
                 number = i[1]
                 test1 = re.match(".*-P([0-9]+)$", i[1])
                 test2 = re.match(".*\(P([0-9]+)\)$", i[1])
@@ -162,10 +182,10 @@ class Export_Cart():
                     pack = int(test1.group(1))
                 if test2 != None:
                     pack = int(test2.group(1))
-                    number = number[:-(4+len(test2.group(1)))]
-                list_w.writerow([i[0], number, math.ceil(parts.count(i[1])/pack)])
-        for i in enumerate(parts):    
-            if i[1] == '':
+                    number = number[: -(4 + len(test2.group(1)))]
+                list_w.writerow([i[0], number, math.ceil(parts.count(i[1]) / pack)])
+        for i in enumerate(parts):
+            if i[1] == "":
                 name = objs[i[0]].Label
                 temp = objs[i[0]]
                 while True:
@@ -176,30 +196,36 @@ class Export_Cart():
                         break
                 list_w.writerow([name, "Unknown", 1])
         return
-    
-class Reload_Modules():
+
+
+class Reload_Modules:
 
     def GetResources(self):
-        return {"Pixmap"  : ":/icons/preferences-import-export.svg",
-                "Accel"   : "Shift+M",
-                "MenuText": "Reload Freecad Optics Modules"}
+        return {
+            "Pixmap": ":/icons/preferences-import-export.svg",
+            "Accel": "Shift+M",
+            "MenuText": "Reload Freecad Optics Modules",
+        }
 
     def Activated(self):
         from importlib import reload
-        reload(layout.optomech)
-        reload(layout.origin)
-        reload(layout.baseplate)
+
         reload(layout)
-        reload(laser)
+        reload(optomech)
+        reload(beam_path)
+        reload(utils)
         App.Console.PrintMessage("Freecad Optics Modules Reloaded\n")
         return
-    
-class Get_Orientation():
+
+
+class Get_Orientation:
 
     def GetResources(self):
-        return {"Pixmap"  : ":/icons/Std_DemoMode.svg",
-                "Accel"   : "Shift+G",
-                "MenuText": "Get Orientation Parameters for Part"}
+        return {
+            "Pixmap": ":/icons/Std_DemoMode.svg",
+            "Accel": "Shift+G",
+            "MenuText": "Get Orientation Parameters for Part",
+        }
 
     def Activated(self):
         for obj in App.ActiveDocument.Objects:
@@ -214,13 +240,16 @@ class Get_Orientation():
                 break
         obj.Label = text[2:-5]
 
-        Mesh.export([obj], "%sMod/PyOpticL/PyOpticL/stl/%s.stl"%(App.getUserAppDataDir(), obj.Label))
+        Mesh.export(
+            [obj],
+            "%sMod/PyOpticL/PyOpticL/stl/%s.stl" % (App.getUserAppDataDir(), obj.Label),
+        )
 
         view_rot = Gui.ActiveDocument.ActiveView.viewPosition().Rotation
         rot1 = view_rot.inverted()
         rot2 = App.Rotation(App.Vector(0, 0, 1), 90)
         rot3 = App.Rotation(App.Vector(0, 1, 0), 90)
-        final_rot = rot3*rot2*rot1
+        final_rot = rot3 * rot2 * rot1
 
         rot_xyz = np.round(final_rot.getYawPitchRoll()[::-1], 3)
 
@@ -245,15 +274,21 @@ class Get_Orientation():
 
         translate = np.round(final_placement.Base, 3)
 
-        print('_import_stl("%s.stl", (%.4g, %.4g, %.4g), (%.4g, %.4g, %.4g))'%(obj.Label, *rot_xyz, *translate))
+        print(
+            '_import_stl("%s.stl", (%.4g, %.4g, %.4g), (%.4g, %.4g, %.4g))'
+            % (obj.Label, *rot_xyz, *translate)
+        )
         return
-    
-class Get_Position():
+
+
+class Get_Position:
 
     def GetResources(self):
-        return {"Pixmap"  : ":/icons/view-measurement.svg",
-                "Accel"   : "Shift+P",
-                "MenuText": "Get Position of Part Features"}
+        return {
+            "Pixmap": ":/icons/view-measurement.svg",
+            "Accel": "Shift+P",
+            "MenuText": "Get Position of Part Features",
+        }
 
     def Activated(self):
         for obj in App.ActiveDocument.Objects:
@@ -279,15 +314,16 @@ class Get_Position():
 
         translate = np.round(translate, 3)
 
-        print("(%.4g, %.4g, %.4g)"%(translate[0], translate[1], translate[2]))
+        print("(%.4g, %.4g, %.4g)" % (translate[0], translate[1], translate[2]))
         return
 
-Gui.addCommand("RerunMacro", Rerun_Macro())
-Gui.addCommand("RedrawBaseplate", Redraw_Baseplate())
-Gui.addCommand("ShowComponents", Show_Components())
-Gui.addCommand("ToggleDrawStyle", Toggle_Draw_Style())
-Gui.addCommand("ExportSTLs", Export_STLs())
-Gui.addCommand("ExportCart", Export_Cart())
+
+# Gui.addCommand("RerunMacro", Rerun_Macro())
+# Gui.addCommand("RedrawBaseplate", Redraw_Baseplate())
+# Gui.addCommand("ShowComponents", Show_Components())
+# Gui.addCommand("ToggleDrawStyle", Toggle_Draw_Style())
+# Gui.addCommand("ExportSTLs", Export_STLs())
+# Gui.addCommand("ExportCart", Export_Cart())
 Gui.addCommand("ReloadModules", Reload_Modules())
-Gui.addCommand("GetOrientation", Get_Orientation())
-Gui.addCommand("GetPosition", Get_Position())
+# Gui.addCommand("GetOrientation", Get_Orientation())
+# Gui.addCommand("GetPosition", Get_Position())

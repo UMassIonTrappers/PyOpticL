@@ -6,7 +6,7 @@ import Mesh
 import numpy as np
 import Part
 
-from .origin import Origin
+from ...layout import Origin
 
 INCH = 25.4
 
@@ -181,7 +181,14 @@ class CutBox(Origin):
 
 class GenericStl:
     def __init__(
-        self, name, stl_name, rotate, translate, scale=1, placement=App.Matrix(), quality=1.
+        self,
+        name,
+        stl_name,
+        rotate,
+        translate,
+        scale=1,
+        placement=App.Matrix(),
+        quality=1.0,
     ) -> None:
         self.obj = App.ActiveDocument.addObject("Mesh::FeaturePython", name)
         self.stl_name = stl_name
@@ -222,7 +229,7 @@ class GenericStl:
 
     def execute(self, obj):
         mesh = Mesh.read(STL_PATH + self.stl_name)
-        mesh.decimate(.1, self.quality)
+        mesh.decimate(0.1, self.quality)
         mesh.Placement = self.obj.Placement
         obj.Mesh = mesh
 
@@ -263,12 +270,12 @@ class RectangularOptic:
         self.obj.Proxy = self
         ViewProvider(self.obj.ViewObject)
 
-        self.obj.addProperty(
-            "App::PropertyVector", "BasePosition"
-        ).BasePosition = App.Vector(position)
-        self.obj.addProperty(
-            "App::PropertyVector", "BaseNormal"
-        ).BaseNormal = App.Vector(normal).normalize()
+        self.obj.addProperty("App::PropertyVector", "BasePosition").BasePosition = (
+            App.Vector(position)
+        )
+        self.obj.addProperty("App::PropertyVector", "BaseNormal").BaseNormal = (
+            App.Vector(normal).normalize()
+        )
         self.obj.addProperty("App::PropertyVector", "BaseEdge1").BaseEdge1 = (
             App.Rotation(App.Vector(1, 0, 0), self.obj.BaseNormal)
             * App.Vector(0, base_length, 0)
@@ -283,9 +290,9 @@ class RectangularOptic:
         self.obj.addProperty("App::PropertyVector", "Edge2")
         self.obj.addProperty("App::PropertyFloat", "Thickness").Thickness = thickness
         self.obj.addProperty("App::PropertyFloat", "MaxAngle").MaxAngle = max_angle
-        self.obj.addProperty(
-            "App::PropertyString", "OpticalShape"
-        ).OpticalShape = "rectangle"
+        self.obj.addProperty("App::PropertyString", "OpticalShape").OpticalShape = (
+            "rectangle"
+        )
         self.obj.addProperty("App::PropertyBool", "Transmit").Transmit = transmit
         self.obj.addProperty("App::PropertyBool", "Reflect").Reflect = reflect
         # self.reflection_angle = 0
@@ -362,9 +369,9 @@ class RectangularOptic:
             self.obj.addProperty("App::PropertyLinkList", "Children")
 
         self.obj.Children += [obj.obj]
-        obj.obj.addProperty(
-            "App::PropertyLinkHidden", "RelativeTo"
-        ).RelativeTo = self.obj
+        obj.obj.addProperty("App::PropertyLinkHidden", "RelativeTo").RelativeTo = (
+            self.obj
+        )
 
         return obj
 
@@ -473,50 +480,56 @@ class CylindricalOptic:
         drills=None,
         mount_class=None,
         mount_pos=(0, 0, 0),
-        mount_rotation = (0,0,0),
+        mount_rotation=(0, 0, 0),
     ):
         self.obj = App.ActiveDocument.addObject("Part::FeaturePython", name)
 
         self.obj.Proxy = self
         ViewProvider(self.obj.ViewObject)
 
-        self.obj.addProperty(
-            "App::PropertyVector", "BasePosition"
-        ).BasePosition = App.Vector(position)
-        self.obj.addProperty(
-            "App::PropertyVector", "BaseNormal"
-        ).BaseNormal = App.Vector(normal).normalize()
+        self.obj.addProperty("App::PropertyVector", "BasePosition").BasePosition = (
+            App.Vector(position)
+        )
+        self.obj.addProperty("App::PropertyVector", "BaseNormal").BaseNormal = (
+            App.Vector(normal).normalize()
+        )
         self.obj.addProperty("App::PropertyVector", "Position")
         self.obj.addProperty("App::PropertyVector", "Normal")
         self.obj.addProperty("App::PropertyFloat", "Radius").Radius = radius
         self.obj.addProperty("App::PropertyFloat", "Thickness").Thickness = thickness
         self.obj.addProperty("App::PropertyFloat", "MaxAngle").MaxAngle = max_angle
-        self.obj.addProperty(
-            "App::PropertyString", "OpticalShape"
-        ).OpticalShape = "circle"
+        self.obj.addProperty("App::PropertyString", "OpticalShape").OpticalShape = (
+            "circle"
+        )
         self.obj.addProperty("App::PropertyBool", "Transmit").Transmit = transmit
         self.obj.addProperty("App::PropertyBool", "Reflect").Reflect = reflect
         # self.reflection_angle = 0
         # self.max_angle = 90
         # self.max_width = diameter
 
-         # Handle mount_class if provided
+        # Handle mount_class if provided
         if mount_class is not None:
             # Instead of passing additional arguments to the mount class,
             # we simply call mount_class with the arguments it expects
             mount_obj = mount_class(
                 name=f"{name}_mount",  # Mount name
                 additional_placement=App.Placement(
-                        App.Vector(mount_pos),
-                        App.Rotation(0, 0, 0),
-                        App.Vector(0, 0, 0),
-                    ),
-                drills=drills,         # Passing drills as a possible argument
+                    App.Vector(mount_pos),
+                    App.Rotation(0, 0, 0),
+                    App.Vector(0, 0, 0),
+                ),
+                drills=drills,  # Passing drills as a possible argument
             )
 
-            self.place(mount_obj)  
+            self.place(mount_obj)
+
     def execute(self, obj):
-        part = Part.makeCylinder(self.obj.Radius, self.obj.Thickness, App.Vector(0, 0, 0), App.Vector(-1, 0, 0))
+        part = Part.makeCylinder(
+            self.obj.Radius,
+            self.obj.Thickness,
+            App.Vector(0, 0, 0),
+            App.Vector(-1, 0, 0),
+        )
         obj.Shape = part
 
     def calculate(
@@ -541,8 +554,8 @@ class CylindricalOptic:
             App.Vector(0, 0, 0),
         )
 
-        if (
-            recurse and hasattr(self.obj, "Children")
+        if recurse and hasattr(
+            self.obj, "Children"
         ):  # don't apply mount transform to children but do apply mirror_thickness offset or similar
             for i in self.obj.Children:
                 i.Proxy.calculate(
@@ -569,13 +582,16 @@ class CylindricalOptic:
 
         if not hasattr(obj.obj, "ParentPlacement"):
             obj.obj.addProperty("App::PropertyPlacement", "ParentPlacement")
-            obj.obj.ParentPlacement = App.Placement()  # Initialize with default placement
+            obj.obj.ParentPlacement = (
+                App.Placement()
+            )  # Initialize with default placement
 
         # Now set the mount's position relative to the optic (parent)
-        obj.obj.addProperty("App::PropertyLinkHidden", "RelativeTo").RelativeTo = self.obj
+        obj.obj.addProperty("App::PropertyLinkHidden", "RelativeTo").RelativeTo = (
+            self.obj
+        )
 
         return obj
-
 
 
 class CircularMirror(CylindricalOptic):
@@ -666,6 +682,7 @@ class CircularTransmission(CylindricalOptic):
         self.obj.ViewObject.Transparency = 50
         self.obj.ViewObject.ShapeColor = (0.5, 0.5, 0.8)
 
+
 class CircularStopper(CylindricalOptic):
     """Absorbs beams"""
 
@@ -739,13 +756,15 @@ class Mount:
             self.obj.addProperty("App::PropertyLinkList", "Children")
 
         # Handle Part::FeaturePython objects
-        if hasattr(obj, 'obj'):  # this indicates it's a Part::FeaturePython or similar
+        if hasattr(obj, "obj"):  # this indicates it's a Part::FeaturePython or similar
             self.obj.Children += [obj.obj]
-            obj.obj.addProperty("App::PropertyLinkHidden", "RelativeTo").RelativeTo = self.obj
+            obj.obj.addProperty("App::PropertyLinkHidden", "RelativeTo").RelativeTo = (
+                self.obj
+            )
         # else:  # assuming obj is a Mesh::MeshObject
         #     # Create a Part::FeaturePython object to wrap the mesh
         #     mesh_obj = App.ActiveDocument.addObject("Part::FeaturePython", f"MeshWrapper_{str(id(obj))}")
-            
+
         #     # Convert Mesh.MeshObject to Part.Shape and assign it to the new Part::FeaturePython
         #     if hasattr(obj, 'Mesh'):
         #         # If the object is a Mesh object, we convert it to Part shape
@@ -779,10 +798,12 @@ class Mount:
             return
 
         if transform:
-            self.obj.Placement = parent_placement * self.obj.BasePlacement * self.obj.OffsetPlacement
+            self.obj.Placement = (
+                parent_placement * self.obj.BasePlacement * self.obj.OffsetPlacement
+            )
 
-        if (
-            recurse and hasattr(self.obj, "Children")
+        if recurse and hasattr(
+            self.obj, "Children"
         ):  # don't apply mount transform to children but do apply mirror_thickness offset or similar
             for i in self.obj.Children:
                 i.Proxy.calculate(
@@ -943,7 +964,7 @@ class Km05(Mount):
         super().__init__(
             name, (-1.916, -1.148, 0.498), (90, 0, 90), additional_placement
         )
-       
+
         if drills != None:
             self.place(
                 Bolt(
@@ -955,7 +976,7 @@ class Km05(Mount):
                     (-11.29, 0, -6.7),
                     (0, 180, 0),
                     True,
-                    head_length=15
+                    head_length=15,
                 )
             )
             self.place(
@@ -983,24 +1004,27 @@ class Km05(Mount):
         )
         obj.Mesh = mesh
 
+
 class Chamber_with_chip:
-    def __init__(
-        self,
-        name,
-        position,
-        rotation
-    ):
+    def __init__(self, name, position, rotation):
         self.position = position
         self.rotation = rotation
         self.obj = App.ActiveDocument.addObject("Mesh::FeaturePython", name)
-        self.obj.addProperty("App::PropertyPlacement", "ParentPlacement").ParentPlacement = App.Placement(App.Matrix())
-        self.obj.addProperty("App::PropertyVector", "BaseOrigin").BaseOrigin = App.Vector(position)
-        self.obj.addProperty("App::PropertyVector", "BaseOffset").BaseOffset = App.Vector(rotation).normalize()
+        self.obj.addProperty(
+            "App::PropertyPlacement", "ParentPlacement"
+        ).ParentPlacement = App.Placement(App.Matrix())
+        self.obj.addProperty("App::PropertyVector", "BaseOrigin").BaseOrigin = (
+            App.Vector(position)
+        )
+        self.obj.addProperty("App::PropertyVector", "BaseOffset").BaseOffset = (
+            App.Vector(rotation).normalize()
+        )
         self.obj.addProperty("App::PropertyVector", "Position")
         self.obj.Proxy = self
         ViewProvider(self.obj.ViewObject)
 
         self.obj.ViewObject.ShapeColor = (0.5, 0.5, 0.55)
+
     def place(self, obj):
         pass
 
@@ -1012,10 +1036,10 @@ class Chamber_with_chip:
         transform=True,
     ):
         pass
-       
+
     def execute(self, obj):
         mesh = Mesh.read(STL_PATH + "room temperature chamber with chip.stl")
-        
+
         mesh.Placement = App.Placement(
             App.Vector(self.position),
             App.Rotation(
@@ -1076,7 +1100,7 @@ class Km05ForRedstone(Mount):
                     (-1 * INCH, -0.75 * INCH, -14.73),
                 )
             )
-            
+
     def execute(self, obj):
         return
         # mesh = Mesh.read(STL_PATH + "KM05-Step.stl")
@@ -1141,12 +1165,16 @@ class ViewProvider:
             if not hasattr(obj, "ParentPlacement"):
                 # print(f"Adding ParentPlacement to {obj.Name}")
                 obj.addProperty("App::PropertyPlacement", "ParentPlacement")
-                obj.ParentPlacement = App.Placement()  # Default placement (no position or rotation)
+                obj.ParentPlacement = (
+                    App.Placement()
+                )  # Default placement (no position or rotation)
             else:
                 print(f"{obj.Name} already has ParentPlacement")
 
             # print(f"Current ParentPlacement for {obj.Name}: {obj.ParentPlacement}")
-            obj.Position = obj.ParentPlacement.Base  # Update position based on parent placement
+            obj.Position = (
+                obj.ParentPlacement.Base
+            )  # Update position based on parent placement
             # print(f"Updated Position for {obj.Name}: {obj.Position}")
 
             # Only check for OpticalShape if the object is an optical element (e.g., CylindricalOptic, Beam, etc.)
@@ -1171,12 +1199,11 @@ class ViewProvider:
                 # print(f"{obj.Name} has {len(obj.Children)} children. Updating their ParentPlacement.")
                 for child in obj.Children:
                     # print(f"Setting ParentPlacement for child {child.Name}")
-                    child.ParentPlacement = obj.Placement  # Set child's ParentPlacement to parent's Placement
+                    child.ParentPlacement = (
+                        obj.Placement
+                    )  # Set child's ParentPlacement to parent's Placement
 
             # print(f"Data update complete for {obj.Name}")
-
-
-
 
     # def onDelete(self, feature, subelements):
     # # delete all elements when baseplate is deleted
