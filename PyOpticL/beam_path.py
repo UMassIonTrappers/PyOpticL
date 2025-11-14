@@ -1,0 +1,804 @@
+from unittest import skip
+
+import FreeCAD as App
+import numpy as np
+import Part
+
+from PyOpticL.layout import Dimension as dim
+from PyOpticL.layout import Layout
+from PyOpticL.utils import collect_children, wavelength_to_rgb
+
+beam_icon = """
+        /* XPM */
+        static char *_0ddddfe6a2d42f3d616a62ec3bb0f7c8Jp52mHVQRFtBmFY[] = {
+        /* columns rows colors chars-per-pixel */
+        "16 16 6 1 ",
+        "  c #ED1C24",
+        ". c #ED5C5E",
+        "X c #ED9092",
+        "o c #EDBDBD",
+        "O c #EDDFDF",
+        "+ c None",
+        /* pixels */
+        "+++++++++..XooOO",
+        "++++++..+..XXooO",
+        "++++++++++. XXoo",
+        "+++++++.++  .XXo",
+        "++++++.++  .  XX",
+        "++++++++  .  ..X",
+        "+++++++  .  ++..",
+        "++++++  .  +++++",
+        "+++++  .  ++.+.+",
+        "++++  .  ++.++.+",
+        "+++  .  ++++++++",
+        "++  .  +++++++++",
+        "+  .  ++++++++++",
+        "  .  +++++++++++",
+        " .  ++++++++++++",
+        ".  +++++++++++++"
+        };
+        """
+
+
+class Beam_Segment(Layout):
+    """
+    Class representing a beam segment
+
+    Args:
+    position (tuple): (x, y, z) coordinates
+    direction (tuple): (x, y, z) normalized direction vector
+    waist (float): Beam waist
+    focal_length (float): Focal length of the beam
+    wavelength (float): Wavelength of the beam
+    polarization (string): Polarization angle of the beam in radians
+    power (float): Power of the beam
+    distance (float): Distance the beam travels in this segment
+    from_global (bool): Whether the beam originated from a global object
+    """
+
+    def __init__(
+        self,
+        index: int,
+        position: tuple[float],
+        rotation: App.Rotation,
+        waist: float,
+        focal_length: float,
+        wavelength: float,
+        polarization: float,
+        power: float,
+    ):
+
+        super().__init__(
+            f"Beam Segment {index}",
+            position=position,
+        )
+
+        obj = self.get_object()
+        obj.BasePlacement.Rotation = rotation
+
+        self.index = index
+        self.waist = waist
+        self.focal_length = focal_length
+        self.wavelength = wavelength
+        self.polarization = polarization
+        self.power = power
+        self.distance = 0
+
+        self.make_property("ChildObject", "App::PropertyLinkHidden")
+        self.make_property("BoundParent", "App::PropertyLinkHidden")
+
+    def set_parent(self, parent):
+        super().set_parent(parent)
+        obj = self.get_object()
+        parent_obj = parent.get_object()
+        print(parent_obj.Name, parent_obj.BoundParent)
+        obj.BoundParent = parent_obj.BoundParent
+
+    def get_constraint_position(
+        self,
+        distance: float = None,
+        x_position: float = None,
+        y_position: float = None,
+        z_position: float = None,
+    ) -> np.ndarray[float]:
+        """
+        Get the position of the beam at a specified distance or coordinate
+
+        Args:
+        distance (float): Distance along the beam direction from origin
+        x_position (float): x-coordinate of the beam position
+        y_position (float): y-coordinate of the beam position
+        z_position (float): z-coordinate of the beam position
+
+        Returns:
+        position (np.ndarray): (x, y, z) coordinates of the beam position
+        """
+
+        obj = self.get_object()
+
+        if (distance != None) + (x_position != None) + (y_position != None) + (
+            z_position != None
+        ) != 1:
+            raise ValueError(
+                "Exactly one of distance, x_position, y_position, or z_position must be specified"
+            )
+
+        # get placement relative to bound parent
+        bound_placement = obj.BoundParent.Placement
+        placement = obj.Placement * bound_placement.inverse()
+
+        # get origin and direction from object placement
+        position = np.array(placement.Base)
+        direction = np.array(placement.Rotation.multVec(App.Vector(1, 0, 0)))
+
+        # calculate position based on specified constraint
+        if distance != None:
+            output = position + distance * direction
+        if x_position != None:
+            t = (x_position - position[0]) / direction[0]
+            output = position + t * direction
+        if y_position != None:
+            t = (y_position - position[1]) / direction[1]
+            output = position + t * direction
+        if z_position != None:
+            t = (z_position - position[2]) / direction[2]
+            output = position + t * direction
+
+        # return global output
+        return output + np.array(bound_placement.Base)
+
+    def get_global_position(self) -> np.ndarray[float]:
+        """
+        Get the global position of the beam origin
+
+        Returns:
+        position (np.ndarray): (x, y, z) coordinates of the beam origin
+        """
+
+        obj = self.get_object()
+        position = obj.Placement.Base
+        return np.array(position)
+
+    def get_global_direction(self) -> np.ndarray[float]:
+        """
+        Get the global direction of the beam
+
+        Returns:
+        direction (np.ndarray): (x, y, z) normalized direction vector
+        """
+
+        obj = self.get_object()
+        rotation = obj.Placement.Rotation
+        global_direction = rotation.multVec(App.Vector(1, 0, 0))
+        return np.array(global_direction)
+
+    def calculate(self):
+        """
+        Calculate the beam segment properties
+        """
+        super().calculate()
+
+        # generate beam geometry
+        obj = self.get_object()
+        shape = Part.makeCylinder(
+            self.waist / 2,
+            self.distance,
+            App.Vector(0, 0, 0),
+            App.Vector(1, 0, 0),
+        )
+        shape.Placement = obj.Placement
+        obj.Shape = shape
+        obj.ViewObject.ShapeColor = wavelength_to_rgb(self.wavelength)
+        # obj.ViewObject.Transparency = 1.0 - self.power / 10  # arbitrary scaling
+
+
+class Beam_Path(Layout):
+    """
+    Class representing a beam path layout object
+
+    Args:
+    label (str): Label for the beam path
+    position (tuple): (x, y, z) coordinates
+    rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
+    bound_parent (Layout): parent whose children this beam path should interact with
+    """
+
+    object_type = "Part::FeaturePython"  # FreeCAD object type
+    object_group = "beam_path"  # group name for management
+    object_icon = beam_icon  # icon for tree view
+
+    def __init__(
+        self,
+        label: str,
+        position: tuple[float] = (0, 0, 0),
+        rotation: tuple[float] = (0, 0, 0),
+        global_rotation: tuple[float] = (0, 0, 0),
+        waist: dim = dim(1, "mm"),
+        wavelength: float = 635,
+        polarization: float = 0,
+        power: float = 1,
+        focal_length: dim = None,
+        bound_parent: Layout = None,
+    ):
+        super().__init__(
+            label,
+            position,
+            global_rotation,
+            relative_position=True,
+            relative_rotation=True,
+            recompute_priority=-1,
+        )
+
+        obj = self.get_object()
+
+        self.make_property("BoundParent", "App::PropertyLinkHidden")
+        obj.BoundParent = bound_parent
+
+        self.make_property("BeamChildren", "App::PropertyLinkListHidden")
+        self.make_property("BeamSegments", "App::PropertyLinkListHidden")
+
+        self.rotation = rotation
+        self.waist = waist
+        self.wavelength = wavelength
+        self.polarization = polarization
+        self.power = power
+        self.focal_length = focal_length
+
+    def set_parent(self, parent: Layout):
+        """Set the parent object of this component"""
+
+        super().set_parent(parent)
+        obj = self.get_object()
+        parent_obj = parent.get_object()
+        if obj.BoundParent is None:
+            obj.BoundParent = parent_obj
+        print(obj.BoundParent)
+
+    def add(
+        self,
+        child: Layout,
+        beam_index: int,
+        distance: dim = None,
+        x_position: dim = None,
+        y_position: dim = None,
+        z_position: dim = None,
+        offset: tuple[dim] = (0, 0),
+        interface_index: int = 0,
+    ):
+        """
+        Add a child layout to the beam path and assign beam index
+
+        Args:
+            child (Layout): Child layout to add
+            beam_index (int): Index of the beam this child interacts with
+            distance (float): Distance along the beam from the last component
+            x_position (float): x-coordinate of the beam position
+            y_position (float): y-coordinate of the beam position
+            z_position (float): z-coordinate of the beam position
+            offset (tuple): (y, z) offset from the center of the interface
+            interface_index (int): Index of the interface on the child object to interact with
+        """
+
+        super().add(child)
+
+        obj = self.get_object()
+        obj.BeamChildren += [child.get_object()]
+
+        if (distance != None) + (x_position != None) + (y_position != None) + (
+            z_position != None
+        ) != 1:
+            raise ValueError(
+                "Exactly one of distance, x_position, y_position, or z_position must be specified"
+            )
+        child.beam_index = beam_index
+        child.distance = distance
+        child.x_position = x_position
+        child.y_position = y_position
+        child.z_position = z_position
+        child.offset = offset
+        child.interface_index = interface_index
+        child.placed = False
+
+        return child
+
+    def calculate(self):
+        """
+        Calculate the beam path through the layout
+        """
+
+        super().calculate()
+
+        obj = self.get_object()
+
+        if len(obj.BeamSegments) == 0:
+            rotation = App.Rotation("XYZ", *self.rotation)
+            print(rotation.multVec(App.Vector(1, 0, 0)))
+            input_beam = Beam_Segment(
+                index=1,
+                position=(0, 0, 0),
+                rotation=rotation,
+                waist=self.waist,
+                wavelength=self.wavelength,
+                polarization=self.polarization,
+                power=self.power,
+                focal_length=self.focal_length,
+            )
+            super().add(input_beam)
+            obj.BeamSegments += [input_beam.get_object()]
+
+        for child in obj.BeamChildren:
+            child.Proxy.placed = False
+
+        # check for loose ends and start simulation from there
+        indices = {child.Proxy.index for child in obj.BeamSegments}
+        for beam in obj.BeamSegments:
+            beam.Proxy.calculate()
+            beam.purgeTouched()
+            endpoint = True
+            for index in indices:
+                print(beam.Proxy.index, index, beam.Proxy.index == index >> 1)
+                if beam.Proxy.index == index >> 1:
+                    endpoint = False
+                    break
+            if endpoint:
+                self.step(beam.Proxy)
+                beam.Proxy.recompute()
+                beam.purgeTouched()
+
+    def recompute(self):
+        """
+        Recompute the beam path layout
+        """
+        self.calculate()
+        self.get_object().purgeTouched()
+
+    def get_next_global(self, input_beam: Beam_Segment):
+        """
+        Get the next global object the beam will interact with
+        """
+
+        obj = self.get_object()
+        input_beam_obj = input_beam.get_object()
+
+        next_object = None
+        next_interface = None
+
+        # gather all children of bound parent
+        all_children = []
+        collect_children(obj.BoundParent, all_children)
+
+        # find closest global object
+        min_distance = np.inf
+        for child in all_children:
+            proxy = child.Proxy
+            # skip beam segments, unplaced beam children, and objects without interfaces
+            if not hasattr(proxy, "get_interfaces") or (
+                child in obj.Children and not proxy.placed
+            ):
+                continue
+            # check all interfaces of the object
+            for interface in proxy.get_interfaces():
+                intercept = interface.get_intercept(input_beam)
+                if intercept is not None:
+                    distance = np.linalg.norm(intercept - input_beam_obj.Placement.Base)
+                    # find closest intercept
+                    if distance < min_distance or min_distance is None:
+                        min_distance = distance
+                        next_object = child
+                        next_interface = interface
+
+        return next_object, next_interface, min_distance
+
+    def get_next_child(self, input_beam: Beam_Segment):
+        """
+        Get the next beam child object for placement
+        """
+
+        obj = self.get_object()
+        input_beam_obj = input_beam.get_object()
+
+        next_object = None
+        next_interface = None
+        next_distance = np.inf
+
+        # get next beam child for placement
+        for child in obj.BeamChildren:
+            proxy = child.Proxy
+            if not proxy.placed and proxy.beam_index == input_beam.index:
+                next_object = child
+                break
+
+        # get info for next beam child
+        if next_object != None and hasattr(next_object.Proxy, "get_interfaces"):
+            proxy = next_object.Proxy
+            next_position = input_beam.get_constraint_position(
+                proxy.distance,
+                proxy.x_position,
+                proxy.y_position,
+                proxy.z_position,
+            )
+
+            # sum previous global interaction distances
+            previous_distance = 0
+            for beam_obj in reversed(obj.BeamSegments[:-1]):
+                beam = beam_obj.Proxy
+                index_diff = input_beam.index.bit_length() - beam.index.bit_length()
+                root_index = beam.index >> index_diff
+                if (
+                    beam.get_object().ChildObject not in obj.BeamChildren
+                    and root_index == input_beam.index
+                ):
+                    previous_distance += beam.distance
+                else:
+                    break
+
+            # get total constraint distance to next child
+            next_distance = (
+                np.linalg.norm(next_position - input_beam_obj.Placement.Base)
+                - previous_distance
+            )
+
+            # gather all interfaces associated with the object
+            object_children = []
+            collect_children(next_object, object_children)
+            interfaces = proxy.get_interfaces()
+            for child in object_children:
+                proxy = child.Proxy
+                if hasattr(proxy, "get_interfaces"):
+                    interfaces.extend(proxy.get_interfaces())
+            # get specified interface
+            next_interface = interfaces[proxy.interface_index]
+
+        return next_object, next_interface, next_distance
+
+    def step(self, input_beam: Beam_Segment):
+        """
+        Perform a single calculation step for the beam path
+        """
+
+        obj = self.get_object()
+
+        print(f"Stepping beam {input_beam.index}")
+
+        # get next global object
+        next_global = self.get_next_global(input_beam)
+        # get next beam child object
+        next_child = self.get_next_child(input_beam)
+
+        global_distance, child_distance = next_global[2], next_child[2]
+
+        if global_distance == np.inf and child_distance == np.inf:
+            # no more interactions, set beam distance to large value
+            input_beam.distance = 50
+            return
+
+        if global_distance < child_distance:
+            next_object, next_interface, next_distance = next_global
+            print(f"Next global object: {next_object.Name} at distance {next_distance}")
+        else:
+            next_object, next_interface, next_distance = next_child
+            print(f"Next child object: {next_object.Name} at distance {next_distance}")
+
+            # place the object at the correct position
+            intercept = input_beam.get_constraint_position(distance=next_distance)
+            # intercept -= obj.Placement.Base  # convert to local coordinates
+            object_rotation = next_object.Placement.Rotation
+            rotated_offset = object_rotation.multVec(
+                App.Vector(0, *next_object.Proxy.offset)
+            )
+            object_position = intercept - next_interface.position + rotated_offset
+            next_object.BasePlacement.Base = App.Vector(*object_position)
+            next_object.Proxy.placed = True
+            next_object.Proxy.recompute()
+
+        # get output beams from interaction
+        input_beam.distance = next_distance
+        input_beam.get_object().ChildObject = next_object
+        output_beams = next_interface.get_beams(input_beam)
+        input_beam.get_object().purgeTouched()
+        for beam in output_beams:
+            input_beam.add(beam)
+            beam_obj = beam.get_object()
+            obj.BeamSegments += [beam_obj]
+            beam.calculate()
+            beam_obj.purgeTouched()
+            self.step(beam)
+
+
+class Interface:
+    """
+    Base class for optical interface elements
+
+    Args:
+        position (tuple): (x, y, z) coordinates (relative to parent)
+        rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees (relative to parent)
+        diameter (float): Diameter for circular interface
+        dx (float): x-dimension for rectangular interface
+        dy (float): y-dimension for rectangular interface
+        max_angle (float): Maximum angle between incident beam and interface normal in degrees
+    """
+
+    def __init__(
+        self,
+        position: tuple,
+        rotation: tuple,
+        diameter: dim = None,
+        dx: dim = None,
+        dy: dim = None,
+        max_angle: float = 90,
+    ):
+        self.position = np.array(position)
+
+        # calculate normal vector from rotation
+        rotation_obj = App.Rotation("XYZ", *rotation)
+        self.normal = np.array(rotation_obj.multVec(App.Vector(1, 0, 0)))
+
+        # define bound type
+        if diameter != None:
+            self.shape = "circular"
+            self.diameter = diameter
+        elif dx != None and dy != None:
+            self.shape = "rectangular"
+            self.dx = dx
+            self.dy = dy
+        else:
+            raise ValueError("Either radius or dx and dy must be specified")
+
+        self.max_angle = max_angle
+        self.parent = None  # to be set when initialized in parent object
+
+    def get_global_position(self) -> np.ndarray[float]:
+        """
+        Get the global position of the interface
+
+        Returns:
+            position (np.ndarray): (x, y, z) coordinates of the interface
+        """
+
+        parent_obj = self.parent.get_object()
+        position = parent_obj.Placement.Base
+        global_position = np.array(position) + self.position
+        return global_position
+
+    def get_global_normal(self) -> np.ndarray[float]:
+        """
+        Get the global normal vector of the interface
+
+        Returns:
+            normal (np.ndarray): (x, y, z) normalized normal vector
+        """
+
+        parent_obj = self.parent.get_object()
+        rotation = parent_obj.Placement.Rotation
+        global_normal = np.array(rotation.multVec(App.Vector(*self.normal)))
+        return global_normal
+
+    def get_intercept(self, incident_beam: Beam_Segment) -> np.ndarray[float] | None:
+        """
+        Get the intercept point of a beam with the interface plane
+
+        Args:
+            beam (Beam): Beam object
+
+        Returns:
+            intercept (np.ndarray): (x, y, z) coordinates of intercept point (None if no intercept)
+        """
+
+        global_position = self.get_global_position()
+        global_normal = self.get_global_normal()
+        beam_position = incident_beam.get_global_position()
+        beam_direction = incident_beam.get_global_direction()
+
+        # check if beam is within max angle
+        incident_angle = np.arccos(np.dot(global_normal, -beam_direction))
+        if incident_angle > np.deg2rad(self.max_angle):
+            return None
+
+        denom = np.dot(global_normal, beam_direction)
+        # check if beam is parallel to interface
+        if np.abs(denom) < 1e-6:
+            return None
+
+        distance = np.dot(global_normal, global_position - beam_position) / denom
+        # check if intercept is behind beam origin
+        if distance < 0:
+            return None
+        # check if intercept is too close to origin
+        if -1e-6 < distance < 1e-6:
+            return None
+
+        intercept = beam_position + distance * beam_direction
+
+        # Check if intercept is within the interface bounds
+        offset_vec = intercept - global_position
+        if self.shape == "circular":
+            if np.linalg.norm(offset_vec) > self.diameter / 2:
+                return None
+        elif self.shape == "rectangular":
+            if abs(offset_vec[0]) > self.dx / 2 or abs(offset_vec[1]) > self.dy / 2:
+                return None
+
+        print(f"Beam intercept at {intercept}")
+        return intercept
+
+
+class Reflection(Interface):
+    """
+    Base class for reflection interfaces
+    Supports mirrors, samplers, polarizing beamsplitters, and dichroic mirrors
+    To use type other than basic mirror, use the appropriate ref_* parameter.
+
+    Args:
+        position (tuple): (x, y, z) coordinates
+        rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
+        ref_ratio (float): Ratio of reflected to transmitted power
+        ref_polarization (string): Polarization angle of reflected light in radians
+        ref_wavelengths (list): List of tuples specifying (min, max) wavelength ranges
+                                for reflection in nm. Use None to indicate an open range
+        diameter (float): Diameter for circular interface
+        dx (float): x-distance for rectangular interface
+        dy (float): y-distance for rectangular interface
+        max_angle (float): Maximum angle between incident beam and interface normal in degrees
+    """
+
+    def __init__(
+        self,
+        position: tuple,
+        rotation: tuple,
+        ref_ratio: float = None,
+        ref_polarization: float = None,
+        ref_wavelengths: list = None,
+        diameter: dim = None,
+        dx: dim = None,
+        dy: dim = None,
+        max_angle: float = 90,
+    ):
+
+        if (ref_ratio != None and ref_ratio != 1) + (ref_polarization != None) + (
+            ref_wavelengths != None
+        ) > 1:
+            raise ValueError(
+                "Only one of ref_ratio, ref_polarization, ref_wavelengths can be specified"
+            )
+
+        # define type of reflection interface
+        if ref_ratio != None and ref_ratio != 1:
+            self.type = "sampler"
+            self.ref_ratio = ref_ratio
+        elif ref_polarization != None:
+            self.type = "polarizing"
+            self.ref_polarization = ref_polarization
+        elif ref_wavelengths != None:
+            self.type = "dichroic"
+            self.ref_wavelengths = ref_wavelengths
+        else:
+            self.type = "mirror"
+
+        super().__init__(position, rotation, diameter, dx, dy, max_angle)
+
+    def get_beams(self, incident_beam: Beam_Segment):
+        """
+        Get the output beams from an incident beam interacting with the interface
+
+        Args:
+            incident_beam (Beam): Incident beam object
+
+        Returns:
+            output_beams (list): List of output Beam objects
+        """
+
+        global_normal = self.get_global_normal()
+        beam_position = incident_beam.get_global_position()
+        beam_direction = incident_beam.get_global_direction()
+        intercept = self.get_intercept(incident_beam)
+
+        if intercept is None:
+            return []
+
+        # calculate ratio of transmitted to reflected power for different interface types
+        if self.type == "mirror":
+            transmit_ratio = 0
+        if self.type == "sampler":
+            transmit_ratio = 1 - self.ref_ratio
+        if self.type == "polarizing":
+            transmit_polarization = self.ref_polarization + np.pi / 2
+            reflect_polarization = self.ref_polarization
+            angle_diff = incident_beam.polarization - transmit_polarization
+            transmit_ratio = np.cos(angle_diff) ** 2
+        if self.type == "dichroic":
+            transmit_ratio = 1
+            # check if wavelength within the reflection ranges
+            for lmin, lmax in self.ref_wavelengths:
+                if lmin == None:
+                    lmin = -np.inf
+                if lmax == None:
+                    lmax = np.inf
+                if lmin <= incident_beam.wavelength <= lmax:
+                    transmit_ratio = 0
+                    break
+        reflect_ratio = 1 - transmit_ratio
+
+        if self.type != "polarizing":
+            # TODO handle polarization change caused by other reflection
+            transmit_polarization = incident_beam.polarization
+            reflect_polarization = incident_beam.polarization
+
+        output_beams = []
+
+        local_origin = intercept - beam_position
+
+        # generate transmitted beam
+        if transmit_ratio > 0:
+            if reflect_ratio > 0:
+                index = incident_beam.index << 1  # handle beam splitting
+            else:
+                index = incident_beam.index
+            transmitted_beam = Beam_Segment(
+                index=index,
+                position=local_origin,
+                rotation=(0, 0, 0),
+                waist=incident_beam.waist,
+                focal_length=incident_beam.focal_length,
+                wavelength=incident_beam.wavelength,
+                polarization=transmit_polarization,
+                power=incident_beam.power * transmit_ratio,
+            )
+            output_beams.append(transmitted_beam)
+
+        # generate reflected beam
+        if reflect_ratio > 0:
+            if transmit_ratio > 0:
+                index = (incident_beam.index << 1) + 1  # handle beam splitting
+            else:
+                index = incident_beam.index
+
+            rot_axis = np.cross(-beam_direction, global_normal)
+            rot_angle = np.arccos(np.dot(-beam_direction, global_normal)) * 2
+            rotation = App.Rotation(App.Vector(*rot_axis), Radian=np.pi + rot_angle)
+            print(local_origin)
+            reflect_beam = Beam_Segment(
+                index=index,
+                position=local_origin,
+                rotation=rotation,
+                waist=incident_beam.waist,
+                focal_length=incident_beam.focal_length,
+                wavelength=incident_beam.wavelength,
+                polarization=reflect_polarization,
+                power=incident_beam.power * reflect_ratio,
+            )
+            output_beams.append(reflect_beam)
+
+        return output_beams
+
+
+class Diffraction(Interface):
+    """
+    Base class for basic diffraction interfaces
+    Only supports single diffraction line
+    # TODO multi line support
+    # (idea: if 3 lines, have the transmitted beam index be 1000 and diffracted beams be 11, 101, and 1001)
+
+    Args:
+        position (tuple): (x, y, z) coordinates
+        rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
+        diff_angle (float): Diffraction angle
+        diameter (float): Diameter for circular interface
+        dx (float): x-distance for rectangular interface
+        dy (float): y-distance for rectangular interface
+        max_angle (float): Maximum angle between incident beam and interface normal in degrees
+    """
+
+    def __init__(
+        self,
+        position: tuple,
+        rotation: tuple,
+        diffracted_angle: float,
+        diffracted_ratio: float,
+        radius: dim = None,
+        dx: dim = None,
+        dy: dim = None,
+        max_angle: float = 90,
+    ):
+
+        # TODO finish this
+        super().__init__(position, rotation, radius, dx, dy, max_angle)
