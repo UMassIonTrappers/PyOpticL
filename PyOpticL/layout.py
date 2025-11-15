@@ -46,22 +46,18 @@ class Layout:
         label (string): Name of the object
         position (tuple): (x, y, z) coordinates
         rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
-        relative_position (bool): Whether position is relative to parent
-        relative_rotation (bool): Whether rotation is relative to parent
         recompute_priority (int): Priority for recompute order
     """
 
-    object_type = "Part::FeaturePython"  # FreeCAD object type
+    object_type = "Part"  # FreeCAD object type (must be Part or Mesh)
     object_group = "layout"  # group name for management
     object_icon = ""  # icon for the object in the tree view
 
     def __init__(
         self,
         label: str,
-        position: tuple = (0, 0, 0),
-        rotation: tuple = (0, 0, 0),
-        relative_position: bool = True,
-        relative_rotation: bool = True,
+        position: tuple = None,
+        rotation: tuple = None,
         recompute_priority: int = 0,
     ):
 
@@ -72,7 +68,7 @@ class Layout:
             document = App.newDocument(label)
 
         # initialize FeaturePython object
-        obj = document.addObject(f"{self.object_type}", label, self)
+        obj = document.addObject(f"{self.object_type}::FeaturePython", label, self)
         obj.Label = label
         self.document_id = document.Name
         self.object_id = obj.Name
@@ -81,9 +77,10 @@ class Layout:
         # setup placement properties
         self.make_property("Placement", "App::PropertyPlacement")
         self.make_property("BasePlacement", "App::PropertyPlacement", visible=True)
-        obj.BasePlacement = App.Placement(
-            App.Vector(*position), App.Rotation("XYZ", *rotation)
-        )
+        if position is not None:
+            obj.BasePlacement.Base = App.Vector(*position)
+        if rotation is not None:
+            obj.BasePlacement.Rotation = App.Rotation("XYZ", *rotation)
 
         # initialize parent and children properties
         self.make_property("Parent", "App::PropertyLinkHidden")
@@ -91,8 +88,6 @@ class Layout:
         self.make_property("Children", "App::PropertyLinkList")
         obj.Children = []
 
-        self.relative_position = relative_position
-        self.relative_rotation = relative_rotation
         self.recompute_priority = recompute_priority
 
     def get_object(self) -> App.DocumentObject:
@@ -114,13 +109,40 @@ class Layout:
         parent_obj = parent.get_object()
         obj.Parent = parent_obj
 
-    def add(self, child: Layout) -> Layout:
-        """Add a child object to this component"""
+    def add(
+        self,
+        child: Layout,
+        position: tuple = None,
+        rotation: tuple = None,
+    ) -> Layout:
+        """Add a child object to this component
+
+        Args:
+            child (Layout): Child object to add
+            position (tuple): (x, y, z) coordinates of child (overrides initial position)
+            rotation (tuple): (angle_x, angle_y, angle_z) rotation of child (overrides initial rotation)
+        """
 
         obj = self.get_object()
         child_obj = child.get_object()
+
+        if child_obj.Parent != None:
+            raise RuntimeError("Child object already has a parent assigned")
+
         obj.Children += [child_obj]
         child.set_parent(self)
+
+        if (position is not None) ^ (rotation is not None):
+            raise RuntimeError("Must specify both position and rotation to override")
+
+        if position is not None and rotation is not None:
+            if child_obj.BasePlacement is not None:
+                raise RuntimeWarning(
+                    f"Overriding existing placement for {child_obj.Label}, avoid setting placement in both constructor and add()"
+                )
+
+            child_obj.BasePlacement.Base = App.Vector(*position)
+            child_obj.BasePlacement.Rotation = App.Rotation("XYZ", *rotation)
 
         return child
 
@@ -129,25 +151,13 @@ class Layout:
 
         obj = self.get_object()
 
-        # separate parent placement into position and rotation components
-        if obj.Parent != None:
-            parent_position = App.Placement(
-                obj.Parent.Placement.Base, App.Rotation(0, 0, 0)
-            )
-            parent_rotation = App.Placement(
-                App.Vector(0, 0, 0), obj.Parent.Placement.Rotation
-            )
-        else:
-            parent_position = App.Placement(App.Vector(0, 0, 0), App.Rotation(0, 0, 0))
-            parent_rotation = App.Placement(App.Vector(0, 0, 0), App.Rotation(0, 0, 0))
+        if obj.BasePlacement is None:
+            raise RuntimeError(f"Placement never defined for {obj.Label}")
 
         # calculate final placement
         obj.Placement = obj.BasePlacement
         if obj.Parent != None:
-            if self.relative_rotation:
-                obj.Placement = parent_rotation * obj.Placement
-            if self.relative_position:
-                obj.Placement = parent_position * obj.Placement
+            obj.Placement = obj.Parent.Placement * obj.Placement
 
     def recompute(self):
         """Recursively recompute all children of this object"""
@@ -185,12 +195,10 @@ class Component(Layout):
         definition (Component_Definition): Template defining component properties
         position (tuple): (x, y, z) coordinates
         rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
-        relative_position (bool): Whether position is relative to parent
-        relative_rotation (bool): Whether rotation is relative to parent
         recompute_priority (int): Priority for recompute order
     """
 
-    object_type = "Part::FeaturePython"  # FreeCAD object type
+    object_type = "Part"  # FreeCAD object type
     object_group = "component"  # group name for management
     object_icon = ""  # icon for the object in the tree view
     object_color = (0.5, 0.5, 0.5)  # color for the object model
@@ -202,8 +210,6 @@ class Component(Layout):
         definition: object,
         position: tuple = (0, 0, 0),
         rotation: tuple = (0, 0, 0),
-        relative_position: bool = True,
-        relative_rotation: bool = True,
         recompute_priority: int = 0,
     ):
 
@@ -211,8 +217,6 @@ class Component(Layout):
             label,
             position,
             rotation,
-            relative_position,
-            relative_rotation,
             recompute_priority,
         )
 
@@ -285,9 +289,9 @@ class Component(Layout):
 
             # apply placement and set final shape
             shape.Placement = obj.Placement
-            if self.object_type == "Part::FeaturePython":
+            if self.object_type == "Part":
                 obj.Shape = shape
-            elif self.object_type == "Mesh::FeaturePython":
+            elif self.object_type == "Mesh":
                 obj.Mesh = shape
 
 

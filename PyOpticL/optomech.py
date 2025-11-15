@@ -161,7 +161,7 @@ class bolt:
         ),
     }
 
-    object_type = "Part::FeaturePython"
+    object_type = "Part"
     object_group = "hardware"
     object_icon = ""
     object_color = (0.8, 0.8, 0.8)
@@ -228,7 +228,7 @@ class example_component:
         drill_depth (float) : The depth of the mounting hole
     """
 
-    object_type = "Part::FeaturePython"
+    object_type = "Part"
     object_icon = ""
 
     def __init__(
@@ -277,7 +277,7 @@ class circular_reflector:
         ref_wavelengths (list) : The reflection wavelength ranges
     """
 
-    object_type = "Part::FeaturePython"
+    object_type = "Part"
     object_group = "optic"
     object_icon = ""
     object_color = (0.5, 0.5, 0.8)
@@ -328,7 +328,7 @@ class circular_mirror(circular_reflector):
         thickness (float) : The thickness of the mirror
     """
 
-    object_type = "Part::FeaturePython"
+    object_type = "Part"
     object_group = "optic"
     object_icon = ""
     object_color = (0.5, 0.5, 0.8)
@@ -354,7 +354,7 @@ class circular_sampler(circular_reflector):
         ref_ratio (float) : The reflection ratio of the sampler
     """
 
-    object_type = "Part::FeaturePython"
+    object_type = "Part"
     object_group = "optic"
     object_icon = ""
     object_color = (0.5, 0.5, 0.8)
@@ -384,7 +384,7 @@ class circular_dichroic_mirror(circular_reflector):
         ref_polarization (float) : The reflection polarization ratio of the dichroic mirror
     """
 
-    object_type = "Part::FeaturePython"
+    object_type = "Part"
     object_group = "optic"
     object_icon = ""
     object_color = (0.5, 0.5, 0.8)
@@ -412,7 +412,7 @@ class polarizing_beam_splitter_cube:
         thickness (float) : The thickness of the beam splitter interface
     """
 
-    object_type = "Part::FeaturePython"
+    object_type = "Part"
     object_group = "optic"
     object_icon = ""
     object_color = (0.5, 0.5, 0.8)

@@ -1,4 +1,4 @@
-from unittest import skip
+from __future__ import annotations
 
 import FreeCAD as App
 import numpy as np
@@ -52,15 +52,13 @@ class Beam_Segment(Layout):
     wavelength (float): Wavelength of the beam
     polarization (string): Polarization angle of the beam in radians
     power (float): Power of the beam
-    distance (float): Distance the beam travels in this segment
-    from_global (bool): Whether the beam originated from a global object
     """
 
     def __init__(
         self,
         index: int,
-        position: tuple[float],
-        rotation: App.Rotation,
+        origin: tuple[float],
+        direction: tuple[float],
         waist: float,
         focal_length: float,
         wavelength: float,
@@ -68,21 +66,29 @@ class Beam_Segment(Layout):
         power: float,
     ):
 
+        # calculate rotation from direction vector
+
         super().__init__(
-            f"Beam Segment {index}",
-            position=position,
+            label=f"Beam {bin(index)}",
+            position=origin,
         )
 
-        obj = self.get_object()
-        obj.BasePlacement.Rotation = rotation
-
         self.index = index
+        self.direction = direction
         self.waist = waist
         self.focal_length = focal_length
         self.wavelength = wavelength
         self.polarization = polarization
         self.power = power
-        self.distance = 0
+        self.distance = 0  # to be set during calculation
+
+        # add properties for displaying beam parameters in FreeCAD
+        self.make_property("BeamWaist", "App::PropertyLength", visible=True)
+        self.make_property("FocalLength", "App::PropertyLength", visible=True)
+        self.make_property("Wavelength", "App::PropertyLength", visible=True)
+        self.make_property("PolarizationAngle", "App::PropertyAngle", visible=True)
+        self.make_property("Power", "App::PropertyPower", visible=True)
+        self.make_property("Distance", "App::PropertyLength", visible=True)
 
         self.make_property("ChildObject", "App::PropertyLinkHidden")
         self.make_property("BoundParent", "App::PropertyLinkHidden")
@@ -91,7 +97,6 @@ class Beam_Segment(Layout):
         super().set_parent(parent)
         obj = self.get_object()
         parent_obj = parent.get_object()
-        print(parent_obj.Name, parent_obj.BoundParent)
         obj.BoundParent = parent_obj.BoundParent
 
     def get_constraint_position(
@@ -129,7 +134,7 @@ class Beam_Segment(Layout):
 
         # get origin and direction from object placement
         position = np.array(placement.Base)
-        direction = np.array(placement.Rotation.multVec(App.Vector(1, 0, 0)))
+        direction = np.array(placement.Rotation.multVec(App.Vector(*self.direction)))
 
         # calculate position based on specified constraint
         if distance != None:
@@ -169,8 +174,42 @@ class Beam_Segment(Layout):
 
         obj = self.get_object()
         rotation = obj.Placement.Rotation
-        global_direction = rotation.multVec(App.Vector(1, 0, 0))
+        global_direction = rotation.multVec(App.Vector(*self.direction))
         return np.array(global_direction)
+
+    def get_relative_position(
+        self, global_position: np.ndarray[float]
+    ) -> np.ndarray[float]:
+        """
+        Convert a global position to relative beam coordinates
+
+        Args:
+        global_position (np.ndarray): (x, y, z) coordinates in global frame
+
+        Returns:
+        position (np.ndarray): (x, y, z) coordinates relative to this beam
+        """
+
+        obj = self.get_object()
+        position = obj.Placement.Base
+        return global_position - np.array(position)
+
+    def get_relative_direction(
+        self, global_direction: np.ndarray[float]
+    ) -> np.ndarray[float]:
+        """Convert a global direction to relative beam direction
+
+        Args:
+            global_direction (np.ndarray): (x, y, z) normalized direction vector in global frame
+
+        Returns:
+            direction (np.ndarray): (x, y, z) normalized direction vector relative to this beam
+        """
+
+        obj = self.get_object()
+        rotation = obj.Placement.Rotation
+        relative_direction = rotation.inverted().multVec(App.Vector(*global_direction))
+        return np.array(relative_direction)
 
     def calculate(self):
         """
@@ -178,18 +217,34 @@ class Beam_Segment(Layout):
         """
         super().calculate()
 
-        # generate beam geometry
         obj = self.get_object()
+        if obj.Parent != None and isinstance(obj.Parent.Proxy, Beam_Segment):
+            self.relative_power = (
+                self.power / obj.Parent.Proxy.power
+            ) * obj.Parent.Proxy.relative_power
+        else:
+            self.relative_power = 1.0
+
+        # generate beam geometry
         shape = Part.makeCylinder(
             self.waist / 2,
             self.distance,
             App.Vector(0, 0, 0),
-            App.Vector(1, 0, 0),
+            App.Vector(*self.direction),
         )
         shape.Placement = obj.Placement
         obj.Shape = shape
         obj.ViewObject.ShapeColor = wavelength_to_rgb(self.wavelength)
-        # obj.ViewObject.Transparency = 1.0 - self.power / 10  # arbitrary scaling
+        obj.ViewObject.Transparency = int(100 * (1 - self.relative_power))
+
+        # set property values for display
+        obj.BeamWaist = self.waist
+        obj.Wavelength = App.Units.Quantity(f"{self.wavelength} nm")
+        obj.PolarizationAngle = App.Units.Quantity(f"{self.polarization} rad")
+        obj.Power = App.Units.Quantity(f"{self.power} W")
+        obj.Distance = self.distance
+        if self.focal_length != None:
+            obj.FocalLength = self.focal_length
 
 
 class Beam_Path(Layout):
@@ -203,7 +258,7 @@ class Beam_Path(Layout):
     bound_parent (Layout): parent whose children this beam path should interact with
     """
 
-    object_type = "Part::FeaturePython"  # FreeCAD object type
+    object_type = "Part"  # FreeCAD object type
     object_group = "beam_path"  # group name for management
     object_icon = beam_icon  # icon for tree view
 
@@ -212,7 +267,6 @@ class Beam_Path(Layout):
         label: str,
         position: tuple[float] = (0, 0, 0),
         rotation: tuple[float] = (0, 0, 0),
-        global_rotation: tuple[float] = (0, 0, 0),
         waist: dim = dim(1, "mm"),
         wavelength: float = 635,
         polarization: float = 0,
@@ -221,11 +275,8 @@ class Beam_Path(Layout):
         bound_parent: Layout = None,
     ):
         super().__init__(
-            label,
-            position,
-            global_rotation,
-            relative_position=True,
-            relative_rotation=True,
+            label=label,
+            position=position,
             recompute_priority=-1,
         )
 
@@ -237,7 +288,8 @@ class Beam_Path(Layout):
         self.make_property("BeamChildren", "App::PropertyLinkListHidden")
         self.make_property("BeamSegments", "App::PropertyLinkListHidden")
 
-        self.rotation = rotation
+        rotation = App.Rotation("XYZ", *rotation)
+        self.direction = rotation.multVec(App.Vector(1, 0, 0))
         self.waist = waist
         self.wavelength = wavelength
         self.polarization = polarization
@@ -252,7 +304,6 @@ class Beam_Path(Layout):
         parent_obj = parent.get_object()
         if obj.BoundParent is None:
             obj.BoundParent = parent_obj
-        print(obj.BoundParent)
 
     def add(
         self,
@@ -262,6 +313,7 @@ class Beam_Path(Layout):
         x_position: dim = None,
         y_position: dim = None,
         z_position: dim = None,
+        rotation: tuple = None,
         offset: tuple[dim] = (0, 0),
         interface_index: int = 0,
     ):
@@ -275,6 +327,7 @@ class Beam_Path(Layout):
             x_position (float): x-coordinate of the beam position
             y_position (float): y-coordinate of the beam position
             z_position (float): z-coordinate of the beam position
+            rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
             offset (tuple): (y, z) offset from the center of the interface
             interface_index (int): Index of the interface on the child object to interact with
         """
@@ -299,6 +352,9 @@ class Beam_Path(Layout):
         child.interface_index = interface_index
         child.placed = False
 
+        if rotation is not None:
+            child.Placement.Rotation = App.Rotation("XYZ", *rotation)
+
         return child
 
     def calculate(self):
@@ -311,12 +367,10 @@ class Beam_Path(Layout):
         obj = self.get_object()
 
         if len(obj.BeamSegments) == 0:
-            rotation = App.Rotation("XYZ", *self.rotation)
-            print(rotation.multVec(App.Vector(1, 0, 0)))
             input_beam = Beam_Segment(
                 index=1,
-                position=(0, 0, 0),
-                rotation=rotation,
+                origin=(0, 0, 0),
+                direction=self.direction,
                 waist=self.waist,
                 wavelength=self.wavelength,
                 polarization=self.polarization,
@@ -326,31 +380,20 @@ class Beam_Path(Layout):
             super().add(input_beam)
             obj.BeamSegments += [input_beam.get_object()]
 
-        for child in obj.BeamChildren:
-            child.Proxy.placed = False
-
         # check for loose ends and start simulation from there
-        indices = {child.Proxy.index for child in obj.BeamSegments}
         for beam in obj.BeamSegments:
-            beam.Proxy.calculate()
-            beam.purgeTouched()
-            endpoint = True
-            for index in indices:
-                print(beam.Proxy.index, index, beam.Proxy.index == index >> 1)
-                if beam.Proxy.index == index >> 1:
-                    endpoint = False
-                    break
-            if endpoint:
+            beam.Proxy.recompute()
+            if len(beam.Children) == 0:
                 self.step(beam.Proxy)
                 beam.Proxy.recompute()
-                beam.purgeTouched()
 
     def recompute(self):
         """
         Recompute the beam path layout
         """
         self.calculate()
-        self.get_object().purgeTouched()
+        obj = self.get_object()
+        obj.purgeTouched()
 
     def get_next_global(self, input_beam: Beam_Segment):
         """
@@ -373,7 +416,7 @@ class Beam_Path(Layout):
             proxy = child.Proxy
             # skip beam segments, unplaced beam children, and objects without interfaces
             if not hasattr(proxy, "get_interfaces") or (
-                child in obj.Children and not proxy.placed
+                child in obj.BeamChildren and not proxy.placed
             ):
                 continue
             # check all interfaces of the object
@@ -382,7 +425,7 @@ class Beam_Path(Layout):
                 if intercept is not None:
                     distance = np.linalg.norm(intercept - input_beam_obj.Placement.Base)
                     # find closest intercept
-                    if distance < min_distance or min_distance is None:
+                    if distance < min_distance:
                         min_distance = distance
                         next_object = child
                         next_interface = interface
@@ -409,7 +452,12 @@ class Beam_Path(Layout):
                 break
 
         # get info for next beam child
-        if next_object != None and hasattr(next_object.Proxy, "get_interfaces"):
+        if next_object != None:
+            if not hasattr(next_object.Proxy, "get_interfaces"):
+                raise RuntimeError(
+                    f"Beam child {next_object.Label} does not have any interfaces"
+                )
+
             proxy = next_object.Proxy
             next_position = input_beam.get_constraint_position(
                 proxy.distance,
@@ -425,7 +473,7 @@ class Beam_Path(Layout):
                 index_diff = input_beam.index.bit_length() - beam.index.bit_length()
                 root_index = beam.index >> index_diff
                 if (
-                    beam.get_object().ChildObject not in obj.BeamChildren
+                    beam_obj.ChildObject not in obj.BeamChildren
                     and root_index == input_beam.index
                 ):
                     previous_distance += beam.distance
@@ -457,8 +505,7 @@ class Beam_Path(Layout):
         """
 
         obj = self.get_object()
-
-        print(f"Stepping beam {input_beam.index}")
+        beam_obj = input_beam.get_object()
 
         # get next global object
         next_global = self.get_next_global(input_beam)
@@ -474,34 +521,30 @@ class Beam_Path(Layout):
 
         if global_distance < child_distance:
             next_object, next_interface, next_distance = next_global
-            print(f"Next global object: {next_object.Name} at distance {next_distance}")
         else:
             next_object, next_interface, next_distance = next_child
-            print(f"Next child object: {next_object.Name} at distance {next_distance}")
 
-            # place the object at the correct position
+            # get object placement
             intercept = input_beam.get_constraint_position(distance=next_distance)
-            # intercept -= obj.Placement.Base  # convert to local coordinates
+            intercept -= obj.Placement.Base  # convert to local coordinates
             object_rotation = next_object.Placement.Rotation
-            rotated_offset = object_rotation.multVec(
-                App.Vector(0, *next_object.Proxy.offset)
-            )
-            object_position = intercept - next_interface.position + rotated_offset
+            offset = object_rotation.multVec(App.Vector(0, *next_object.Proxy.offset))
+            object_position = intercept - next_interface.position + offset
+            # apply placement
             next_object.BasePlacement.Base = App.Vector(*object_position)
             next_object.Proxy.placed = True
             next_object.Proxy.recompute()
 
         # get output beams from interaction
         input_beam.distance = next_distance
-        input_beam.get_object().ChildObject = next_object
+        beam_obj.ChildObject = next_object
         output_beams = next_interface.get_beams(input_beam)
-        input_beam.get_object().purgeTouched()
+        input_beam.recompute()
         for beam in output_beams:
             input_beam.add(beam)
-            beam_obj = beam.get_object()
-            obj.BeamSegments += [beam_obj]
-            beam.calculate()
-            beam_obj.purgeTouched()
+            new_beam_obj = beam.get_object()
+            obj.BeamSegments += [new_beam_obj]
+            beam.recompute()
             self.step(beam)
 
 
@@ -618,7 +661,6 @@ class Interface:
             if abs(offset_vec[0]) > self.dx / 2 or abs(offset_vec[1]) > self.dy / 2:
                 return None
 
-        print(f"Beam intercept at {intercept}")
         return intercept
 
 
@@ -688,7 +730,6 @@ class Reflection(Interface):
         """
 
         global_normal = self.get_global_normal()
-        beam_position = incident_beam.get_global_position()
         beam_direction = incident_beam.get_global_direction()
         intercept = self.get_intercept(incident_beam)
 
@@ -725,7 +766,7 @@ class Reflection(Interface):
 
         output_beams = []
 
-        local_origin = intercept - beam_position
+        local_origin = incident_beam.get_relative_position(intercept)
 
         # generate transmitted beam
         if transmit_ratio > 0:
@@ -733,10 +774,11 @@ class Reflection(Interface):
                 index = incident_beam.index << 1  # handle beam splitting
             else:
                 index = incident_beam.index
+            direction = incident_beam.get_relative_direction(beam_direction)
             transmitted_beam = Beam_Segment(
                 index=index,
-                position=local_origin,
-                rotation=(0, 0, 0),
+                origin=local_origin,
+                direction=direction,
                 waist=incident_beam.waist,
                 focal_length=incident_beam.focal_length,
                 wavelength=incident_beam.wavelength,
@@ -752,14 +794,15 @@ class Reflection(Interface):
             else:
                 index = incident_beam.index
 
-            rot_axis = np.cross(-beam_direction, global_normal)
-            rot_angle = np.arccos(np.dot(-beam_direction, global_normal)) * 2
-            rotation = App.Rotation(App.Vector(*rot_axis), Radian=np.pi + rot_angle)
-            print(local_origin)
+            direction = (
+                beam_direction
+                - 2 * np.dot(beam_direction, global_normal) * global_normal
+            )
+            local_direction = incident_beam.get_relative_direction(direction)
             reflect_beam = Beam_Segment(
                 index=index,
-                position=local_origin,
-                rotation=rotation,
+                origin=local_origin,
+                direction=local_direction,
                 waist=incident_beam.waist,
                 focal_length=incident_beam.focal_length,
                 wavelength=incident_beam.wavelength,

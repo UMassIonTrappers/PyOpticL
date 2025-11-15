@@ -11,9 +11,8 @@ print("Created layout")
 beam_path = example_layout.add(
     Beam_Path(
         label="Beam Path",
-        position=(0, 0, 0),
-        rotation=(0, 0, 10),
-        global_rotation=(0, 0, 0),
+        position=(10, 20, 0),
+        rotation=(0, 0, 60),
         waist=dim(2, "mm"),
         wavelength=350,
     )
@@ -30,22 +29,22 @@ beam_path.add(
         rotation=(0, 0, -135),
     ),
     beam_index=1,
-    distance=dim(100, "mm"),
+    distance=dim(150, "mm"),
 )
 
 print("Added first mirror")
 
-# beam_path.add(
-#     Component(
-#         label="Mirror 2",
-#         definition=optomech.circular_sampler(
-#             ref_ratio=0.25,
-#             diameter=dim(1, "in"),
-#         ),
-#         rotation=(0, 0, -135),
-#     ),
-#     beam_index=1,
-#     distance=dim(100, "mm"),
-# )
+beam_path.add(
+    Component(
+        label="Mirror 2",
+        definition=optomech.circular_sampler(
+            ref_ratio=0.25,
+            diameter=dim(1, "in"),
+        ),
+        rotation=(0, 0, 45),
+    ),
+    beam_index=1,
+    distance=dim(100, "mm"),
+)
 
 example_layout.recompute()
