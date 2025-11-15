@@ -56,8 +56,6 @@ class Layout:
     def __init__(
         self,
         label: str,
-        position: tuple = None,
-        rotation: tuple = None,
         recompute_priority: int = 0,
     ):
 
@@ -77,10 +75,6 @@ class Layout:
         # setup placement properties
         self.make_property("Placement", "App::PropertyPlacement")
         self.make_property("BasePlacement", "App::PropertyPlacement", visible=True)
-        if position is not None:
-            obj.BasePlacement.Base = App.Vector(*position)
-        if rotation is not None:
-            obj.BasePlacement.Rotation = App.Rotation("XYZ", *rotation)
 
         # initialize parent and children properties
         self.make_property("Parent", "App::PropertyLinkHidden")
@@ -112,8 +106,8 @@ class Layout:
     def add(
         self,
         child: Layout,
-        position: tuple = None,
-        rotation: tuple = None,
+        position: tuple,
+        rotation: tuple,
     ) -> Layout:
         """Add a child object to this component
 
@@ -132,17 +126,9 @@ class Layout:
         obj.Children += [child_obj]
         child.set_parent(self)
 
-        if (position is not None) ^ (rotation is not None):
-            raise RuntimeError("Must specify both position and rotation to override")
-
-        if position is not None and rotation is not None:
-            if child_obj.BasePlacement is not None:
-                raise RuntimeWarning(
-                    f"Overriding existing placement for {child_obj.Label}, avoid setting placement in both constructor and add()"
-                )
-
-            child_obj.BasePlacement.Base = App.Vector(*position)
-            child_obj.BasePlacement.Rotation = App.Rotation("XYZ", *rotation)
+        child_obj.BasePlacement = App.Placement(
+            App.Vector(*position), App.Rotation("XYZ", *rotation)
+        )
 
         return child
 
@@ -150,9 +136,6 @@ class Layout:
         """Calculate global placement of object"""
 
         obj = self.get_object()
-
-        if obj.BasePlacement is None:
-            raise RuntimeError(f"Placement never defined for {obj.Label}")
 
         # calculate final placement
         obj.Placement = obj.BasePlacement
@@ -208,15 +191,11 @@ class Component(Layout):
         self,
         label: str,
         definition: object,
-        position: tuple = (0, 0, 0),
-        rotation: tuple = (0, 0, 0),
         recompute_priority: int = 0,
     ):
 
         super().__init__(
             label,
-            position,
-            rotation,
             recompute_priority,
         )
 
@@ -258,8 +237,8 @@ class Component(Layout):
 
         # add any sub-components defined in the template
         if hasattr(definition, "get_components"):
-            for comp in definition.get_components():
-                self.add(comp)
+            for comp, placement in definition.get_components():
+                self.add(comp, **placement)
 
     def calculate(self):
         """Calculate global placement of object and update shape"""

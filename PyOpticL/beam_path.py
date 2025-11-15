@@ -57,7 +57,6 @@ class Beam_Segment(Layout):
     def __init__(
         self,
         index: int,
-        origin: tuple[float],
         direction: tuple[float],
         waist: float,
         focal_length: float,
@@ -70,7 +69,6 @@ class Beam_Segment(Layout):
 
         super().__init__(
             label=f"Beam {bin(index)}",
-            position=origin,
         )
 
         self.index = index
@@ -98,6 +96,16 @@ class Beam_Segment(Layout):
         obj = self.get_object()
         parent_obj = parent.get_object()
         obj.BoundParent = parent_obj.BoundParent
+
+    def add(self, child: Layout, origin: tuple = (0, 0, 0)):
+        """
+        Add a child beam segment to this beam
+
+        Args:
+        child (Beam_Segment): Child beam segment to add
+        """
+
+        super().add(child, position=origin, rotation=(0, 0, 0))
 
     def get_constraint_position(
         self,
@@ -265,8 +273,6 @@ class Beam_Path(Layout):
     def __init__(
         self,
         label: str,
-        position: tuple[float] = (0, 0, 0),
-        rotation: tuple[float] = (0, 0, 0),
         waist: dim = dim(1, "mm"),
         wavelength: float = 635,
         polarization: float = 0,
@@ -276,7 +282,6 @@ class Beam_Path(Layout):
     ):
         super().__init__(
             label=label,
-            position=position,
             recompute_priority=-1,
         )
 
@@ -288,8 +293,6 @@ class Beam_Path(Layout):
         self.make_property("BeamChildren", "App::PropertyLinkListHidden")
         self.make_property("BeamSegments", "App::PropertyLinkListHidden")
 
-        rotation = App.Rotation("XYZ", *rotation)
-        self.direction = rotation.multVec(App.Vector(1, 0, 0))
         self.waist = waist
         self.wavelength = wavelength
         self.polarization = polarization
@@ -309,11 +312,11 @@ class Beam_Path(Layout):
         self,
         child: Layout,
         beam_index: int,
+        rotation: tuple,
         distance: dim = None,
         x_position: dim = None,
         y_position: dim = None,
         z_position: dim = None,
-        rotation: tuple = None,
         offset: tuple[dim] = (0, 0),
         interface_index: int = 0,
     ):
@@ -332,7 +335,7 @@ class Beam_Path(Layout):
             interface_index (int): Index of the interface on the child object to interact with
         """
 
-        super().add(child)
+        super().add(child, position=(0, 0, 0), rotation=rotation)
 
         obj = self.get_object()
         obj.BeamChildren += [child.get_object()]
@@ -352,9 +355,6 @@ class Beam_Path(Layout):
         child.interface_index = interface_index
         child.placed = False
 
-        if rotation is not None:
-            child.Placement.Rotation = App.Rotation("XYZ", *rotation)
-
         return child
 
     def calculate(self):
@@ -366,18 +366,24 @@ class Beam_Path(Layout):
 
         obj = self.get_object()
 
+        # reset rotation so that child placements are correct
+        if obj.Parent != None:
+            obj.Placement.Rotation = obj.Parent.Placement.Rotation
+        else:
+            obj.Placement.Rotation = App.Rotation("XYZ", 0, 0, 0)
+
         if len(obj.BeamSegments) == 0:
+            direction = obj.BasePlacement.Rotation.multVec(App.Vector(1, 0, 0))
             input_beam = Beam_Segment(
                 index=1,
-                origin=(0, 0, 0),
-                direction=self.direction,
+                direction=direction,
                 waist=self.waist,
                 wavelength=self.wavelength,
                 polarization=self.polarization,
                 power=self.power,
                 focal_length=self.focal_length,
             )
-            super().add(input_beam)
+            super().add(input_beam, position=(0, 0, 0), rotation=(0, 0, 0))
             obj.BeamSegments += [input_beam.get_object()]
 
         # check for loose ends and start simulation from there
@@ -541,7 +547,6 @@ class Beam_Path(Layout):
         output_beams = next_interface.get_beams(input_beam)
         input_beam.recompute()
         for beam in output_beams:
-            input_beam.add(beam)
             new_beam_obj = beam.get_object()
             obj.BeamSegments += [new_beam_obj]
             beam.recompute()
@@ -777,7 +782,6 @@ class Reflection(Interface):
             direction = incident_beam.get_relative_direction(beam_direction)
             transmitted_beam = Beam_Segment(
                 index=index,
-                origin=local_origin,
                 direction=direction,
                 waist=incident_beam.waist,
                 focal_length=incident_beam.focal_length,
@@ -785,6 +789,7 @@ class Reflection(Interface):
                 polarization=transmit_polarization,
                 power=incident_beam.power * transmit_ratio,
             )
+            incident_beam.add(transmitted_beam, origin=local_origin)
             output_beams.append(transmitted_beam)
 
         # generate reflected beam
@@ -801,7 +806,6 @@ class Reflection(Interface):
             local_direction = incident_beam.get_relative_direction(direction)
             reflect_beam = Beam_Segment(
                 index=index,
-                origin=local_origin,
                 direction=local_direction,
                 waist=incident_beam.waist,
                 focal_length=incident_beam.focal_length,
@@ -809,6 +813,7 @@ class Reflection(Interface):
                 polarization=reflect_polarization,
                 power=incident_beam.power * reflect_ratio,
             )
+            incident_beam.add(reflect_beam, origin=local_origin)
             output_beams.append(reflect_beam)
 
         return output_beams

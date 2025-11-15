@@ -245,11 +245,12 @@ class example_component:
     def get_components(self):
         """Define any sub-components"""
         components = [
-            Component(
-                "Mounting Bolt",
-                bolt("8_32", length=self.height + self.drill_depth),
-                position=(0, 0, 0),
-                rotation=(0, 0, 0),
+            (
+                Component(
+                    "Mounting Bolt",
+                    bolt("8_32", length=self.height + self.drill_depth),
+                ),
+                dict(position=(0, 0, 0), rotation=(0, 0, 0)),
             )
         ]
         return components

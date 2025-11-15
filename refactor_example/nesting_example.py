@@ -18,7 +18,7 @@ def nesting_example():
 
     layout.add(
         example_layout(),
-        position=(dim(20, "in"), dim(10, "in"), 0),
+        position=(dim(4, "in"), dim(4, "in"), 0),
         rotation=(0, 0, 90),
     )
 

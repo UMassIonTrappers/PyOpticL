@@ -17,45 +17,33 @@ def example_layout():
     sub_layout = layout.add(
         Layout(
             label="Sub-Layout",
-            position=(50, 0, 0),
-            rotation=(0, 0, -90),
-        )
+        ),
+        position=(50, 0, 0),
+        rotation=(0, 0, -90),
     )
 
     layout.add(
-        Component(
-            label="Example Component 1",
-            definition=example_component,
-            position=(0, 0, 0),
-            rotation=(0, 0, 0),
-        )
+        Component(label="Example Component 1", definition=example_component),
+        position=(0, 0, 0),
+        rotation=(0, 0, 0),
     )
 
     layout.add(
-        Component(
-            label="Example Component 2",
-            definition=example_component,
-            position=(0, 20, 0),
-            rotation=(0, 0, 0),
-        )
+        Component(label="Example Component 2", definition=example_component),
+        position=(0, 20, 0),
+        rotation=(0, 0, 0),
     )
 
     sub_layout.add(
-        Component(
-            label="Example Component 3",
-            definition=example_component,
-            position=(0, 0, 0),
-            rotation=(0, 0, 0),
-        )
+        Component(label="Example Component 3", definition=example_component),
+        position=(0, 0, 0),
+        rotation=(0, 0, 0),
     )
 
     sub_layout.add(
-        Component(
-            label="Example Component 4",
-            definition=example_component,
-            position=(0, 20, 0),
-            rotation=(0, 0, 0),
-        )
+        Component(label="Example Component 4", definition=example_component),
+        position=(0, 20, 0),
+        rotation=(0, 0, 0),
     )
 
     return layout
