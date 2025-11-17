@@ -2,7 +2,7 @@ import FreeCAD as App
 import numpy as np
 import Part
 
-from PyOpticL.beam_path import Reflection
+from PyOpticL.beam_path import Lens, Reflection
 from PyOpticL.layout import Component
 from PyOpticL.layout import Dimension as dim
 
@@ -402,6 +402,53 @@ class circular_dichroic_mirror(circular_reflector):
             thickness=thickness,
             ref_wavelengths=ref_wavelengths,
         )
+
+
+class spherical_lens:
+    """
+    A spherical lens component
+
+    Args:
+        diameter (float) : The diameter of the lens
+        thickness (float) : The thickness of the lens
+        focal_length (float) : The focal length of the lens
+    """
+
+    object_type = "Part"
+    object_group = "optic"
+    object_icon = ""
+    object_color = (0.5, 0.5, 0.8)
+    object_transparency = 75
+
+    def __init__(
+        self,
+        diameter: dim = dim(0.5, "in"),
+        thickness: dim = dim(2, "mm"),
+        focal_length: dim = dim(50, "mm"),
+    ):
+        self.diameter = diameter
+        self.thickness = thickness
+        self.focal_length = focal_length
+
+    def get_interfaces(self):
+        interfaces = [
+            Lens(
+                position=(0, 0, 0),
+                rotation=(0, 0, 0),
+                diameter=self.diameter,
+                focal_length=self.focal_length,
+            )
+        ]
+        return interfaces
+
+    def get_shape(self):
+        part = custom_cylinder(
+            diameter=self.diameter,
+            height=self.thickness,
+            position=(-self.thickness / 2, 0, 0),
+            direction=(1, 0, 0),
+        )
+        return part
 
 
 class polarizing_beam_splitter_cube:

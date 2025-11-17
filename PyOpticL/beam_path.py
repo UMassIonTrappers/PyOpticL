@@ -48,10 +48,10 @@ class Beam_Segment(Layout):
     position (tuple): (x, y, z) coordinates
     direction (tuple): (x, y, z) normalized direction vector
     waist (float): Beam waist
-    focal_length (float): Focal length of the beam
     wavelength (float): Wavelength of the beam
     polarization (string): Polarization angle of the beam in radians
     power (float): Power of the beam
+    focal_rate (float): Focal rate of beam (waist / focal length)
     """
 
     def __init__(
@@ -59,30 +59,28 @@ class Beam_Segment(Layout):
         index: int,
         direction: tuple[float],
         waist: float,
-        focal_length: float,
         wavelength: float,
         polarization: float,
         power: float,
+        focal_rate: float,
     ):
-
-        # calculate rotation from direction vector
 
         super().__init__(
             label=f"Beam {bin(index)}",
         )
 
         self.index = index
-        self.direction = direction
+        self.direction = tuple(direction)
         self.waist = waist
-        self.focal_length = focal_length
         self.wavelength = wavelength
         self.polarization = polarization
         self.power = power
-        self.distance = 0  # to be set during calculation
+        self.focal_rate = focal_rate
+        self.distance = 0  # to be set during path calculation
 
         # add properties for displaying beam parameters in FreeCAD
         self.make_property("BeamWaist", "App::PropertyLength", visible=True)
-        self.make_property("FocalLength", "App::PropertyLength", visible=True)
+        self.make_property("FocalLength", "App::PropertyDistance", visible=True)
         self.make_property("Wavelength", "App::PropertyLength", visible=True)
         self.make_property("PolarizationAngle", "App::PropertyAngle", visible=True)
         self.make_property("Power", "App::PropertyPower", visible=True)
@@ -233,13 +231,44 @@ class Beam_Segment(Layout):
         else:
             self.relative_power = 1.0
 
-        # generate beam geometry
-        shape = Part.makeCylinder(
-            self.waist / 2,
-            self.distance,
-            App.Vector(0, 0, 0),
-            App.Vector(*self.direction),
-        )
+        # generate segment shape
+        if np.isclose(self.focal_rate, 0):
+            focal_length = 0
+            shape = Part.makeCylinder(
+                self.waist / 2,
+                self.distance,
+                App.Vector(0, 0, 0),
+                App.Vector(*self.direction),
+            )
+        else:
+            # use conical sections to represent focusing/defocusing beams
+            start_diameter = self.waist
+            end_diameter = self.waist - self.distance * self.focal_rate
+            focal_length = self.waist / self.focal_rate
+            if self.distance > focal_length > 0:
+                distance = focal_length
+            else:
+                distance = self.distance
+            shape = Part.makeCone(
+                start_diameter / 2,
+                max(end_diameter / 2, 0),
+                distance,
+                App.Vector(0, 0, 0),
+                App.Vector(*self.direction),
+            )
+            # add cone for remaining distance if focal point is within segment
+            if end_diameter < 0 and not np.isclose(end_diameter, 0):
+                shape = shape.fuse(
+                    Part.makeCone(
+                        0,
+                        -end_diameter / 2,
+                        self.distance - focal_length,
+                        distance * App.Vector(*self.direction),
+                        App.Vector(*self.direction),
+                    )
+                )
+
+        # apply placement and set shape
         shape.Placement = obj.Placement
         obj.Shape = shape
         obj.ViewObject.ShapeColor = wavelength_to_rgb(self.wavelength)
@@ -251,8 +280,7 @@ class Beam_Segment(Layout):
         obj.PolarizationAngle = App.Units.Quantity(f"{self.polarization} rad")
         obj.Power = App.Units.Quantity(f"{self.power} W")
         obj.Distance = self.distance
-        if self.focal_length != None:
-            obj.FocalLength = self.focal_length
+        obj.FocalLength = focal_length
 
 
 class Beam_Path(Layout):
@@ -374,6 +402,10 @@ class Beam_Path(Layout):
 
         if len(obj.BeamSegments) == 0:
             direction = obj.BasePlacement.Rotation.multVec(App.Vector(1, 0, 0))
+            if self.focal_length != None:
+                focal_rate = self.waist / self.focal_length
+            else:
+                focal_rate = 0
             input_beam = Beam_Segment(
                 index=1,
                 direction=direction,
@@ -381,14 +413,14 @@ class Beam_Path(Layout):
                 wavelength=self.wavelength,
                 polarization=self.polarization,
                 power=self.power,
-                focal_length=self.focal_length,
+                focal_rate=focal_rate,
             )
             super().add(input_beam, position=(0, 0, 0), rotation=(0, 0, 0))
             obj.BeamSegments += [input_beam.get_object()]
 
         # check for loose ends and start simulation from there
         for beam in obj.BeamSegments:
-            beam.Proxy.recompute()
+            Layout.calculate(beam.Proxy)
             if len(beam.Children) == 0:
                 self.step(beam.Proxy)
                 beam.Proxy.recompute()
@@ -533,6 +565,7 @@ class Beam_Path(Layout):
             # get object placement
             intercept = input_beam.get_constraint_position(distance=next_distance)
             intercept -= obj.Placement.Base  # convert to local coordinates
+            Layout.calculate(next_object.Proxy)  # update placement
             object_rotation = next_object.Placement.Rotation
             offset = object_rotation.multVec(App.Vector(0, *next_object.Proxy.offset))
             object_position = intercept - next_interface.position + offset
@@ -544,12 +577,11 @@ class Beam_Path(Layout):
         # get output beams from interaction
         input_beam.distance = next_distance
         beam_obj.ChildObject = next_object
-        output_beams = next_interface.get_beams(input_beam)
-        input_beam.recompute()
+        output_beams = next_interface.get_output_beams(input_beam)
         for beam in output_beams:
             new_beam_obj = beam.get_object()
             obj.BeamSegments += [new_beam_obj]
-            beam.recompute()
+            Layout.calculate(beam)
             self.step(beam)
 
 
@@ -564,6 +596,7 @@ class Interface:
         dx (float): x-dimension for rectangular interface
         dy (float): y-dimension for rectangular interface
         max_angle (float): Maximum angle between incident beam and interface normal in degrees
+        single_sided (bool): Whether the interface only interacts with beams from one side
     """
 
     def __init__(
@@ -574,6 +607,7 @@ class Interface:
         dx: dim = None,
         dy: dim = None,
         max_angle: float = 90,
+        single_sided: bool = False,
     ):
         self.position = np.array(position)
 
@@ -593,6 +627,7 @@ class Interface:
             raise ValueError("Either radius or dx and dy must be specified")
 
         self.max_angle = max_angle
+        self.single_sided = single_sided
         self.parent = None  # to be set when initialized in parent object
 
     def get_global_position(self) -> np.ndarray[float]:
@@ -637,22 +672,32 @@ class Interface:
         beam_position = incident_beam.get_global_position()
         beam_direction = incident_beam.get_global_direction()
 
+        print(f"Checking intercept with interface at {global_position}")
+
         # check if beam is within max angle
-        incident_angle = np.arccos(np.dot(global_normal, -beam_direction))
+        incident_angle = abs(
+            np.arccos(np.clip(np.dot(global_normal, -beam_direction), -1, 1))
+        )
+        if not self.single_sided and incident_angle > np.pi / 2:
+            incident_angle -= np.pi
         if incident_angle > np.deg2rad(self.max_angle):
+            print("Beam exceeds max angle for interface")
             return None
 
         denom = np.dot(global_normal, beam_direction)
         # check if beam is parallel to interface
         if np.abs(denom) < 1e-6:
+            print("Beam is parallel to interface")
             return None
 
         distance = np.dot(global_normal, global_position - beam_position) / denom
         # check if intercept is behind beam origin
         if distance < 0:
+            print("Intercept is behind beam origin")
             return None
         # check if intercept is too close to origin
         if -1e-6 < distance < 1e-6:
+            print("Intercept is too close to origin")
             return None
 
         intercept = beam_position + distance * beam_direction
@@ -686,6 +731,7 @@ class Reflection(Interface):
         dx (float): x-distance for rectangular interface
         dy (float): y-distance for rectangular interface
         max_angle (float): Maximum angle between incident beam and interface normal in degrees
+        single_sided (bool): Whether the interface only interacts with beams from one side
     """
 
     def __init__(
@@ -699,7 +745,18 @@ class Reflection(Interface):
         dx: dim = None,
         dy: dim = None,
         max_angle: float = 90,
+        single_sided: bool = False,
     ):
+
+        super().__init__(
+            position=position,
+            rotation=rotation,
+            diameter=diameter,
+            dx=dx,
+            dy=dy,
+            max_angle=max_angle,
+            single_sided=single_sided,
+        )
 
         if (ref_ratio != None and ref_ratio != 1) + (ref_polarization != None) + (
             ref_wavelengths != None
@@ -721,9 +778,7 @@ class Reflection(Interface):
         else:
             self.type = "mirror"
 
-        super().__init__(position, rotation, diameter, dx, dy, max_angle)
-
-    def get_beams(self, incident_beam: Beam_Segment):
+    def get_output_beams(self, incident_beam: Beam_Segment) -> list[Beam_Segment]:
         """
         Get the output beams from an incident beam interacting with the interface
 
@@ -769,9 +824,12 @@ class Reflection(Interface):
             transmit_polarization = incident_beam.polarization
             reflect_polarization = incident_beam.polarization
 
-        output_beams = []
-
         local_origin = incident_beam.get_relative_position(intercept)
+        waist = incident_beam.waist - incident_beam.distance * incident_beam.focal_rate
+        focal_rate = incident_beam.focal_rate * np.sign(waist)
+        waist = abs(waist)
+
+        output_beams = []
 
         # generate transmitted beam
         if transmit_ratio > 0:
@@ -783,11 +841,11 @@ class Reflection(Interface):
             transmitted_beam = Beam_Segment(
                 index=index,
                 direction=direction,
-                waist=incident_beam.waist,
-                focal_length=incident_beam.focal_length,
+                waist=waist,
                 wavelength=incident_beam.wavelength,
                 polarization=transmit_polarization,
                 power=incident_beam.power * transmit_ratio,
+                focal_rate=focal_rate,
             )
             incident_beam.add(transmitted_beam, origin=local_origin)
             output_beams.append(transmitted_beam)
@@ -807,16 +865,115 @@ class Reflection(Interface):
             reflect_beam = Beam_Segment(
                 index=index,
                 direction=local_direction,
-                waist=incident_beam.waist,
-                focal_length=incident_beam.focal_length,
+                waist=waist,
                 wavelength=incident_beam.wavelength,
                 polarization=reflect_polarization,
                 power=incident_beam.power * reflect_ratio,
+                focal_rate=focal_rate,
             )
             incident_beam.add(reflect_beam, origin=local_origin)
             output_beams.append(reflect_beam)
 
         return output_beams
+
+
+class Lens(Interface):
+    """
+    Base class for lens interface
+    Supports spherical lenses using thin lens approximation
+
+    Args:
+        position (tuple): (x, y, z) coordinates
+        rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
+        focal_length (float): Focal length of the lens
+        diameter (float): Diameter for circular interface
+        max_angle (float): Maximum angle between incident beam and interface normal in degrees
+        single_sided (bool): Whether the interface is single-sided
+    """
+
+    def __init__(
+        self,
+        position: tuple,
+        rotation: tuple,
+        focal_length: float,
+        diameter: dim = None,
+        max_angle: float = 90,
+        single_sided: bool = False,
+    ):
+
+        super().__init__(
+            position=position,
+            rotation=rotation,
+            diameter=diameter,
+            max_angle=max_angle,
+            single_sided=single_sided,
+        )
+
+        self.focal_length = focal_length
+
+    def get_output_beams(self, incident_beam: Beam_Segment) -> list[Beam_Segment]:
+
+        global_normal = self.get_global_normal()
+        beam_direction = incident_beam.get_global_direction()
+        intercept = self.get_intercept(incident_beam)
+
+        if intercept is None:
+            return []
+
+        local_origin = incident_beam.get_relative_position(intercept)
+        waist = incident_beam.waist - incident_beam.distance * incident_beam.focal_rate
+        if np.isclose(incident_beam.focal_rate, 0):
+            focal_rate = waist / self.focal_length
+        else:
+            incident_focal_length = incident_beam.waist / incident_beam.focal_rate
+            denom = incident_focal_length + self.focal_length - incident_beam.distance
+            if np.isclose(denom, 0):
+                focal_rate = 0
+            else:
+                focal_length = (
+                    incident_focal_length
+                    * self.focal_length
+                    / (
+                        incident_focal_length
+                        + self.focal_length
+                        - incident_beam.distance
+                    )
+                )
+                focal_rate = waist / focal_length
+        waist = abs(waist)
+
+        # calculate beam rotation using thin lens approximation
+        radial_vector = intercept - self.get_global_position()
+        if np.isclose(np.linalg.norm(radial_vector), 0):
+            direction = beam_direction
+        else:
+            normal_component = np.dot(beam_direction, global_normal)
+            radial_direction = radial_vector / np.linalg.norm(radial_vector)
+            tangent_direction = np.cross(radial_direction, global_normal)
+            tangent_component = np.dot(beam_direction, tangent_direction)
+            tangent_slope = tangent_component / normal_component
+            radial_slope = np.dot(beam_direction, radial_direction) / normal_component
+            radial_slope -= np.linalg.norm(radial_vector) / self.focal_length
+
+            direction = global_normal * normal_component
+            direction += tangent_direction * tangent_slope * normal_component
+            direction += radial_direction * radial_slope * normal_component
+            direction /= np.linalg.norm(direction)
+
+        local_direction = incident_beam.get_relative_direction(direction)
+
+        output_beam = Beam_Segment(
+            index=incident_beam.index,
+            direction=local_direction,
+            waist=waist,
+            wavelength=incident_beam.wavelength,
+            polarization=incident_beam.polarization,
+            power=incident_beam.power,
+            focal_rate=focal_rate,
+        )
+        incident_beam.add(output_beam, origin=local_origin)
+
+        return [output_beam]
 
 
 class Diffraction(Interface):
@@ -849,4 +1006,12 @@ class Diffraction(Interface):
     ):
 
         # TODO finish this
-        super().__init__(position, rotation, radius, dx, dy, max_angle)
+        super().__init__(
+            position=position,
+            rotation=rotation,
+            radius=radius,
+            dx=dx,
+            dy=dy,
+            max_angle=max_angle,
+            single_sided=False,
+        )

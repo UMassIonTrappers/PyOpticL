@@ -195,8 +195,8 @@ class Component(Layout):
     ):
 
         super().__init__(
-            label,
-            recompute_priority,
+            label=label,
+            recompute_priority=recompute_priority,
         )
 
         # Define attributes to override using the component definition
