@@ -3,35 +3,9 @@ import numpy as np
 import Part
 
 from PyOpticL.beam_path import Lens, Reflection
+from PyOpticL.icons import beam_icon, optic_icon, thorlabs_icon
 from PyOpticL.layout import Component
 from PyOpticL.layout import Dimension as dim
-
-thorlabs_icon = """
-    /* XPM */
-    static char *_e94ebdf19f64588ceeb5b5397743c6amoxjrynTrPg9Fk5U[] = {
-    /* columns rows colors chars-per-pixel */
-    "16 16 2 1 ",
-    "  c None",
-    "& c red",
-    /* pixels */
-    "                ",
-    "  &&&&&&&&&&&&  ",
-    "  &&&&&&&&&&&&  ",
-    "  &&&&&&&&&&&&  ",
-    "  &&&&&&&&&&&&  ",
-    "      &&&&      ",
-    "      &&&&      ",
-    "      &&&&      ",
-    "      &&&&      ",
-    "      &&&&      ",
-    "      &&&&      ",
-    "      &&&&      ",
-    "      &&&&      ",
-    "      &&&&      ",
-    "      &&&&      ",
-    "                "
-    };
-    """
 
 
 def custom_box(
@@ -280,7 +254,7 @@ class circular_reflector:
 
     object_type = "Part"
     object_group = "optic"
-    object_icon = ""
+    object_icon = optic_icon
     object_color = (0.5, 0.5, 0.8)
 
     def __init__(
@@ -329,11 +303,6 @@ class circular_mirror(circular_reflector):
         thickness (float) : The thickness of the mirror
     """
 
-    object_type = "Part"
-    object_group = "optic"
-    object_icon = ""
-    object_color = (0.5, 0.5, 0.8)
-
     def __init__(
         self,
         diameter: dim = dim(0.5, "in"),
@@ -354,11 +323,6 @@ class circular_sampler(circular_reflector):
         thickness (float) : The thickness of the sampler
         ref_ratio (float) : The reflection ratio of the sampler
     """
-
-    object_type = "Part"
-    object_group = "optic"
-    object_icon = ""
-    object_color = (0.5, 0.5, 0.8)
 
     def __init__(
         self,
@@ -385,10 +349,6 @@ class circular_dichroic_mirror(circular_reflector):
         ref_polarization (float) : The reflection polarization ratio of the dichroic mirror
     """
 
-    object_type = "Part"
-    object_group = "optic"
-    object_icon = ""
-    object_color = (0.5, 0.5, 0.8)
     object_transparency = 25
 
     def __init__(
@@ -416,7 +376,7 @@ class spherical_lens:
 
     object_type = "Part"
     object_group = "optic"
-    object_icon = ""
+    object_icon = optic_icon
     object_color = (0.5, 0.5, 0.8)
     object_transparency = 75
 
@@ -462,8 +422,9 @@ class polarizing_beam_splitter_cube:
 
     object_type = "Part"
     object_group = "optic"
-    object_icon = ""
+    object_icon = optic_icon
     object_color = (0.5, 0.5, 0.8)
+    object_transparency = 75
 
     def __init__(
         self,
@@ -477,7 +438,7 @@ class polarizing_beam_splitter_cube:
         interfaces = [
             Reflection(
                 position=(0, 0, 0),
-                rotation=(0, 45, 0),
+                rotation=(0, 0, 45),
                 dx=self.size * np.sqrt(2),
                 dy=self.size * np.sqrt(2),
                 ref_polarization=self.ref_polarization,
@@ -489,7 +450,15 @@ class polarizing_beam_splitter_cube:
         part = custom_box(
             dimensions=(self.size, self.size, self.size),
             position=(0, 0, 0),
-            direction=(0, 0, -1),
+            direction=(0, 0, 0),
         )
+        diag = self.size * np.sqrt(2)
+        gap = custom_box(
+            dimensions=(0.1, diag, diag),
+            position=(0, 0, 0),
+            direction=(0, 0, 0),
+        )
+        gap.rotate(App.Vector(0, 0, 0), App.Vector(0, 0, 1), 45)
+        part = part.cut(gap)
 
         return part

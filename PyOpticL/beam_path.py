@@ -4,40 +4,10 @@ import FreeCAD as App
 import numpy as np
 import Part
 
+from PyOpticL.icons import beam_icon
 from PyOpticL.layout import Dimension as dim
 from PyOpticL.layout import Layout
 from PyOpticL.utils import collect_children, wavelength_to_rgb
-
-beam_icon = """
-        /* XPM */
-        static char *_0ddddfe6a2d42f3d616a62ec3bb0f7c8Jp52mHVQRFtBmFY[] = {
-        /* columns rows colors chars-per-pixel */
-        "16 16 6 1 ",
-        "  c #ED1C24",
-        ". c #ED5C5E",
-        "X c #ED9092",
-        "o c #EDBDBD",
-        "O c #EDDFDF",
-        "+ c None",
-        /* pixels */
-        "+++++++++..XooOO",
-        "++++++..+..XXooO",
-        "++++++++++. XXoo",
-        "+++++++.++  .XXo",
-        "++++++.++  .  XX",
-        "++++++++  .  ..X",
-        "+++++++  .  ++..",
-        "++++++  .  +++++",
-        "+++++  .  ++.+.+",
-        "++++  .  ++.++.+",
-        "+++  .  ++++++++",
-        "++  .  +++++++++",
-        "+  .  ++++++++++",
-        "  .  +++++++++++",
-        " .  ++++++++++++",
-        ".  +++++++++++++"
-        };
-        """
 
 
 class Beam_Segment(Layout):
@@ -284,7 +254,7 @@ class Beam_Segment(Layout):
         # set property values for display
         obj.BeamWaist = self.waist
         obj.Wavelength = App.Units.Quantity(f"{self.wavelength} nm")
-        obj.PolarizationAngle = App.Units.Quantity(f"{self.polarization} rad")
+        obj.PolarizationAngle = App.Units.Quantity(f"{self.polarization} deg")
         obj.Power = App.Units.Quantity(f"{self.power} W")
         obj.Distance = self.distance
         if hasattr(obj, "FocalLength"):
@@ -852,10 +822,10 @@ class Reflection(Interface):
         if self.type == "sampler":
             transmit_ratio = 1 - self.ref_ratio
         if self.type == "polarizing":
-            transmit_polarization = self.ref_polarization + np.pi / 2
+            transmit_polarization = self.ref_polarization + 90
             reflect_polarization = self.ref_polarization
             angle_diff = incident_beam.polarization - transmit_polarization
-            transmit_ratio = np.cos(angle_diff) ** 2
+            transmit_ratio = np.cos(np.radians(angle_diff)) ** 2
         if self.type == "dichroic":
             transmit_ratio = 1
             # check if wavelength within the reflection ranges
@@ -882,7 +852,7 @@ class Reflection(Interface):
         output_beams = []
 
         # generate transmitted beam
-        if transmit_ratio > 0:
+        if not np.isclose(transmit_ratio, 0):
             if reflect_ratio > 0:
                 index = incident_beam.index << 1  # handle beam splitting
             else:
@@ -901,7 +871,7 @@ class Reflection(Interface):
             output_beams.append(transmitted_beam)
 
         # generate reflected beam
-        if reflect_ratio > 0:
+        if not np.isclose(reflect_ratio, 0):
             if transmit_ratio > 0:
                 index = (incident_beam.index << 1) + 1  # handle beam splitting
             else:
