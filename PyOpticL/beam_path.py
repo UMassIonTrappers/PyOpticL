@@ -216,6 +216,14 @@ class Beam_Segment(Layout):
         relative_direction = rotation.inverted().multVec(App.Vector(*global_direction))
         return np.array(relative_direction)
 
+    def recompute(self):
+        """
+        Recompute the beam segment
+        """
+        self.calculate()
+        obj = self.get_object()
+        obj.purgeTouched()
+
     def calculate(self):
         """
         Calculate the beam segment properties
@@ -394,6 +402,14 @@ class Beam_Path(Layout):
 
         return child
 
+    def recompute(self):
+        """
+        Recompute the beam path layout
+        """
+        self.calculate()
+        obj = self.get_object()
+        obj.purgeTouched()
+
     def calculate(self):
         """
         Calculate the beam path through the layout
@@ -433,15 +449,6 @@ class Beam_Path(Layout):
             Layout.calculate(beam.Proxy)  # update beam placement
             if len(beam.Children) == 0:
                 self.step(beam.Proxy)
-                beam.Proxy.recompute()
-
-    def recompute(self):
-        """
-        Recompute the beam path layout
-        """
-        self.calculate()
-        obj = self.get_object()
-        obj.purgeTouched()
 
     def get_next_global(self, input_beam: Beam_Segment):
         """
@@ -507,6 +514,7 @@ class Beam_Path(Layout):
                 )
 
             proxy = next_object.Proxy
+            # get position from provided constraint
             next_position = input_beam.get_constraint_position(
                 proxy.distance,
                 proxy.x_position,
@@ -514,38 +522,68 @@ class Beam_Path(Layout):
                 proxy.z_position,
             )
 
-            # sum previous global interaction distances
-            previous_distance = 0
-            for beam_obj in reversed(obj.BeamSegments[:-1]):
-                beam = beam_obj.Proxy
-                index_diff = input_beam.index.bit_length() - beam.index.bit_length()
-                root_index = beam.index >> index_diff
-                if (
-                    beam_obj.ChildObject not in obj.BeamChildren
-                    and root_index == input_beam.index
-                ):
-                    previous_distance += beam.distance
-                else:
-                    break
-
-            # get total constraint distance to next child
-            next_distance = (
-                np.linalg.norm(next_position - input_beam_obj.Placement.Base)
-                - previous_distance
+            # get distance and interface for interaction
+            next_distance = np.linalg.norm(
+                next_position - input_beam_obj.Placement.Base
             )
-
-            # gather all interfaces associated with the object
-            object_children = []
-            collect_children(next_object, object_children)
-            interfaces = proxy.get_interfaces()
-            for child in object_children:
-                proxy = child.Proxy
-                if hasattr(proxy, "get_interfaces"):
-                    interfaces.extend(proxy.get_interfaces())
-            # get specified interface
-            next_interface = interfaces[proxy.interface_index]
+            next_interface = self.get_child_interface(next_object)
 
         return next_object, next_interface, next_distance
+
+    def get_child_interface(self, child_object: App.DocumentObject):
+        """
+        Check if the child object interacts with any beams in the path
+        """
+        proxy = child_object.Proxy
+        # gather all interfaces associated with the object
+        object_children = []
+        collect_children(child_object, object_children)
+        interfaces = proxy.get_interfaces()
+        for child in object_children:
+            proxy = child.Proxy
+            if hasattr(proxy, "get_interfaces"):
+                interfaces.extend(proxy.get_interfaces())
+        # get specified interface
+
+        return interfaces[proxy.interface_index]
+
+    def handle_conflicts(self, last_beam, placed_obj):
+        """
+        Handle conflicts between placed object and previously computed beams
+        """
+        obj = self.get_object()
+
+        # gather all previously placed beam segments
+        bound_children = []
+        collect_children(obj.BoundParent, bound_children)
+        beam_paths = []
+        for child in bound_children:
+            if isinstance(child.Proxy, Beam_Path):
+                beam_paths.append(child)
+
+        interface = self.get_child_interface(placed_obj)
+
+        # check for conflicts
+        deleted_objs = []
+        for beam_path in beam_paths:
+            proxy = beam_path.Proxy
+            for beam_obj in beam_path.BeamSegments:
+                if beam_obj == last_beam.get_object():
+                    continue
+                beam = beam_obj.Proxy
+                if (
+                    interface.get_intercept(beam) is not None
+                    and beam_obj not in deleted_objs
+                ):
+                    beam_children = []
+                    collect_children(beam_obj, beam_children)
+                    # remove all children and recompute beam
+                    for child in beam_children:
+                        beam_path.BeamSegments.remove(child)
+                        deleted_objs.append(child)
+                        obj.Document.removeObject(child.Name)
+                    proxy.step(beam)
+                    beam_path.purgeTouched()
 
     def step(self, input_beam: Beam_Segment):
         """
@@ -565,6 +603,7 @@ class Beam_Path(Layout):
         if global_distance == np.inf and child_distance == np.inf:
             # no more interactions, set beam distance to large value
             input_beam.distance = 50
+            input_beam.recompute()
             return
 
         if global_distance < child_distance:
@@ -583,11 +622,14 @@ class Beam_Path(Layout):
             next_object.BasePlacement.Base = App.Vector(*object_position)
             next_object.Proxy.placed = True
             next_object.Proxy.recompute()
+            # check for conflicts with previously placed beams
+            self.handle_conflicts(input_beam, next_object)
 
         # get output beams from interaction
+        output_beams = next_interface.get_output_beams(input_beam)
         input_beam.distance = next_distance
         beam_obj.ChildObject = next_object
-        output_beams = next_interface.get_output_beams(input_beam)
+        input_beam.recompute()
         for beam in output_beams:
             new_beam_obj = beam.get_object()
             obj.BeamSegments += [new_beam_obj]
@@ -702,6 +744,10 @@ class Interface:
             return None
         # check if intercept is too close to origin
         if -1e-6 < distance < 1e-6:
+            return None
+        # check if intercept is within beam distance (if defined)
+        beam_obj = incident_beam.get_object()
+        if beam_obj.ChildObject != None and distance > incident_beam.distance:
             return None
 
         intercept = beam_position + distance * beam_direction

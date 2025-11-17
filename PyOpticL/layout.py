@@ -166,7 +166,7 @@ class Layout:
 
     # link built-in FreeCAD execute to internal recompute
     def execute(self, obj):
-        print(f"Recomputing {obj.Label}...")
+        print(f"Recomputing {obj.Name}...")
         self.recompute()
 
 
