@@ -80,7 +80,6 @@ class Beam_Segment(Layout):
 
         # add properties for displaying beam parameters in FreeCAD
         self.make_property("BeamWaist", "App::PropertyLength", visible=True)
-        self.make_property("FocalLength", "App::PropertyDistance", visible=True)
         self.make_property("Wavelength", "App::PropertyLength", visible=True)
         self.make_property("PolarizationAngle", "App::PropertyAngle", visible=True)
         self.make_property("Power", "App::PropertyPower", visible=True)
@@ -280,7 +279,14 @@ class Beam_Segment(Layout):
         obj.PolarizationAngle = App.Units.Quantity(f"{self.polarization} rad")
         obj.Power = App.Units.Quantity(f"{self.power} W")
         obj.Distance = self.distance
-        obj.FocalLength = focal_length
+        if hasattr(obj, "FocalLength"):
+            obj.removeProperty("FocalLength")
+        if focal_length == 0:
+            self.make_property("FocalLength", "App::PropertyString", visible=True)
+            obj.FocalLength = "Collimated"
+        else:
+            self.make_property("FocalLength", "App::PropertyDistance", visible=True)
+            obj.FocalLength = focal_length
 
 
 class Beam_Path(Layout):
@@ -315,9 +321,11 @@ class Beam_Path(Layout):
 
         obj = self.get_object()
 
+        # bound parent represents the parent whose children this beam path interacts with
         self.make_property("BoundParent", "App::PropertyLinkHidden")
         obj.BoundParent = bound_parent
 
+        # separate lists for beam children and beam segments
         self.make_property("BeamChildren", "App::PropertyLinkListHidden")
         self.make_property("BeamSegments", "App::PropertyLinkListHidden")
 
@@ -333,6 +341,7 @@ class Beam_Path(Layout):
         super().set_parent(parent)
         obj = self.get_object()
         parent_obj = parent.get_object()
+        # bound parent defaults to the parent object
         if obj.BoundParent is None:
             obj.BoundParent = parent_obj
 
@@ -400,6 +409,7 @@ class Beam_Path(Layout):
         else:
             obj.Placement.Rotation = App.Rotation("XYZ", 0, 0, 0)
 
+        # initialize input beam if none exist
         if len(obj.BeamSegments) == 0:
             direction = obj.BasePlacement.Rotation.multVec(App.Vector(1, 0, 0))
             if self.focal_length != None:
@@ -420,7 +430,7 @@ class Beam_Path(Layout):
 
         # check for loose ends and start simulation from there
         for beam in obj.BeamSegments:
-            Layout.calculate(beam.Proxy)
+            Layout.calculate(beam.Proxy)  # update beam placement
             if len(beam.Children) == 0:
                 self.step(beam.Proxy)
                 beam.Proxy.recompute()
@@ -672,8 +682,6 @@ class Interface:
         beam_position = incident_beam.get_global_position()
         beam_direction = incident_beam.get_global_direction()
 
-        print(f"Checking intercept with interface at {global_position}")
-
         # check if beam is within max angle
         incident_angle = abs(
             np.arccos(np.clip(np.dot(global_normal, -beam_direction), -1, 1))
@@ -681,23 +689,19 @@ class Interface:
         if not self.single_sided and incident_angle > np.pi / 2:
             incident_angle -= np.pi
         if incident_angle > np.deg2rad(self.max_angle):
-            print("Beam exceeds max angle for interface")
             return None
 
         denom = np.dot(global_normal, beam_direction)
         # check if beam is parallel to interface
         if np.abs(denom) < 1e-6:
-            print("Beam is parallel to interface")
             return None
 
         distance = np.dot(global_normal, global_position - beam_position) / denom
         # check if intercept is behind beam origin
         if distance < 0:
-            print("Intercept is behind beam origin")
             return None
         # check if intercept is too close to origin
         if -1e-6 < distance < 1e-6:
-            print("Intercept is too close to origin")
             return None
 
         intercept = beam_position + distance * beam_direction
@@ -857,6 +861,7 @@ class Reflection(Interface):
             else:
                 index = incident_beam.index
 
+            # calculate reflected direction
             direction = (
                 beam_direction
                 - 2 * np.dot(beam_direction, global_normal) * global_normal
@@ -942,11 +947,11 @@ class Lens(Interface):
                 focal_rate = waist / focal_length
         waist = abs(waist)
 
-        # calculate beam rotation using thin lens approximation
         radial_vector = intercept - self.get_global_position()
         if np.isclose(np.linalg.norm(radial_vector), 0):
-            direction = beam_direction
+            direction = beam_direction  # on-axis beam, no change in direction
         else:
+            # calculate new beam direction using thin lens approximation
             normal_component = np.dot(beam_direction, global_normal)
             radial_direction = radial_vector / np.linalg.norm(radial_vector)
             tangent_direction = np.cross(radial_direction, global_normal)
@@ -954,7 +959,7 @@ class Lens(Interface):
             tangent_slope = tangent_component / normal_component
             radial_slope = np.dot(beam_direction, radial_direction) / normal_component
             radial_slope -= np.linalg.norm(radial_vector) / self.focal_length
-
+            # construct new direction vector
             direction = global_normal * normal_component
             direction += tangent_direction * tangent_slope * normal_component
             direction += radial_direction * radial_slope * normal_component
@@ -962,6 +967,7 @@ class Lens(Interface):
 
         local_direction = incident_beam.get_relative_direction(direction)
 
+        # generate output beam
         output_beam = Beam_Segment(
             index=incident_beam.index,
             direction=local_direction,

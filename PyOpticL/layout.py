@@ -142,6 +142,8 @@ class Layout:
         if obj.Parent != None:
             obj.Placement = obj.Parent.Placement * obj.Placement
 
+        obj.purgeTouched()  # prevent multiple recomputes
+
     def recompute(self):
         """Recursively recompute all children of this object"""
 
