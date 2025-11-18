@@ -6,99 +6,74 @@ from PyOpticL.beam_path import Lens, Reflection
 from PyOpticL.icons import beam_icon, optic_icon, thorlabs_icon
 from PyOpticL.layout import Component
 from PyOpticL.layout import Dimension as dim
+from PyOpticL.utils import (
+    bolt_shape,
+    bolt_slot_shape,
+    box_shape,
+    cylinder_shape,
+    import_stl,
+    stl_path,
+    subcomponent,
+)
+
+##########################
+### Example Components ###
+##########################
 
 
-def custom_box(
-    dimensions: tuple,
-    position: tuple,
-    direction: tuple = (0, 0, 1),
-    fillet: float = 0,
-    fillet_direction: tuple = None,
-) -> Part.Solid:
+class example_component:
     """
-    Create a box part with optional filleting in a specified direction
+    An example component class for reference on creating new components
+    creates a simple cube which mounts using a single bolt
 
     Args:
-    dimensions (tuple): Dimensions of the box (dx, dy, dz)
-    position (tuple): Position of the box center (x, y, z)
-    direction (tuple): +Z direction vector for box orientation
-    fillet (float): Radius of fillet to apply to edges in fillet_dir
-    fillet_dir (tuple): Direction vector for filleting edges; defaults to dir if None
-
-    Returns:
-    Part.Shape: The created box part
+        side_length (float) : The side length of the cube
+        height (float) : The height of the cube
+        drill_depth (float) : The depth of the mounting hole
     """
 
-    if fillet_direction == None:
-        fillet_direction = np.abs(direction)
-    part = Part.makeBox(*dimensions)
-    if fillet != 0:
-        for i in part.Edges:
-            if i.tangentAt(i.FirstParameter) == App.Vector(*fillet_direction):
-                part = part.makeFillet(fillet - 1e-3, [i])
-    part.translate(
-        App.Vector(
-            position[0] - (1 - direction[0]) * dimensions[0] / 2,
-            position[1] - (1 - direction[1]) * dimensions[1] / 2,
-            position[2] - (1 - direction[2]) * dimensions[2] / 2,
+    object_group = "example"
+    object_icon = ""
+    object_color = (0.5, 0.5, 0.5)
+
+    def __init__(
+        self,
+        side_length: dim = dim(25, "mm"),
+        height: dim = dim(15, "mm"),
+        drill_depth: dim = dim(5, "mm"),
+    ):
+        """Initialize adjustable parameters"""
+        self.side_length = side_length
+        self.height = height
+        self.drill_depth = drill_depth
+
+    def subcomponents(self) -> list[subcomponent]:
+        """Define any sub-components"""
+        return [
+            subcomponent(
+                component=Component(
+                    "Mounting Bolt",
+                    bolt("8_32", length=self.height + self.drill_depth),
+                ),
+                position=(0, 0, self.height),
+                rotation=(0, 0, 0),
+            )
+        ]
+
+    def shape(self) -> Part.Shape:
+        """Define the main shape of the component"""
+        part = box_shape(
+            dimensions=(self.side_length, self.side_length, self.height),
+            position=(0, 0, 0),
+            center=(0, 0, -1),
+            fillet=1,
         )
-    )
-    part = part.fuse(part)
-    return part
+        return part
 
 
-def custom_cylinder(
-    diameter: float,
-    height: float,
-    position: tuple,
-    direction: tuple = (0, 0, -1),
-    head_diameter: float = 0,
-    head_height: float = 0,
-    countersink: bool = False,
-) -> Part.Solid:
-    """
-    Create a cylinder part with optional bolt head
-
-    Args:
-    dia (float): Diameter of the cylinder
-    dz (float): Height of the cylinder
-    pos (tuple): Position of the cylinder base center (x, y, z)
-    head_dia (float): Diameter of the bolt head
-    head_dz (float): Height of the bolt head
-    dir (tuple): +Z direction vector for cylinder orientation
-    countersink (bool): Whether the head is a countersink (conical)
-
-    Returns:
-    Part.Shape: The created cylinder part
-    """
-
-    part = Part.makeCylinder(
-        diameter / 2,
-        height,
-        App.Vector(*position),
-        App.Vector(*direction),
-    )
-    if head_diameter != 0 and head_height != 0:
-        if countersink:
-            part = part.fuse(
-                Part.makeCone(
-                    head_diameter / 2,
-                    diameter / 2,
-                    head_height,
-                    App.Vector(*position),
-                    App.Vector(*direction),
-                )
-            )
-        else:
-            part = part.fuse(
-                Part.makeCylinder(
-                    head_diameter / 2,
-                    head_height,
-                    App.Vector(*position),
-                    App.Vector(*direction),
-                )
-            )
-    return part.removeSplitter()
+###########################
+### Hardware Components ###
+###########################
 
 
 class bolt:
@@ -135,7 +110,6 @@ class bolt:
         ),
     }
 
-    object_type = "Part"
     object_group = "hardware"
     object_icon = ""
     object_color = (0.8, 0.8, 0.8)
@@ -158,86 +132,41 @@ class bolt:
         if washer_diameter != 0 and countersink:
             raise ValueError("Bolt does not support both washer and countersink")
 
-    def get_shape(self):
+    def shape(self):
         dims = self.bolt_dimensions[self.type]
-        part = custom_cylinder(
+        part = bolt_shape(
             diameter=dims["tap_diameter"],
             height=self.length,
-            position=(0, 0, 0),
-            direction=(0, 0, -1),
             head_diameter=dims["head_diameter"],
             head_height=dims["head_height"],
+            position=(0, 0, 0),
+            direction=(0, 0, -1),
             countersink=self.countersink,
         )
         return part
 
-    def get_drill(self):
+    def drill(self):
         dims = self.bolt_dimensions[self.type]
         if self.washer_diameter != 0:
             head_diameter = self.washer_diameter
         else:
             head_diameter = dims["head_diameter"]
         head_diameter += self.head_tol
-        part = custom_cylinder(
+        part = bolt_shape(
             diameter=dims["tap_diameter"],
             height=self.length,
-            position=(0, 0, 0),
-            direction=(0, 0, -1),
             head_diameter=head_diameter,
             head_height=dims["head_height"],
+            position=(0, 0, 0),
+            direction=(0, 0, -1),
             countersink=self.countersink,
         )
         return part
 
 
-class example_component:
-    """
-    An example component class for reference on importing new components
-    creates a simple cube which mounts using a single bolt
-
-    Args:
-        drill (bool) : Whether baseplate mounting for this part should be drilled
-        side_length (float) : The side length of the cube
-        height (float) : The height of the cube
-        drill_depth (float) : The depth of the mounting hole
-    """
-
-    object_type = "Part"
-    object_icon = ""
-
-    def __init__(
-        self,
-        side_length: dim = dim(25, "mm"),
-        height: dim = dim(15, "mm"),
-        drill_depth: dim = dim(5, "mm"),
-    ):
-        """Initialize adjustable parameters"""
-        self.side_length = side_length
-        self.height = height
-        self.drill_depth = drill_depth
-
-    def get_components(self):
-        """Define any sub-components"""
-        components = [
-            (
-                Component(
-                    "Mounting Bolt",
-                    bolt("8_32", length=self.height + self.drill_depth),
-                ),
-                dict(position=(0, 0, 0), rotation=(0, 0, 0)),
-            )
-        ]
-        return components
-
-    def get_shape(self):
-        """Define the main shape of the component"""
-        part = custom_box(
-            dimensions=(self.side_length, self.side_length, self.height),
-            position=(0, 0, 0),
-            direction=(0, 0, -1),
-            fillet=1,
-        )
-        return part
+##########################
+### Optical Components ###
+##########################
 
 
 class circular_reflector:
@@ -252,7 +181,6 @@ class circular_reflector:
         ref_wavelengths (list) : The reflection wavelength ranges
     """
 
-    object_type = "Part"
     object_group = "optic"
     object_icon = optic_icon
     object_color = (0.5, 0.5, 0.8)
@@ -271,8 +199,8 @@ class circular_reflector:
         self.ref_polarization = ref_polarization
         self.ref_wavelengths = ref_wavelengths
 
-    def get_interfaces(self):
-        interfaces = [
+    def interfaces(self):
+        return [
             Reflection(
                 position=(0, 0, 0),
                 rotation=(0, 0, 0),
@@ -282,10 +210,9 @@ class circular_reflector:
                 ref_wavelengths=self.ref_wavelengths,
             )
         ]
-        return interfaces
 
-    def get_shape(self):
-        part = custom_cylinder(
+    def shape(self):
+        part = cylinder_shape(
             diameter=self.diameter,
             height=self.thickness,
             position=(-self.thickness, 0, 0),
@@ -374,7 +301,6 @@ class spherical_lens:
         focal_length (float) : The focal length of the lens
     """
 
-    object_type = "Part"
     object_group = "optic"
     object_icon = optic_icon
     object_color = (0.5, 0.5, 0.8)
@@ -390,8 +316,8 @@ class spherical_lens:
         self.thickness = thickness
         self.focal_length = focal_length
 
-    def get_interfaces(self):
-        interfaces = [
+    def interfaces(self):
+        return [
             Lens(
                 position=(0, 0, 0),
                 rotation=(0, 0, 0),
@@ -399,10 +325,9 @@ class spherical_lens:
                 focal_length=self.focal_length,
             )
         ]
-        return interfaces
 
-    def get_shape(self):
-        part = custom_cylinder(
+    def shape(self):
+        part = cylinder_shape(
             diameter=self.diameter,
             height=self.thickness,
             position=(-self.thickness / 2, 0, 0),
@@ -420,7 +345,6 @@ class polarizing_beam_splitter_cube:
         thickness (float) : The thickness of the beam splitter interface
     """
 
-    object_type = "Part"
     object_group = "optic"
     object_icon = optic_icon
     object_color = (0.5, 0.5, 0.8)
@@ -434,8 +358,8 @@ class polarizing_beam_splitter_cube:
         self.size = size
         self.ref_polarization = ref_polarization
 
-    def get_interfaces(self):
-        interfaces = [
+    def interfaces(self):
+        return [
             Reflection(
                 position=(0, 0, 0),
                 rotation=(0, 0, 45),
@@ -444,21 +368,59 @@ class polarizing_beam_splitter_cube:
                 ref_polarization=self.ref_polarization,
             )
         ]
-        return interfaces
 
-    def get_shape(self):
-        part = custom_box(
+    def shape(self):
+        part = box_shape(
             dimensions=(self.size, self.size, self.size),
             position=(0, 0, 0),
-            direction=(0, 0, 0),
+            center=(0, 0, 0),
         )
         diag = self.size * np.sqrt(2)
-        gap = custom_box(
-            dimensions=(0.1, diag, diag),
-            position=(0, 0, 0),
-            direction=(0, 0, 0),
+        part = part.cut(
+            box_shape(
+                dimensions=(0.1, diag, diag),
+                position=(0, 0, 0),
+                rotation=(0, 0, 45),
+                center=(0, 0, 0),
+            )
         )
-        gap.rotate(App.Vector(0, 0, 0), App.Vector(0, 0, 1), 45)
-        part = part.cut(gap)
-
         return part
+
+
+###########################
+### Thorlabs Components ###
+###########################
+
+
+class mirror_mount_k05s1:
+    """
+    Mirror mount, model K05S1
+    """
+
+    object_group = "mount"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+
+    mesh = import_stl(
+        stl_path=stl_path / "POLARIS-K05S1-Step.stl",
+        translation=(-4.514, 0.254, -0.254),
+        rotation=(90, 0, -90),
+    )
+
+    def __init__(self, drill_depth: dim):
+        self.drill_depth = drill_depth
+
+    def subcomponents(self):
+        return [
+            subcomponent(
+                component=Component(
+                    label="Mounting Bolt",
+                    definition=bolt(
+                        "8_32",
+                        length=dim(20, "mm"),
+                    ),
+                ),
+                position=(-8.017, 0, 0),
+                rotation=(0, 0, 0),
+            )
+        ]

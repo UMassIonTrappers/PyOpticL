@@ -15,13 +15,13 @@ class Beam_Segment(Layout):
     Class representing a beam segment
 
     Args:
-    position (tuple): (x, y, z) coordinates
-    direction (tuple): (x, y, z) normalized direction vector
-    waist (float): Beam waist
-    wavelength (float): Wavelength of the beam
-    polarization (string): Polarization angle of the beam in radians
-    power (float): Power of the beam
-    focal_rate (float): Focal rate of beam (waist / focal length)
+        index (int): Index of the beam
+        direction (tuple): (x, y, z) normalized direction vector
+        waist (float): Beam waist in mm
+        wavelength (float): Wavelength of the beam in nm
+        polarization (string): Polarization angle of the beam in degrees
+        power (float): Power of the beam in W
+        focal_rate (float): Focal rate of beam (waist / focal length)
     """
 
     def __init__(
@@ -55,10 +55,18 @@ class Beam_Segment(Layout):
         self.make_property("Power", "App::PropertyPower", visible=True)
         self.make_property("Distance", "App::PropertyLength", visible=True)
 
+        # additional object links
         self.make_property("ChildObject", "App::PropertyLinkHidden")
         self.make_property("BoundParent", "App::PropertyLinkHidden")
 
-    def set_parent(self, parent):
+    def set_parent(self, parent: Layout):
+        """
+        Set the parent object of this component
+
+        Args:
+            parent (Layout): Parent object to set
+        """
+
         super().set_parent(parent)
         obj = self.get_object()
         parent_obj = parent.get_object()
@@ -69,7 +77,7 @@ class Beam_Segment(Layout):
         Add a child beam segment to this beam
 
         Args:
-        child (Beam_Segment): Child beam segment to add
+            child (Beam_Segment): Child beam segment to add
         """
 
         super().add(child, position=origin, rotation=(0, 0, 0))
@@ -85,13 +93,13 @@ class Beam_Segment(Layout):
         Get the position of the beam at a specified distance or coordinate
 
         Args:
-        distance (float): Distance along the beam direction from origin
-        x_position (float): x-coordinate of the beam position
-        y_position (float): y-coordinate of the beam position
-        z_position (float): z-coordinate of the beam position
+            distance (float): Distance along the beam direction from origin
+            x_position (float): x-coordinate of the beam position
+            y_position (float): y-coordinate of the beam position
+            z_position (float): z-coordinate of the beam position
 
         Returns:
-        position (np.ndarray): (x, y, z) coordinates of the beam position
+            position (np.ndarray): (x, y, z) coordinates of the beam position
         """
 
         obj = self.get_object()
@@ -132,7 +140,7 @@ class Beam_Segment(Layout):
         Get the global position of the beam origin
 
         Returns:
-        position (np.ndarray): (x, y, z) coordinates of the beam origin
+            position (np.ndarray): (x, y, z) coordinates of the beam origin
         """
 
         obj = self.get_object()
@@ -144,7 +152,7 @@ class Beam_Segment(Layout):
         Get the global direction of the beam
 
         Returns:
-        direction (np.ndarray): (x, y, z) normalized direction vector
+            direction (np.ndarray): (x, y, z) normalized direction vector
         """
 
         obj = self.get_object()
@@ -159,10 +167,10 @@ class Beam_Segment(Layout):
         Convert a global position to relative beam coordinates
 
         Args:
-        global_position (np.ndarray): (x, y, z) coordinates in global frame
+            global_position (np.ndarray): (x, y, z) coordinates in global frame
 
         Returns:
-        position (np.ndarray): (x, y, z) coordinates relative to this beam
+            position (np.ndarray): (x, y, z) coordinates relative to this beam
         """
 
         obj = self.get_object()
@@ -272,10 +280,13 @@ class Beam_Path(Layout):
     Class representing a beam path layout object
 
     Args:
-    label (str): Label for the beam path
-    position (tuple): (x, y, z) coordinates
-    rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
-    bound_parent (Layout): parent whose children this beam path should interact with
+        label (str): Label for the beam path
+        waist (dim): Initial beam waist in mm
+        wavelength (float): Wavelength of the beam in nm
+        polarization (float): Polarization angle in degrees
+        power (float): Power of the beam in W
+        focal_length (dim): Focal length of the beam path in mm
+        bound_parent (Layout): parent whose children this beam path should interact with
     """
 
     object_type = "Part"  # FreeCAD object type
@@ -314,7 +325,12 @@ class Beam_Path(Layout):
         self.focal_length = focal_length
 
     def set_parent(self, parent: Layout):
-        """Set the parent object of this component"""
+        """
+        Set the parent object of this component
+
+        Args:
+            parent (Layout): Parent object to set
+        """
 
         super().set_parent(parent)
         obj = self.get_object()
@@ -334,20 +350,23 @@ class Beam_Path(Layout):
         z_position: dim = None,
         offset: tuple[dim] = (0, 0),
         interface_index: int = 0,
-    ):
+    ) -> Layout:
         """
         Add a child layout to the beam path and assign beam index
 
         Args:
             child (Layout): Child layout to add
             beam_index (int): Index of the beam this child interacts with
+            rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
             distance (float): Distance along the beam from the last component
             x_position (float): x-coordinate of the beam position
             y_position (float): y-coordinate of the beam position
             z_position (float): z-coordinate of the beam position
-            rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
             offset (tuple): (y, z) offset from the center of the interface
             interface_index (int): Index of the interface on the child object to interact with
+
+        Returns:
+            child (Layout): The added child layout
         """
 
         super().add(child, position=(0, 0, 0), rotation=rotation)
@@ -376,6 +395,7 @@ class Beam_Path(Layout):
         """
         Recompute the beam path layout
         """
+
         self.calculate()
         obj = self.get_object()
         obj.purgeTouched()
@@ -420,9 +440,17 @@ class Beam_Path(Layout):
             if len(beam.Children) == 0:
                 self.step(beam.Proxy)
 
-    def get_next_global(self, input_beam: Beam_Segment):
+    def get_next_global(self, input_beam: Beam_Segment) -> tuple:
         """
         Get the next global object the beam will interact with
+
+        Args:
+            input_beam (Beam_Segment): Input beam segment to process
+
+        Returns:
+            next_object (App.DocumentObject): Next global object to interact with
+            next_interface (Interface): Interface on the next object
+            min_distance (float): Distance to the next interaction
         """
 
         obj = self.get_object()
@@ -440,12 +468,12 @@ class Beam_Path(Layout):
         for child in all_children:
             proxy = child.Proxy
             # skip beam segments, unplaced beam children, and objects without interfaces
-            if not hasattr(proxy, "get_interfaces") or (
+            if not hasattr(proxy, "interfaces") or (
                 child in obj.BeamChildren and not proxy.placed
             ):
                 continue
             # check all interfaces of the object
-            for interface in proxy.get_interfaces():
+            for interface in proxy.interfaces():
                 intercept = interface.get_intercept(input_beam)
                 if intercept is not None:
                     distance = np.linalg.norm(intercept - input_beam_obj.Placement.Base)
@@ -457,9 +485,17 @@ class Beam_Path(Layout):
 
         return next_object, next_interface, min_distance
 
-    def get_next_child(self, input_beam: Beam_Segment):
+    def get_next_child(self, input_beam: Beam_Segment) -> tuple:
         """
         Get the next beam child object for placement
+
+        Args:
+            input_beam (Beam_Segment): Input beam segment to process
+
+        Returns:
+            next_object (App.DocumentObject): Next beam child object to interact with
+            next_interface (Interface): Interface on the next object
+            min_distance (float): Distance to the next interaction
         """
 
         obj = self.get_object()
@@ -478,7 +514,7 @@ class Beam_Path(Layout):
 
         # get info for next beam child
         if next_object != None:
-            if not hasattr(next_object.Proxy, "get_interfaces"):
+            if not hasattr(next_object.Proxy, "interfaces"):
                 raise RuntimeError(
                     f"Beam child {next_object.Label} does not have any interfaces"
                 )
@@ -500,26 +536,36 @@ class Beam_Path(Layout):
 
         return next_object, next_interface, next_distance
 
-    def get_child_interface(self, child_object: App.DocumentObject):
+    def get_child_interface(self, child_object: App.DocumentObject) -> Interface:
         """
-        Check if the child object interacts with any beams in the path
+        Get the selected interface on a child object
+
+        Args:
+            child_object (App.DocumentObject): Child object to check
+
+        Returns:
+            interface (Interface): Interface of the child object
         """
         proxy = child_object.Proxy
         # gather all interfaces associated with the object
         object_children = []
         collect_children(child_object, object_children)
-        interfaces = proxy.get_interfaces()
+        interfaces = proxy.interfaces()
         for child in object_children:
             proxy = child.Proxy
-            if hasattr(proxy, "get_interfaces"):
-                interfaces.extend(proxy.get_interfaces())
+            if hasattr(proxy, "interfaces"):
+                interfaces.extend(proxy.interfaces())
         # get specified interface
 
         return interfaces[proxy.interface_index]
 
-    def handle_conflicts(self, last_beam, placed_obj):
+    def handle_conflicts(self, last_beam: Beam_Segment, placed_obj: App.DocumentObject):
         """
         Handle conflicts between placed object and previously computed beams
+
+        Args:
+            last_beam (Beam_Segment): Last beam segment placed
+            placed_obj (App.DocumentObject): Object that was just placed
         """
         obj = self.get_object()
 
@@ -558,6 +604,9 @@ class Beam_Path(Layout):
     def step(self, input_beam: Beam_Segment):
         """
         Perform a single calculation step for the beam path
+
+        Args:
+            input_beam (Beam_Segment): Input beam segment to process
         """
 
         obj = self.get_object()
@@ -916,7 +965,7 @@ class Lens(Interface):
         self,
         position: tuple,
         rotation: tuple,
-        focal_length: float,
+        focal_length: dim,
         diameter: dim = None,
         max_angle: float = 90,
         single_sided: bool = False,
@@ -933,6 +982,15 @@ class Lens(Interface):
         self.focal_length = focal_length
 
     def get_output_beams(self, incident_beam: Beam_Segment) -> list[Beam_Segment]:
+        """
+        Get the output beams from an incident beam interacting with the interface
+
+        Args:
+            incident_beam (Beam): Incident beam object
+
+        Returns:
+            output_beams (list): List of output Beam objects
+        """
 
         global_normal = self.get_global_normal()
         beam_direction = incident_beam.get_global_direction()
@@ -941,6 +999,7 @@ class Lens(Interface):
         if intercept is None:
             return []
 
+        # calculate new focal rate and waist given input beam and lens focal length
         local_origin = incident_beam.get_relative_position(intercept)
         waist = incident_beam.waist - incident_beam.distance * incident_beam.focal_rate
         if np.isclose(incident_beam.focal_rate, 0):
@@ -963,6 +1022,7 @@ class Lens(Interface):
                 focal_rate = waist / focal_length
         waist = abs(waist)
 
+        # handle off-center interactions
         radial_vector = intercept - self.get_global_position()
         if np.isclose(np.linalg.norm(radial_vector), 0):
             direction = beam_direction  # on-axis beam, no change in direction

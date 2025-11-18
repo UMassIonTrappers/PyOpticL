@@ -44,8 +44,6 @@ class Layout:
 
     Args:
         label (string): Name of the object
-        position (tuple): (x, y, z) coordinates
-        rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
         recompute_priority (int): Priority for recompute order
     """
 
@@ -68,6 +66,7 @@ class Layout:
         # initialize FeaturePython object
         obj = document.addObject(f"{self.object_type}::FeaturePython", label, self)
         obj.Label = label
+        obj.setEditorMode("Label", 1)  # make label read-only
         self.document_id = document.Name
         self.object_id = obj.Name
         ViewProvider(obj.ViewObject, icon=self.object_icon)
@@ -85,19 +84,39 @@ class Layout:
         self.recompute_priority = recompute_priority
 
     def get_object(self) -> App.DocumentObject:
-        """Get the FreeCAD object associated with this proxy"""
+        """
+        Get the FreeCAD object associated with this proxy
+
+        Returns:
+            App.DocumentObject: The FreeCAD document object
+        """
         document = App.getDocument(self.document_id)
         return document.getObject(self.object_id)
 
-    def make_property(self, name, type, visible=False):
+    def make_property(self, name: str, type: str, visible: bool = False):
+        """
+        Create a property on the FreeCAD object if it does not already exist
+
+        Args:
+            name (string): Name of the property
+            type (string): Type of the property
+            visible (bool): Whether the property is visible in the property editor
+        """
         obj = self.get_object()
         if not hasattr(obj, name):
             obj.addProperty(type, name)
-        if not visible:
-            obj.setEditorMode(name, 2)
+        if visible:
+            obj.setEditorMode(name, 1)  # read-only
+        else:
+            obj.setEditorMode(name, 2)  # hidden
 
     def set_parent(self, parent: Layout):
-        """Set the parent object of this component"""
+        """
+        Set the parent object of this component
+
+        Args:
+            parent (Layout): Parent object to set
+        """
 
         obj = self.get_object()
         parent_obj = parent.get_object()
@@ -113,8 +132,11 @@ class Layout:
 
         Args:
             child (Layout): Child object to add
-            position (tuple): (x, y, z) coordinates of child (overrides initial position)
-            rotation (tuple): (angle_x, angle_y, angle_z) rotation of child (overrides initial rotation)
+            position (tuple): (x, y, z) relative coordinates of child
+            rotation (tuple): (angle_x, angle_y, angle_z) relative rotation of child
+
+        Returns:
+            child (Layout): The added child layout
         """
 
         obj = self.get_object()
@@ -166,6 +188,8 @@ class Layout:
 
     # link built-in FreeCAD execute to internal recompute
     def execute(self, obj):
+        """Execute method called by FreeCAD to recompute the object"""
+
         print(f"Recomputing {obj.Name}...")
         self.recompute()
 
@@ -178,14 +202,10 @@ class Component(Layout):
     Args:
         label (string): Name of the object
         definition (Component_Definition): Template defining component properties
-        position (tuple): (x, y, z) coordinates
-        rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
         recompute_priority (int): Priority for recompute order
     """
 
-    object_type = "Part"  # FreeCAD object type
     object_group = "component"  # group name for management
-    object_icon = ""  # icon for the object in the tree view
     object_color = (0.5, 0.5, 0.5)  # color for the object model
     object_transparency = 0  # transparency for the object model
 
@@ -200,7 +220,6 @@ class Component(Layout):
         override_attributes = (
             "object_color",
             "object_icon",
-            "object_type",
             "object_group",
             "object_transparency",
         )
@@ -216,11 +235,14 @@ class Component(Layout):
                 if hasattr(definition, attr):
                     setattr(self, attr, getattr(definition, attr))
 
-            # wrap get_interfaces to set parent
-            if hasattr(definition, "get_interfaces"):
+            if hasattr(definition, "mesh"):
+                object_type = "Mesh"
 
-                def get_interfaces(self):
-                    interfaces = definition.get_interfaces()
+            # wrap interfaces to set parent
+            if hasattr(definition, "interfaces"):
+
+                def interfaces(self):
+                    interfaces = definition.interfaces()
                     for interface in interfaces:
                         interface.parent = self
                     return interfaces
@@ -238,8 +260,8 @@ class Component(Layout):
         obj.ViewObject.Transparency = self.object_transparency
 
         # add any sub-components defined in the template
-        if hasattr(definition, "get_components"):
-            for comp, placement in definition.get_components():
+        if hasattr(definition, "subcomponents"):
+            for comp, placement in definition.subcomponents():
                 self.add(comp, **placement)
 
     def calculate(self):
@@ -249,8 +271,8 @@ class Component(Layout):
         obj = self.get_object()
 
         # update object shape
-        if hasattr(self, "get_shape"):
-            shape = self.get_shape()
+        if self.object_type == "Part" and hasattr(self, "shape"):
+            shape = self.shape()
 
             # gather peer objects
             drill_objs = []
@@ -264,18 +286,23 @@ class Component(Layout):
 
             # apply drilling
             for drill_obj in drill_objs:
-                if hasattr(drill_obj.Proxy, "get_drill"):
-                    drill_shape = drill_obj.Proxy.get_drill()
+                if hasattr(drill_obj.Proxy, "drill"):
+                    Layout.calculate(drill_obj.Proxy)  # ensure drill is up to date
+                    drill_shape = drill_obj.Proxy.drill()
+                    drill_shape.Placement = drill_obj.Placement
+                    # convert to local coordinates
+                    drill_shape.Placement *= obj.Placement.inverse()
                     shape = shape.cut(drill_shape)
 
             # apply placement and set final shape
             shape.Placement = obj.Placement
-            if self.object_type == "Part":
-                obj.Shape = shape
-            elif self.object_type == "Mesh":
-                obj.Mesh = shape
+            obj.Shape = shape
+
+        elif self.object_type == "Mesh" and hasattr(self, "mesh"):
+            obj.Mesh = self.mesh
 
 
+# ViewProvider handles how the object is handled in the FreeCAD GUI
 class ViewProvider:
     def __init__(self, obj, icon=None):
         obj.Proxy = self
