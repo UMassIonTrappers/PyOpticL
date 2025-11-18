@@ -1,8 +1,8 @@
-<img src="https://github.com/user-attachments/assets/d20bf57a-f602-48b8-b033-8d03141b6e97" width=300>
+<img height="100" alt="PyOpticL_logo" src="https://github.com/user-attachments/assets/6abdeee1-0d27-4417-b13f-469ae00388c7" />
 
 ## PyOpticL - Code-to-CAD optical system engineering
 
-![image](https://github.com/user-attachments/assets/780dbadd-5971-4b00-a471-07538e7d65ba)
+<img width="3341" height="1411" alt="image" src="https://github.com/user-attachments/assets/1b857ff6-a425-4261-a6f4-b00795de6f05" />
 
 #### Discord Server: https://discord.gg/vV4NP6rXmp
 
@@ -150,7 +150,9 @@ subsystem_spam(x=32 , y=50, thumbscrews=True)
  * NUS - Prof. Dzmitry Matsukevich
  * Stanford - Prof. Jonathan Simon
  * Quera
+ * Durham University
 
-<img src="https://github.com/user-attachments/assets/ff290700-2e48-4404-ba55-5830340bf4d4" width=700>
+<img width="800" src="https://github.com/user-attachments/assets/da1f5e60-a97e-493c-a372-581fa3e241eb" />
+
 
 #### Again we thank the MIT QUANTA LAB for sharing their C4PO ('CAD for Precision Optics') based on OpenSCAD which inspired this library.
