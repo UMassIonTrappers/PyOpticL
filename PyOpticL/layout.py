@@ -59,7 +59,7 @@ class baseplate:
         optics_dz (float): The optical height of baseplate
         invert_label (bool): Whether to switch the face the label is embossed on
     '''
-    def __init__(self, dx=0, dy=0, dz=inch, x=0, y=0, angle=0, gap=0, name="Baseplate", drill=True, mount_holes=[], label="", x_offset=0, y_offset=0, optics_dz=inch/2, x_splits=[], y_splits=[], invert_label=False, z=0):
+    def __init__(self, dx=0, dy=0, dz=inch, x=0, y=0, angle=0, gap=0, name="Baseplate", drill=True, mount_holes=[], label="", x_offset=0, y_offset=0, optics_dz=inch/2, x_splits=[], y_splits=[], invert_label=False, z=0, metric=False):
         obj = App.ActiveDocument.addObject('Part::FeaturePython', name)
         ViewProvider(obj.ViewObject)
         obj.Proxy = self
@@ -81,8 +81,12 @@ class baseplate:
         obj.Placement = App.Placement(App.Vector(x*inch, y*inch, z*inch), App.Rotation(angle, 0, 0), App.Vector(0, 0, 0))
         self.active_baseplate = obj.Name
         obj.addProperty("App::PropertyLinkListHidden","ChildObjects")
+        if metric:
+            grid_spacing = 25
+        else:
+            grid_spacing = inch
         for x, y in mount_holes:
-            mount = self.place_element("Mount Hole (%d, %d)"%(x, y), optomech.baseplate_mount, (x+0.5)*inch, (y+0.5)*inch, 0)
+            mount = self.place_element("Mount Hole (%d, %d)"%(x, y), optomech.baseplate_mount, (x+0.5)*grid_spacing, (y+0.5)*grid_spacing, 0, metric=metric)
             obj.ChildObjects += [mount]
     
     def add_cover(self, dz, **args):

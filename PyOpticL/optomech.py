@@ -34,6 +34,14 @@ bolt_14_20 = {
     "washer_dia":9/16*inch
 }
 
+bolt_m6 = {
+    "clear_dia":6.5,
+    "tap_dia":5.0,
+    "head_dia":10.0,
+    "head_dz":8.0,
+    "washer_dia":12.5, 
+}
+
 adapter_color = (0.6, 0.9, 0.6)
 mount_color = (0.5, 0.5, 0.55)
 glass_color = (0.5, 0.5, 0.8)
@@ -189,7 +197,7 @@ class baseplate_mount:
         bore_depth (float) : The depth for the counterbore of the mount hole
     '''
     type = 'Part::FeaturePython'
-    def __init__(self, obj, bore_depth=10, drill=True):
+    def __init__(self, obj, bore_depth=10, drill=True, metric=False):
         obj.Proxy = self
         ViewProvider(obj.ViewObject)
 
@@ -197,18 +205,23 @@ class baseplate_mount:
         obj.addProperty('App::PropertyLength', 'BoreDepth').BoreDepth = bore_depth
         obj.addProperty('Part::PropertyPartShape', 'DrillPart')
 
+        if metric:
+            self.bolt_type = bolt_m6
+        else:
+            self.bolt_type = bolt_14_20
+
         obj.ViewObject.ShapeColor = mount_color
 
     def execute(self, obj):
-        bolt_len = inch-(obj.BoreDepth.Value-bolt_14_20['head_dz'])
+        bolt_len = inch-(obj.BoreDepth.Value-self.bolt_type['head_dz'])
 
-        part = _custom_cylinder(dia=bolt_14_20['tap_dia'], dz=bolt_len,
-                                head_dia=bolt_14_20['head_dia'], head_dz=bolt_14_20['head_dz'],
+        part = _custom_cylinder(dia=self.bolt_type['tap_dia'], dz=bolt_len,
+                                head_dia=self.bolt_type['head_dia'], head_dz=self.bolt_type['head_dz'],
                                 x=0, y=0, z=-(obj.Baseplate.OpticsDz.Value + obj.Baseplate.dz.Value)+bolt_len)
         obj.Shape = part
 
-        part = _custom_cylinder(dia=bolt_14_20['clear_dia'], dz=drill_depth,
-                                head_dia=bolt_14_20["washer_dia"], head_dz=obj.BoreDepth.Value,
+        part = _custom_cylinder(dia=self.bolt_type['clear_dia'], dz=drill_depth,
+                                head_dia=self.bolt_type["washer_dia"], head_dz=obj.BoreDepth.Value,
                                 x=0, y=0, z=-obj.Baseplate.OpticsDz.Value)
         part.Placement = obj.Placement
         obj.DrillPart = part
