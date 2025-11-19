@@ -34,6 +34,7 @@ beam_path.add(
         label="Mirror 1",
         definition=optomech.circular_mirror(
             diameter=dim(1, "in"),
+            thickness=dim(5, "mm"),
         ),
     ),
     beam_index=0b11,
@@ -46,6 +47,7 @@ beam_path.add(
         label="Mirror 2",
         definition=optomech.circular_mirror(
             diameter=dim(1, "in"),
+            thickness=dim(5, "mm"),
         ),
     ),
     beam_index=0b11,

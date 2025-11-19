@@ -13,6 +13,7 @@ from PyOpticL import beam_path, icons, layout, optomech, utils
 
 
 class Rerun_Macro:
+
     def GetResources(self):
         return {
             "Pixmap": ":/icons/view-refresh.svg",
@@ -24,38 +25,6 @@ class Rerun_Macro:
         for i in App.ActiveDocument.Objects:
             App.ActiveDocument.removeObject(i.Name)
         Gui.runCommand("Std_RecentMacros", 0)
-        return
-
-
-class Redraw_Baseplate:
-
-    def GetResources(self):
-        return {
-            "Pixmap": ":/icons/tree-sync-pla.svg",
-            "Accel": "Shift+B",
-            "MenuText": "Redraw Baseplate After Editing Parameters in GUI",
-        }
-
-    def Activated(self):
-        layout.redraw()
-        return
-
-
-class Show_Components:
-
-    def __init__(self):
-        self.state = True
-
-    def GetResources(self):
-        return {
-            "Pixmap": ":/icons/dagViewVisible.svg",
-            "Accel": "Shift+V",
-            "MenuText": "Toggle Component Visibility",
-        }
-
-    def Activated(self):
-        self.state = not self.state
-        layout.show_components(self.state)
         return
 
 
@@ -79,6 +48,7 @@ class Toggle_Draw_Style:
         return
 
 
+### TODO update to work with refactored code
 class Export_STLs:
 
     def GetResources(self):
@@ -114,6 +84,7 @@ class Export_STLs:
         return
 
 
+### TODO update to work with refactored code
 class Export_Cart:
 
     def GetResources(self):
@@ -319,12 +290,10 @@ class Get_Position:
         return
 
 
-# Gui.addCommand("RerunMacro", Rerun_Macro())
-# Gui.addCommand("RedrawBaseplate", Redraw_Baseplate())
-# Gui.addCommand("ShowComponents", Show_Components())
-# Gui.addCommand("ToggleDrawStyle", Toggle_Draw_Style())
-# Gui.addCommand("ExportSTLs", Export_STLs())
-# Gui.addCommand("ExportCart", Export_Cart())
+Gui.addCommand("RerunMacro", Rerun_Macro())
+Gui.addCommand("ToggleDrawStyle", Toggle_Draw_Style())
+Gui.addCommand("ExportSTLs", Export_STLs())
+Gui.addCommand("ExportCart", Export_Cart())
 Gui.addCommand("ReloadModules", Reload_Modules())
-# Gui.addCommand("GetOrientation", Get_Orientation())
-# Gui.addCommand("GetPosition", Get_Position())
+Gui.addCommand("GetOrientation", Get_Orientation())
+Gui.addCommand("GetPosition", Get_Position())

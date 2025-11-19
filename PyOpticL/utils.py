@@ -199,6 +199,7 @@ def bolt_shape(
     position: tuple = (0, 0, 0),
     rotation: tuple = (0, 0, 0),
     direction: tuple = (0, 0, -1),
+    from_top: bool = True,
     countersink: bool = False,
 ) -> Part.Shape:
     """
@@ -206,12 +207,13 @@ def bolt_shape(
 
     Args:
         diameter (float): Diameter of the bolt shaft
-        height (float): Height of the bolt (including the head)
+        height (float): Distance from origin to end of bolt shaft
         head_diameter (float): Diameter of the bolt head
         head_height (float): Height of the bolt head
         position (tuple): Position of the bolt head center (x, y, z)
         rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
         direction (tuple): Direction vector for bolt orientation
+        from_top (bool): Whether the origin is the top or bottom of the head
         countersink (bool): Whether the head is a countersink (conical)
 
     Returns:
@@ -226,6 +228,8 @@ def bolt_shape(
         App.Vector(*direction),
     )
     # create head
+    if not from_top:
+        direction = tuple(-i for i in direction)
     if countersink:
         part = part.fuse(
             Part.makeCone(

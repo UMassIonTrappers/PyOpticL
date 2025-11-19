@@ -42,8 +42,18 @@ class OpticsWorkbench(Workbench):
         """
         import guiCommands
 
-        # self.toolbar = ["RerunMacro", "RedrawBaseplate", "ShowComponents", "ToggleDrawStyle", "ExportSTLs", "ExportCart", "ReloadModules", "GetOrientation", "GetPosition"] # A list of command names created in the line above
-        self.toolbar = ["ReloadModules"]
+        self.toolbar = [
+            "RerunMacro",
+            "RedrawBaseplate",
+            "ShowComponents",
+            "ToggleDrawStyle",
+            "ExportSTLs",
+            "ExportCart",
+            "ReloadModules",
+            "GetOrientation",
+            "GetPosition",
+        ]  # A list of command names created in the line above
+        # self.toolbar = ["ReloadModules"]
         self.appendToolbar(
             "PyOpticL Commands", self.toolbar
         )  # creates a new toolbar with your commands

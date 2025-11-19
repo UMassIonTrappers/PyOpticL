@@ -154,7 +154,7 @@ class Layout:
 
         return child
 
-    def calculate(self):
+    def compute_placement(self):
         """Calculate global placement of object"""
 
         obj = self.get_object()
@@ -164,13 +164,13 @@ class Layout:
         if obj.Parent != None:
             obj.Placement = obj.Parent.Placement * obj.Placement
 
-        obj.purgeTouched()  # prevent multiple recomputes
+        obj.purgeTouched()  # prevent triggering recompute
 
     def recompute(self):
         """Recursively recompute all children of this object"""
 
         obj = self.get_object()
-        self.calculate()
+        self.compute_placement()
 
         compute_list = obj.Children
         # sort by recompute priority
@@ -179,12 +179,6 @@ class Layout:
         )
         for child_obj in compute_list:
             child_obj.Proxy.recompute()
-            child_obj.purgeTouched()  # prevent multiple recomputes
-
-        # prevent multiple recomputes
-        obj.purgeTouched()
-        if obj.Parent != None:
-            obj.Parent.purgeTouched()
 
     # link built-in FreeCAD execute to internal recompute
     def execute(self, obj):
@@ -261,13 +255,16 @@ class Component(Layout):
 
         # add any sub-components defined in the template
         if hasattr(definition, "subcomponents"):
-            for comp, placement in definition.subcomponents():
-                self.add(comp, **placement)
+            for subcomponent in definition.subcomponents():
+                self.add(
+                    child=subcomponent.component,
+                    position=subcomponent.position,
+                    rotation=subcomponent.rotation,
+                )
 
-    def calculate(self):
-        """Calculate global placement of object and update shape"""
+    def compute_shape(self):
+        """Calculate and set the shape of the object"""
 
-        super().calculate()
         obj = self.get_object()
 
         # update object shape
@@ -287,11 +284,11 @@ class Component(Layout):
             # apply drilling
             for drill_obj in drill_objs:
                 if hasattr(drill_obj.Proxy, "drill"):
-                    Layout.calculate(drill_obj.Proxy)  # ensure drill is up to date
+                    drill_obj.Proxy.compute_placement()
                     drill_shape = drill_obj.Proxy.drill()
-                    drill_shape.Placement = drill_obj.Placement
-                    # convert to local coordinates
-                    drill_shape.Placement *= obj.Placement.inverse()
+                    drill_shape.Placement = (
+                        obj.Placement.inverse() * drill_obj.Placement
+                    )
                     shape = shape.cut(drill_shape)
 
             # apply placement and set final shape
@@ -299,7 +296,17 @@ class Component(Layout):
             obj.Shape = shape
 
         elif self.object_type == "Mesh" and hasattr(self, "mesh"):
-            obj.Mesh = self.mesh
+            mesh = self.mesh
+            mesh.Placement = obj.Placement
+            obj.Mesh = mesh
+
+        obj.purgeTouched()  # prevent triggering recompute
+
+    def recompute(self):
+        """Recursively recompute all children of this object"""
+
+        super().recompute()
+        self.compute_shape()
 
 
 # ViewProvider handles how the object is handled in the FreeCAD GUI

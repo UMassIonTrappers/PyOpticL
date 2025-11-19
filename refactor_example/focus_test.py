@@ -39,7 +39,7 @@ layout.add(
 layout.add(
     Component(
         label="Mirror 1",
-        definition=optomech.circular_lens(
+        definition=optomech.spherical_lens(
             diameter=dim(1, "in"),
             focal_length=dim(100, "mm"),
         ),
@@ -51,7 +51,7 @@ layout.add(
 layout.add(
     Component(
         label="Mirror 1",
-        definition=optomech.circular_lens(
+        definition=optomech.spherical_lens(
             diameter=dim(1, "in"),
             focal_length=dim(50, "mm"),
         ),

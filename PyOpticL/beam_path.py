@@ -194,19 +194,10 @@ class Beam_Segment(Layout):
         relative_direction = rotation.inverted().multVec(App.Vector(*global_direction))
         return np.array(relative_direction)
 
-    def recompute(self):
-        """
-        Recompute the beam segment
-        """
-        self.calculate()
-        obj = self.get_object()
-        obj.purgeTouched()
-
-    def calculate(self):
+    def compute_shape(self):
         """
         Calculate the beam segment properties
         """
-        super().calculate()
 
         obj = self.get_object()
         if obj.Parent != None and isinstance(obj.Parent.Proxy, Beam_Segment):
@@ -273,6 +264,16 @@ class Beam_Segment(Layout):
         else:
             self.make_property("FocalLength", "App::PropertyDistance", visible=True)
             obj.FocalLength = focal_length
+
+        obj.purgeTouched()  # prevent triggering recompute
+
+    def recompute(self):
+        """
+        Recompute the beam segment
+        """
+
+        super().compute_placement()
+        self.compute_shape()
 
 
 class Beam_Path(Layout):
@@ -391,21 +392,10 @@ class Beam_Path(Layout):
 
         return child
 
-    def recompute(self):
-        """
-        Recompute the beam path layout
-        """
-
-        self.calculate()
-        obj = self.get_object()
-        obj.purgeTouched()
-
-    def calculate(self):
+    def compute_path(self):
         """
         Calculate the beam path through the layout
         """
-
-        super().calculate()
 
         obj = self.get_object()
 
@@ -436,9 +426,19 @@ class Beam_Path(Layout):
 
         # check for loose ends and start simulation from there
         for beam in obj.BeamSegments:
-            Layout.calculate(beam.Proxy)  # update beam placement
+            beam.Proxy.compute_placement()
             if len(beam.Children) == 0:
                 self.step(beam.Proxy)
+
+        obj.purgeTouched()  # prevent triggering recompute
+
+    def recompute(self):
+        """
+        Recompute the beam path layout
+        """
+
+        super().compute_placement()
+        self.compute_path()
 
     def get_next_global(self, input_beam: Beam_Segment) -> tuple:
         """
@@ -546,18 +546,17 @@ class Beam_Path(Layout):
         Returns:
             interface (Interface): Interface of the child object
         """
-        proxy = child_object.Proxy
+        child = child_object.Proxy
         # gather all interfaces associated with the object
         object_children = []
         collect_children(child_object, object_children)
-        interfaces = proxy.interfaces()
-        for child in object_children:
-            proxy = child.Proxy
+        interfaces = child.interfaces()
+        for obj in object_children:
+            proxy = obj.Proxy
             if hasattr(proxy, "interfaces"):
                 interfaces.extend(proxy.interfaces())
         # get specified interface
-
-        return interfaces[proxy.interface_index]
+        return interfaces[child.interface_index]
 
     def handle_conflicts(self, last_beam: Beam_Segment, placed_obj: App.DocumentObject):
         """
@@ -633,7 +632,7 @@ class Beam_Path(Layout):
             # get object placement
             intercept = input_beam.get_constraint_position(distance=next_distance)
             intercept -= obj.Placement.Base  # convert to local coordinates
-            Layout.calculate(next_object.Proxy)  # update placement
+            next_object.Proxy.compute_placement()  # update placement
             object_rotation = next_object.Placement.Rotation
             offset = object_rotation.multVec(App.Vector(0, *next_object.Proxy.offset))
             object_position = intercept - next_interface.position + offset
@@ -645,14 +644,14 @@ class Beam_Path(Layout):
             self.handle_conflicts(input_beam, next_object)
 
         # get output beams from interaction
-        output_beams = next_interface.get_output_beams(input_beam)
         input_beam.distance = next_distance
+        output_beams = next_interface.get_output_beams(input_beam)
         beam_obj.ChildObject = next_object
         input_beam.recompute()
         for beam in output_beams:
             new_beam_obj = beam.get_object()
             obj.BeamSegments += [new_beam_obj]
-            Layout.calculate(beam)
+            beam.compute_placement()
             self.step(beam)
 
 
@@ -675,8 +674,8 @@ class Interface:
         position: tuple,
         rotation: tuple,
         diameter: dim = None,
-        dx: dim = None,
-        dy: dim = None,
+        width: dim = None,
+        height: dim = None,
         max_angle: float = 90,
         single_sided: bool = False,
     ):
@@ -690,12 +689,12 @@ class Interface:
         if diameter != None:
             self.shape = "circular"
             self.diameter = diameter
-        elif dx != None and dy != None:
+        elif width != None and height != None:
             self.shape = "rectangular"
-            self.dx = dx
-            self.dy = dy
+            self.width = width
+            self.height = height
         else:
-            raise ValueError("Either radius or dx and dy must be specified")
+            raise ValueError("Either radius or width and height must be specified")
 
         self.max_angle = max_angle
         self.single_sided = single_sided
@@ -777,7 +776,10 @@ class Interface:
             if np.linalg.norm(offset_vec) > self.diameter / 2:
                 return None
         elif self.shape == "rectangular":
-            if abs(offset_vec[0]) > self.dx / 2 or abs(offset_vec[1]) > self.dy / 2:
+            if (
+                abs(offset_vec[0]) > self.width / 2
+                or abs(offset_vec[1]) > self.height / 2
+            ):
                 return None
 
         return intercept
@@ -811,8 +813,8 @@ class Reflection(Interface):
         ref_polarization: float = None,
         ref_wavelengths: list = None,
         diameter: dim = None,
-        dx: dim = None,
-        dy: dim = None,
+        width: dim = None,
+        height: dim = None,
         max_angle: float = 90,
         single_sided: bool = False,
     ):
@@ -821,8 +823,8 @@ class Reflection(Interface):
             position=position,
             rotation=rotation,
             diameter=diameter,
-            dx=dx,
-            dy=dy,
+            width=width,
+            height=height,
             max_angle=max_angle,
             single_sided=single_sided,
         )
@@ -1082,8 +1084,8 @@ class Diffraction(Interface):
         diffracted_angle: float,
         diffracted_ratio: float,
         radius: dim = None,
-        dx: dim = None,
-        dy: dim = None,
+        width: dim = None,
+        height: dim = None,
         max_angle: float = 90,
     ):
 
@@ -1092,8 +1094,8 @@ class Diffraction(Interface):
             position=position,
             rotation=rotation,
             radius=radius,
-            dx=dx,
-            dy=dy,
+            width=width,
+            height=height,
             max_angle=max_angle,
             single_sided=False,
         )
