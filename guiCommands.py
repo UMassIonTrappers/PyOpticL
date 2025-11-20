@@ -2,6 +2,7 @@ import csv
 import math
 import re
 from inspect import cleandoc
+from itertools import count
 from pathlib import Path
 
 import FreeCAD as App
@@ -193,6 +194,22 @@ class Reload_Modules:
         return
 
 
+def get_position_of_selected():
+    selection = Gui.Selection.getSelectionEx()
+    points = []
+    for element in selection:
+        for feature in element.SubObjects:
+            if hasattr(feature, "Curve"):
+                if hasattr(feature.Curve, "Center"):
+                    points.append(feature.Curve.Center)
+                else:
+                    points.append(feature.CenterOfMass)
+            elif hasattr(feature, "Point"):
+                points.append(feature.Point)
+    points = np.array(points)
+    return np.mean(points, axis=0)
+
+
 class Load_Model_Dialog(QtGui.QDialog):
     def __init__(self):
         super(Load_Model_Dialog, self).__init__()
@@ -254,6 +271,8 @@ class Import_Model_Dialog(QtGui.QDialog):
                 Please define the optical center and orientation for the model.
                 To do this, select one or more edges whose centers match or frame the desired origin,
                 then orient the camera such as to view the model exactly from the desired front.
+                In general, optics should be centered at the optical center
+                and mounts should be centered on the optic or other logical mounting surface.
                 When ready, press 'Orient' to apply the new orientation.
                 When complete, the origin should be as desired and the front of the model should face +X (right).
                 If the orientation is incorrect, you may press 'Reset' to try again.
@@ -277,29 +296,14 @@ class Import_Model_Dialog(QtGui.QDialog):
 
     def orient(self):
         # get rotation from view
-        view_rotation = Gui.ActiveDocument.ActiveView.viewPosition().Rotation.inverted()
-        view_rotation = App.Rotation("XYZ", 90, 0, 90) * view_rotation
-        rotation = App.Placement(
-            App.Vector(0, 0, 0), view_rotation, App.Vector(0, 0, 0)
-        )
+        rotation = Gui.ActiveDocument.ActiveView.viewPosition().Rotation.inverted()
+        rotation = App.Rotation("XYZ", 90, 0, 90) * rotation
+        rotation = App.Placement(App.Vector(0, 0, 0), rotation, App.Vector(0, 0, 0))
 
         # get translation from selected features
-        selection = Gui.Selection.getSelectionEx()
-        translate = np.zeros(3)
-        count = 0
-        for element in selection:
-            for feature in element.SubObjects:
-                if hasattr(feature, "Curve"):
-                    if hasattr(feature.Curve, "Center"):
-                        translate -= feature.Curve.Center
-                    else:
-                        translate -= feature.CenterOfMass
-                elif hasattr(feature, "Point"):
-                    translate -= feature.Point
-                count += 1
-        translate /= count
+        translation = -get_position_of_selected()
         translation = App.Placement(
-            App.Vector(App.Vector(*translate)),
+            App.Vector(App.Vector(*translation)),
             App.Rotation("XYZ", 0, 0, 0),
             App.Vector(0, 0, 0),
         )
@@ -402,69 +406,6 @@ class Convert_Model:
         return
 
 
-class Get_Orientation:
-
-    def GetResources(self):
-        return {
-            "Pixmap": ":/icons/Std_DemoMode.svg",
-            "Accel": "Shift+G",
-            "MenuText": "Get Orientation Parameters for Part",
-        }
-
-    def Activated(self):
-        for obj in App.ActiveDocument.Objects:
-            if obj.TypeId == "App::Part":
-                break
-
-        mw = Gui.getMainWindow()
-        actions = mw.findChildren(QtGui.QAction)
-        for action in actions:
-            text = action.text()
-            if "1" in text and ".step" in text:
-                break
-        obj.Label = text[2:-5]
-
-        Mesh.export(
-            [obj],
-            "%sMod/PyOpticL/PyOpticL/stl/%s.stl" % (App.getUserAppDataDir(), obj.Label),
-        )
-
-        view_rot = Gui.ActiveDocument.ActiveView.viewPosition().Rotation
-        rot1 = view_rot.inverted()
-        rot2 = App.Rotation(App.Vector(0, 0, 1), 90)
-        rot3 = App.Rotation(App.Vector(0, 1, 0), 90)
-        final_rot = rot3 * rot2 * rot1
-
-        rot_xyz = np.round(final_rot.getYawPitchRoll()[::-1], 3)
-
-        selection = Gui.Selection.getSelectionEx()
-        translate = np.zeros(3)
-        count = 0
-        for element in selection:
-            for feature in element.SubObjects:
-                if hasattr(feature, "Curve"):
-                    if hasattr(feature.Curve, "Center"):
-                        translate += feature.Curve.Center
-                    else:
-                        translate += feature.CenterOfMass
-                elif hasattr(feature, "Point"):
-                    translate += feature.Point
-                count += 1
-        translate /= count
-        final_translate = final_rot.multVec(-App.Vector(*translate))
-
-        final_placement = App.Placement(final_translate, final_rot, App.Vector(0, 0, 0))
-        obj.Placement = final_placement
-
-        translate = np.round(final_placement.Base, 3)
-
-        print(
-            '_import_stl("%s.stl", (%.4g, %.4g, %.4g), (%.4g, %.4g, %.4g))'
-            % (obj.Label, *rot_xyz, *translate)
-        )
-        return
-
-
 class Get_Position:
 
     def GetResources(self):
@@ -475,30 +416,9 @@ class Get_Position:
         }
 
     def Activated(self):
-        for obj in App.ActiveDocument.Objects:
-            if obj.TypeId == "App::Part":
-                break
+        position = get_position_of_selected()
 
-        selection = Gui.Selection.getSelectionEx()
-        translate = np.zeros(3)
-        count = 0
-        for element in selection:
-            for feature in element.SubObjects:
-                if hasattr(feature, "Curve"):
-                    if hasattr(feature.Curve, "Center"):
-                        translate += feature.Curve.Center
-                    else:
-                        translate += feature.CenterOfMass
-                elif hasattr(feature, "Point"):
-                    translate += feature.Point
-                count += 1
-        translate /= count
-        if hasattr(obj, "Group"):
-            translate = obj.Placement.multVec(App.Vector(*translate))
-
-        translate = np.round(translate, 3)
-
-        print("(%.4g, %.4g, %.4g)" % (translate[0], translate[1], translate[2]))
+        print(f"Position: ({position[0]:.3f}, {position[1]:.3f}, {position[2]:.3f})")
         return
 
 
@@ -508,5 +428,4 @@ Gui.addCommand("ExportSTLs", Export_STLs())
 Gui.addCommand("ExportCart", Export_Cart())
 Gui.addCommand("ReloadModules", Reload_Modules())
 Gui.addCommand("ConvertModel", Convert_Model())
-Gui.addCommand("GetOrientation", Get_Orientation())
 Gui.addCommand("GetPosition", Get_Position())

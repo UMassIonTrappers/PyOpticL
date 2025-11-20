@@ -343,18 +343,3 @@ class ViewProvider:
             document.removeObject(child.Name)
 
         return True
-
-    def onChanged(self, vp, prop):
-        # propagate visibility changes to all children recursively
-        if prop == "Visibility":
-            try:
-                visible = bool(vp.Visibility)
-            except Exception:
-                return
-
-            obj = self.get_object()
-
-            children = []
-            collect_children(obj, children)
-            for child in children:
-                child.ViewObject.Visibility = visible

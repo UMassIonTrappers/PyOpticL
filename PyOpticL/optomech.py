@@ -37,9 +37,9 @@ class example_component:
 
     def __init__(
         self,
-        side_length: dim = dim(25, "mm"),
-        height: dim = dim(15, "mm"),
-        drill_depth: dim = dim(5, "mm"),
+        side_length: dim,
+        height: dim,
+        drill_depth: dim,
     ):
         """Initialize adjustable parameters"""
         self.side_length = side_length
@@ -116,7 +116,9 @@ class bolt:
         length (float): Length of the bolt including the head
         washer_diameter (float): Diameter of washer to include, None for no washer
         countersink (bool): Whether the bolt head is a countersink
-        head_tol (float): Additional diameter to add to bolt head for clearance
+        head_tolerance (float): Tolerance of the bolt head / washer diameter
+        extra_depth (float): Extra depth to add to the drilled hole
+        from_top (bool): Whether the origin is at the top or bottom of the bolt head
     """
 
     bolt_dimensions = {
@@ -150,7 +152,7 @@ class bolt:
         length: dim,
         washer_diameter: dim = None,
         countersink: bool = False,
-        head_tol: dim = dim(1, "mm"),
+        head_tolerance: dim = dim(1, "mm"),
         extra_depth: dim = dim(5, "mm"),
         from_top: bool = True,
     ):
@@ -159,7 +161,7 @@ class bolt:
         self.length = length
         self.washer_diameter = washer_diameter
         self.countersink = countersink
-        self.head_tol = head_tol
+        self.head_tolerance = head_tolerance
         self.extra_depth = extra_depth
         self.from_top = from_top
 
@@ -186,7 +188,7 @@ class bolt:
             head_diameter = self.washer_diameter
         else:
             head_diameter = dims["head_diameter"]
-        head_diameter += self.head_tol
+        head_diameter += self.head_tolerance
         part = bolt_shape(
             diameter=dims["tap_diameter"],
             height=self.length + self.extra_depth,
@@ -196,6 +198,52 @@ class bolt:
             direction=(0, 0, -1),
             countersink=self.countersink,
             from_top=self.from_top,
+        )
+        return part
+
+
+class alignment_pin:
+    """
+    Standard alignment pin
+
+    Args:
+        diameter (float): Diameter of the pin
+        length (float): Length of the pin
+        hole_tolerance (float): Tolerance in the hole diameter
+        depth_tolerance (float): Tolerance in the pin depth
+    """
+
+    object_group = "hardware"
+    object_icon = ""
+    object_color = (0.8, 0.8, 0.8)
+
+    def __init__(
+        self,
+        diameter: dim,
+        length: dim,
+        hole_tolerance: dim = dim(0.05, "mm"),
+        depth_tolerance: dim = dim(1, "mm"),
+    ):
+        self.diameter = diameter
+        self.length = length
+        self.hole_tolerance = hole_tolerance
+        self.depth_tolerance = depth_tolerance
+
+    def shape(self):
+        part = cylinder_shape(
+            diameter=self.diameter,
+            height=self.length,
+            position=(0, 0, -self.depth_tolerance / 2),
+            direction=(0, 0, -1),
+        )
+        return part
+
+    def drill(self):
+        part = cylinder_shape(
+            diameter=self.diameter + self.hole_tolerance,
+            height=self.length + self.depth_tolerance,
+            position=(0, 0, 0),
+            direction=(0, 0, -1),
         )
         return part
 
@@ -539,23 +587,41 @@ class mirror_mount_k05s1:
     object_color = (0.25, 0.25, 0.25)
 
     mesh = import_model("polaris-k05s1")
+    mount_position = (-8.017, 0.000, -12.700)
+    bolt_position = (-8.017, 0.000, -7.112)
+    pin_positions = [(-8.017, 5.000, -10.795), (-8.017, -5.000, -10.795)]
 
     def __init__(self, drill_depth: dim):
         self.drill_depth = drill_depth
 
     def subcomponents(self):
-        return [
+        extra_length = self.bolt_position[2] - self.mount_position[2]
+        components = [
             subcomponent(
                 component=Component(
                     label="Mounting Bolt",
                     definition=bolt(
                         "8_32",
-                        length=dim(5.588, "mm") + self.drill_depth,
+                        length=self.drill_depth + extra_length,
                         from_top=False,
                         extra_depth=0,
                     ),
                 ),
-                position=(-8.017, 0, -7.112),
+                position=self.bolt_position,
                 rotation=(0, 0, 0),
             )
         ]
+        for position in self.pin_positions:
+            components.append(
+                subcomponent(
+                    component=Component(
+                        label="Alignment Pin",
+                        definition=alignment_pin(
+                            diameter=dim(1.9, "mm"), length=dim(4, "mm")
+                        ),
+                    ),
+                    position=position,
+                    rotation=(0, 0, 0),
+                )
+            )
+        return components

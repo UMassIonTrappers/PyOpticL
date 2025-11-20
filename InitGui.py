@@ -44,14 +44,11 @@ class OpticsWorkbench(Workbench):
 
         self.toolbar = [
             "RerunMacro",
-            "RedrawBaseplate",
-            "ShowComponents",
             "ToggleDrawStyle",
             "ExportSTLs",
             "ExportCart",
             "ReloadModules",
             "ConvertModel",
-            "GetOrientation",
             "GetPosition",
         ]  # A list of command names created in the line above
         # self.toolbar = ["ReloadModules"]

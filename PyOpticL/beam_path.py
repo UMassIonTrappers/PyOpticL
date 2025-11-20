@@ -24,6 +24,9 @@ class Beam_Segment(Layout):
         focal_rate (float): Focal rate of beam (waist / focal length)
     """
 
+    object_group = "beam_path"
+    object_icon = beam_icon
+
     def __init__(
         self,
         index: int,
@@ -290,9 +293,8 @@ class Beam_Path(Layout):
         bound_parent (Layout): parent whose children this beam path should interact with
     """
 
-    object_type = "Part"  # FreeCAD object type
-    object_group = "beam_path"  # group name for management
-    object_icon = beam_icon  # icon for tree view
+    object_group = "beam_path"
+    object_icon = beam_icon
 
     def __init__(
         self,
