@@ -20,3 +20,4 @@ redstone/stl_workflow/*.step
 redstone/stl_workflow/*.FCStd
 redstone/stl_workflow/*.FCBak
 redstone/*
+PyOpticL/models/**/*.stl

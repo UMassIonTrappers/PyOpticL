@@ -325,6 +325,9 @@ class ViewProvider:
     def getIcon(self):
         return self.icon
 
+    def getDefaultDisplayMode(self):
+        return "Shaded"
+
     def claimChildren(self):
         obj = self.get_object()
         return obj.Children

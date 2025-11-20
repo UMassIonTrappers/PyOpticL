@@ -11,8 +11,7 @@ from PyOpticL.utils import (
     bolt_slot_shape,
     box_shape,
     cylinder_shape,
-    import_stl,
-    stl_path,
+    import_model,
     subcomponent,
 )
 
@@ -133,7 +132,7 @@ class bolt:
             head_diameter=dim(7, "mm"),
             head_height=dim(4.4, "mm"),
         ),
-        "14_20": dict(
+        "1/4_20": dict(
             clear_diameter=dim(0.26, "in"),
             tap_diameter=dim(0.201, "in"),
             head_diameter=dim(9.8, "mm"),
@@ -539,11 +538,7 @@ class mirror_mount_k05s1:
     object_icon = thorlabs_icon
     object_color = (0.25, 0.25, 0.25)
 
-    mesh = import_stl(
-        stl_path=stl_path / "POLARIS-K05S1-Step.stl",
-        translation=(-4.514, 0.254, -0.254),
-        rotation=(90, 0, -90),
-    )
+    mesh = import_model("polaris-k05s1")
 
     def __init__(self, drill_depth: dim):
         self.drill_depth = drill_depth

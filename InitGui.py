@@ -50,6 +50,7 @@ class OpticsWorkbench(Workbench):
             "ExportSTLs",
             "ExportCart",
             "ReloadModules",
+            "ConvertModel",
             "GetOrientation",
             "GetPosition",
         ]  # A list of command names created in the line above

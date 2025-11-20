@@ -1,13 +1,16 @@
 import csv
 import math
 import re
+from inspect import cleandoc
 from pathlib import Path
 
 import FreeCAD as App
 import FreeCADGui as Gui
+import ImportGui
 import Mesh
 import numpy as np
-from PySide import QtGui
+import Part
+from PySide import QtCore, QtGui
 
 from PyOpticL import beam_path, icons, layout, optomech, utils
 
@@ -190,6 +193,215 @@ class Reload_Modules:
         return
 
 
+class Load_Model_Dialog(QtGui.QDialog):
+    def __init__(self):
+        super(Load_Model_Dialog, self).__init__()
+        self.setWindowTitle("PyOpticL Model Conversion")
+
+        # file selector
+        self.filePathEdit = QtGui.QLineEdit()
+        self.browseBtn = QtGui.QPushButton("Browse...")
+        self.browseBtn.clicked.connect(self.selectFile)
+
+        fileLayout = QtGui.QHBoxLayout()
+        fileLayout.addWidget(self.filePathEdit)
+        fileLayout.addWidget(self.browseBtn)
+
+        # name input
+        self.nameEdit = QtGui.QLineEdit()
+
+        # checkbox
+        self.externalSave = QtGui.QCheckBox("Save to external library (recommended)")
+        self.externalSave.setChecked(True)
+
+        # buttons
+        self.btnBox = QtGui.QDialogButtonBox(
+            QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel
+        )
+        self.btnBox.accepted.connect(self.accept)
+        self.btnBox.rejected.connect(self.reject)
+
+        # widget layout
+        layout = QtGui.QFormLayout()
+        layout.addRow("Select Model:", fileLayout)
+        layout.addRow("Model Name:", self.nameEdit)
+        layout.addRow(self.externalSave)
+        layout.addRow(self.btnBox)
+
+        self.setLayout(layout)
+
+    def selectFile(self):
+        filename, _ = QtGui.QFileDialog.getOpenFileName(self, "Select File")
+        if filename:
+            self.filePathEdit.setText(filename)
+
+
+class Import_Model_Dialog(QtGui.QDialog):
+    def __init__(self, import_object, import_name, external_save):
+        super(Import_Model_Dialog, self).__init__()
+
+        self.import_object = import_object
+        self.import_name = import_name
+        self.external_save = external_save
+
+        self.setWindowTitle("PyOpticL Model Conversion")
+        self.setModal(False)
+        self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.WindowStaysOnTopHint)
+
+        self.instructions = QtGui.QLabel(
+            cleandoc(
+                """
+                Please define the optical center and orientation for the model.
+                To do this, select one or more edges whose centers match or frame the desired origin,
+                then orient the camera such as to view the model exactly from the desired front.
+                When ready, press 'Orient' to apply the new orientation.
+                When complete, the origin should be as desired and the front of the model should face +X (right).
+                If the orientation is incorrect, you may press 'Reset' to try again.
+                """
+            )
+        )
+        self.orient_button = QtGui.QPushButton("Orient")
+        self.orient_button.clicked.connect(self.orient)
+        self.reset_button = QtGui.QPushButton("Reset")
+        self.reset_button.clicked.connect(self.reset)
+        self.save_button = QtGui.QPushButton("Confirm and Save")
+        self.save_button.clicked.connect(self.save)
+        self.save_button.setEnabled(False)
+
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(self.instructions)
+        layout.addWidget(self.orient_button)
+        layout.addWidget(self.reset_button)
+        layout.addWidget(self.save_button)
+        self.setLayout(layout)
+
+    def orient(self):
+        # get rotation from view
+        view_rotation = Gui.ActiveDocument.ActiveView.viewPosition().Rotation.inverted()
+        view_rotation = App.Rotation("XYZ", 90, 0, 90) * view_rotation
+        rotation = App.Placement(
+            App.Vector(0, 0, 0), view_rotation, App.Vector(0, 0, 0)
+        )
+
+        # get translation from selected features
+        selection = Gui.Selection.getSelectionEx()
+        translate = np.zeros(3)
+        count = 0
+        for element in selection:
+            for feature in element.SubObjects:
+                if hasattr(feature, "Curve"):
+                    if hasattr(feature.Curve, "Center"):
+                        translate -= feature.Curve.Center
+                    else:
+                        translate -= feature.CenterOfMass
+                elif hasattr(feature, "Point"):
+                    translate -= feature.Point
+                count += 1
+        translate /= count
+        translation = App.Placement(
+            App.Vector(App.Vector(*translate)),
+            App.Rotation("XYZ", 0, 0, 0),
+            App.Vector(0, 0, 0),
+        )
+
+        # update object placement
+        self.import_object.Placement = rotation * translation
+
+        self.save_button.setEnabled(True)
+
+    def reset(self):
+        self.save_button.setEnabled(False)
+        self.import_object.Placement = App.Placement()
+
+    def save(self):
+        # select folder
+        if self.external_save:
+            save_path = QtGui.QFileDialog.getExistingDirectory(
+                None, "Select Folder to Save Model"
+            )
+
+            # validate path
+            if not save_path:
+                App.Console.PrintError("No folder selected. Model not saved.\n")
+                return
+            output_path = Path(save_path) / self.import_name
+        else:
+            output_path = (
+                Path(App.getUserAppDataDir())
+                / "Mod"
+                / "PyOpticL"
+                / "PyOpticL"
+                / "models"
+                / self.import_name
+            )
+
+        # check if folder already exists
+        if output_path.is_dir():
+            App.Console.PrintError("Folder already exists. Model not saved.\n")
+            return
+
+        # create output folder and save STEP file
+        output_path.mkdir()
+        step_path = output_path / (self.import_name + ".step")
+        Part.export([self.import_object], str(step_path))
+
+        self.close()
+
+
+class Convert_Model:
+
+    def GetResources(self):
+        return {
+            "Pixmap": ":/icons/Std_DemoMode.svg",
+            "Accel": "Shift+G",
+            "MenuText": "Create PyOpticL Model from STEP File",
+        }
+
+    def Activated(self):
+        dialog = Load_Model_Dialog()
+        result = dialog.exec_()
+
+        if result:
+            # retrieve values when user presses OK
+            selected_file = Path(dialog.filePathEdit.text())
+            name_value = dialog.nameEdit.text()
+            external_save = dialog.externalSave.isChecked()
+
+            # check for valid inputs
+            if not selected_file.is_file():
+                App.Console.PrintError("Invalid file selected.\n")
+                return
+            if not name_value:
+                App.Console.PrintError("Model name cannot be empty.\n")
+                return
+
+            # create / clean new document
+            if "PyOpticL Model Conversion" in App.listDocuments():
+                App.setActiveDocument("PyOpticL Model Conversion")
+                for obj in App.ActiveDocument.Objects:
+                    App.ActiveDocument.removeObject(obj.Name)
+            else:
+                App.newDocument("PyOpticL Model Conversion")
+            document = App.ActiveDocument
+
+            # import selected file
+            shape = Part.read(str(selected_file))
+            import_object = document.addObject("Part::Feature", name_value)
+            import_object.Shape = shape
+
+            # show confirm orientation dialog
+            global confirm_dialog
+            confirm_dialog = Import_Model_Dialog(
+                import_object, name_value, external_save
+            )
+            confirm_dialog.show()
+
+            Gui.ActiveDocument.ActiveView.setAxisCross(True)  # show axis cross
+            Gui.ActiveDocument.ActiveView.fitAll()
+
+        return
+
+
 class Get_Orientation:
 
     def GetResources(self):
@@ -295,5 +507,6 @@ Gui.addCommand("ToggleDrawStyle", Toggle_Draw_Style())
 Gui.addCommand("ExportSTLs", Export_STLs())
 Gui.addCommand("ExportCart", Export_Cart())
 Gui.addCommand("ReloadModules", Reload_Modules())
+Gui.addCommand("ConvertModel", Convert_Model())
 Gui.addCommand("GetOrientation", Get_Orientation())
 Gui.addCommand("GetPosition", Get_Position())

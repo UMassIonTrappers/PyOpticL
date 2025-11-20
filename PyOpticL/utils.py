@@ -3,10 +3,11 @@ from pathlib import Path
 
 import FreeCAD as App
 import Mesh
+import MeshPart
 import numpy as np
 import Part
 
-stl_path = Path(__file__).parent / "stl"
+models_dir = Path(__file__).parent / "models"
 
 subcomponent = namedtuple("subcomponent", ["component", "position", "rotation"])
 
@@ -334,16 +335,40 @@ def bolt_slot_shape(
     return part
 
 
-def import_stl(
-    stl_path: str | Path, translation: tuple, rotation: tuple, scale=1, internal=False
+def import_model(
+    name: str,
+    directory: Path | str = models_dir,
 ) -> Mesh.Mesh:
+    """
+    Import a mesh model from a PyOpticL specific models directory
+
+    Args:
+        name (str): Name of the model to import
+        directory (Path | str): Path to the models directory (defaults to internal models directory)
+
+    Returns:
+        Mesh.Mesh: The imported mesh object
+    """
+
+    directory = Path(directory)
+    model_path = directory / name
+
+    # validate files
+    if not directory.is_dir():
+        raise FileNotFoundError(f"Models directory not found")
+    if not model_path.is_dir():
+        raise FileNotFoundError(f"Model not found in directory")
+    if not (model_path / (f"{name}.step")).is_file():
+        raise FileNotFoundError(f"Model STEP file not found")
+
+    if not (model_path / (f"{name}.stl")).is_file():
+        shape = Part.read(str(model_path / (f"{name}.step")))
+        mesh = MeshPart.meshFromShape(
+            Shape=shape, LinearDeflection=0.1, AngularDeflection=0.5
+        )
+        mesh.write(str(model_path / (f"{name}.stl")))
+
     # read mesh from file
-    mesh = Mesh.read(str(stl_path))
-    # scale using transformation matrix
-    mat = App.Matrix()
-    mat.scale(App.Vector(scale, scale, scale))
-    mesh.transform(mat)
-    # apply rotation and translation
-    mesh.rotate(*np.deg2rad(rotation))
-    mesh.translate(*translation)
+    mesh = Mesh.read(str(model_path / (f"{name}.stl")))
+
     return mesh
