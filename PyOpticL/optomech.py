@@ -119,6 +119,7 @@ class bolt:
         head_tolerance (float): Tolerance of the bolt head / washer diameter
         extra_depth (float): Extra depth to add to the drilled hole
         from_top (bool): Whether the origin is at the top or bottom of the bolt head
+        slot_length (float): Length of slot drilling a slot, None for no slot
     """
 
     bolt_dimensions = {
@@ -155,6 +156,7 @@ class bolt:
         head_tolerance: dim = dim(1, "mm"),
         extra_depth: dim = dim(5, "mm"),
         from_top: bool = True,
+        slot_length: dim = None,
     ):
 
         self.type = type
@@ -164,6 +166,10 @@ class bolt:
         self.head_tolerance = head_tolerance
         self.extra_depth = extra_depth
         self.from_top = from_top
+        self.slot_length = slot_length
+
+        if countersink and slot_length != None:
+            raise ValueError("Bolt does not support both slot and countersink")
 
         if washer_diameter != 0 and countersink:
             raise ValueError("Bolt does not support both washer and countersink")
@@ -189,16 +195,28 @@ class bolt:
         else:
             head_diameter = dims["head_diameter"]
         head_diameter += self.head_tolerance
-        part = bolt_shape(
-            diameter=dims["tap_diameter"],
-            height=self.length + self.extra_depth,
-            head_diameter=head_diameter,
-            head_height=dims["head_height"],
-            position=(0, 0, 0),
-            direction=(0, 0, -1),
-            countersink=self.countersink,
-            from_top=self.from_top,
-        )
+        if self.slot_length == None:
+            part = bolt_shape(
+                diameter=dims["tap_diameter"],
+                height=self.length + self.extra_depth,
+                head_diameter=head_diameter,
+                head_height=dims["head_height"],
+                position=(0, 0, 0),
+                direction=(0, 0, -1),
+                countersink=self.countersink,
+                from_top=self.from_top,
+            )
+        else:
+            part = bolt_slot_shape(
+                diameter=dims["tap_diameter"],
+                height=self.length + self.extra_depth,
+                head_diameter=head_diameter,
+                head_height=dims["head_height"],
+                slot_length=self.slot_length,
+                position=(0, 0, 0),
+                direction=(0, 0, -1),
+                from_top=self.from_top,
+            )
         return part
 
 
@@ -567,6 +585,47 @@ class polarizing_beam_splitter_cube:
             )
         )
         return part
+
+
+################################
+### Custom Adapters / Mounts ###
+################################
+
+# class skate_mount:
+#     """
+#     A simple glue-on mount for rectangular optics
+
+#     Args:
+#         height (float): The height of the mount
+#         min_width (float): The minimum width of the mount
+#         bolt_spacing (float): The spacing between the two mount holes of the adapter
+#         bolt_walls (float): The minimum thickness of the walls around the bolt holes
+#         recess_depth (float): The depth of the recess for the optic
+#         slot_length (float): The length of the slot for the bolts, 0 for no slot
+#     """
+
+#     object_group = "adapter"
+#     object_color = (0.25, 0.25, 0.25)
+
+#     def __init__(
+#         self,
+#         height: dim,
+#         min_width: dim,
+#         bolt_spacing: dim,
+#         bolt_walls: dim = dim(2, "mm"),
+#         recess_depth: dim = dim(2, "mm"),
+#         slot_length: dim = dim(0, "mm"),
+#     ):
+#         self.height = height
+#         self.min_width = min_width
+#         self.bolt_spacing = bolt_spacing
+#         self.bolt_walls = bolt_walls
+#         self.recess_depth = recess_depth
+#         self.slot_length = slot_length
+
+#     def shape(self):
+#         width = self.bolt_spacing + 2 * self.bolt_walls
+#         length = min(self.min_width
 
 
 ###########################

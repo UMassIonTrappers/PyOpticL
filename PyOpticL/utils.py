@@ -276,10 +276,11 @@ def bolt_slot_shape(
     height: float,
     head_diameter: float,
     head_height: float,
-    length: float,
+    slot_length: float,
     position: tuple = (0, 0, 0),
     rotation: tuple = (0, 0, 0),
     direction: tuple = (0, 0, -1),
+    from_top: bool = True,
 ) -> Part.Shape:
     """
     Create a bolt slot shape
@@ -293,6 +294,7 @@ def bolt_slot_shape(
         position (tuple): Position of the slot center (x, y, z)
         rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
         direction (tuple): Direction vector for slot orientation
+        from_top (bool): Whether the origin is the top or bottom of the bolt head
 
     Returns:
         Part.Shape: The created bolt slot part
@@ -300,15 +302,15 @@ def bolt_slot_shape(
 
     # create shape
     part = box_shape(
-        dimensions=(length + diameter, diameter, height),
+        dimensions=(slot_length + diameter, diameter, height),
         position=position,
         center=(0, 0, 1),
     )
     part = part.fuse(
         box_shape(
-            dimensions=(length + head_diameter, head_diameter, head_height),
+            dimensions=(slot_length + head_diameter, head_diameter, head_height),
             position=position,
-            center=(0, 0, 1),
+            center=(0, 0, 1) if from_top else (0, 0, -1),
         )
     )
     # remove internal edges
