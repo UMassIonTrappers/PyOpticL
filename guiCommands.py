@@ -117,21 +117,22 @@ class Export_Cart():
         types = []
         objs = []
         for obj in doc.Objects:
-            if hasattr(obj.Proxy, 'part_numbers'):
-                if '' in obj.Proxy.part_numbers:
-                    name = obj.Label
-                    temp = obj
-                    while True:
-                        if hasattr(temp, "ParentObject"):
-                            name = temp.ParentObject.Label + " - " + name
-                            temp = temp.ParentObject
-                        else:
-                            break
-                    App.Console.PrintMessage(name + " is missing a part number\n")
-                parts.extend(obj.Proxy.part_numbers)
-                for num in obj.Proxy.part_numbers:
-                    types.append((type(obj.Proxy).__name__, num))
-                objs.extend([obj]*len(obj.Proxy.part_numbers))
+            if hasattr(obj, "Proxy"):
+                if hasattr(obj.Proxy, 'part_numbers'):
+                    if '' in obj.Proxy.part_numbers:
+                        name = obj.Label
+                        temp = obj
+                        while True:
+                            if hasattr(temp, "ParentObject"):
+                                name = temp.ParentObject.Label + " - " + name
+                                temp = temp.ParentObject
+                            else:
+                                break
+                        App.Console.PrintMessage(name + " is missing a part number\n")
+                    parts.extend(obj.Proxy.part_numbers)
+                    for num in obj.Proxy.part_numbers:
+                        types.append((type(obj.Proxy).__name__, num))
+                    objs.extend([obj]*len(obj.Proxy.part_numbers))
 
         cart = open(str(path / "Thorlabs_Cart.csv"), 'w', newline='')
         list = open(str(path / "Parts_List.csv"), 'w', newline='')
