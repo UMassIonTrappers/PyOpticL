@@ -54,21 +54,22 @@ See our recent preprint for more details about our results using these laser sou
 
 1. **Install FreeCAD, Python, and Git**
 
-2. **Add PyOpticL as an custom addon repository in FreeCAD**  
-	Under _Edit>Preferences>Addons>Custom Repositories,_ enter the following information: \
+2. **Add PyOpticL as a custom addon repository in FreeCAD**  
+	Under _Edit>Preferences>Addon Manager>Custom Repositories,_ click the plus icon and enter the following information: \
     _Repository URL:_ https://github.com/UMassIonTrappers/PyOpticL.git \
-    _Branch:_ main
+    _Branch:_ main \
+   Press _OK_ to save settings
 
-3. **Install the PyOpticL library**
+4. **Install the PyOpticL library**
     In the Addon Manager _(Tools>Addon Manager),_ search for "PyOpticL" and click install.
 		
-4. **Check everything is setup correctly**  
-   You should now be able to re-launch FreeCAD and see the "PyOpticL" workbench in the dropdown
+5. **Check everything is setup correctly**  
+   You should now be able to re-launch FreeCAD and see the "PyOpticL" workbench in the workbench dropdown
    <!-- <img width="250" alt="Screenshot 2023-10-27 225345" src="https://github.com/user-attachments/assets/7a43cac3-7d3b-4a3b-8e5f-189f39729251"> -->
 
-5. **Check out the [wiki](https://github.com/UMassIonTrappers/PyOpticL/wiki) for guides on how to [get started](https://github.com/UMassIonTrappers/PyOpticL/wiki#quickstart-guide) and examples**
+6. **Check out the [wiki](https://github.com/UMassIonTrappers/PyOpticL/wiki) for guides on how to [get started](https://github.com/UMassIonTrappers/PyOpticL/wiki#quickstart-guide) and examples**
 
-6. **Read the [docs](https://github.com/UMassIonTrappers/PyOpticL/tree/main/docs) library documentation**
+7. **Read the [docs](https://github.com/UMassIonTrappers/PyOpticL/tree/main/docs) library documentation**
 
 
 ___
