@@ -71,7 +71,12 @@ See our recent preprint for more details about our results using these laser sou
 
 7. **Read the [docs](https://github.com/UMassIonTrappers/PyOpticL/tree/main/docs) library documentation**
 
+### Pre-made Layouts
 
+Macro files for pre-made layouts can be found in the PyOpticL directory. This can be found in: \
+```<FreeCAD User Data Directory>/Mod/PyOpticL/Design``` \
+On windows this is: \
+```%APPDATA%\FreeCAD\Mod\PyOpticL\Design```
 ___
 
 
