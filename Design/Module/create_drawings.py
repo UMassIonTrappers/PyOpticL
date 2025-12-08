@@ -39,7 +39,17 @@ bolt_14_20 = {
     "clear_dia_string": '6.60 mm, unthreaded'
 }
 
-bolts = [bolt_4_40, bolt_8_32, bolt_14_20]
+bolt_m6 = {
+    "name": "M6",
+    "clear_dia":6.5,
+    "tap_dia":5.0,
+    "head_dia":10.0,
+    "head_dz":8.0,
+    "washer_dia":12.5,
+    "clear_dia_string": '6.50 mm, unthreaded'
+}
+
+bolts = [bolt_4_40, bolt_8_32, bolt_14_20, bolt_m6]
 
 doc = FreeCAD.ActiveDocument
 FreeCAD.Console.SetStatus("Console", "Err", False)
