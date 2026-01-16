@@ -317,6 +317,7 @@ class ViewProvider:
         proxy = obj.Object.Proxy
         self.document_id = proxy.document_id
         self.object_id = proxy.object_id
+        obj.DisplayMode = "Shaded"
 
     def get_object(self) -> App.DocumentObject:
         document = App.getDocument(self.document_id)

@@ -14,14 +14,19 @@ class Beam_Segment(Layout):
     """
     Class representing a beam segment
 
+    Note: There are two options for defining the gaussian beam parameters:
+        1. Specify waist and waist_position
+        2. Specify rayleigh_range and waist_position
+
     Args:
         index (int): Index of the beam
         direction (tuple): (x, y, z) normalized direction vector
-        waist (float): Beam waist in mm
         wavelength (float): Wavelength of the beam in nm
         polarization (string): Polarization angle of the beam in degrees
         power (float): Power of the beam in W
-        focal_rate (float): Focal rate of beam (waist / focal length)
+        waist_position (float): Position of the beam waist in mm
+        waist (float): Beam waist radius in mm
+        rayleigh_range (float): Rayleigh range in mm
     """
 
     object_group = "beam_path"
@@ -31,11 +36,12 @@ class Beam_Segment(Layout):
         self,
         index: int,
         direction: tuple[float],
-        waist: float,
         wavelength: float,
         polarization: float,
         power: float,
-        focal_rate: float,
+        waist_position: dim,
+        waist: dim = None,
+        rayleigh_range: dim = None,
     ):
 
         super().__init__(
@@ -44,15 +50,25 @@ class Beam_Segment(Layout):
 
         self.index = index
         self.direction = tuple(direction)
-        self.waist = waist
         self.wavelength = wavelength
         self.polarization = polarization
         self.power = power
-        self.focal_rate = focal_rate
+        self.waist_position = waist_position
         self.distance = 0  # to be set during path calculation
+
+        if rayleigh_range is not None:
+            self.rayleigh_range = rayleigh_range
+        elif waist is not None:
+            self.rayleigh_range = np.pi * waist**2 / (wavelength * 1e-6)
+        else:
+            raise ValueError("Either waist or rayleigh_range must be specified")
 
         # add properties for displaying beam parameters in FreeCAD
         self.make_property("BeamWaist", "App::PropertyLength", visible=True)
+        self.make_property("WaistPosition", "App::PropertyLength", visible=True)
+        self.make_property("InitialRadius", "App::PropertyLength", visible=True)
+        self.make_property("FinalRadius", "App::PropertyLength", visible=True)
+        self.make_property("RayleighRange", "App::PropertyLength", visible=True)
         self.make_property("Wavelength", "App::PropertyLength", visible=True)
         self.make_property("PolarizationAngle", "App::PropertyAngle", visible=True)
         self.make_property("Power", "App::PropertyPower", visible=True)
@@ -197,6 +213,61 @@ class Beam_Segment(Layout):
         relative_direction = rotation.inverted().multVec(App.Vector(*global_direction))
         return np.array(relative_direction)
 
+    def get_q_parameter(self) -> complex:
+        """
+        Calculate the complex beam parameter
+
+        Returns:
+            q_param (complex): Complex beam parameter (mm units)
+        """
+
+        return complex(-self.waist_position, self.rayleigh_range)
+
+    def get_beam_radius(self, q_param) -> float:
+        """
+        Calculate the beam radius at a given complex beam parameter
+
+        Args:
+            q_param (complex): Complex beam parameter (mm units)
+
+        Returns:
+            w_f (float): Beam radius at the given position in mm
+        """
+
+        z_f = q_param.real
+        z_R = q_param.imag
+        w_0 = np.sqrt(self.wavelength * 1e-6 * z_R / np.pi)  # beam waist
+        w_f = w_0 * np.sqrt(1 + (z_f / z_R) ** 2)  # beam radius
+        return w_f
+
+    def get_next_beam_point(self, q_param, ddw: float) -> float:
+        """
+        Calculate the next beam point based on change in slope
+        Useful for reducing number of conical sections needed for gaussian beam representation
+
+        Args:
+            q_param (complex): Current complex beam parameter
+            ddw (float): Minimum change in beam slope
+
+        Returns:
+            dz (float): Distance to next beam point in meters
+        """
+
+        z_i = q_param.real
+        z_R = q_param.imag
+        w_0 = np.sqrt(self.wavelength * 1e-6 * z_R / np.pi)  # beam waist
+
+        dw_max = w_0 / z_R - 1e-12  # far-field slope limit
+        dw = w_0 * (z_i / z_R) / np.sqrt(z_i**2 + z_R**2)  # current slope
+        dw_f = min(max(dw + ddw, -dw_max), dw_max)  # target slope
+
+        if dw_f != 0:  # prevent division by zero if slope is exactly zero
+            z_f = z_R / np.sqrt((w_0 / (z_R * dw_f)) ** 2 - 1) * np.sign(dw_f)
+        else:
+            z_f = 0.0
+
+        return z_f - z_i
+
     def compute_shape(self):
         """
         Calculate the beam segment properties
@@ -210,63 +281,61 @@ class Beam_Segment(Layout):
         else:
             self.relative_power = 1.0
 
-        # generate segment shape
-        if np.isclose(self.focal_rate, 0):
-            focal_length = 0
-            shape = Part.makeCylinder(
-                self.waist / 2,
-                self.distance,
-                App.Vector(0, 0, 0),
-                App.Vector(*self.direction),
-            )
-        else:
-            # use conical sections to represent focusing/defocusing beams
-            start_diameter = self.waist
-            end_diameter = self.waist - self.distance * self.focal_rate
-            focal_length = self.waist / self.focal_rate
-            if self.distance > focal_length > 0:
-                distance = focal_length
-            else:
-                distance = self.distance
-            shape = Part.makeCone(
-                start_diameter / 2,
-                max(end_diameter / 2, 0),
-                distance,
-                App.Vector(0, 0, 0),
-                App.Vector(*self.direction),
-            )
-            # add cone for remaining distance if focal point is within segment
-            if end_diameter < 0 and not np.isclose(end_diameter, 0):
-                shape = shape.fuse(
-                    Part.makeCone(
-                        0,
-                        -end_diameter / 2,
-                        self.distance - focal_length,
-                        distance * App.Vector(*self.direction),
-                        App.Vector(*self.direction),
-                    )
+        # generate segment shape using conical sections
+        shapes = []
+        q_param = self.get_q_parameter()  # initial q parameter
+        current_position = 0  # track position along beam segments
+        while current_position < self.distance:
+            # TODO: may want to make ddw a user-defined parameter
+            dz = self.get_next_beam_point(q_param, 1e-3)  # get next segment distance
+            dz = min(dz, self.distance - current_position)  # clip to remaining distance
+            # calculate starting and ending radius for segment
+            radius1 = self.get_beam_radius(q_param)
+            radius2 = self.get_beam_radius(q_param + dz)
+            # create conical section
+            if radius1 == radius2:  # freecad does not support cones with equal radii
+                shape = Part.makeCylinder(
+                    radius1,
+                    dz,
+                    App.Vector(*self.direction) * current_position,
+                    App.Vector(*self.direction),
                 )
+            else:
+                shape = Part.makeCone(
+                    radius1,
+                    radius2,
+                    dz,
+                    App.Vector(*self.direction) * current_position,
+                    App.Vector(*self.direction),
+                )
+            shapes.append(shape)
+            # step q_param and update position
+            q_param += dz
+            current_position += dz
+        shape = Part.makeCompound(shapes)  # combine all segments
 
         # apply placement and set shape
         shape.Placement = obj.Placement
         obj.Shape = shape
+        # color and transparency based on wavelength and power
         obj.ViewObject.ShapeColor = wavelength_to_rgb(self.wavelength)
         obj.ViewObject.Transparency = int(100 * (1 - self.relative_power))
 
-        # set property values for display
-        obj.BeamWaist = self.waist
+        # get gaussian beam parameters
+        q_param = self.get_q_parameter()
+        waist = self.get_beam_radius(q_param + self.waist_position)
+        initial_radius = self.get_beam_radius(q_param)
+        final_radius = self.get_beam_radius(q_param + self.distance)
+        # set readout properties
         obj.Wavelength = App.Units.Quantity(f"{self.wavelength} nm")
         obj.PolarizationAngle = App.Units.Quantity(f"{self.polarization} deg")
         obj.Power = App.Units.Quantity(f"{self.power} W")
         obj.Distance = self.distance
-        if hasattr(obj, "FocalLength"):
-            obj.removeProperty("FocalLength")
-        if focal_length == 0:
-            self.make_property("FocalLength", "App::PropertyString", visible=True)
-            obj.FocalLength = "Collimated"
-        else:
-            self.make_property("FocalLength", "App::PropertyDistance", visible=True)
-            obj.FocalLength = focal_length
+        obj.BeamWaist = App.Units.Quantity(f"{waist} mm")
+        obj.InitialRadius = App.Units.Quantity(f"{initial_radius} mm")
+        obj.FinalRadius = App.Units.Quantity(f"{final_radius} mm")
+        obj.WaistPosition = App.Units.Quantity(f"{self.waist_position} mm")
+        obj.RayleighRange = App.Units.Quantity(f"{self.rayleigh_range} mm")
 
         obj.purgeTouched()  # prevent triggering recompute
 
@@ -283,13 +352,18 @@ class Beam_Path(Layout):
     """
     Class representing a beam path layout object
 
+    Note: There are two options for defining the gaussian beam parameters:
+        1. Specify waist and waist_position
+        2. Specify rayleigh_range and waist_position
+
     Args:
         label (str): Label for the beam path
-        waist (dim): Initial beam waist in mm
         wavelength (float): Wavelength of the beam in nm
         polarization (float): Polarization angle in degrees
         power (float): Power of the beam in W
-        focal_length (dim): Focal length of the beam path in mm
+        waist_position (float): Position of the beam waist in mm
+        waist (float): Beam waist radius in mm
+        rayleigh_range (float): Rayleigh range in mm
         bound_parent (Layout): parent whose children this beam path should interact with
     """
 
@@ -299,11 +373,12 @@ class Beam_Path(Layout):
     def __init__(
         self,
         label: str,
-        waist: dim = dim(1, "mm"),
         wavelength: float = 635,
         polarization: float = 0,
         power: float = 1,
-        focal_length: dim = None,
+        waist_position: dim = dim(0, "mm"),
+        waist: dim = None,
+        rayleigh_range: dim = None,
         bound_parent: Layout = None,
     ):
         super().__init__(
@@ -325,7 +400,13 @@ class Beam_Path(Layout):
         self.wavelength = wavelength
         self.polarization = polarization
         self.power = power
-        self.focal_length = focal_length
+        self.waist_position = waist_position
+        if rayleigh_range is not None:
+            self.rayleigh_range = rayleigh_range
+        elif waist is not None:
+            self.rayleigh_range = np.pi * waist**2 / (wavelength * 1e-6)
+        else:
+            raise ValueError("Either waist or rayleigh_range must be specified")
 
     def set_parent(self, parent: Layout):
         """
@@ -410,18 +491,14 @@ class Beam_Path(Layout):
         # initialize input beam if none exist
         if len(obj.BeamSegments) == 0:
             direction = obj.BasePlacement.Rotation.multVec(App.Vector(1, 0, 0))
-            if self.focal_length != None:
-                focal_rate = self.waist / self.focal_length
-            else:
-                focal_rate = 0
             input_beam = Beam_Segment(
                 index=1,
                 direction=direction,
-                waist=self.waist,
                 wavelength=self.wavelength,
                 polarization=self.polarization,
                 power=self.power,
-                focal_rate=focal_rate,
+                waist_position=self.waist_position,
+                rayleigh_range=self.rayleigh_range,
             )
             super().add(input_beam, position=(0, 0, 0), rotation=(0, 0, 0))
             obj.BeamSegments += [input_beam.get_object()]
@@ -687,6 +764,8 @@ class Interface:
         rotation_obj = App.Rotation("XYZ", *rotation)
         self.normal = np.array(rotation_obj.multVec(App.Vector(1, 0, 0)))
 
+        self.abcd_matrix = [1, 0, 0, 1]  # identity matrix by default
+
         # define bound type
         if diameter != None:
             self.shape = "circular"
@@ -727,6 +806,25 @@ class Interface:
         rotation = parent_obj.Placement.Rotation
         global_normal = np.array(rotation.multVec(App.Vector(*self.normal)))
         return global_normal
+
+    def apply_abcd(self, incident_beam: Beam_Segment) -> tuple[float, float]:
+        """
+        Apply the ABCD matrix of the interface to an incident beam
+        Note: this also accounts for the distance traveled to the interface
+
+        Args:
+            incident_beam (Beam_Segment): Incident beam segment
+
+        Returns:
+            new_waist_position (float): New waist position relative to interface
+            new_rayleigh_range (float): New Rayleigh range of beam
+        """
+
+        waist_position = incident_beam.waist_position - incident_beam.distance
+        q_param = complex(-waist_position, incident_beam.rayleigh_range)
+        A, B, C, D = self.abcd_matrix
+        q_out = (A * q_param + B) / (C * q_param + D)
+        return -q_out.real, q_out.imag
 
     def get_intercept(self, incident_beam: Beam_Segment) -> np.ndarray[float] | None:
         """
@@ -898,9 +996,7 @@ class Reflection(Interface):
             reflect_polarization = incident_beam.polarization
 
         local_origin = incident_beam.get_relative_position(intercept)
-        waist = incident_beam.waist - incident_beam.distance * incident_beam.focal_rate
-        focal_rate = incident_beam.focal_rate * np.sign(waist)
-        waist = abs(waist)
+        waist_position, rayleigh_range = self.apply_abcd(incident_beam)
 
         output_beams = []
 
@@ -914,11 +1010,11 @@ class Reflection(Interface):
             transmitted_beam = Beam_Segment(
                 index=index,
                 direction=direction,
-                waist=waist,
                 wavelength=incident_beam.wavelength,
                 polarization=transmit_polarization,
                 power=incident_beam.power * transmit_ratio,
-                focal_rate=focal_rate,
+                waist_position=waist_position,
+                rayleigh_range=rayleigh_range,
             )
             incident_beam.add(transmitted_beam, origin=local_origin)
             output_beams.append(transmitted_beam)
@@ -939,11 +1035,11 @@ class Reflection(Interface):
             reflect_beam = Beam_Segment(
                 index=index,
                 direction=local_direction,
-                waist=waist,
                 wavelength=incident_beam.wavelength,
                 polarization=reflect_polarization,
                 power=incident_beam.power * reflect_ratio,
-                focal_rate=focal_rate,
+                waist_position=waist_position,
+                rayleigh_range=rayleigh_range,
             )
             incident_beam.add(reflect_beam, origin=local_origin)
             output_beams.append(reflect_beam)
@@ -985,6 +1081,8 @@ class Lens(Interface):
 
         self.focal_length = focal_length
 
+        self.abcd_matrix = [1, 0, -1 / focal_length, 1]
+
     def get_output_beams(self, incident_beam: Beam_Segment) -> list[Beam_Segment]:
         """
         Get the output beams from an incident beam interacting with the interface
@@ -1003,28 +1101,8 @@ class Lens(Interface):
         if intercept is None:
             return []
 
-        # calculate new focal rate and waist given input beam and lens focal length
         local_origin = incident_beam.get_relative_position(intercept)
-        waist = incident_beam.waist - incident_beam.distance * incident_beam.focal_rate
-        if np.isclose(incident_beam.focal_rate, 0):
-            focal_rate = waist / self.focal_length
-        else:
-            incident_focal_length = incident_beam.waist / incident_beam.focal_rate
-            denom = incident_focal_length + self.focal_length - incident_beam.distance
-            if np.isclose(denom, 0):
-                focal_rate = 0
-            else:
-                focal_length = (
-                    incident_focal_length
-                    * self.focal_length
-                    / (
-                        incident_focal_length
-                        + self.focal_length
-                        - incident_beam.distance
-                    )
-                )
-                focal_rate = waist / focal_length
-        waist = abs(waist)
+        waist_position, rayleigh_range = self.apply_abcd(incident_beam)
 
         # handle off-center interactions
         radial_vector = intercept - self.get_global_position()
@@ -1051,11 +1129,11 @@ class Lens(Interface):
         output_beam = Beam_Segment(
             index=incident_beam.index,
             direction=local_direction,
-            waist=waist,
             wavelength=incident_beam.wavelength,
             polarization=incident_beam.polarization,
             power=incident_beam.power,
-            focal_rate=focal_rate,
+            waist_position=waist_position,
+            rayleigh_range=rayleigh_range,
         )
         incident_beam.add(output_beam, origin=local_origin)
 

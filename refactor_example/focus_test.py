@@ -9,7 +9,7 @@ layout = Layout("Example Layout")
 beam_path = layout.add(
     Beam_Path(
         label="Beam Path",
-        waist=dim(5, "mm"),
+        waist=dim(1, "mm"),
         wavelength=670,
     ),
     position=(0, 0, 0),
@@ -19,7 +19,7 @@ beam_path = layout.add(
 layout.add(
     Beam_Path(
         label="Beam Path",
-        waist=dim(5, "mm"),
+        waist=dim(1, "mm"),
         wavelength=670,
     ),
     position=(dim(8, "mm"), 0, 0),
@@ -29,7 +29,7 @@ layout.add(
 layout.add(
     Beam_Path(
         label="Beam Path",
-        waist=dim(5, "mm"),
+        waist=dim(1, "mm"),
         wavelength=670,
     ),
     position=(dim(-8, "mm"), 0, 0),
@@ -38,9 +38,10 @@ layout.add(
 
 layout.add(
     Component(
-        label="Mirror 1",
+        label="f=100mm lens",
         definition=optomech.spherical_lens(
             diameter=dim(1, "in"),
+            thickness=dim(2, "mm"),
             focal_length=dim(100, "mm"),
         ),
     ),
@@ -50,9 +51,10 @@ layout.add(
 
 layout.add(
     Component(
-        label="Mirror 1",
+        label="f=50mm lens",
         definition=optomech.spherical_lens(
             diameter=dim(1, "in"),
+            thickness=dim(2, "mm"),
             focal_length=dim(50, "mm"),
         ),
     ),
