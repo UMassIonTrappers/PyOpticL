@@ -714,7 +714,7 @@ class Beam_Path(Layout):
             next_object.Proxy.compute_placement()  # update placement
             object_rotation = next_object.Placement.Rotation
             offset = object_rotation.multVec(App.Vector(0, *next_object.Proxy.offset))
-            object_position = intercept - next_interface.position + offset
+            object_position = intercept - next_interface.get_position_offset() + offset
             # apply placement
             next_object.BasePlacement.Base = App.Vector(*object_position)
             next_object.Proxy.placed = True
@@ -781,6 +781,17 @@ class Interface:
         self.single_sided = single_sided
         self.parent = None  # to be set when initialized in parent object
 
+    def get_position_offset(self) -> np.ndarray[float]:
+        """
+        Get the position offset of the interface relative to parent
+        Returns:
+            offset (np.ndarray): (x, y, z) coordinates of the interface relative to parent
+        """
+        global_normal = self.get_global_normal()
+        global_rotation = App.Rotation(App.Vector(1, 0, 0), App.Vector(*global_normal))
+        local_position = global_rotation.multVec(App.Vector(*self.position))
+        return np.array(local_position)
+
     def get_global_position(self) -> np.ndarray[float]:
         """
         Get the global position of the interface
@@ -791,7 +802,8 @@ class Interface:
 
         parent_obj = self.parent.get_object()
         position = parent_obj.Placement.Base
-        global_position = np.array(position) + self.position
+        local_position = self.get_position_offset()
+        global_position = np.array(position) + local_position
         return global_position
 
     def get_global_normal(self) -> np.ndarray[float]:
