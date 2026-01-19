@@ -21,6 +21,7 @@ beam_path.add(
         label="Mirror 2",
         definition=optomech.circular_sampler(
             ref_ratio=0.5,
+            thickness=dim(12, "mm"),
             diameter=dim(1, "in"),
         ),
     ),
@@ -33,8 +34,9 @@ beam_path.add(
     Component(
         label="Mirror 2",
         definition=optomech.circular_sampler(
-            ref_ratio=0.5,
-            diameter=dim(1, "in"),
+            diameter=dim(1, "in"),          
+            thickness=dim(6, "mm"),
+            ref_ratio=0.5,  
         ),
     ),
     beam_index=0b10,
@@ -43,3 +45,4 @@ beam_path.add(
 )
 
 layout.recompute()
+

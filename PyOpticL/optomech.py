@@ -324,7 +324,7 @@ class circular_reflector:
                 refractive_index_ratio= 1/self.refractive_index
             ),
             Reflection(
-                position=(-self.thickness/1.41, self.thickness/1.41, 0), # appears to be in global frame, but need to offset along normal
+                position=(-self.thickness, 0, 0), 
                 rotation=(0, 0, 0),
                 diameter=self.diameter,
                 ref_ratio=0,
