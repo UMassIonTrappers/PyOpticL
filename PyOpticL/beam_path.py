@@ -930,7 +930,7 @@ class Reflection(Interface):
         height: dim = None,
         max_angle: float = 90,
         single_sided: bool = False,
-        refractive_index_ratio: float = 1
+        refractive_index_ratio: float = 1,
     ):
 
         super().__init__(
@@ -941,7 +941,7 @@ class Reflection(Interface):
             height=height,
             max_angle=max_angle,
             single_sided=single_sided,
-           )
+        )
 
         if (ref_ratio != None and ref_ratio != 1) + (ref_polarization != None) + (
             ref_wavelengths != None
@@ -1022,16 +1022,24 @@ class Reflection(Interface):
                 index = incident_beam.index << 1  # handle beam splitting
             else:
                 index = incident_beam.index
-            
+
             # calculate refraction
-            rad = 1 - self.refractive_index_ratio**2 * ( 1- np.dot(global_normal, beam_direction)**2)
-            if rad < 0: 
-                pass
-                #total internal reflection
+            refraction_angle = 1 - self.refractive_index_ratio**2 * (
+                1 - np.dot(global_normal, beam_direction) ** 2
+            )
+            if refraction_angle < 0:
+                # TODO: handle total internal reflection
+                print(
+                    "Warning: Total internal reflection occurred, but not implemented. Expect inaccurate results."
+                )
             else:
-                direction = (self.refractive_index_ratio * beam_direction 
-                             - global_normal * np.sqrt(rad)
-                             - self.refractive_index_ratio * global_normal * np.dot(global_normal, beam_direction))
+                direction = (
+                    self.refractive_index_ratio * beam_direction
+                    - global_normal * np.sqrt(refraction_angle)
+                    - self.refractive_index_ratio
+                    * global_normal
+                    * np.dot(global_normal, beam_direction)
+                )
                 local_direction = incident_beam.get_relative_direction(direction)
                 transmitted_beam = Beam_Segment(
                     index=index,
