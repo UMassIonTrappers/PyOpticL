@@ -312,7 +312,17 @@ class Beam_Segment(Layout):
             # step q_param and update position
             q_param += dz
             current_position += dz
-        shape = Part.makeCompound(shapes)  # combine all segments
+        # add sphere as cap for smoother beam transitions
+        beam_radius = self.get_beam_radius(self.get_q_parameter() + self.distance)
+        sphere = Part.makeSphere(
+            beam_radius,
+            App.Vector(*self.direction) * self.distance,
+        )
+        shapes.append(sphere)
+        # fuse all shapes together
+        shape = shapes[0]
+        for s in shapes[1:]:
+            shape = shape.fuse(s)
 
         # apply placement and set shape
         shape.Placement = obj.Placement
@@ -915,6 +925,7 @@ class Reflection(Interface):
         dy (float): y-distance for rectangular interface
         max_angle (float): Maximum angle between incident beam and interface normal in degrees
         single_sided (bool): Whether the interface only interacts with beams from one side
+        refractive_index_ratio (float): ratio of refractive index before interface to refractive index after interface
     """
 
     def __init__(
@@ -929,6 +940,7 @@ class Reflection(Interface):
         height: dim = None,
         max_angle: float = 90,
         single_sided: bool = False,
+        refractive_index_ratio: float = 1,
     ):
 
         super().__init__(
@@ -960,6 +972,8 @@ class Reflection(Interface):
             self.ref_wavelengths = ref_wavelengths
         else:
             self.type = "mirror"
+
+        self.refractive_index_ratio = refractive_index_ratio
 
     def get_output_beams(self, incident_beam: Beam_Segment) -> list[Beam_Segment]:
         """
@@ -1018,18 +1032,36 @@ class Reflection(Interface):
                 index = incident_beam.index << 1  # handle beam splitting
             else:
                 index = incident_beam.index
-            direction = incident_beam.get_relative_direction(beam_direction)
-            transmitted_beam = Beam_Segment(
-                index=index,
-                direction=direction,
-                wavelength=incident_beam.wavelength,
-                polarization=transmit_polarization,
-                power=incident_beam.power * transmit_ratio,
-                waist_position=waist_position,
-                rayleigh_range=rayleigh_range,
+
+            # calculate refraction
+            refraction_angle = 1 - self.refractive_index_ratio**2 * (
+                1 - np.dot(global_normal, beam_direction) ** 2
             )
-            incident_beam.add(transmitted_beam, origin=local_origin)
-            output_beams.append(transmitted_beam)
+            if refraction_angle < 0:
+                # TODO: handle total internal reflection
+                print(
+                    "Warning: Total internal reflection occurred, but not implemented. Expect inaccurate results."
+                )
+            else:
+                direction = (
+                    self.refractive_index_ratio * beam_direction
+                    - global_normal * np.sqrt(refraction_angle)
+                    - self.refractive_index_ratio
+                    * global_normal
+                    * np.dot(global_normal, beam_direction)
+                )
+                local_direction = incident_beam.get_relative_direction(direction)
+                transmitted_beam = Beam_Segment(
+                    index=index,
+                    direction=local_direction,
+                    wavelength=incident_beam.wavelength,
+                    polarization=transmit_polarization,
+                    power=incident_beam.power * transmit_ratio,
+                    waist_position=waist_position,
+                    rayleigh_range=rayleigh_range,
+                )
+                incident_beam.add(transmitted_beam, origin=local_origin)
+                output_beams.append(transmitted_beam)
 
         # generate reflected beam
         if not np.isclose(reflect_ratio, 0):

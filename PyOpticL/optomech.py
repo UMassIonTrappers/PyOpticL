@@ -285,6 +285,7 @@ class circular_reflector:
         ref_polarization (float): The reflected polarization angle
         ref_wavelengths (list): A list of tuples representing the ranges of wavelengths to be reflected
                                  Use None for open-ended ranges
+        refractive_index (float): refractive index of the substrate
     """
 
     object_group = "optic"
@@ -300,6 +301,7 @@ class circular_reflector:
         ref_ratio: float = None,
         ref_polarization: float = None,
         ref_wavelengths: list = None,
+        refractive_index: float = 1.5,
     ):
         self.diameter = diameter
         self.thickness = thickness
@@ -308,6 +310,7 @@ class circular_reflector:
         self.ref_ratio = ref_ratio
         self.ref_polarization = ref_polarization
         self.ref_wavelengths = ref_wavelengths
+        self.refractive_index = refractive_index
 
     def interfaces(self):
         return [
@@ -318,7 +321,15 @@ class circular_reflector:
                 ref_ratio=self.ref_ratio,
                 ref_polarization=self.ref_polarization,
                 ref_wavelengths=self.ref_wavelengths,
-            )
+                refractive_index_ratio=1 / self.refractive_index,
+            ),
+            Reflection(
+                position=(-self.thickness, 0, 0),
+                rotation=(0, 0, 0),
+                diameter=self.diameter,
+                ref_ratio=0,
+                refractive_index_ratio=self.refractive_index,
+            ),
         ]
 
     def subcomponents(self):
