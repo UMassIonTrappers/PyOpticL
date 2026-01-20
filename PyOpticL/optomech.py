@@ -321,15 +321,15 @@ class circular_reflector:
                 ref_ratio=self.ref_ratio,
                 ref_polarization=self.ref_polarization,
                 ref_wavelengths=self.ref_wavelengths,
-                refractive_index_ratio= 1/self.refractive_index
+                refractive_index_ratio=1 / self.refractive_index,
             ),
             Reflection(
-                position=(-self.thickness, 0, 0), 
+                position=(-self.thickness, 0, 0),
                 rotation=(0, 0, 0),
                 diameter=self.diameter,
                 ref_ratio=0,
-                refractive_index_ratio= self.refractive_index
-            )
+                refractive_index_ratio=self.refractive_index,
+            ),
         ]
 
     def subcomponents(self):
