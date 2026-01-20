@@ -312,7 +312,17 @@ class Beam_Segment(Layout):
             # step q_param and update position
             q_param += dz
             current_position += dz
-        shape = Part.makeCompound(shapes)  # combine all segments
+        # add sphere as cap for smoother beam transitions
+        beam_radius = self.get_beam_radius(self.get_q_parameter() + self.distance)
+        sphere = Part.makeSphere(
+            beam_radius,
+            App.Vector(*self.direction) * self.distance,
+        )
+        shapes.append(sphere)
+        # fuse all shapes together
+        shape = shapes[0]
+        for s in shapes[1:]:
+            shape = shape.fuse(s)
 
         # apply placement and set shape
         shape.Placement = obj.Placement
