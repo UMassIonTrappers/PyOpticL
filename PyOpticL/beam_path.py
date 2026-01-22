@@ -10,6 +10,17 @@ from PyOpticL.layout import Layout
 from PyOpticL.utils import collect_children, wavelength_to_rgb
 
 
+class DeleteObserver:
+    def __init__(self, names):
+        self.names = names
+
+    def slotRecomputedDocument(self, doc):
+        for name in self.names:
+            if doc.getObject(name):
+                doc.removeObject(name)
+        App.removeDocumentObserver(self)
+
+
 class Beam_Segment(Layout):
     """
     Class representing a beam segment
@@ -498,20 +509,25 @@ class Beam_Path(Layout):
         else:
             obj.Placement.Rotation = App.Rotation("XYZ", 0, 0, 0)
 
-        # initialize input beam if none exist
-        if len(obj.BeamSegments) == 0:
-            direction = obj.BasePlacement.Rotation.multVec(App.Vector(1, 0, 0))
-            input_beam = Beam_Segment(
-                index=1,
-                direction=direction,
-                wavelength=self.wavelength,
-                polarization=self.polarization,
-                power=self.power,
-                waist_position=self.waist_position,
-                rayleigh_range=self.rayleigh_range,
-            )
-            super().add(input_beam, position=(0, 0, 0), rotation=(0, 0, 0))
-            obj.BeamSegments += [input_beam.get_object()]
+        # clear previous beam segments
+        if len(obj.BeamSegments) > 0:
+            to_delete = [beam.Name for beam in obj.BeamSegments]
+            App.addDocumentObserver(DeleteObserver(to_delete))
+            obj.BeamSegments = []
+
+        # add initial input beam
+        direction = obj.BasePlacement.Rotation.multVec(App.Vector(1, 0, 0))
+        input_beam = Beam_Segment(
+            index=1,
+            direction=direction,
+            wavelength=self.wavelength,
+            polarization=self.polarization,
+            power=self.power,
+            waist_position=self.waist_position,
+            rayleigh_range=self.rayleigh_range,
+        )
+        super().add(input_beam, position=(0, 0, 0), rotation=(0, 0, 0))
+        obj.BeamSegments += [input_beam.get_object()]
 
         # check for loose ends and start simulation from there
         for beam in obj.BeamSegments:
