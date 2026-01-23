@@ -312,8 +312,15 @@ class circular_reflector:
         self.ref_wavelengths = ref_wavelengths
         self.refractive_index = refractive_index
 
+        if ref_ratio != None or ref_polarization != None or ref_wavelengths != None:
+            self.bidirectional = True
+            self.max_angle = 180
+        else:
+            self.bidirectional = False
+            self.max_angle = 90
+
     def interfaces(self):
-        return [
+        interfaces = [
             Reflection(
                 position=(0, 0, 0),
                 rotation=(0, 0, 0),
@@ -322,15 +329,23 @@ class circular_reflector:
                 ref_polarization=self.ref_polarization,
                 ref_wavelengths=self.ref_wavelengths,
                 refractive_index_ratio=1 / self.refractive_index,
-            ),
-            Reflection(
-                position=(-self.thickness, 0, 0),
-                rotation=(0, 0, 0),
-                diameter=self.diameter,
-                ref_ratio=0,
-                refractive_index_ratio=self.refractive_index,
+                max_angle=self.max_angle,
             ),
         ]
+
+        if self.bidirectional:
+            interfaces.append(
+                Reflection(
+                    position=(-self.thickness, 0, 0),
+                    rotation=(0, 0, 180),
+                    diameter=self.diameter,
+                    ref_ratio=0,
+                    refractive_index_ratio=1 / self.refractive_index,
+                    max_angle=self.max_angle,
+                )
+            )
+
+        return interfaces
 
     def subcomponents(self):
         if self.mount_definition != None:

@@ -813,9 +813,9 @@ class Interface:
         Returns:
             offset (np.ndarray): (x, y, z) coordinates of the interface relative to parent
         """
-        global_normal = self.get_global_normal()
-        global_rotation = App.Rotation(App.Vector(1, 0, 0), App.Vector(*global_normal))
-        local_position = global_rotation.multVec(App.Vector(*self.position))
+        parent_obj = self.parent.get_object()
+        rotation = parent_obj.Placement.Rotation
+        local_position = rotation.multVec(App.Vector(*self.position))
         return np.array(local_position)
 
     def get_global_position(self) -> np.ndarray[float]:
@@ -1049,8 +1049,18 @@ class Reflection(Interface):
             else:
                 index = incident_beam.index
 
+            # adjust for beam hitting the backside of interface
+            incident_angle = np.arccos(
+                np.clip(np.dot(global_normal, -beam_direction), -1, 1)
+            )
+            if incident_angle > np.pi / 2:
+                global_normal = -global_normal
+                refractive_index_ratio = 1 / self.refractive_index_ratio
+            else:
+                refractive_index_ratio = self.refractive_index_ratio
+
             # calculate refraction
-            refraction_angle = 1 - self.refractive_index_ratio**2 * (
+            refraction_angle = 1 - refractive_index_ratio**2 * (
                 1 - np.dot(global_normal, beam_direction) ** 2
             )
             if refraction_angle < 0:
@@ -1060,9 +1070,9 @@ class Reflection(Interface):
                 )
             else:
                 direction = (
-                    self.refractive_index_ratio * beam_direction
+                    refractive_index_ratio * beam_direction
                     - global_normal * np.sqrt(refraction_angle)
-                    - self.refractive_index_ratio
+                    - refractive_index_ratio
                     * global_normal
                     * np.dot(global_normal, beam_direction)
                 )
