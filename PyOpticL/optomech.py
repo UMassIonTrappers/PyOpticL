@@ -2526,16 +2526,11 @@ class laser_box:
         mount = parent.ChildObjects[0]
         parent.Proxy.execute(parent)
         for cutObj in [mount, parent]:
-            try:
-                temp = _bounding_box(cutObj, 19, 19, z_tol=False)
-                temp.translate(cutObj.Placement.Base)
-                temp.translate(App.Vector(-8,-7,0))
-                #temp.rotate(App.Vector(0,0,0),App.Vector(0,0,1),0)
-                part = part.cut(temp)
-                print("yup")
-            except Exception as e:
-                print(e)
-                pass
+            temp = _bounding_box(cutObj, 19, 19, z_tol=False)
+            temp.translate(cutObj.Placement.Base)
+            temp.translate(App.Vector(-8,-7,0))
+            #temp.rotate(App.Vector(0,0,0),App.Vector(0,0,1),0)
+            part = part.cut(temp)
         
         #part = _custom_box(dx=obj.Thickness.Value, dy=obj.Width.Value, dz=obj.Height.Value,
         #                   x=x_off, y=y_off, z=-3/2*inch-3.95-inch/2-obj.MatThickness.Value, dir=(0, 0, 1))
