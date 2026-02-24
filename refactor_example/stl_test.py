@@ -1,5 +1,5 @@
 from PyOpticL import optomech
-from PyOpticL.beam_path import Beam_Path
+from PyOpticL.beam_path import BeamPath
 from PyOpticL.layout import Component
 from PyOpticL.layout import Dimension as dim
 from PyOpticL.layout import Layout

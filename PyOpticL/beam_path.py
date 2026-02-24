@@ -21,7 +21,7 @@ class DeleteObserver:
         App.removeDocumentObserver(self)
 
 
-class Beam_Segment(Layout):
+class BeamSegment(Layout):
     """
     Class representing a beam segment
 
@@ -285,7 +285,7 @@ class Beam_Segment(Layout):
         """
 
         obj = self.get_object()
-        if obj.Parent != None and isinstance(obj.Parent.Proxy, Beam_Segment):
+        if obj.Parent != None and isinstance(obj.Parent.Proxy, BeamSegment):
             self.relative_power = (
                 self.power / obj.Parent.Proxy.power
             ) * obj.Parent.Proxy.relative_power
@@ -369,7 +369,7 @@ class Beam_Segment(Layout):
         self.compute_shape()
 
 
-class Beam_Path(Layout):
+class BeamPath(Layout):
     """
     Class representing a beam path layout object
 
@@ -517,7 +517,7 @@ class Beam_Path(Layout):
 
         # add initial input beam
         direction = obj.BasePlacement.Rotation.multVec(App.Vector(1, 0, 0))
-        input_beam = Beam_Segment(
+        input_beam = BeamSegment(
             index=1,
             direction=direction,
             wavelength=self.wavelength,
@@ -545,7 +545,7 @@ class Beam_Path(Layout):
         super().compute_placement()
         self.compute_path()
 
-    def get_next_global(self, input_beam: Beam_Segment) -> tuple:
+    def get_next_global(self, input_beam: BeamSegment) -> tuple:
         """
         Get the next global object the beam will interact with
 
@@ -590,7 +590,7 @@ class Beam_Path(Layout):
 
         return next_object, next_interface, min_distance
 
-    def get_next_child(self, input_beam: Beam_Segment) -> tuple:
+    def get_next_child(self, input_beam: BeamSegment) -> tuple:
         """
         Get the next beam child object for placement
 
@@ -663,7 +663,7 @@ class Beam_Path(Layout):
         # get specified interface
         return interfaces[child.interface_index]
 
-    def handle_conflicts(self, last_beam: Beam_Segment, placed_obj: App.DocumentObject):
+    def handle_conflicts(self, last_beam: BeamSegment, placed_obj: App.DocumentObject):
         """
         Handle conflicts between placed object and previously computed beams
 
@@ -678,7 +678,7 @@ class Beam_Path(Layout):
         collect_children(obj.BoundParent, bound_children)
         beam_paths = []
         for child in bound_children:
-            if isinstance(child.Proxy, Beam_Path):
+            if isinstance(child.Proxy, BeamPath):
                 beam_paths.append(child)
 
         interface = self.get_child_interface(placed_obj)
@@ -705,7 +705,7 @@ class Beam_Path(Layout):
                     proxy.step(beam)
                     beam_path.purgeTouched()
 
-    def step(self, input_beam: Beam_Segment):
+    def step(self, input_beam: BeamSegment):
         """
         Perform a single calculation step for the beam path
 
@@ -845,7 +845,7 @@ class Interface:
         global_normal = np.array(rotation.multVec(App.Vector(*self.normal)))
         return global_normal
 
-    def apply_abcd(self, incident_beam: Beam_Segment) -> tuple[float, float]:
+    def apply_abcd(self, incident_beam: BeamSegment) -> tuple[float, float]:
         """
         Apply the ABCD matrix of the interface to an incident beam
         Note: this also accounts for the distance traveled to the interface
@@ -864,7 +864,7 @@ class Interface:
         q_out = (A * q_param + B) / (C * q_param + D)
         return -q_out.real, q_out.imag
 
-    def get_intercept(self, incident_beam: Beam_Segment) -> np.ndarray[float] | None:
+    def get_intercept(self, incident_beam: BeamSegment) -> np.ndarray[float] | None:
         """
         Get the intercept point of a beam with the interface plane
 
@@ -991,7 +991,7 @@ class Reflection(Interface):
 
         self.refractive_index_ratio = refractive_index_ratio
 
-    def get_output_beams(self, incident_beam: Beam_Segment) -> list[Beam_Segment]:
+    def get_output_beams(self, incident_beam: BeamSegment) -> list[BeamSegment]:
         """
         Get the output beams from an incident beam interacting with the interface
 
@@ -1077,7 +1077,7 @@ class Reflection(Interface):
                     * np.dot(global_normal, beam_direction)
                 )
                 local_direction = incident_beam.get_relative_direction(direction)
-                transmitted_beam = Beam_Segment(
+                transmitted_beam = BeamSegment(
                     index=index,
                     direction=local_direction,
                     wavelength=incident_beam.wavelength,
@@ -1102,7 +1102,7 @@ class Reflection(Interface):
                 - 2 * np.dot(beam_direction, global_normal) * global_normal
             )
             local_direction = incident_beam.get_relative_direction(direction)
-            reflect_beam = Beam_Segment(
+            reflect_beam = BeamSegment(
                 index=index,
                 direction=local_direction,
                 wavelength=incident_beam.wavelength,
@@ -1153,7 +1153,7 @@ class Lens(Interface):
 
         self.abcd_matrix = [1, 0, -1 / focal_length, 1]
 
-    def get_output_beams(self, incident_beam: Beam_Segment) -> list[Beam_Segment]:
+    def get_output_beams(self, incident_beam: BeamSegment) -> list[BeamSegment]:
         """
         Get the output beams from an incident beam interacting with the interface
 
@@ -1196,7 +1196,7 @@ class Lens(Interface):
         local_direction = incident_beam.get_relative_direction(direction)
 
         # generate output beam
-        output_beam = Beam_Segment(
+        output_beam = BeamSegment(
             index=incident_beam.index,
             direction=local_direction,
             wavelength=incident_beam.wavelength,

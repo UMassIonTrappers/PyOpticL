@@ -1,5 +1,5 @@
 from PyOpticL import optomech
-from PyOpticL.beam_path import Beam_Path
+from PyOpticL.beam_path import BeamPath
 from PyOpticL.layout import Component
 from PyOpticL.layout import Dimension as dim
 from PyOpticL.layout import Layout
@@ -7,7 +7,7 @@ from PyOpticL.layout import Layout
 layout = Layout("Example Layout")
 
 beam_path = layout.add(
-    Beam_Path(
+    BeamPath(
         label="Beam Path",
         waist=dim(2, "mm"),
         wavelength=670,

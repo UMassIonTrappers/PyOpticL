@@ -22,7 +22,7 @@ baseplate = Component(
         dimensions=(dim(100, "mm"), dim(100, "mm"), dim(1, "in"))
     ))
 
-beam_path = baseplate.add(Beam_Path(
+beam_path = baseplate.add(BeamPath(
     label="Beam Path",
     position=(dim(10, "mm"), dim(50, "mm"), dim(0, "mm")),
     rotation=(0, 0, 0),

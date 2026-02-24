@@ -1,5 +1,5 @@
 from PyOpticL import optomech
-from PyOpticL.beam_path import Beam_Path
+from PyOpticL.beam_path import BeamPath
 from PyOpticL.layout import Component
 from PyOpticL.layout import Dimension as dim
 from PyOpticL.layout import Layout
@@ -13,7 +13,7 @@ mirror_distance = dim(50, "mm")
 
 for i, wavelength in enumerate(wavelengths):
     beam_path = example_layout.add(
-        Beam_Path(
+        BeamPath(
             label=f"Beam Path {wavelength}nm",
             position=(i * beam_offset, 0, 0),
             rotation=(0, 0, 90),

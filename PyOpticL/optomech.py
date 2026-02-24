@@ -7,12 +7,12 @@ from PyOpticL.icons import optic_icon, thorlabs_icon
 from PyOpticL.layout import Component
 from PyOpticL.layout import Dimension as dim
 from PyOpticL.utils import (
+    Subcomponent,
     bolt_shape,
     bolt_slot_shape,
     box_shape,
     cylinder_shape,
     import_model,
-    subcomponent,
 )
 
 ##########################
