@@ -153,12 +153,24 @@ class BeamSegment(Layout):
         if distance != None:
             output = position + distance * direction
         if x_position != None:
+            if direction[0] == 0:
+                raise RuntimeError(
+                    "Beam is parallel to yz plane, cannot constrain x position"
+                )
             t = (x_position - position[0]) / direction[0]
             output = position + t * direction
         if y_position != None:
+            if direction[1] == 0:
+                raise RuntimeError(
+                    "Beam is parallel to xz plane, cannot constrain y position"
+                )
             t = (y_position - position[1]) / direction[1]
             output = position + t * direction
         if z_position != None:
+            if direction[2] == 0:
+                raise RuntimeError(
+                    "Beam is parallel to xy plane, cannot constrain z position"
+                )
             t = (z_position - position[2]) / direction[2]
             output = position + t * direction
 
@@ -626,12 +638,17 @@ class BeamPath(Layout):
 
             proxy = next_object.Proxy
             # get position from provided constraint
-            next_position = input_beam.get_constraint_position(
-                proxy.distance,
-                proxy.x_position,
-                proxy.y_position,
-                proxy.z_position,
-            )
+            try:
+                next_position = input_beam.get_constraint_position(
+                    proxy.distance,
+                    proxy.x_position,
+                    proxy.y_position,
+                    proxy.z_position,
+                )
+            except RuntimeError as e:
+                raise RuntimeError(
+                    f"Error handling containts for beam child {next_object.Label}: {str(e)}"
+                )
 
             # get distance and interface for interaction
             next_distance = np.linalg.norm(
