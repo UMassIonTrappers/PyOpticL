@@ -46,10 +46,10 @@ class example_component:
         self.height = height
         self.drill_depth = drill_depth
 
-    def subcomponents(self) -> list[subcomponent]:
+    def Subcomponents(self) -> list[Subcomponent]:
         """Define any sub-components"""
         return [
-            subcomponent(
+            Subcomponent(
                 component=Component(
                     "Mounting Bolt",
                     bolt("8_32", length=self.height + self.drill_depth),
@@ -347,13 +347,13 @@ class circular_reflector:
 
         return interfaces
 
-    def subcomponents(self):
+    def Subcomponents(self):
         if self.mount_definition != None:
             mount_offset = self.mount_offset
             if mount_offset is None:
                 mount_offset = (-self.thickness, 0, 0)
             return [
-                subcomponent(
+                Subcomponent(
                     component=Component(
                         label="Mount",
                         definition=self.mount_definition,
@@ -509,13 +509,13 @@ class spherical_lens:
             )
         ]
 
-    def subcomponents(self):
+    def Subcomponents(self):
         if self.mount_definition != None:
             mount_offset = self.mount_offset
             if mount_offset is None:
                 mount_offset = (0, 0, 0)
             return [
-                subcomponent(
+                Subcomponent(
                     component=Component(
                         label="Mount",
                         definition=self.mount_definition,
@@ -577,13 +577,13 @@ class polarizing_beam_splitter_cube:
             )
         ]
 
-    def subcomponents(self):
+    def Subcomponents(self):
         if self.mount_definition != None:
             mount_offset = self.mount_offset
             if mount_offset is None:
                 mount_offset = (0, 0, -self.size / 2)
             return [
-                subcomponent(
+                Subcomponent(
                     component=Component(
                         label="Mount",
                         definition=self.mount_definition,
@@ -679,10 +679,10 @@ class mirror_mount_k05s1:
     def __init__(self, drill_depth: dim):
         self.drill_depth = drill_depth
 
-    def subcomponents(self):
+    def Subcomponents(self):
         extra_length = self.bolt_position[2] - self.mount_position[2]
         components = [
-            subcomponent(
+            Subcomponent(
                 component=Component(
                     label="Mounting Bolt",
                     definition=bolt(
@@ -698,7 +698,7 @@ class mirror_mount_k05s1:
         ]
         for position in self.pin_positions:
             components.append(
-                subcomponent(
+                Subcomponent(
                     component=Component(
                         label="Alignment Pin",
                         definition=alignment_pin(

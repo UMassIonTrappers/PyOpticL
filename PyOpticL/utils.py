@@ -9,7 +9,7 @@ import Part
 
 models_dir = Path(__file__).parent / "models"
 
-Subcomponent = namedtuple("subcomponent", ["component", "position", "rotation"])
+Subcomponent = namedtuple("Subcomponent", ["component", "position", "rotation"])
 
 
 def collect_children(parent: App.DocumentObject, output_list: list):

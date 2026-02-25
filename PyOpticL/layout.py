@@ -254,12 +254,12 @@ class Component(Layout):
         obj.ViewObject.Transparency = self.object_transparency
 
         # add any sub-components defined in the template
-        if hasattr(definition, "subcomponents"):
-            for subcomponent in definition.subcomponents():
+        if hasattr(definition, "Subcomponents"):
+            for Subcomponent in definition.Subcomponents():
                 self.add(
-                    child=subcomponent.component,
-                    position=subcomponent.position,
-                    rotation=subcomponent.rotation,
+                    child=Subcomponent.component,
+                    position=Subcomponent.position,
+                    rotation=Subcomponent.rotation,
                 )
 
     def compute_shape(self):
