@@ -528,10 +528,14 @@ class table_no_grid:
             
 # Update function for dynamic elements
 def redraw():
-    for class_type in [laser.beam_path, baseplate, baseplate_cover, baseplate]:
+    for class_type in [laser.beam_path, baseplate_cover, baseplate]:
         for i in App.ActiveDocument.Objects:
             if hasattr(i, "Proxy") and isinstance(i.Proxy, class_type):
                 i.touch()
+                if hasattr(i, "ChildObjects"):
+                    for child in i.ChildObjects:
+                        child.purgeTouched()
+                        
         App.ActiveDocument.recompute()
 
 def show_components(state):
@@ -570,7 +574,7 @@ class ViewProvider:
         return True
     
     def claimChildren(self):
-        if hasattr(self.Object, "ChildObjects"):
+        if hasattr(self, "Object") and hasattr(self.Object, "ChildObjects"):
             return self.Object.ChildObjects
         else:
             return []

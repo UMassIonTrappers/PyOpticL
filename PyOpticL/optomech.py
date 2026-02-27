@@ -4439,7 +4439,7 @@ class ViewProvider:
         return
     
     def claimChildren(self):
-        if hasattr(self.Object, "ChildObjects"):
+        if hasattr(self, "Object") and hasattr(self.Object, "ChildObjects"):
             return self.Object.ChildObjects
         else:
             return []
