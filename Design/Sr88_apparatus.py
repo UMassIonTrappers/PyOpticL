@@ -18,13 +18,15 @@ from SPAM_subsystem import subsystem_spam
 
 from PyOpticL import layout, optomech
 
-# layout.table_grid(dx=72, dy=92)
+layout.table_grid(dx=86, dy=44)
 # layout.place_element_on_table("chamber", optomech.Room_temp_chamber_Mechanical, x=28, y = 60, angle=0)
 # # there is a room temperature chamber in the center. it will largely increase loading time...
-laser_cooling_subsystem(x=1, y=10, thumbscrews=True)
-Raman_subsystem(x=1, y=26.5, thumbscrews=True)
-PI_subsystem_commercial(x=29, y=8.5, angle=0, thumbscrews=True)  # 405 for sr88+
-PI_subsystem_ECDL(x=39, y=8.5, thumbscrews=True)  # 461 for sr88+
-repump_subsystem_ECDL_mirrored(x=50, y=8.5, thumbscrews=True)
-repump_subsystem_ECDL(x=60, y=8.5, thumbscrews=True)
-subsystem_spam(x=32, y=50, thumbscrews=True)
+laser_cooling_subsystem(x=1, y=2, thumbscrews=True)
+Raman_subsystem(x=28, y=32, angle=180, thumbscrews=True)
+PI_subsystem_commercial(x=45, y=9, angle=0, thumbscrews=True)  # 405 for sr88+
+PI_subsystem_ECDL(x=55, y=10, thumbscrews=True)  # 461 for sr88+
+repump_subsystem_ECDL_mirrored(x=66, y=10, thumbscrews=True)
+repump_subsystem_ECDL(x=76, y=10, thumbscrews=True)
+subsystem_spam(x=41, y=38, angle=180, thumbscrews=True)
+
+layout.redraw()

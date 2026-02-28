@@ -332,37 +332,20 @@ def modified_doublepass(x=0, y=0, angle=0, mirror=optomech.mirror_mount_km05, x_
                                       beam_index=0b11110, x=gap, angle=layout.cardinal['right'])
 print("current wavelength is " + str(wavelength * 1e6) + " nm")
 print("current littrow angle is " + str(littrow_angle))
+
 def laser_cooling_subsystem(x=0, y=0, angle=0, thumbscrews=True, littrow_angle = littrow_angle, **args_for_doublepass):
+    ax = np.sin(np.deg2rad(angle))
+    ay = np.cos(np.deg2rad(angle))
+    p = lambda dx, dy: dict(x=x + dx * ay - dy * ax, y=y + dx * ax + dy * ay)
 
-    # # Starting position
-    x0 = 8 + y
-    y0 = 1 + x
-    sourcebox(x=x0, y=y0, angle=0 + angle)  # model for toptica
-
-    x0 += 2.5
-    y0 += 11.5
-    layout.place_element_on_table("Periscope", optomech.periscope, x=x0, y=y0, z=0, 
+    sourcebox(**p(8, 1), angle=0 + angle)  # model for toptica
+    layout.place_element_on_table("Periscope", optomech.periscope, **p(10.5, 12.5), z=0, 
                         angle=layout.cardinal['up'] + angle, mirror_args=dict(mount_type=optomech.mirror_mount_k05s1))
-
-    x0 += 1.5
-    y0 += 1.5
-    telescope(x=x0, y=y0, angle=90 + angle)
-
-    x0 -= 11
-    y0 += 3
-    Rb_SAS(x=x0, y=y0, angle=0, mirror=optomech.mirror_mount_km05, thumbscrews=True)
-
-    x0 += 4
-    y0 += 5
-    modified_doublepass(x=x0-4, y=y0, angle=0, mirror=optomech.mirror_mount_km05, x_split=True, thumbscrews=True)
-
-    x0 += 1
-    y0 += 6
-    doublepass_f50(x=x0, y=y0, thumbscrews=thumbscrews, x_split=True)
-
-    x0 += 1
-    y0 += 6
-    doublepass_f50(x=x0, y=y0, thumbscrews=thumbscrews, x_split=True)
+    telescope(**p(12, 14), angle=90 + angle)
+    Rb_SAS(**p(1, 17), angle=0+angle, mirror=optomech.mirror_mount_km05, thumbscrews=True)
+    modified_doublepass(**p(1, 22), angle=0+angle, mirror=optomech.mirror_mount_km05, x_split=True, thumbscrews=True)
+    doublepass_f50(**p(6, 28), angle=0+angle, thumbscrews=thumbscrews, x_split=True)
+    doublepass_f50(**p(7, 34), angle=0+angle, thumbscrews=thumbscrews, x_split=True)
 
 def doublepass_f50(x=0, y=0, angle=0, mirror=optomech.mirror_mount_k05s2, x_split=False, thumbscrews=True):
     
