@@ -2,6 +2,10 @@
 
 ## PyOpticL - Code-to-CAD optical system engineering
 
+<img width="1440" height="948" alt="TestOut1" src="https://github.com/user-attachments/assets/5e055344-8273-4f93-b434-f0b63a8e18fb" />
+
+
+
 <img width="3341" height="1411" alt="image" src="https://github.com/user-attachments/assets/1b857ff6-a425-4261-a6f4-b00795de6f05" />
 
 #### Discord Server: https://discord.gg/vV4NP6rXmp
