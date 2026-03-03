@@ -647,7 +647,7 @@ class BeamPath(Layout):
                 )
             except RuntimeError as e:
                 raise RuntimeError(
-                    f"Error handling containts for beam child {next_object.Label}: {str(e)}"
+                    f"Error handling constraints for beam child {next_object.Label}: {str(e)}"
                 )
 
             # get distance and interface for interaction
