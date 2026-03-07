@@ -87,7 +87,8 @@ def check_interaction(x1, y1, a1, ref_obj):
     # refracted beam
     if hasattr(ref_obj.Proxy, 'focal_length'):
         a_rel = abs(a2-atan2(y-y2, x-x2))%(2*pi)
-        offset = pi/2-atan2(ref_obj.Proxy.focal_length, ref_d)
+        f=ref_obj.Proxy.focal_length
+        offset = np.sign(f)*(pi/2-atan2(np.abs(f), ref_d))
         if is_mult(a_rel, 2*pi):
             offset *= -1
         if a_in < pi/2:
