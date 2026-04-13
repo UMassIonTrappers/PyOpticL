@@ -116,19 +116,15 @@ def box_shape(
     """
 
     # create shape
-    part = Part.makeBox(*dimensions)
+    part = Part.makeBox(*dimensions, App.Vector(
+            position[0] - (1 + center[0]) * dimensions[0] / 2,
+            position[1] - (1 + center[1]) * dimensions[1] / 2,
+            position[2] - (1 + center[2]) * dimensions[2] / 2,
+        ))
     if fillet != 0:  # apply fillet to specified edges
         for i in part.Edges:
             if i.tangentAt(i.FirstParameter) == App.Vector(*fillet_direction):
                 part = part.makeFillet(fillet - 1e-3, [i])
-    # move origin to specified center and position
-    part.translate(
-        App.Vector(
-            position[0] - (1 + center[0]) * dimensions[0] / 2,
-            position[1] - (1 + center[1]) * dimensions[1] / 2,
-            position[2] - (1 + center[2]) * dimensions[2] / 2,
-        )
-    )
     # apply rotation
     part.rotate(
         App.Vector(*position),
@@ -324,6 +320,7 @@ def bolt_slot_shape(
         dimensions=(slot_length + head_diameter, head_diameter, head_height),
         position=position,
         center=(0, 0, 1) if from_top else (0, 0, -1),
+        fillet=head_diameter / 2,
     )
     # create clearance hole
     part = part.fuse(
@@ -331,6 +328,7 @@ def bolt_slot_shape(
             dimensions=(slot_length + clear_diameter, clear_diameter, clear_depth),
             position=position,
             center=(0, 0, 1),
+            fillet=clear_diameter / 2,
         )
     )
     # create tapped hole

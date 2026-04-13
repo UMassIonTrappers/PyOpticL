@@ -51,7 +51,7 @@ class example_component:
         self.drill_depth = drill_depth
         self.bolt_length = bolt_length
 
-    def Subcomponents(self) -> list[Subcomponent]:
+    def subcomponents(self) -> list[Subcomponent]:
         """Define any sub-components"""
         return [
             Subcomponent(
@@ -214,12 +214,17 @@ class bolt:
             self.length = default_bolt_length(clear_depth)
 
         if drill_depth is None:
-            self.drill_depth = self.length - self.clear_depth + settings.default_extra_drill_depth
+            self.drill_depth = (
+                self.length - self.clear_depth + settings.default_extra_drill_depth
+            )
 
         for bolt_type in types:
             if bolt_type not in self.available_bolt_types:
                 raise ValueError(f"Bolt type {bolt_type} is not supported")
-            if settings.measurement_system in self.available_bolt_types[bolt_type]["tags"]:
+            if (
+                settings.measurement_system
+                in self.available_bolt_types[bolt_type]["tags"]
+            ):
                 self.type = bolt_type
                 break
 
@@ -251,7 +256,7 @@ class bolt:
             head_diameter = dims["head_diameter"]
         head_diameter += self.head_tolerance
 
-        if self.slot_length == None:
+        if not self.slot_length:
             part = bolt_shape(
                 clear_diameter=dims["clear_diameter"],
                 tap_diameter=dims["tap_diameter"],
@@ -407,7 +412,7 @@ class circular_reflector:
 
         return interfaces
 
-    def Subcomponents(self):
+    def subcomponents(self):
         if self.mount_definition != None:
             mount_offset = self.mount_offset
             if mount_offset is None:
@@ -569,7 +574,7 @@ class spherical_lens:
             )
         ]
 
-    def Subcomponents(self):
+    def subcomponents(self):
         if self.mount_definition != None:
             mount_offset = self.mount_offset
             if mount_offset is None:
@@ -641,7 +646,7 @@ class polarizing_beam_splitter_cube:
             )
         ]
 
-    def Subcomponents(self):
+    def subcomponents(self):
         if self.mount_definition != None:
             mount_offset = self.mount_offset
             if mount_offset is None:
@@ -677,7 +682,24 @@ class polarizing_beam_splitter_cube:
         return part
 
     def drill(self):
-        pass
+        part = box_shape(
+            dimensions=(
+                self.size + self.drill_tolerance,
+                self.size + self.drill_tolerance,
+                self.size,
+            ),
+            position=(0, 0, 0),
+            center=(0, 0, 0),
+        )
+        for x, y in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:
+            part = part.fuse(
+                cylinder_shape(
+                    diameter=self.corner_drill_diameter,
+                    height=self.size,
+                    position=(x * self.size / 2, y * self.size / 2, -self.size / 2),
+                )
+            )
+        return part
 
 
 ################################
@@ -706,20 +728,24 @@ class surface_adapter:
         height: dim,
         min_length: dim,
         bolt_spacing: dim,
-        bolt_length: dim,
-        drill_depth: dim,
-        extra_thickness: dim = dim(5, "mm"),
+        bolt_types: list = ["8_32", "M4"],
+        bolt_length: dim = None,
+        drill_depth: dim = None,
+        extra_thickness: dim = dim(6, "mm"),
         slot_length: dim = dim(0, "mm"),
+        fillet_radius: dim = dim(5, "mm"),
         drill_tolerance: dim = dim(1, "mm"),
     ):
         self.height = height
         self.min_length = min_length
         self.bolt_spacing = bolt_spacing
+        self.bolt_types = bolt_types
         self.bolt_length = bolt_length
         self.drill_depth = drill_depth
         self.extra_thickness = extra_thickness
         self.slot_length = slot_length
         self.drill_depth = drill_depth
+        self.fillet_radius = fillet_radius
         self.drill_tolerance = drill_tolerance
 
     def subcomponents(self):
@@ -728,8 +754,9 @@ class surface_adapter:
                 component=Component(
                     label="Mounting Bolt 1",
                     definition=bolt(
-                        "8_32",
+                        types=self.bolt_types,
                         length=self.bolt_length,
+                        clear_depth=self.height,
                         drill_depth=self.drill_depth,
                         slot_length=self.slot_length,
                     ),
@@ -741,8 +768,9 @@ class surface_adapter:
                 component=Component(
                     label="Mounting Bolt 2",
                     definition=bolt(
-                        "8_32",
+                        types=self.bolt_types,
                         length=self.bolt_length,
+                        clear_depth=self.height,
                         drill_depth=self.drill_depth,
                         slot_length=self.slot_length,
                     ),
@@ -754,25 +782,28 @@ class surface_adapter:
 
     def shape(self):
         width = self.bolt_spacing + 2 * self.extra_thickness
-        length = min(self.min_length, self.slot_length + 2 * self.extra_thickness)
+        length = max(self.min_length, self.slot_length + 2 * self.extra_thickness)
         part = box_shape(
             dimensions=(length, width, self.height),
             position=(0, 0, 0),
             center=(0, 0, 1),
+            fillet=self.fillet_radius,
         )
         return part
-    
+
     def drill(self):
         width = self.bolt_spacing + 2 * self.extra_thickness + 2 * self.drill_tolerance
-        length = min(self.min_length, self.slot_length + 2 * self.extra_thickness) + 2 * self.drill_tolerance
+        length = (
+            max(self.min_length, self.slot_length + 2 * self.extra_thickness)
+            + 2 * self.drill_tolerance
+        )
         part = box_shape(
             dimensions=(length, width, self.height),
             position=(0, 0, 0),
             center=(0, 0, 1),
+            fillet=self.fillet_radius,
         )
         return part
-    
-
 
 
 ###########################
@@ -805,7 +836,7 @@ class mirror_mount_k05s1:
         if bolt_length is None:
             self.bolt_length = default_bolt_length(self.extra_length)
 
-    def Subcomponents(self):
+    def subcomponents(self):
         extra_length = self.bolt_position[2] - self.mount_position[2]
         components = [
             Subcomponent(

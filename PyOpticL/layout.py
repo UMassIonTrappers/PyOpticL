@@ -181,7 +181,7 @@ class Component(Layout):
         definition: object,
         recompute_priority: int = 0,
     ):
-        
+
         super().__init__(
             label=label,
             recompute_priority=recompute_priority,
@@ -226,8 +226,8 @@ class Component(Layout):
         obj.ViewObject.Transparency = self.object_transparency
 
         # add any sub-components defined in the template
-        if hasattr(definition, "Subcomponents"):
-            for Subcomponent in definition.Subcomponents():
+        if hasattr(definition, "subcomponents"):
+            for Subcomponent in definition.subcomponents():
                 self.add(
                     child=Subcomponent.component,
                     position=Subcomponent.position,
@@ -242,7 +242,7 @@ class Component(Layout):
         # update object shape
         if self.object_type == "Part" and hasattr(self, "shape"):
             shape = self.shape()
-            if isinstance(shape, list): # if multiple shapes are returned, fuse
+            if isinstance(shape, list):  # if multiple shapes are returned, fuse
                 combined = shape[0]
                 for part in shape[1:]:
                     combined = combined.fuse(part)
@@ -263,6 +263,19 @@ class Component(Layout):
                 if hasattr(drill_obj.Proxy, "drill"):
                     drill_obj.Proxy.compute_placement()
                     drill_shape = drill_obj.Proxy.drill()
+
+                    # find and extrude +z-facing faces from drill_obj
+                    shape_bbox = shape.BoundBox
+                    for face in drill_shape.Faces:
+                        normal = face.normalAt(0, 0)
+                        face_bbox = face.BoundBox
+                        print(normal)
+
+                        if normal == App.Vector(0, 0, 1):
+                            # TODO - make this extrude by finding distance to surface
+                            extrusion = face.extrude(App.Vector(0, 0, 500))
+                            drill_shape = drill_shape.fuse(extrusion)
+
                     drill_shape.Placement = (
                         obj.Placement.inverse() * drill_obj.Placement
                     )
