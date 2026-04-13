@@ -5,13 +5,15 @@ import Part
 from PyOpticL.beam_path import Lens, Reflection
 from PyOpticL.icons import optic_icon, thorlabs_icon
 from PyOpticL.layout import Component
-from PyOpticL.layout import Dimension as dim
+from PyOpticL import settings
+from PyOpticL.types import Dimension as dim
 from PyOpticL.utils import (
     Subcomponent,
     bolt_shape,
     bolt_slot_shape,
     box_shape,
     cylinder_shape,
+    default_bolt_length,
     import_model,
 )
 
@@ -29,6 +31,7 @@ class example_component:
         side_length (float): The side length of the cube
         height (float): The height of the cube
         drill_depth (float): The depth of the mounting hole
+        bolt_length (float): The length of the mounting bolt (defaults based on minimum thread engagement settings)
     """
 
     object_group = "example"
@@ -39,12 +42,14 @@ class example_component:
         self,
         side_length: dim,
         height: dim,
-        drill_depth: dim,
+        drill_depth: dim = None,
+        bolt_length: dim = None,
     ):
         """Initialize adjustable parameters"""
         self.side_length = side_length
         self.height = height
         self.drill_depth = drill_depth
+        self.bolt_length = bolt_length
 
     def Subcomponents(self) -> list[Subcomponent]:
         """Define any sub-components"""
@@ -52,7 +57,12 @@ class example_component:
             Subcomponent(
                 component=Component(
                     "Mounting Bolt",
-                    bolt("8_32", length=self.height + self.drill_depth),
+                    bolt(
+                        types=["8_32", "M4"],
+                        length=self.bolt_length,
+                        clear_depth=self.height,
+                        drill_depth=self.drill_depth,
+                    ),
                 ),
                 position=(0, 0, self.height),
                 rotation=(0, 0, 0),
@@ -112,34 +122,59 @@ class bolt:
 
     Args:
         label (str): The label for the component
-        type (string): Bolt type, supports "4_40", "8_32", "14_20"
+        types (list): List of all supported bolt types (for example, one metric and one imperial)
         length (float): Length of the bolt including the head
+        clear_depth (float): The depth at which the hole threading should start
+        drill_depth (float): Depth of the drilled hole after clear_depth, defaults uses default_extra_drill_depth setting
         washer_diameter (float): Diameter of washer to include, None for no washer
         countersink (bool): Whether the bolt head is a countersink
         head_tolerance (float): Tolerance of the bolt head / washer diameter
-        extra_depth (float): Extra depth to add to the drilled hole
         from_top (bool): Whether the origin is at the top or bottom of the bolt head
         slot_length (float): Length of slot drilling a slot, None for no slot
     """
 
-    bolt_dimensions = {
+    available_bolt_types = {
         "4_40": dict(
             clear_diameter=dim(0.12, "in"),
             tap_diameter=dim(0.089, "in"),
             head_diameter=dim(5.5, "mm"),
             head_height=dim(2.5, "mm"),
+            tags=["imperial"],
         ),
         "8_32": dict(
             clear_diameter=dim(0.172, "in"),
             tap_diameter=dim(0.136, "in"),
             head_diameter=dim(7, "mm"),
             head_height=dim(4.4, "mm"),
+            tags=["imperial"],
         ),
         "1/4_20": dict(
             clear_diameter=dim(0.26, "in"),
             tap_diameter=dim(0.201, "in"),
             head_diameter=dim(9.8, "mm"),
             head_height=dim(8, "mm"),
+            tags=["imperial"],
+        ),
+        "M3": dict(
+            clear_diameter=dim(3.2, "mm"),
+            tap_diameter=dim(2.5, "mm"),
+            head_diameter=dim(5.5, "mm"),
+            head_height=dim(2.4, "mm"),
+            tags=["metric"],
+        ),
+        "M4": dict(
+            clear_diameter=dim(4.3, "mm"),
+            tap_diameter=dim(3.3, "mm"),
+            head_diameter=dim(7, "mm"),
+            head_height=dim(3.0, "mm"),
+            tags=["metric"],
+        ),
+        "M6": dict(
+            clear_diameter=dim(6.4, "mm"),
+            tap_diameter=dim(5.0, "mm"),
+            head_diameter=dim(10, "mm"),
+            head_height=dim(4.0, "mm"),
+            tags=["metric"],
         ),
     }
 
@@ -149,36 +184,55 @@ class bolt:
 
     def __init__(
         self,
-        type: str,
-        length: dim,
+        types: list,
+        length: dim = None,
+        clear_depth: dim = 0,
+        drill_depth: dim = None,
         washer_diameter: dim = None,
         countersink: bool = False,
         head_tolerance: dim = dim(1, "mm"),
-        extra_depth: dim = dim(5, "mm"),
         from_top: bool = True,
         slot_length: dim = None,
     ):
 
-        self.type = type
         self.length = length
+        self.clear_depth = clear_depth
+        self.drill_depth = drill_depth
         self.washer_diameter = washer_diameter
         self.countersink = countersink
         self.head_tolerance = head_tolerance
-        self.extra_depth = extra_depth
         self.from_top = from_top
         self.slot_length = slot_length
 
-        if countersink and slot_length != None:
+        if slot_length and countersink:
             raise ValueError("Bolt does not support both slot and countersink")
 
-        if washer_diameter != 0 and countersink:
+        if washer_diameter and countersink:
             raise ValueError("Bolt does not support both washer and countersink")
 
+        if length is None:
+            self.length = default_bolt_length(clear_depth)
+
+        if drill_depth is None:
+            self.drill_depth = self.length - self.clear_depth + settings.default_extra_drill_depth
+
+        for bolt_type in types:
+            if bolt_type not in self.available_bolt_types:
+                raise ValueError(f"Bolt type {bolt_type} is not supported")
+            if settings.measurement_system in self.available_bolt_types[bolt_type]["tags"]:
+                self.type = bolt_type
+                break
+
     def shape(self):
-        dims = self.bolt_dimensions[self.type]
+        dims = self.available_bolt_types[self.type]
+        length = self.length
+        if self.from_top:
+            length -= dims["head_height"]
         part = bolt_shape(
-            diameter=dims["tap_diameter"],
-            height=self.length,
+            clear_diameter=dims["clear_diameter"],
+            tap_diameter=dims["tap_diameter"],
+            length=length,
+            clear_depth=0,
             head_diameter=dims["head_diameter"],
             head_height=dims["head_height"],
             position=(0, 0, 0),
@@ -189,16 +243,20 @@ class bolt:
         return part
 
     def drill(self):
-        dims = self.bolt_dimensions[self.type]
-        if self.washer_diameter != None:
+        dims = self.available_bolt_types[self.type]
+
+        if self.washer_diameter:
             head_diameter = self.washer_diameter
         else:
             head_diameter = dims["head_diameter"]
         head_diameter += self.head_tolerance
+
         if self.slot_length == None:
             part = bolt_shape(
-                diameter=dims["tap_diameter"],
-                height=self.length + self.extra_depth,
+                clear_diameter=dims["clear_diameter"],
+                tap_diameter=dims["tap_diameter"],
+                length=self.drill_depth,
+                clear_depth=self.clear_depth,
                 head_diameter=head_diameter,
                 head_height=dims["head_height"],
                 position=(0, 0, 0),
@@ -208,8 +266,10 @@ class bolt:
             )
         else:
             part = bolt_slot_shape(
-                diameter=dims["tap_diameter"],
-                height=self.length + self.extra_depth,
+                clear_diameter=dims["clear_diameter"],
+                tap_diameter=dims["tap_diameter"],
+                length=self.drill_depth,
+                clear_depth=self.clear_depth,
                 head_diameter=head_diameter,
                 head_height=dims["head_height"],
                 slot_length=self.slot_length,
@@ -560,11 +620,15 @@ class polarizing_beam_splitter_cube:
         ref_polarization: float = 0.0,
         mount_definition: object = None,
         mount_offset: tuple = None,
+        drill_tolerance: dim = dim(0.5, "mm"),
+        corner_drill_diameter: dim = dim(3, "mm"),
     ):
         self.size = size
         self.ref_polarization = ref_polarization
         self.mount_definition = mount_definition
         self.mount_offset = mount_offset
+        self.drill_tolerance = drill_tolerance
+        self.corner_drill_diameter = corner_drill_diameter
 
     def interfaces(self):
         return [
@@ -612,46 +676,103 @@ class polarizing_beam_splitter_cube:
         )
         return part
 
+    def drill(self):
+        pass
+
 
 ################################
 ### Custom Adapters / Mounts ###
 ################################
 
-# class skate_mount:
-#     """
-#     A simple glue-on mount for rectangular optics
 
-#     Args:
-#         height (float): The height of the mount
-#         min_width (float): The minimum width of the mount
-#         bolt_spacing (float): The spacing between the two mount holes of the adapter
-#         bolt_walls (float): The minimum thickness of the walls around the bolt holes
-#         recess_depth (float): The depth of the recess for the optic
-#         slot_length (float): The length of the slot for the bolts, 0 for no slot
-#     """
+class surface_adapter:
+    """
+    A generic surface mount adapter
 
-#     object_group = "adapter"
-#     object_color = (0.25, 0.25, 0.25)
+    Args:
+        height (float): The height of the mount
+        min_width (float): The minimum width of the mount
+        bolt_spacing (float): The spacing between the two mount holes of the adapter
+        bolt_walls (float): The minimum thickness of the walls around the bolt holes
+        slot_length (float): The length of the slot for the bolts, 0 for no slot
+        drill_tolerance: (float): The tolerance to add around the drilling
+    """
 
-#     def __init__(
-#         self,
-#         height: dim,
-#         min_width: dim,
-#         bolt_spacing: dim,
-#         bolt_walls: dim = dim(2, "mm"),
-#         recess_depth: dim = dim(2, "mm"),
-#         slot_length: dim = dim(0, "mm"),
-#     ):
-#         self.height = height
-#         self.min_width = min_width
-#         self.bolt_spacing = bolt_spacing
-#         self.bolt_walls = bolt_walls
-#         self.recess_depth = recess_depth
-#         self.slot_length = slot_length
+    object_group = "adapter"
+    object_color = (0.25, 0.25, 0.25)
 
-#     def shape(self):
-#         width = self.bolt_spacing + 2 * self.bolt_walls
-#         length = min(self.min_width
+    def __init__(
+        self,
+        height: dim,
+        min_length: dim,
+        bolt_spacing: dim,
+        bolt_length: dim,
+        drill_depth: dim,
+        extra_thickness: dim = dim(5, "mm"),
+        slot_length: dim = dim(0, "mm"),
+        drill_tolerance: dim = dim(1, "mm"),
+    ):
+        self.height = height
+        self.min_length = min_length
+        self.bolt_spacing = bolt_spacing
+        self.bolt_length = bolt_length
+        self.drill_depth = drill_depth
+        self.extra_thickness = extra_thickness
+        self.slot_length = slot_length
+        self.drill_depth = drill_depth
+        self.drill_tolerance = drill_tolerance
+
+    def subcomponents(self):
+        return [
+            Subcomponent(
+                component=Component(
+                    label="Mounting Bolt 1",
+                    definition=bolt(
+                        "8_32",
+                        length=self.bolt_length,
+                        drill_depth=self.drill_depth,
+                        slot_length=self.slot_length,
+                    ),
+                ),
+                position=(0, -self.bolt_spacing / 2, 0),
+                rotation=(0, 0, 0),
+            ),
+            Subcomponent(
+                component=Component(
+                    label="Mounting Bolt 2",
+                    definition=bolt(
+                        "8_32",
+                        length=self.bolt_length,
+                        drill_depth=self.drill_depth,
+                        slot_length=self.slot_length,
+                    ),
+                ),
+                position=(0, self.bolt_spacing / 2, 0),
+                rotation=(0, 0, 0),
+            ),
+        ]
+
+    def shape(self):
+        width = self.bolt_spacing + 2 * self.extra_thickness
+        length = min(self.min_length, self.slot_length + 2 * self.extra_thickness)
+        part = box_shape(
+            dimensions=(length, width, self.height),
+            position=(0, 0, 0),
+            center=(0, 0, 1),
+        )
+        return part
+    
+    def drill(self):
+        width = self.bolt_spacing + 2 * self.extra_thickness + 2 * self.drill_tolerance
+        length = min(self.min_length, self.slot_length + 2 * self.extra_thickness) + 2 * self.drill_tolerance
+        part = box_shape(
+            dimensions=(length, width, self.height),
+            position=(0, 0, 0),
+            center=(0, 0, 1),
+        )
+        return part
+    
+
 
 
 ###########################
@@ -665,6 +786,7 @@ class mirror_mount_k05s1:
 
     Args:
         drill_depth (float): The depth of the mounting hole
+        bolt_length (float): The length of the mounting bolt (defaults to minimum required length)
     """
 
     object_group = "mount"
@@ -676,8 +798,12 @@ class mirror_mount_k05s1:
     bolt_position = (-8.017, 0.000, -7.112)
     pin_positions = [(-8.017, 5.000, -10.795), (-8.017, -5.000, -10.795)]
 
-    def __init__(self, drill_depth: dim):
+    def __init__(self, drill_depth: dim, bolt_length: dim = None):
+        """Initialize adjustable parameters"""
         self.drill_depth = drill_depth
+        self.extra_length = self.bolt_position[2] - self.mount_position[2]
+        if bolt_length is None:
+            self.bolt_length = default_bolt_length(self.extra_length)
 
     def Subcomponents(self):
         extra_length = self.bolt_position[2] - self.mount_position[2]
@@ -687,9 +813,9 @@ class mirror_mount_k05s1:
                     label="Mounting Bolt",
                     definition=bolt(
                         "8_32",
-                        length=self.drill_depth + extra_length,
+                        length=self.bolt_length,
                         from_top=False,
-                        extra_depth=0,
+                        drill_depth=self.drill_depth + self.extra_length,
                     ),
                 ),
                 position=self.bolt_position,

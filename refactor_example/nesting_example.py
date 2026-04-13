@@ -2,7 +2,7 @@ from example_layout import example_layout
 
 from PyOpticL import optomech
 from PyOpticL.layout import Component
-from PyOpticL.layout import Dimension as dim
+from PyOpticL.types import Dimension as dim
 from PyOpticL.layout import Layout
 
 

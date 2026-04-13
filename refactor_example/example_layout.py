@@ -1,12 +1,14 @@
 from PyOpticL import optomech
 from PyOpticL.layout import Component
-from PyOpticL.layout import Dimension as dim
+from PyOpticL.types import Dimension as dim
 from PyOpticL.layout import Layout
+import PyOpticL
+
+PyOpticL.set_minimum_thread_engagement(dim(0.5, "in"))
 
 example_component = optomech.example_component(
-    side_length=dim(20, "mm"),
-    height=dim(15, "mm"),
-    drill_depth=dim(10, "mm"),
+    side_length=dim(1, "in"),
+    height=dim(1, "in"),
 )
 
 

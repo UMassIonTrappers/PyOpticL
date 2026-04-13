@@ -7,6 +7,9 @@ import MeshPart
 import numpy as np
 import Part
 
+from PyOpticL.settings import measurement_system, minimum_bolt_engagement
+from PyOpticL.types import Dimension as dim
+
 models_dir = Path(__file__).parent / "models"
 
 Subcomponent = namedtuple("Subcomponent", ["component", "position", "rotation"])
@@ -193,8 +196,10 @@ def cylinder_shape(
 
 
 def bolt_shape(
-    diameter: float,
-    height: float,
+    clear_diameter: float,
+    tap_diameter: float,
+    length: float,
+    clear_depth: float,
     head_diameter: float,
     head_height: float,
     position: tuple = (0, 0, 0),
@@ -207,8 +212,10 @@ def bolt_shape(
     Create a simple bolt shape
 
     Args:
-        diameter (float): Diameter of the bolt shaft
-        height (float): Distance from origin to end of bolt shaft
+        clear_diameter (float): Clear diameter of the bolt shaft
+        tap_diameter (float): Tap diameter of the bolt shaft
+        length (float): Length of the bolt shaft
+        clear_depth (float): The depth at which the hole threading should start
         head_diameter (float): Diameter of the bolt head
         head_height (float): Height of the bolt head
         position (tuple): Position of the bolt head center (x, y, z)
@@ -221,35 +228,43 @@ def bolt_shape(
         Part.Shape: The created cylinder part
     """
 
-    # create shaft
-    part = Part.makeCylinder(
-        diameter / 2,
-        height,
-        App.Vector(*position),
-        App.Vector(*direction),
-    )
     # create head
     if not from_top:
         direction = tuple(-i for i in direction)
     if countersink:
-        part = part.fuse(
-            Part.makeCone(
-                head_diameter / 2,
-                diameter / 2,
-                head_height,
-                App.Vector(*position),
-                App.Vector(*direction),
-            )
+        part = Part.makeCone(
+            head_diameter / 2,
+            tap_diameter / 2,
+            head_height,
+            App.Vector(*position),
+            App.Vector(*direction),
         )
     else:
-        part = part.fuse(
-            Part.makeCylinder(
-                head_diameter / 2,
-                head_height,
-                App.Vector(*position),
-                App.Vector(*direction),
-            )
+        part = Part.makeCylinder(
+            head_diameter / 2,
+            head_height,
+            App.Vector(*position),
+            App.Vector(*direction),
         )
+    # create clearance hole
+    part = part.fuse(
+        Part.makeCylinder(
+            clear_diameter / 2,
+            clear_depth,
+            App.Vector(*position),
+            App.Vector(*direction),
+        )
+    )
+    # create tapped hole
+    part = part.fuse(
+        Part.makeCylinder(
+            tap_diameter / 2,
+            length,
+            App.Vector(*position),
+            App.Vector(*direction),
+        )
+    )
+
     # remove internal edges
     part = part.removeSplitter()
     # apply rotation
@@ -272,8 +287,10 @@ def bolt_shape(
 
 
 def bolt_slot_shape(
-    diameter: float,
-    height: float,
+    clear_diameter: float,
+    tap_diameter: float,
+    length: float,
+    clear_depth: float,
     head_diameter: float,
     head_height: float,
     slot_length: float,
@@ -286,11 +303,13 @@ def bolt_slot_shape(
     Create a bolt slot shape
 
     Args:
-        diameter (float): Diameter of the bolt shaft
-        height (float): Height of the slot
+        clear_diameter (float): Clear diameter of the bolt shaft
+        tap_diameter (float): Tap diameter of the bolt shaft
+        length (float): Length of the slot
+        clear_depth (float): The depth at which the hole threading should start
         head_diameter (float): Diameter of the bolt head
         head_height (float): Height of the bolt head
-        length (float): Travel length for slot (full length - diameter)
+        slot_length (float): Travel length for slot (full length - diameter)
         position (tuple): Position of the slot center (x, y, z)
         rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
         direction (tuple): Direction vector for slot orientation
@@ -300,19 +319,30 @@ def bolt_slot_shape(
         Part.Shape: The created bolt slot part
     """
 
-    # create shape
+    # create head
     part = box_shape(
-        dimensions=(slot_length + diameter, diameter, height),
+        dimensions=(slot_length + head_diameter, head_diameter, head_height),
         position=position,
-        center=(0, 0, 1),
+        center=(0, 0, 1) if from_top else (0, 0, -1),
     )
+    # create clearance hole
     part = part.fuse(
         box_shape(
-            dimensions=(slot_length + head_diameter, head_diameter, head_height),
+            dimensions=(slot_length + clear_diameter, clear_diameter, clear_depth),
             position=position,
-            center=(0, 0, 1) if from_top else (0, 0, -1),
+            center=(0, 0, 1),
         )
     )
+    # create tapped hole
+    part = part.fuse(
+        Part.makeCylinder(
+            tap_diameter / 2,
+            length,
+            App.Vector(*position),
+            App.Vector(0, 0, -1),
+        )
+    )
+
     # remove internal edges
     part = part.removeSplitter()
     # rotate to direction
@@ -335,6 +365,53 @@ def bolt_slot_shape(
         rotation[2],
     )
     return part
+
+
+def default_bolt_length(through_length: float) -> float:
+    """
+    Determine the minimum standard bolt length for a given through length
+    Note: The minimum bolt engagement global parameter is used to calculate the minimum length
+
+    Args:
+        through_length (float): The minimum required through length
+
+    Returns:
+        float: The calculated bolt length
+    """
+
+    default_lengths = dict(
+        imperial=dict(
+            lower_values=[
+                dim(1 / 4, "in"),
+                dim(3 / 8, "in"),
+                dim(1 / 2, "in"),
+                dim(5 / 8, "in"),
+                dim(3 / 4, "in"),
+                dim(7 / 8, "in"),
+                dim(1, "in"),
+            ],
+            upper_multiple=dim(1 / 2, "in"),
+        ),
+        metric=dict(
+            lower_values=[
+                dim(6, "mm"),
+                dim(8, "mm"),
+                dim(10, "mm"),
+                dim(12, "mm"),
+                dim(16, "mm"),
+                dim(20, "mm"),
+            ],
+            upper_multiple=dim(5, "mm"),
+        ),
+    )
+
+    lengths = default_lengths[measurement_system]
+    minimum_length = through_length + minimum_bolt_engagement
+    for val in lengths["lower_values"]:
+        if minimum_length <= val:
+            return val
+    multiple = lengths["upper_multiple"]
+    return np.ceil(minimum_length / multiple) * multiple
 
 
 def import_model(

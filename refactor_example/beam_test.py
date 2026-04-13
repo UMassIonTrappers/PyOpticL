@@ -1,7 +1,7 @@
 from PyOpticL import optomech
 from PyOpticL.beam_path import BeamPath
 from PyOpticL.layout import Component
-from PyOpticL.layout import Dimension as dim
+from PyOpticL.types import Dimension as dim
 from PyOpticL.layout import Layout
 
 example_layout = Layout("Example Layout")
@@ -23,6 +23,7 @@ beam_path.add(
         label="Mirror 1",
         definition=optomech.circular_mirror(
             diameter=dim(1, "in"),
+            thickness=dim(5, "mm"),
         ),
     ),
     beam_index=1,
@@ -36,6 +37,7 @@ beam_path.add(
         definition=optomech.circular_sampler(
             ref_ratio=0.25,
             diameter=dim(1, "in"),
+            thickness=dim(5, "mm"),
         ),
     ),
     beam_index=1,

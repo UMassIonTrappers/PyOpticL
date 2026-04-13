@@ -5,8 +5,8 @@ import numpy as np
 import Part
 
 from PyOpticL.icons import beam_icon
-from PyOpticL.layout import Dimension as dim
 from PyOpticL.layout import Layout
+from PyOpticL.types import Dimension as dim
 from PyOpticL.utils import collect_children, wavelength_to_rgb
 
 
@@ -114,32 +114,21 @@ class BeamSegment(Layout):
 
     def get_constraint_position(
         self,
-        distance: float = None,
-        x_position: float = None,
-        y_position: float = None,
-        z_position: float = None,
+        type: str,
+        value: float,
     ) -> np.ndarray[float]:
         """
         Get the position of the beam at a specified distance or coordinate
 
         Args:
-            distance (float): Distance along the beam direction from origin
-            x_position (float): x-coordinate of the beam position
-            y_position (float): y-coordinate of the beam position
-            z_position (float): z-coordinate of the beam position
+            type (str): Type of constraint ('distance', 'xPosition', 'yPosition', 'zPosition')
+            value (float): Value of the constraint in mm
 
         Returns:
             position (np.ndarray): (x, y, z) coordinates of the beam position
         """
 
         obj = self.get_object()
-
-        if (distance != None) + (x_position != None) + (y_position != None) + (
-            z_position != None
-        ) != 1:
-            raise ValueError(
-                "Exactly one of distance, x_position, y_position, or z_position must be specified"
-            )
 
         # get placement relative to bound parent
         bound_placement = obj.BoundParent.Placement
@@ -150,28 +139,28 @@ class BeamSegment(Layout):
         direction = np.array(placement.Rotation.multVec(App.Vector(*self.direction)))
 
         # calculate position based on specified constraint
-        if distance != None:
-            output = position + distance * direction
-        if x_position != None:
+        if type == "distance":
+            output = position + value * direction
+        if type == "xPosition":
             if direction[0] == 0:
                 raise RuntimeError(
                     "Beam is parallel to yz plane, cannot constrain x position"
                 )
-            t = (x_position - position[0]) / direction[0]
+            t = (value - position[0]) / direction[0]
             output = position + t * direction
-        if y_position != None:
+        if type == "yPosition":
             if direction[1] == 0:
                 raise RuntimeError(
                     "Beam is parallel to xz plane, cannot constrain y position"
                 )
-            t = (y_position - position[1]) / direction[1]
+            t = (value - position[1]) / direction[1]
             output = position + t * direction
-        if z_position != None:
+        if type == "zPosition":
             if direction[2] == 0:
                 raise RuntimeError(
                     "Beam is parallel to xy plane, cannot constrain z position"
                 )
-            t = (z_position - position[2]) / direction[2]
+            t = (value - position[2]) / direction[2]
             output = position + t * direction
 
         # return global output
@@ -498,13 +487,27 @@ class BeamPath(Layout):
                 "Exactly one of distance, x_position, y_position, or z_position must be specified"
             )
         child.beam_index = beam_index
-        child.distance = distance
-        child.x_position = x_position
-        child.y_position = y_position
-        child.z_position = z_position
-        child.offset = offset
         child.interface_index = interface_index
         child.placed = False
+
+        child_obj = child.get_object()
+        child.make_property("ConstraintValue", "App::PropertyLength")
+        child.make_property("ConstraintType", "App::PropertyEnumeration")
+        child_obj.ConstraintType = ["distance", "xPosition", "yPosition", "zPosition"]
+        if distance is not None:
+            child_obj.ConstraintType = "distance"
+            child_obj.ConstraintValue = distance
+        if x_position is not None:
+            child_obj.ConstraintType = "xPosition"
+            child_obj.ConstraintValue = x_position
+        if y_position is not None:
+            child_obj.ConstraintType = "yPosition"
+            child_obj.ConstraintValue = y_position
+        if z_position is not None:
+            child_obj.ConstraintType = "zPosition"
+            child_obj.ConstraintValue = z_position
+        child.make_property("Offset", "App::PropertyVector", editable=True)
+        child_obj.Offset = App.Vector(0, offset[0], offset[1])
 
         return child
 
@@ -636,14 +639,10 @@ class BeamPath(Layout):
                     f"Beam child {next_object.Label} does not have any interfaces"
                 )
 
-            proxy = next_object.Proxy
             # get position from provided constraint
             try:
                 next_position = input_beam.get_constraint_position(
-                    proxy.distance,
-                    proxy.x_position,
-                    proxy.y_position,
-                    proxy.z_position,
+                    next_object.ConstraintType, next_object.ConstraintValue.Value
                 )
             except RuntimeError as e:
                 raise RuntimeError(
@@ -752,11 +751,13 @@ class BeamPath(Layout):
             next_object, next_interface, next_distance = next_child
 
             # get object placement
-            intercept = input_beam.get_constraint_position(distance=next_distance)
+            intercept = input_beam.get_constraint_position(
+                type="distance", value=next_distance
+            )
             intercept -= obj.Placement.Base  # convert to local coordinates
             next_object.Proxy.compute_placement()  # update placement
             object_rotation = next_object.Placement.Rotation
-            offset = object_rotation.multVec(App.Vector(0, *next_object.Proxy.offset))
+            offset = object_rotation.multVec(next_object.Offset)
             object_position = intercept - next_interface.get_position_offset() + offset
             # apply placement
             next_object.BasePlacement.Base = App.Vector(*object_position)
@@ -954,8 +955,8 @@ class Reflection(Interface):
         ref_wavelengths (list): List of tuples specifying (min, max) wavelength ranges
                                 for reflection in nm. Use None to indicate an open range
         diameter (float): Diameter for circular interface
-        dx (float): x-distance for rectangular interface
-        dy (float): y-distance for rectangular interface
+        width (float): x-distance for rectangular interface
+        height (float): y-distance for rectangular interface
         max_angle (float): Maximum angle between incident beam and interface normal in degrees
         single_sided (bool): Whether the interface only interacts with beams from one side
         refractive_index_ratio (float): ratio of refractive index before interface to refractive index after interface

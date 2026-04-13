@@ -5,39 +5,6 @@ import FreeCAD as App
 from PyOpticL.utils import collect_children
 
 
-class Dimension(float):
-    """
-    Class to handle dimensions with units
-    value is stored internally as mm
-
-    Args:
-        value (float) : numerical value of the dimension
-        unit (str) : unit of the dimension, options are 'um', 'mm', 'cm', 'm', 'in', 'ft'
-    """
-
-    conversion_factors = {
-        "um": 0.001,
-        "mm": 1,
-        "cm": 10,
-        "m": 1000,
-        "in": 25.4,
-        "ft": 304.8,
-    }
-
-    def __new__(self, value: float, unit: str = "mm") -> Dimension:
-        if unit not in self.conversion_factors:
-            raise ValueError(f"Unsupported unit: {unit}")
-        instance = super().__new__(self, value * self.conversion_factors[unit])
-        instance.unit = unit
-        return instance
-
-    def to_unit(self, unit: str) -> float:
-        if unit in self.conversion_factors:
-            return self.value / self.conversion_factors[unit]
-        else:
-            raise ValueError(f"Unsupported unit: {unit}")
-
-
 class Layout:
     """
     Abstracted proxy for a FreeCAD object representing a layout
@@ -73,7 +40,7 @@ class Layout:
 
         # setup placement properties
         self.make_property("Placement", "App::PropertyPlacement")
-        self.make_property("BasePlacement", "App::PropertyPlacement", visible=True)
+        self.make_property("BasePlacement", "App::PropertyPlacement", editable=True)
 
         # initialize parent and children properties
         self.make_property("Parent", "App::PropertyLinkHidden")
@@ -93,7 +60,9 @@ class Layout:
         document = App.getDocument(self.document_id)
         return document.getObject(self.object_id)
 
-    def make_property(self, name: str, type: str, visible: bool = False):
+    def make_property(
+        self, name: str, type: str, visible: bool = False, editable: bool = False
+    ):
         """
         Create a property on the FreeCAD object if it does not already exist
 
@@ -101,11 +70,14 @@ class Layout:
             name (string): Name of the property
             type (string): Type of the property
             visible (bool): Whether the property is visible in the property editor
+            editable (bool): Whether the property is editable in the property editor
         """
         obj = self.get_object()
         if not hasattr(obj, name):
             obj.addProperty(type, name)
-        if visible:
+        if editable:
+            obj.setEditorMode(name, 0)  # editable
+        elif visible:
             obj.setEditorMode(name, 1)  # read-only
         else:
             obj.setEditorMode(name, 2)  # hidden
@@ -209,6 +181,11 @@ class Component(Layout):
         definition: object,
         recompute_priority: int = 0,
     ):
+        
+        super().__init__(
+            label=label,
+            recompute_priority=recompute_priority,
+        )
 
         # Define attributes to override using the component definition
         override_attributes = (
@@ -243,11 +220,6 @@ class Component(Layout):
 
         self.__class__ = Component_Wrapper
 
-        super().__init__(
-            label=label,
-            recompute_priority=recompute_priority,
-        )
-
         # set object color
         obj = self.get_object()
         obj.ViewObject.ShapeColor = self.object_color
@@ -270,6 +242,11 @@ class Component(Layout):
         # update object shape
         if self.object_type == "Part" and hasattr(self, "shape"):
             shape = self.shape()
+            if isinstance(shape, list): # if multiple shapes are returned, fuse
+                combined = shape[0]
+                for part in shape[1:]:
+                    combined = combined.fuse(part)
+                shape = combined
 
             # gather peer objects
             drill_objs = []
