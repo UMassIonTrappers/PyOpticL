@@ -1,7 +1,7 @@
 from PyOpticL.types import Dimension as dim
 
 measurement_system = "imperial"
-minimum_bolt_engagement = dim(0.5, "in")
+minimum_thread_engagement = dim(0.25, "in")
 default_extra_drill_depth = dim(0.25, "in")
 
 
@@ -28,8 +28,8 @@ def set_minimum_thread_engagement(length: dim):
         length (dim): The minimum thread engagement length.
     """
 
-    global minimum_bolt_engagement
-    minimum_bolt_engagement = length
+    global minimum_thread_engagement
+    minimum_thread_engagement = length
 
 
 def set_default_extra_drill_depth(length: dim):

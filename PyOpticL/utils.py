@@ -8,7 +8,7 @@ import numpy as np
 import Part
 import json
 
-from PyOpticL.settings import measurement_system, minimum_bolt_engagement
+from PyOpticL.settings import measurement_system, minimum_thread_engagement
 from PyOpticL.types import Dimension as dim
 
 models_dir = Path(__file__).parent / "models"
@@ -363,13 +363,14 @@ def bolt_slot_shape(
     return part
 
 
-def default_bolt_length(through_length: float) -> float:
+def default_bolt_length(through_length: float, max_thread_engagement: float = None) -> float:
     """
     Determine the minimum standard bolt length for a given through length
     Note: The minimum bolt engagement global parameter is used to calculate the minimum length
 
     Args:
         through_length (float): The minimum required through length
+        max_thread_engagement (float): The maximum thread engagement length
 
     Returns:
         float: The calculated bolt length
@@ -402,12 +403,20 @@ def default_bolt_length(through_length: float) -> float:
     )
 
     lengths = default_lengths[measurement_system]
-    minimum_length = through_length + minimum_bolt_engagement
-    for val in lengths["lower_values"]:
-        if minimum_length <= val:
-            return val
-    multiple = lengths["upper_multiple"]
-    return np.ceil(minimum_length / multiple) * multiple
+    if max_thread_engagement is None:
+        minimum_length = through_length + minimum_thread_engagement
+        for val in lengths["lower_values"]:
+            if val >= minimum_length:
+                return val
+        multiple = lengths["upper_multiple"]
+        return np.ceil(minimum_length / multiple) * multiple
+    else:
+        maximum_length = through_length + max_thread_engagement
+        for val in lengths["lower_values"][::-1]:
+            if val <= maximum_length:
+                return val
+        multiple = lengths["upper_multiple"]
+        return np.floor(maximum_length / multiple) * multiple
 
 
 def import_model(

@@ -211,7 +211,7 @@ class bolt:
             raise ValueError("Bolt does not support both washer and countersink")
 
         if length is None:
-            self.length = default_bolt_length(clear_depth)
+            self.length = default_bolt_length(clear_depth, drill_depth)
 
         if drill_depth is None:
             self.drill_depth = (
@@ -316,7 +316,7 @@ class alignment_pin:
             diameter=self.diameter,
             height=self.length,
             position=(0, 0, -self.depth_tolerance / 2),
-            rotation=(180, 0, 0)
+            rotation=(180, 0, 0),
         )
         return part
 
@@ -829,11 +829,8 @@ class mirror_mount_k05s1:
     pin_positions = [(-8.017, 5.000, -10.795), (-8.017, -5.000, -10.795)]
 
     def __init__(self, drill_depth: dim, bolt_length: dim = None):
-        """Initialize adjustable parameters"""
         self.drill_depth = drill_depth
-        self.extra_length = self.bolt_position[2] - self.mount_position[2]
-        if bolt_length is None:
-            self.bolt_length = default_bolt_length(self.extra_length)
+        self.bolt_length = bolt_length
 
     def subcomponents(self):
         components = [
@@ -843,8 +840,9 @@ class mirror_mount_k05s1:
                     definition=bolt(
                         types=["8_32", "M4"],
                         length=self.bolt_length,
+                        clear_depth=self.mount_position[2] - self.bolt_position[2],
+                        drill_depth=self.drill_depth,
                         from_top=False,
-                        drill_depth=self.drill_depth + self.extra_length,
                     ),
                 ),
                 position=self.bolt_position,
@@ -862,6 +860,57 @@ class mirror_mount_k05s1:
                     ),
                     position=position,
                     rotation=(0, 0, 0),
+                )
+            )
+        return components
+
+
+class rotation_mount_rsp05:
+    """
+    Rotation mount, model RSP05
+
+    Args:
+        drill_depth (float): The depth of the mounting hole
+        bolt_length (float): The length of the mounting bolt (defaults to minimum required length)
+    """
+
+    object_group = "mount"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+
+    mesh = import_model("thorlabs-rsp05")
+    mount_position = (-0.635, -0.000, -13.975)
+    mount_hole_end = (-0.635, -0.000, -7.521)
+
+    def __init__(
+        self,
+        include_bolt: bool = True,
+        bolt_distance: dim = dim(10, "mm"),
+        bolt_distance_includes_head: bool = True,
+        bolt_length: dim = None,
+    ):
+        self.include_bolt = include_bolt
+        self.bolt_distance = bolt_distance
+        self.bolt_distance_includes_head = bolt_distance_includes_head
+        self.bolt_length = bolt_length
+
+    def subcomponents(self):
+        components = []
+        if self.include_bolt:
+            components.append(
+                Subcomponent(
+                    component=Component(
+                        label="Mounting Bolt",
+                        definition=bolt(
+                            types=["8_32", "M4"],
+                            length=self.bolt_length,
+                            clear_depth=self.bolt_distance,
+                            drill_depth=self.mount_hole_end[2] - self.mount_position[2],
+                            from_top=self.bolt_distance_includes_head,
+                        ),
+                    ),
+                    position=(self.mount_position[0], self.mount_position[1], self.mount_position[2] - self.bolt_distance),
+                    rotation=(180, 0, 0),
                 )
             )
         return components
