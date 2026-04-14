@@ -49,6 +49,7 @@ class OpticsWorkbench(Workbench):
             "ExportCart",
             "ReloadModules",
             "ConvertModel",
+            "OpenModel",
             "GetPosition",
         ]  # A list of command names created in the line above
         # self.toolbar = ["ReloadModules"]

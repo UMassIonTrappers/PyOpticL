@@ -360,6 +360,8 @@ class Import_Model_Dialog(QtGui.QDialog):
         with open(info_path, "w") as f:
             json.dump(info_dict, f)
 
+        App.closeDocument(App.ActiveDocument.Name)  # close the temporary document used for import
+
         self.close()
 
 
@@ -415,6 +417,130 @@ class Convert_Model:
             Gui.ActiveDocument.ActiveView.fitAll()
 
         return
+    
+class Open_Model_Dialog(QtGui.QDialog):
+    def __init__(self):
+        super(Open_Model_Dialog, self).__init__()
+        self.setWindowTitle("Load PyOpticL Model")
+
+        # external library file selector
+        self.externalPathEdit = QtGui.QLineEdit()
+        self.browseBtnExternal = QtGui.QPushButton("Browse...")
+        self.browseBtnExternal.clicked.connect(self.selectExternalFolder)
+
+        externalLayout = QtGui.QHBoxLayout()
+        externalLayout.addWidget(self.externalPathEdit)
+        externalLayout.addWidget(self.browseBtnExternal)
+
+        # model dropdown
+        self.modelCombo = QtGui.QComboBox()
+
+        # buttons
+        self.btnBox = QtGui.QDialogButtonBox(
+            QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel
+        )
+        self.btnBox.accepted.connect(self.accept)
+        self.btnBox.rejected.connect(self.reject)
+
+        # widget layout
+        layout = QtGui.QFormLayout()
+        layout.addRow("External Library Folder:", externalLayout)
+        layout.addRow("Select Model:", self.modelCombo)
+        layout.addRow(self.btnBox)
+
+        self.setLayout(layout)
+        self.populateModels()
+
+    def selectExternalFolder(self):
+        folder = QtGui.QFileDialog.getExistingDirectory(self, "Select External Library Folder")
+        if folder:
+            self.externalPathEdit.setText(folder)
+            self.populateModels()
+
+    def populateModels(self):
+        self.modelCombo.blockSignals(True)
+        self.modelCombo.clear()
+
+        # internal models
+        internal_path = Path(App.getUserAppDataDir()) / "Mod" / "PyOpticL" / "PyOpticL" / "models"
+        if internal_path.is_dir():
+            for folder in internal_path.iterdir():
+                if folder.is_dir():
+                    self.modelCombo.addItem(folder.name, str(folder))
+
+        # external models
+        external_path = self.externalPathEdit.text()
+        if external_path and Path(external_path).is_dir():
+            for folder in Path(external_path).iterdir():
+                if folder.is_dir():
+                    self.modelCombo.addItem(folder.name, str(folder))
+
+        if self.modelCombo.count() > 0:
+            self.modelCombo.setCurrentIndex(0)
+
+        self.modelCombo.blockSignals(False)
+
+class Open_Model:
+    def GetResources(self):
+        return {
+            "Pixmap": ":/icons/LinkGroup.svg",
+            "Accel": "Shift+L",
+            "MenuText": "Load PyOpticL Model for measurement",
+        }
+
+    def Activated(self):
+        dialog = Open_Model_Dialog()
+        result = dialog.exec_()
+
+        if result:
+            # retrieve values from dialog
+            selected_data = dialog.modelCombo.currentData()
+            if not selected_data:
+                App.Console.PrintError("No model selected.\n")
+                return
+
+            selected_folder = Path(selected_data)
+            
+            # check if folder exists and contains required files
+            step_file = selected_folder / (selected_folder.name + ".step")
+            info_file = selected_folder / (selected_folder.name + ".json")
+            
+            if not step_file.is_file() or not info_file.is_file():
+                App.Console.PrintError("Selected model folder missing STEP or JSON file.\n")
+                return
+            
+            # create/clean new document
+            doc_name = selected_folder.name
+            if doc_name in App.listDocuments():
+                App.setActiveDocument(doc_name)
+                for obj in App.ActiveDocument.Objects:
+                    App.ActiveDocument.removeObject(obj.Name)
+            else:
+                App.newDocument(doc_name)
+            document = App.ActiveDocument
+            
+            # load STEP file
+            shape = Part.read(str(step_file))
+            model_object = document.addObject("Part::Feature", selected_folder.name)
+            model_object.Shape = shape
+            
+            # load transformation info from JSON
+            with open(info_file, "r") as f:
+                info = json.load(f)
+            
+            # apply placement from saved transformation
+            rotation = App.Rotation("XYZ", *info["rotation"])
+            rotation = App.Placement(App.Vector(0, 0, 0), rotation, App.Vector(0, 0, 0))
+            translation = App.Placement(
+                App.Vector(*info["translation"]),
+                App.Rotation("XYZ", 0, 0, 0),
+                App.Vector(0, 0, 0),
+            )
+            model_object.Placement = rotation * translation
+            
+            Gui.ActiveDocument.ActiveView.fitAll()
+
+        return
 
 
 class Get_Position:
@@ -439,4 +565,5 @@ Gui.addCommand("ExportSTLs", Export_STLs())
 Gui.addCommand("ExportCart", Export_Cart())
 Gui.addCommand("ReloadModules", Reload_Modules())
 Gui.addCommand("ConvertModel", Convert_Model())
+Gui.addCommand("OpenModel", Open_Model())
 Gui.addCommand("GetPosition", Get_Position())
