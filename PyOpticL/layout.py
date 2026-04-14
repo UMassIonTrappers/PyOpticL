@@ -263,22 +263,20 @@ class Component(Layout):
                 if hasattr(drill_obj.Proxy, "drill"):
                     drill_obj.Proxy.compute_placement()
                     drill_shape = drill_obj.Proxy.drill()
-
-                    # find and extrude +z-facing faces from drill_obj
-                    shape_bbox = shape.BoundBox
-                    for face in drill_shape.Faces:
-                        normal = face.normalAt(0, 0)
-                        face_bbox = face.BoundBox
-                        print(normal)
-
-                        if normal == App.Vector(0, 0, 1):
-                            # TODO - make this extrude by finding distance to surface
-                            extrusion = face.extrude(App.Vector(0, 0, 500))
-                            drill_shape = drill_shape.fuse(extrusion)
-
                     drill_shape.Placement = (
                         obj.Placement.inverse() * drill_obj.Placement
                     )
+                    z_direction = drill_obj.Placement.Rotation.multVec(App.Vector(0, 0, 1))
+
+                    # find and extrude +z-facing faces from drill_obj
+                    for face in drill_shape.Faces:
+                        normal = face.normalAt(0, 0)
+                        intersection = face.common(shape)
+                        if normal.getAngle(z_direction) < 1e-6 and intersection.Area > 1e-6:
+                            max_dimension = shape.BoundBox.DiagonalLength
+                            extrusion = face.extrude(max_dimension * z_direction)
+                            drill_shape = drill_shape.fuse(extrusion)
+
                     shape = shape.cut(drill_shape)
 
             # apply placement and set final shape
