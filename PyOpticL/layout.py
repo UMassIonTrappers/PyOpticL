@@ -248,36 +248,40 @@ class Component(Layout):
                     combined = combined.fuse(part)
                 shape = combined
 
-            # gather peer objects
-            drill_objs = []
-            if obj.Parent != None:
-                for child in obj.Parent.Children:
-                    if child != obj:
-                        drill_objs.append(child)
+            # don't apply drilling to some groups
+            if obj.Proxy.object_group not in ["hardware", "optic"]:
 
-            # gather child objects recursively
-            collect_children(obj, drill_objs)
+                # gather peer objects
+                drill_objs = []
+                if obj.Parent != None:
+                    drill_objs.append(obj.Parent)
+                    for child in obj.Parent.Children:
+                        if child != obj:
+                            drill_objs.append(child)
 
-            # apply drilling
-            for drill_obj in drill_objs:
-                if hasattr(drill_obj.Proxy, "drill"):
-                    drill_obj.Proxy.compute_placement()
-                    drill_shape = drill_obj.Proxy.drill()
-                    drill_shape.Placement = (
-                        obj.Placement.inverse() * drill_obj.Placement
-                    )
-                    z_direction = drill_obj.Placement.Rotation.multVec(App.Vector(0, 0, 1))
+                # gather child objects recursively
+                collect_children(obj, drill_objs)
 
-                    # find and extrude +z-facing faces from drill_obj
-                    for face in drill_shape.Faces:
-                        normal = face.normalAt(0, 0)
-                        intersection = face.common(shape)
-                        if normal.getAngle(z_direction) < 1e-6 and intersection.Area > 1e-6:
-                            max_dimension = shape.BoundBox.DiagonalLength
-                            extrusion = face.extrude(max_dimension * z_direction)
-                            drill_shape = drill_shape.fuse(extrusion)
+                # apply drilling
+                for drill_obj in drill_objs:
+                    if hasattr(drill_obj.Proxy, "drill"):
+                        drill_obj.Proxy.compute_placement()
+                        drill_shape = drill_obj.Proxy.drill()
+                        drill_shape.Placement = (
+                            obj.Placement.inverse() * drill_obj.Placement
+                        )
+                        z_direction = drill_obj.Placement.Rotation.multVec(App.Vector(0, 0, 1))
 
-                    shape = shape.cut(drill_shape)
+                        # find and extrude +z-facing faces from drill_obj
+                        for face in drill_shape.Faces:
+                            normal = face.normalAt(0, 0)
+                            intersection = face.common(shape)
+                            if normal.getAngle(z_direction) < 1e-6 and intersection.Area > 1e-6:
+                                max_dimension = shape.BoundBox.DiagonalLength
+                                extrusion = face.extrude(max_dimension * z_direction)
+                                drill_shape = drill_shape.fuse(extrusion)
+
+                        shape = shape.cut(drill_shape)
 
             # apply placement and set final shape
             shape.Placement = obj.Placement
