@@ -6,6 +6,7 @@ import Mesh
 import MeshPart
 import numpy as np
 import Part
+import json
 
 from PyOpticL.settings import measurement_system, minimum_bolt_engagement
 from PyOpticL.types import Dimension as dim
@@ -149,7 +150,6 @@ def cylinder_shape(
     height: float,
     position: tuple = (0, 0, 0),
     rotation: tuple = (0, 0, 0),
-    direction: tuple = (0, 0, 1),
 ) -> Part.Shape:
     """
     Create a cylinder part
@@ -159,7 +159,6 @@ def cylinder_shape(
         height (float): Height of the cylinder
         position (tuple): Position of the cylinder base center (x, y, z)
         rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
-        direction (tuple): Direction vector for cylinder orientation
 
     Returns:
         Part.Shape: The created cylinder part
@@ -170,7 +169,7 @@ def cylinder_shape(
         diameter / 2,
         height,
         App.Vector(*position),
-        App.Vector(*direction),
+        App.Vector(0, 0, 1),
     )
     # apply rotation
     part.rotate(
@@ -200,7 +199,6 @@ def bolt_shape(
     head_height: float,
     position: tuple = (0, 0, 0),
     rotation: tuple = (0, 0, 0),
-    direction: tuple = (0, 0, -1),
     from_top: bool = True,
     countersink: bool = False,
 ) -> Part.Shape:
@@ -216,7 +214,6 @@ def bolt_shape(
         head_height (float): Height of the bolt head
         position (tuple): Position of the bolt head center (x, y, z)
         rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
-        direction (tuple): Direction vector for bolt orientation
         from_top (bool): Whether the origin is the top or bottom of the head
         countersink (bool): Whether the head is a countersink (conical)
 
@@ -225,22 +222,28 @@ def bolt_shape(
     """
 
     # create head
-    if not from_top:
-        direction = tuple(-i for i in direction)
+    if from_top:
+        head_position = position
+    else:
+        head_position = (
+            position[0],
+            position[1],
+            position[2] + head_height,
+        )
     if countersink:
         part = Part.makeCone(
             head_diameter / 2,
             tap_diameter / 2,
             head_height,
-            App.Vector(*position),
-            App.Vector(*direction),
+            App.Vector(*head_position),
+            App.Vector(0, 0, -1),
         )
     else:
         part = Part.makeCylinder(
             head_diameter / 2,
             head_height,
-            App.Vector(*position),
-            App.Vector(*direction),
+            App.Vector(*head_position),
+            App.Vector(0, 0, -1),
         )
     # create clearance hole
     part = part.fuse(
@@ -248,7 +251,7 @@ def bolt_shape(
             clear_diameter / 2,
             clear_depth,
             App.Vector(*position),
-            App.Vector(*direction),
+            App.Vector(0, 0, -1),
         )
     )
     # create tapped hole
@@ -257,7 +260,7 @@ def bolt_shape(
             tap_diameter / 2,
             length,
             App.Vector(*position),
-            App.Vector(*direction),
+            App.Vector(0, 0, -1),
         )
     )
 
@@ -292,7 +295,6 @@ def bolt_slot_shape(
     slot_length: float,
     position: tuple = (0, 0, 0),
     rotation: tuple = (0, 0, 0),
-    direction: tuple = (0, 0, -1),
     from_top: bool = True,
 ) -> Part.Shape:
     """
@@ -308,7 +310,6 @@ def bolt_slot_shape(
         slot_length (float): Travel length for slot (full length - diameter)
         position (tuple): Position of the slot center (x, y, z)
         rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
-        direction (tuple): Direction vector for slot orientation
         from_top (bool): Whether the origin is the top or bottom of the bolt head
 
     Returns:
@@ -343,9 +344,6 @@ def bolt_slot_shape(
 
     # remove internal edges
     part = part.removeSplitter()
-    # rotate to direction
-    dir_rotation = App.Rotation(App.Vector(0, 0, 1), App.Vector(*direction))
-    part.rotate(App.Vector(*position), dir_rotation.Axis, dir_rotation.Angle)
     # apply final rotation
     part.rotate(
         App.Vector(*position),
@@ -430,22 +428,40 @@ def import_model(
     directory = Path(directory)
     model_path = directory / name
 
-    # validate files
-    if not directory.is_dir():
-        raise FileNotFoundError(f"Models directory not found")
-    if not model_path.is_dir():
-        raise FileNotFoundError(f"Model not found in directory")
-    if not (model_path / (f"{name}.step")).is_file():
-        raise FileNotFoundError(f"Model STEP file not found")
+    try:
+        # validate files
+        if not directory.is_dir():
+            raise FileNotFoundError(f"Models directory not found")
+        if not model_path.is_dir():
+            raise FileNotFoundError(f"Model not found in directory")
+        if not (model_path / (f"{name}.step")).is_file():
+            raise FileNotFoundError(f"Model STEP file not found")
+        if not (model_path / (f"{name}.json")).is_file():
+            raise FileNotFoundError(f"Model info file not found")
 
-    if not (model_path / (f"{name}.stl")).is_file():
-        shape = Part.read(str(model_path / (f"{name}.step")))
-        mesh = MeshPart.meshFromShape(
-            Shape=shape, LinearDeflection=0.1, AngularDeflection=0.5
-        )
-        mesh.write(str(model_path / (f"{name}.stl")))
+        if not (model_path / (f"{name}.stl")).is_file():
+            shape = Part.read(str(model_path / (f"{name}.step")))
+            info = json.load(open(model_path / (f"{name}.json")))
 
-    # read mesh from file
-    mesh = Mesh.read(str(model_path / (f"{name}.stl")))
+            rotation = App.Rotation("XYZ", *info["rotation"])
+            rotation = App.Placement(App.Vector(0, 0, 0), rotation, App.Vector(0, 0, 0))
+            translation = App.Placement(
+                App.Vector(*info["translation"]),
+                App.Rotation("XYZ", 0, 0, 0),
+                App.Vector(0, 0, 0),
+            )
+            shape.Placement = rotation * translation
+
+            mesh = MeshPart.meshFromShape(
+                Shape=shape, LinearDeflection=0.1, AngularDeflection=0.5
+            )
+            mesh.write(str(model_path / (f"{name}.stl")))
+
+        # read mesh from file
+        mesh = Mesh.read(str(model_path / (f"{name}.stl")))
+    
+    except FileNotFoundError as e:
+        print(f"Error importing model '{name}': {e}")
+        mesh = Mesh.Mesh()  # return empty mesh on error
 
     return mesh

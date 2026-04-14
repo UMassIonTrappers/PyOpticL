@@ -241,7 +241,6 @@ class bolt:
             head_diameter=dims["head_diameter"],
             head_height=dims["head_height"],
             position=(0, 0, 0),
-            direction=(0, 0, -1),
             countersink=self.countersink,
             from_top=self.from_top,
         )
@@ -265,7 +264,7 @@ class bolt:
                 head_diameter=head_diameter,
                 head_height=dims["head_height"],
                 position=(0, 0, 0),
-                direction=(0, 0, -1),
+                rotation=(0, 0, 0),
                 countersink=self.countersink,
                 from_top=self.from_top,
             )
@@ -279,7 +278,7 @@ class bolt:
                 head_height=dims["head_height"],
                 slot_length=self.slot_length,
                 position=(0, 0, 0),
-                direction=(0, 0, -1),
+                rotation=(0, 0, 0),
                 from_top=self.from_top,
             )
         return part
@@ -317,7 +316,7 @@ class alignment_pin:
             diameter=self.diameter,
             height=self.length,
             position=(0, 0, -self.depth_tolerance / 2),
-            direction=(0, 0, -1),
+            rotation=(180, 0, 0)
         )
         return part
 
@@ -326,7 +325,7 @@ class alignment_pin:
             diameter=self.diameter + self.hole_tolerance,
             height=self.length + self.depth_tolerance,
             position=(0, 0, 0),
-            direction=(0, 0, -1),
+            rotation=(180, 0, 0),
         )
         return part
 
@@ -435,7 +434,7 @@ class circular_reflector:
             diameter=self.diameter,
             height=self.thickness,
             position=(-self.thickness, 0, 0),
-            direction=(1, 0, 0),
+            rotation=(0, 90, 0),
         )
         return part
 
@@ -597,7 +596,7 @@ class spherical_lens:
             diameter=self.diameter,
             height=self.thickness,
             position=(-self.thickness / 2, 0, 0),
-            direction=(1, 0, 0),
+            rotation=(0, 90, 0),
         )
         return part
 
@@ -837,13 +836,12 @@ class mirror_mount_k05s1:
             self.bolt_length = default_bolt_length(self.extra_length)
 
     def subcomponents(self):
-        extra_length = self.bolt_position[2] - self.mount_position[2]
         components = [
             Subcomponent(
                 component=Component(
                     label="Mounting Bolt",
                     definition=bolt(
-                        "8_32",
+                        types=["8_32", "M4"],
                         length=self.bolt_length,
                         from_top=False,
                         drill_depth=self.drill_depth + self.extra_length,

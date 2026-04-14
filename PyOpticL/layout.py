@@ -182,11 +182,6 @@ class Component(Layout):
         recompute_priority: int = 0,
     ):
 
-        super().__init__(
-            label=label,
-            recompute_priority=recompute_priority,
-        )
-
         # Define attributes to override using the component definition
         override_attributes = (
             "object_color",
@@ -219,6 +214,11 @@ class Component(Layout):
                     return interfaces
 
         self.__class__ = Component_Wrapper
+
+        super().__init__(
+            label=label,
+            recompute_priority=recompute_priority,
+        )
 
         # set object color
         obj = self.get_object()

@@ -4,6 +4,7 @@ import re
 from inspect import cleandoc
 from itertools import count
 from pathlib import Path
+import json
 
 import FreeCAD as App
 import FreeCADGui as Gui
@@ -298,12 +299,14 @@ class Import_Model_Dialog(QtGui.QDialog):
         # get rotation from view
         rotation = Gui.ActiveDocument.ActiveView.viewPosition().Rotation.inverted()
         rotation = App.Rotation("XYZ", 90, 0, 90) * rotation
+        self.raw_rotation = tuple(np.round(rotation.getYawPitchRoll()[::-1], 3))
         rotation = App.Placement(App.Vector(0, 0, 0), rotation, App.Vector(0, 0, 0))
 
         # get translation from selected features
         translation = -get_position_of_selected()
+        self.raw_translation = tuple(np.round(translation, 3))
         translation = App.Placement(
-            App.Vector(App.Vector(*translation)),
+            App.Vector(*translation),
             App.Rotation("XYZ", 0, 0, 0),
             App.Vector(0, 0, 0),
         )
@@ -345,9 +348,17 @@ class Import_Model_Dialog(QtGui.QDialog):
             return
 
         # create output folder and save STEP file
-        output_path.mkdir()
+        output_path.mkdir(parents=True, exist_ok=True)
         step_path = output_path / (self.import_name + ".step")
+        self.import_object.Placement = App.Placement()  # reset placement before export
         Part.export([self.import_object], str(step_path))
+        
+        info_dict = dict(translation=self.raw_translation, rotation=self.raw_rotation)
+
+        # save transformation info
+        info_path = output_path / (self.import_name + ".json")
+        with open(info_path, "w") as f:
+            json.dump(info_dict, f)
 
         self.close()
 
