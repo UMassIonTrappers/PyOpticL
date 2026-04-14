@@ -187,6 +187,7 @@ def cylinder_shape(
         App.Vector(0, 0, 1),
         rotation[2],
     )
+    part = part.fuse(part)
     return part
 
 
