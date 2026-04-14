@@ -1146,7 +1146,6 @@ class Lens(Interface):
         focal_length (float): Focal length of the lens
         diameter (float): Diameter for circular interface
         max_angle (float): Maximum angle between incident beam and interface normal in degrees
-        single_sided (bool): Whether the interface is single-sided
     """
 
     def __init__(
@@ -1156,7 +1155,6 @@ class Lens(Interface):
         focal_length: dim,
         diameter: dim = None,
         max_angle: float = 90,
-        single_sided: bool = False,
     ):
 
         super().__init__(
@@ -1164,7 +1162,7 @@ class Lens(Interface):
             rotation=rotation,
             diameter=diameter,
             max_angle=max_angle,
-            single_sided=single_sided,
+            single_sided=False,
         )
 
         self.focal_length = focal_length
@@ -1226,6 +1224,89 @@ class Lens(Interface):
         incident_beam.add(output_beam, origin=local_origin)
 
         return [output_beam]
+    
+
+class Waveplate(Interface):
+    """
+    Base class for waveplate interface
+    Supports quarter and half waveplates
+
+    Args:
+        position (tuple): (x, y, z)
+        rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
+        retardance (float): The phase delay introduced by the waveplate
+        fast_axis_angle (float): The angle of the fast axis in degrees
+        diameter (float): Diameter for circular interface
+        width (float): x-distance for rectangular interface
+        height (float): y-distance for rectangular interface
+        max_angle (float): Maximum angle between incident beam and interface normal in degrees
+    """
+
+    def __init__(
+        self,
+        position: tuple,
+        rotation: tuple,
+        retardance: float,
+        fast_axis_angle: float,
+        diameter: dim = None,
+        width: dim = None,
+        height: dim = None,
+        max_angle: float = 90,
+    ):
+
+        super().__init__(
+            position=position,
+            rotation=rotation,
+            diameter=diameter,
+            width=width,
+            height=height,
+            max_angle=max_angle,
+            single_sided=False,
+        )
+        self.retardance = retardance
+        self.fast_axis_angle = fast_axis_angle
+
+    def get_output_beams(self, incident_beam: BeamSegment) -> list[BeamSegment]:
+        """
+        Get the output beams from an incident beam interacting with the interface
+
+        Args:
+            incident_beam (Beam): Incident beam object
+
+        Returns:
+            output_beams (list): List of output Beam objects
+        """
+
+        global_normal = self.get_global_normal()
+        beam_direction = incident_beam.get_global_direction()
+        intercept = self.get_intercept(incident_beam)
+
+        if intercept is None:
+            return []
+
+        local_origin = incident_beam.get_relative_position(intercept)
+
+        # calculate new polarization angle
+        fast_axis_rad = np.radians(self.fast_axis_angle)
+        incident_polarization_rad = np.radians(incident_beam.polarization)
+        delta = self.retardance
+        new_polarization_rad = 2 * fast_axis_rad - incident_polarization_rad + delta
+        new_polarization = np.degrees(new_polarization_rad) % 360
+
+        # generate output beam (no change in direction or other properties)
+        output_beam = BeamSegment(
+            index=incident_beam.index,
+            direction=incident_beam.get_relative_direction(beam_direction),
+            wavelength=incident_beam.wavelength,
+            polarization=new_polarization,
+            power=incident_beam.power,
+            waist_position=incident_beam.waist_position,
+            rayleigh_range=incident_beam.rayleigh_range,
+        )
+        incident_beam.add(output_beam, origin=local_origin)
+
+        return [output_beam]
+
 
 
 class Diffraction(Interface):
