@@ -608,7 +608,7 @@ class circular_waveplate:
     Args:
         diameter (float): The diameter of the waveplate
         thickness (float): The thickness of the waveplate
-        retardance (float): The phase delay introduced by the waveplate
+        retardance (float): The phase delay in waves (0.25 quarter-wave, 0.5 half-wave)
         fast_axis_angle (float): The angle of the fast axis in degrees
     """
 

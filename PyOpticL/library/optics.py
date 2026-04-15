@@ -281,7 +281,7 @@ class circular_waveplate:
     Args:
         diameter (float): The diameter of the waveplate
         thickness (float): The thickness of the waveplate
-        retardance (float): The phase delay introduced by the waveplate
+        retardance (float): The phase delay in waves (0.25 quarter-wave, 0.5 half-wave)
         fast_axis_angle (float): The angle of the fast axis in degrees
     """
 
@@ -347,7 +347,7 @@ class circular_waveplate:
 
 class beamsplitter_cube:
     """
-    A generic beamsplitter cube component, mounted on a surface adapter
+    A generic beamsplitter cube component, optionally mounted on a surface adapter
 
     Args:
         size (float): The side length of the cube
@@ -365,10 +365,11 @@ class beamsplitter_cube:
     def __init__(
         self,
         side_length: dim,
-        optical_height: dim,
         ref_polarization: float = 0,
         ref_ratio: float = None,
         rotate_cube: bool = False,
+        surface_adapter: bool = False,
+        optical_height: dim = 0,
         rotate_adapter: bool = False,
         inset_depth: dim = dim(1, "mm"),
         drill_depth: dim = None,
@@ -394,9 +395,10 @@ class beamsplitter_cube:
         )
         self.adapter_parameters |= adapter_parameters
         self.side_length = side_length
-        self.optical_height = optical_height
         self.ref_polarization = ref_polarization
         self.ref_ratio = ref_ratio
+        self.surface_adapter = surface_adapter
+        self.optical_height = optical_height
         self.rotate_cube = rotate_cube
         self.rotate_adapter = rotate_adapter
         self.inset_depth = inset_depth
@@ -416,16 +418,17 @@ class beamsplitter_cube:
         ]
 
     def subcomponents(self):
-        return [
-            Subcomponent(
-                component=Component(
-                    label="Surface Adapter",
-                    definition=surface_adapter(**self.adapter_parameters),
-                ),
-                position=(0, 0, self.inset_depth - self.side_length / 2),
-                rotation=(0, 0, 90 if self.rotate_adapter else 0),
-            )
-        ]
+        if self.surface_adapter:
+            return [
+                Subcomponent(
+                    component=Component(
+                        label="Surface Adapter",
+                        definition=surface_adapter(**self.adapter_parameters),
+                    ),
+                    position=(0, 0, self.inset_depth - self.side_length / 2),
+                    rotation=(0, 0, 90 if self.rotate_adapter else 0),
+                )
+            ]
 
     def shape(self):
         part = box_shape(

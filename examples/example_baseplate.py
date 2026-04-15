@@ -23,7 +23,7 @@ beam.add(
         definition=optics.circular_waveplate(
             diameter=dim(0.5, "in"),
             retardance=0.5,
-            fast_axis_angle=45,
+            fast_axis_angle=22.5,
             mount_definition=thorlabs.rotation_mount_rsp05(),
         ),
     ),

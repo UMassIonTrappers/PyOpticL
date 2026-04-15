@@ -1,17 +1,16 @@
-from PyOpticL import optomech
-from PyOpticL.beam_path import BeamPath
-from PyOpticL.layout import Component
+from PyOpticL.beam_path import BeamPath, linear_polarization
+from PyOpticL.layout import Component, Layout
+from PyOpticL.library import optics
 from PyOpticL.types import Dimension as dim
-from PyOpticL.layout import Layout
 
 layout = Layout("Example Layout")
 
 beam_path = layout.add(
     BeamPath(
         label="Beam Path",
-        waist=dim(5, "mm"),
+        waist=dim(1, "mm"),
         wavelength=670,
-        polarization=45,
+        polarization=linear_polarization(45),
     ),
     position=(0, 0, 0),
     rotation=(0, 0, 90),
@@ -20,8 +19,8 @@ beam_path = layout.add(
 beam_path.add(
     Component(
         label="PBS 1",
-        definition=optomech.polarizing_beam_splitter_cube(
-            size=dim(1, "in"), ref_polarization=0
+        definition=optics.beamsplitter_cube(
+            side_length=dim(10, "mm"), optical_height=dim(0.5, "in")
         ),
     ),
     beam_index=0b1,

@@ -9,6 +9,83 @@ from PyOpticL.layout import Layout
 from PyOpticL.types import Dimension as dim
 from PyOpticL.utils import collect_children, wavelength_to_rgb
 
+JonesComponent = tuple[float, float]  # (real, imag)
+JonesState = tuple[JonesComponent, JonesComponent]  # ((Ex_re, Ex_im), (Ey_re, Ey_im))
+
+
+def _normalize_jones_vector(
+    jones_vector: JonesState | np.ndarray,
+) -> np.ndarray:
+    """Normalize a Jones vector to unit intensity."""
+
+    raw = np.asarray(jones_vector)
+    if raw.shape == (2,):
+        vector = raw.astype(complex)
+    elif raw.shape == (2, 2):
+        pairs = raw.astype(float)
+        vector = pairs[:, 0] + 1j * pairs[:, 1]
+    else:
+        raise ValueError(
+            "Jones vector must be length-2 complex-like or ((re, im), (re, im))"
+        )
+
+    norm = np.linalg.norm(vector)
+    if np.isclose(norm, 0, atol=1e-9):
+        raise ValueError("Polarization Jones vector magnitude cannot be zero")
+    return vector / norm
+
+
+def _serialize_jones_vector(
+    jones_vector: JonesState | np.ndarray,
+) -> JonesState:
+    """Convert any accepted Jones representation to plain nested float tuples."""
+
+    normalized = _normalize_jones_vector(jones_vector)
+    return (
+        (float(np.real(normalized[0])), float(np.imag(normalized[0]))),
+        (float(np.real(normalized[1])), float(np.imag(normalized[1]))),
+    )
+
+
+def linear_polarization(angle_deg: float = 0) -> JonesState:
+    """Create a linear polarization Jones state at `angle_deg` in degrees."""
+
+    angle_rad = np.radians(angle_deg)
+    return ((float(np.cos(angle_rad)), 0.0), (float(np.sin(angle_rad)), 0.0))
+
+
+def circular_polarization(handedness: str = "right") -> JonesState:
+    """Create a circular polarization Jones state.
+
+    Args:
+        handedness (str): "right" or "left"
+    """
+
+    handedness_value = handedness.lower()
+    if handedness_value == "right":
+        ellipticity = 45.0
+    elif handedness_value == "left":
+        ellipticity = -45.0
+    else:
+        raise ValueError("Circular polarization handedness must be 'right' or 'left'")
+    return elliptical_polarization(0, ellipticity)
+
+
+def elliptical_polarization(
+    azimuth_deg: float,
+    ellipticity_deg: float,
+    global_phase_deg: float = 0,
+) -> JonesState:
+    """Create an elliptical polarization Jones state from ellipse parameters."""
+
+    psi = np.radians(azimuth_deg)
+    chi = np.radians(ellipticity_deg)
+    phase = np.exp(1j * np.radians(global_phase_deg))
+
+    ex = np.cos(psi) * np.cos(chi) + 1j * np.sin(psi) * np.sin(chi)
+    ey = np.sin(psi) * np.cos(chi) - 1j * np.cos(psi) * np.sin(chi)
+    return _serialize_jones_vector((phase * ex, phase * ey))
+
 
 class DeleteObserver:
     def __init__(self, names):
@@ -33,7 +110,7 @@ class BeamSegment(Layout):
         index (int): Index of the beam
         direction (tuple): (x, y, z) normalized direction vector
         wavelength (float): Wavelength of the beam in nm
-        polarization (string): Polarization angle of the beam in degrees
+        polarization (JonesState): Jones state ((Ex_re, Ex_im), (Ey_re, Ey_im))
         power (float): Power of the beam in W
         waist_position (float): Position of the beam waist in mm
         waist (float): Beam waist radius in mm
@@ -48,7 +125,7 @@ class BeamSegment(Layout):
         index: int,
         direction: tuple[float],
         wavelength: float,
-        polarization: float,
+        polarization: JonesState,
         power: float,
         waist_position: dim,
         waist: dim = None,
@@ -62,7 +139,7 @@ class BeamSegment(Layout):
         self.index = index
         self.direction = tuple(direction)
         self.wavelength = wavelength
-        self.polarization = polarization
+        self.set_polarization_state(polarization)
         self.power = power
         self.waist_position = waist_position
         self.distance = 0  # to be set during path calculation
@@ -88,6 +165,20 @@ class BeamSegment(Layout):
         # additional object links
         self.make_property("ChildObject", "App::PropertyLinkHidden")
         self.make_property("BoundParent", "App::PropertyLinkHidden")
+
+    def set_polarization_state(self, polarization: JonesState):
+        """Store Jones polarization state and derived angle readout."""
+
+        self.polarization_jones = _serialize_jones_vector(polarization)
+        ex, ey = _normalize_jones_vector(self.polarization_jones)
+        s1 = np.abs(ex) ** 2 - np.abs(ey) ** 2
+        s2 = 2 * np.real(ex * np.conjugate(ey))
+        self.polarization = float(np.degrees(0.5 * np.arctan2(s2, s1)) % 180)
+
+    def get_jones_vector(self) -> JonesState:
+        """Return the normalized Jones state ((Ex_re, Ex_im), (Ey_re, Ey_im))."""
+
+        return self.polarization_jones
 
     def set_parent(self, parent: Layout):
         """
@@ -381,7 +472,7 @@ class BeamPath(Layout):
     Args:
         label (str): Label for the beam path
         wavelength (float): Wavelength of the beam in nm
-        polarization (float): Polarization angle in degrees
+        polarization (JonesState): Input Jones state
         power (float): Power of the beam in W
         waist_position (float): Position of the beam waist in mm
         waist (float): Beam waist radius in mm
@@ -396,7 +487,7 @@ class BeamPath(Layout):
         self,
         label: str,
         wavelength: float = 635,
-        polarization: float = 0,
+        polarization: JonesState = None,
         power: float = 1,
         waist_position: dim = dim(0, "mm"),
         waist: dim = None,
@@ -420,6 +511,8 @@ class BeamPath(Layout):
 
         self.waist = waist
         self.wavelength = wavelength
+        if polarization is None:
+            polarization = linear_polarization(0)
         self.polarization = polarization
         self.power = power
         self.waist_position = waist_position
@@ -951,7 +1044,7 @@ class Reflection(Interface):
         position (tuple): (x, y, z) coordinates
         rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
         ref_ratio (float): Ratio of reflected to transmitted power
-        ref_polarization (string): Polarization angle of reflected light in radians
+        ref_polarization (float): Polarization axis angle of reflected light in degrees
         ref_wavelengths (list): List of tuples specifying (min, max) wavelength ranges
                                 for reflection in nm. Use None to indicate an open range
         diameter (float): Diameter for circular interface
@@ -1027,18 +1120,51 @@ class Reflection(Interface):
         if intercept is None:
             return []
 
+        incident_jones = _normalize_jones_vector(incident_beam.get_jones_vector())
+
         # calculate ratio of transmitted to reflected power for different interface types
         if self.type == "mirror":
             transmit_ratio = 0
+            transmit_jones = incident_jones
+            reflect_jones = incident_jones
         if self.type == "sampler":
             transmit_ratio = 1 - self.ref_ratio
+            transmit_jones = incident_jones
+            reflect_jones = incident_jones
         if self.type == "polarizing":
-            transmit_polarization = self.ref_polarization + 90
-            reflect_polarization = self.ref_polarization
-            angle_diff = incident_beam.polarization - transmit_polarization
-            transmit_ratio = np.cos(np.radians(angle_diff)) ** 2
+            reflect_axis = _normalize_jones_vector(
+                linear_polarization(self.ref_polarization)
+            )
+            transmit_axis = _normalize_jones_vector(
+                linear_polarization(self.ref_polarization + 90)
+            )
+
+            reflect_component = np.vdot(reflect_axis, incident_jones) * reflect_axis
+            transmit_component = np.vdot(transmit_axis, incident_jones) * transmit_axis
+
+            reflect_ratio = float(
+                np.real(np.vdot(reflect_component, reflect_component))
+            )
+            transmit_ratio = float(
+                np.real(np.vdot(transmit_component, transmit_component))
+            )
+            total_ratio = reflect_ratio + transmit_ratio
+            if total_ratio > 1e-9:
+                reflect_ratio /= total_ratio
+                transmit_ratio /= total_ratio
+
+            if reflect_ratio > 1e-9:
+                reflect_jones = _normalize_jones_vector(reflect_component)
+            else:
+                reflect_jones = reflect_axis
+            if transmit_ratio > 1e-9:
+                transmit_jones = _normalize_jones_vector(transmit_component)
+            else:
+                transmit_jones = transmit_axis
         if self.type == "dichroic":
             transmit_ratio = 1
+            transmit_jones = incident_jones
+            reflect_jones = incident_jones
             # check if wavelength within the reflection ranges
             for lmin, lmax in self.ref_wavelengths:
                 if lmin == None:
@@ -1049,11 +1175,6 @@ class Reflection(Interface):
                     transmit_ratio = 0
                     break
         reflect_ratio = 1 - transmit_ratio
-
-        if self.type != "polarizing":
-            # TODO handle polarization change caused by other reflection
-            transmit_polarization = incident_beam.polarization
-            reflect_polarization = incident_beam.polarization
 
         local_origin = incident_beam.get_relative_position(intercept)
         waist_position, rayleigh_range = self.apply_abcd(incident_beam)
@@ -1099,7 +1220,7 @@ class Reflection(Interface):
                     index=index,
                     direction=local_direction,
                     wavelength=incident_beam.wavelength,
-                    polarization=transmit_polarization,
+                    polarization=_serialize_jones_vector(transmit_jones),
                     power=incident_beam.power * transmit_ratio,
                     waist_position=waist_position,
                     rayleigh_range=rayleigh_range,
@@ -1124,7 +1245,7 @@ class Reflection(Interface):
                 index=index,
                 direction=local_direction,
                 wavelength=incident_beam.wavelength,
-                polarization=reflect_polarization,
+                polarization=_serialize_jones_vector(reflect_jones),
                 power=incident_beam.power * reflect_ratio,
                 waist_position=waist_position,
                 rayleigh_range=rayleigh_range,
@@ -1216,7 +1337,7 @@ class Lens(Interface):
             index=incident_beam.index,
             direction=local_direction,
             wavelength=incident_beam.wavelength,
-            polarization=incident_beam.polarization,
+            polarization=incident_beam.get_jones_vector(),
             power=incident_beam.power,
             waist_position=waist_position,
             rayleigh_range=rayleigh_range,
@@ -1224,7 +1345,7 @@ class Lens(Interface):
         incident_beam.add(output_beam, origin=local_origin)
 
         return [output_beam]
-    
+
 
 class Waveplate(Interface):
     """
@@ -1234,7 +1355,7 @@ class Waveplate(Interface):
     Args:
         position (tuple): (x, y, z)
         rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
-        retardance (float): The phase delay introduced by the waveplate
+        retardance (float): The phase delay in waves (0.25 quarter-wave, 0.5 half-wave)
         fast_axis_angle (float): The angle of the fast axis in degrees
         diameter (float): Diameter for circular interface
         width (float): x-distance for rectangular interface
@@ -1285,20 +1406,25 @@ class Waveplate(Interface):
             return []
 
         local_origin = incident_beam.get_relative_position(intercept)
-
-        # calculate new polarization angle
-        fast_axis_rad = np.radians(self.fast_axis_angle)
-        incident_polarization_rad = np.radians(incident_beam.polarization)
-        delta = self.retardance
-        new_polarization_rad = 2 * fast_axis_rad - incident_polarization_rad + delta
-        new_polarization = np.degrees(new_polarization_rad) % 360
+        # Apply ideal waveplate Jones transform (retardance is specified in waves).
+        theta = np.radians(self.fast_axis_angle)
+        delta = 2 * np.pi * self.retardance
+        rotation = np.array(
+            [[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]],
+            dtype=complex,
+        )
+        phase_delay = np.array([[1, 0], [0, np.exp(1j * delta)]], dtype=complex)
+        transform = rotation @ phase_delay @ rotation.T
+        output_jones = _normalize_jones_vector(
+            transform @ _normalize_jones_vector(incident_beam.get_jones_vector())
+        )
 
         # generate output beam (no change in direction or other properties)
         output_beam = BeamSegment(
             index=incident_beam.index,
             direction=incident_beam.get_relative_direction(beam_direction),
             wavelength=incident_beam.wavelength,
-            polarization=new_polarization,
+            polarization=_serialize_jones_vector(output_jones),
             power=incident_beam.power,
             waist_position=incident_beam.waist_position,
             rayleigh_range=incident_beam.rayleigh_range,
@@ -1306,7 +1432,6 @@ class Waveplate(Interface):
         incident_beam.add(output_beam, origin=local_origin)
 
         return [output_beam]
-
 
 
 class Diffraction(Interface):
