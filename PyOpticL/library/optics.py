@@ -418,8 +418,9 @@ class beamsplitter_cube:
         ]
 
     def subcomponents(self):
+        components = []
         if self.surface_adapter:
-            return [
+            components.append(
                 Subcomponent(
                     component=Component(
                         label="Surface Adapter",
@@ -428,7 +429,8 @@ class beamsplitter_cube:
                     position=(0, 0, self.inset_depth - self.side_length / 2),
                     rotation=(0, 0, 90 if self.rotate_adapter else 0),
                 )
-            ]
+            )
+        return components
 
     def shape(self):
         part = box_shape(
