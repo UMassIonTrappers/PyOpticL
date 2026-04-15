@@ -1,10 +1,10 @@
 import csv
+import json
 import math
 import re
 from inspect import cleandoc
 from itertools import count
 from pathlib import Path
-import json
 
 import FreeCAD as App
 import FreeCADGui as Gui
@@ -352,7 +352,7 @@ class Import_Model_Dialog(QtGui.QDialog):
         step_path = output_path / (self.import_name + ".step")
         self.import_object.Placement = App.Placement()  # reset placement before export
         Part.export([self.import_object], str(step_path))
-        
+
         info_dict = dict(translation=self.raw_translation, rotation=self.raw_rotation)
 
         # save transformation info
@@ -360,7 +360,9 @@ class Import_Model_Dialog(QtGui.QDialog):
         with open(info_path, "w") as f:
             json.dump(info_dict, f)
 
-        App.closeDocument(App.ActiveDocument.Name)  # close the temporary document used for import
+        App.closeDocument(
+            App.ActiveDocument.Name
+        )  # close the temporary document used for import
 
         self.close()
 
@@ -405,6 +407,9 @@ class Convert_Model:
             shape = Part.read(str(selected_file))
             import_object = document.addObject("Part::Feature", name_value)
             import_object.Shape = shape
+            # fix issues with strange STEP artifacts in rendering
+            view_object = import_object.ViewObject
+            view_object.Deviation = 0.01
 
             # show confirm orientation dialog
             global confirm_dialog
@@ -417,7 +422,8 @@ class Convert_Model:
             Gui.ActiveDocument.ActiveView.fitAll()
 
         return
-    
+
+
 class Open_Model_Dialog(QtGui.QDialog):
     def __init__(self):
         super(Open_Model_Dialog, self).__init__()
@@ -452,7 +458,9 @@ class Open_Model_Dialog(QtGui.QDialog):
         self.populateModels()
 
     def selectExternalFolder(self):
-        folder = QtGui.QFileDialog.getExistingDirectory(self, "Select External Library Folder")
+        folder = QtGui.QFileDialog.getExistingDirectory(
+            self, "Select External Library Folder"
+        )
         if folder:
             self.externalPathEdit.setText(folder)
             self.populateModels()
@@ -462,7 +470,9 @@ class Open_Model_Dialog(QtGui.QDialog):
         self.modelCombo.clear()
 
         # internal models
-        internal_path = Path(App.getUserAppDataDir()) / "Mod" / "PyOpticL" / "PyOpticL" / "models"
+        internal_path = (
+            Path(App.getUserAppDataDir()) / "Mod" / "PyOpticL" / "PyOpticL" / "models"
+        )
         if internal_path.is_dir():
             for folder in internal_path.iterdir():
                 if folder.is_dir():
@@ -479,6 +489,7 @@ class Open_Model_Dialog(QtGui.QDialog):
             self.modelCombo.setCurrentIndex(0)
 
         self.modelCombo.blockSignals(False)
+
 
 class Open_Model:
     def GetResources(self):
@@ -500,15 +511,17 @@ class Open_Model:
                 return
 
             selected_folder = Path(selected_data)
-            
+
             # check if folder exists and contains required files
             step_file = selected_folder / (selected_folder.name + ".step")
             info_file = selected_folder / (selected_folder.name + ".json")
-            
+
             if not step_file.is_file() or not info_file.is_file():
-                App.Console.PrintError("Selected model folder missing STEP or JSON file.\n")
+                App.Console.PrintError(
+                    "Selected model folder missing STEP or JSON file.\n"
+                )
                 return
-            
+
             # create/clean new document
             doc_name = selected_folder.name
             if doc_name in App.listDocuments():
@@ -518,16 +531,19 @@ class Open_Model:
             else:
                 App.newDocument(doc_name)
             document = App.ActiveDocument
-            
+
             # load STEP file
             shape = Part.read(str(step_file))
             model_object = document.addObject("Part::Feature", selected_folder.name)
             model_object.Shape = shape
-            
+            # fix issues with strange STEP artifacts in rendering
+            view_object = model_object.ViewObject
+            view_object.Deviation = 0.01
+
             # load transformation info from JSON
             with open(info_file, "r") as f:
                 info = json.load(f)
-            
+
             # apply placement from saved transformation
             rotation = App.Rotation("XYZ", *info["rotation"])
             rotation = App.Placement(App.Vector(0, 0, 0), rotation, App.Vector(0, 0, 0))
@@ -537,7 +553,7 @@ class Open_Model:
                 App.Vector(0, 0, 0),
             )
             model_object.Placement = rotation * translation
-            
+
             Gui.ActiveDocument.ActiveView.fitAll()
 
         return
