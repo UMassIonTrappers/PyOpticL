@@ -32,7 +32,7 @@ class polaris_mount:
                     definition=bolt(
                         types=["8_32", "M4"],
                         length=self.bolt_length,
-                        clear_depth=self.mount_position[2] - self.bolt_position[2],
+                        clear_depth=self.bolt_position[2] - self.mount_position[2],
                         drill_depth=self.drill_depth,
                         from_top=False,
                     ),

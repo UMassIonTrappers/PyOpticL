@@ -270,13 +270,18 @@ class Component(Layout):
                         drill_shape.Placement = (
                             obj.Placement.inverse() * drill_obj.Placement
                         )
-                        z_direction = drill_obj.Placement.Rotation.multVec(App.Vector(0, 0, 1))
+                        z_direction = drill_obj.Placement.Rotation.multVec(
+                            App.Vector(0, 0, 1)
+                        )
 
                         # find and extrude +z-facing faces from drill_obj
                         for face in drill_shape.Faces:
                             normal = face.normalAt(0, 0)
                             intersection = face.common(shape)
-                            if normal.getAngle(z_direction) < 1e-6 and intersection.Area > 1e-6:
+                            if (
+                                normal.getAngle(z_direction) < 1e-6
+                                and intersection.Area > 1e-6
+                            ):
                                 max_dimension = shape.BoundBox.DiagonalLength
                                 extrusion = face.extrude(max_dimension * z_direction)
                                 drill_shape = drill_shape.fuse(extrusion)
@@ -284,6 +289,7 @@ class Component(Layout):
                         shape = shape.cut(drill_shape)
 
             # apply placement and set final shape
+            shape = shape.removeSplitter()
             shape.Placement = obj.Placement
             obj.Shape = shape
 

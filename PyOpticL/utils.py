@@ -1,3 +1,4 @@
+import json
 from collections import namedtuple
 from pathlib import Path
 
@@ -6,7 +7,6 @@ import Mesh
 import MeshPart
 import numpy as np
 import Part
-import json
 
 from PyOpticL.settings import measurement_system, minimum_thread_engagement
 from PyOpticL.types import Dimension as dim
@@ -117,11 +117,14 @@ def box_shape(
     """
 
     # create shape
-    part = Part.makeBox(*dimensions, App.Vector(
+    part = Part.makeBox(
+        *dimensions,
+        App.Vector(
             position[0] - (1 + center[0]) * dimensions[0] / 2,
             position[1] - (1 + center[1]) * dimensions[1] / 2,
             position[2] - (1 + center[2]) * dimensions[2] / 2,
-        ))
+        ),
+    )
     if fillet != 0:  # apply fillet to specified edges
         for i in part.Edges:
             if i.tangentAt(i.FirstParameter) == App.Vector(*fillet_direction):
@@ -247,14 +250,15 @@ def bolt_shape(
             App.Vector(0, 0, -1),
         )
     # create clearance hole
-    part = part.fuse(
-        Part.makeCylinder(
-            clear_diameter / 2,
-            clear_depth,
-            App.Vector(*position),
-            App.Vector(0, 0, -1),
+    if clear_depth > 0:
+        part = part.fuse(
+            Part.makeCylinder(
+                clear_diameter / 2,
+                clear_depth,
+                App.Vector(*position),
+                App.Vector(0, 0, -1),
+            )
         )
-    )
     # create tapped hole
     part = part.fuse(
         Part.makeCylinder(
@@ -325,14 +329,15 @@ def bolt_slot_shape(
         fillet=head_diameter / 2,
     )
     # create clearance hole
-    part = part.fuse(
-        box_shape(
-            dimensions=(slot_length + clear_diameter, clear_diameter, clear_depth),
-            position=position,
-            center=(0, 0, 1),
-            fillet=clear_diameter / 2,
+    if clear_depth > 0:
+        part = part.fuse(
+            box_shape(
+                dimensions=(slot_length + clear_diameter, clear_diameter, clear_depth),
+                position=position,
+                center=(0, 0, 1),
+                fillet=clear_diameter / 2,
+            )
         )
-    )
     # create tapped hole
     part = part.fuse(
         Part.makeCylinder(
@@ -364,7 +369,9 @@ def bolt_slot_shape(
     return part
 
 
-def default_bolt_length(through_length: float, max_thread_engagement: float = None) -> float:
+def default_bolt_length(
+    through_length: float, max_thread_engagement: float = None
+) -> float:
     """
     Determine the minimum standard bolt length for a given through length
     Note: The minimum bolt engagement global parameter is used to calculate the minimum length
@@ -469,7 +476,7 @@ def import_model(
 
         # read mesh from file
         mesh = Mesh.read(str(model_path / (f"{name}.stl")))
-    
+
     except FileNotFoundError as e:
         print(f"Error importing model '{name}': {e}")
         mesh = Mesh.Mesh()  # return empty mesh on error

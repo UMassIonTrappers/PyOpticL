@@ -127,7 +127,7 @@ class circular_mirror(circular_reflector):
     def __init__(
         self,
         diameter: dim,
-        thickness: dim,
+        thickness: dim = dim(6, "mm"),
         mount_definition: object = None,
         mount_offset: tuple = None,
     ):
@@ -293,9 +293,9 @@ class circular_waveplate:
     def __init__(
         self,
         diameter: dim,
-        thickness: dim,
-        retardance: float,
-        fast_axis_angle: float,
+        thickness: dim = dim(1, "mm"),
+        retardance: float = 0.5,
+        fast_axis_angle: float = 0,
         mount_definition: object = None,
         mount_offset: tuple = None,
     ):
@@ -366,8 +366,10 @@ class beamsplitter_cube:
         self,
         side_length: dim,
         optical_height: dim,
-        ref_polarization: float = None,
+        ref_polarization: float = 0,
         ref_ratio: float = None,
+        rotate_cube: bool = False,
+        rotate_adapter: bool = False,
         inset_depth: dim = dim(1, "mm"),
         drill_depth: dim = None,
         bolt_length: dim = None,
@@ -381,7 +383,7 @@ class beamsplitter_cube:
         self.adapter_parameters = dict(
             height=optical_height - side_length / 2 + inset_depth,
             min_length=side_length + corner_drill_diameter + dim(2, "mm"),
-            bolt_spacing=dim(25, "mm"),
+            bolt_spacing=side_length + dim(10, "mm"),
             bolt_types=["8_32", "M4"],
             bolt_length=bolt_length,
             drill_depth=drill_depth,
@@ -395,6 +397,8 @@ class beamsplitter_cube:
         self.optical_height = optical_height
         self.ref_polarization = ref_polarization
         self.ref_ratio = ref_ratio
+        self.rotate_cube = rotate_cube
+        self.rotate_adapter = rotate_adapter
         self.inset_depth = inset_depth
         self.drill_tolerance = drill_tolerance
         self.corner_drill_diameter = corner_drill_diameter
@@ -403,7 +407,7 @@ class beamsplitter_cube:
         return [
             Reflection(
                 position=(0, 0, 0),
-                rotation=(0, 0, 45),
+                rotation=(0, 0, 45 if self.rotate_cube else -45),
                 width=self.side_length * np.sqrt(2),
                 height=self.side_length * np.sqrt(2),
                 ref_polarization=self.ref_polarization,
@@ -419,7 +423,7 @@ class beamsplitter_cube:
                     definition=surface_adapter(**self.adapter_parameters),
                 ),
                 position=(0, 0, self.inset_depth - self.side_length / 2),
-                rotation=(0, 0, 0),
+                rotation=(0, 0, 90 if self.rotate_adapter else 0),
             )
         ]
 
