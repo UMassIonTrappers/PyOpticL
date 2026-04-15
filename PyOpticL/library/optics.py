@@ -347,7 +347,7 @@ class circular_waveplate:
 
 class beamsplitter_cube:
     """
-    A generic beamsplitter cube component, optionally mounted on a surface adapter
+    A generic beamsplitter cube component
 
     Args:
         size (float): The side length of the cube
@@ -368,40 +368,20 @@ class beamsplitter_cube:
         ref_polarization: float = 0,
         ref_ratio: float = None,
         rotate_cube: bool = False,
-        surface_adapter: bool = False,
-        optical_height: dim = 0,
-        rotate_adapter: bool = False,
-        inset_depth: dim = dim(1, "mm"),
-        drill_depth: dim = None,
-        bolt_length: dim = None,
-        adapter_parameters: dict = dict(),
+        mount_definition: object = None,
+        mount_offset: tuple = None,
         drill_tolerance: dim = dim(0.5, "mm"),
         corner_drill_diameter: dim = dim(3, "mm"),
     ):
         if ref_ratio is None and ref_polarization is None:
             raise ValueError("Either ref_ratio or ref_polarization must be specified")
 
-        self.adapter_parameters = dict(
-            height=optical_height - side_length / 2 + inset_depth,
-            min_length=side_length + corner_drill_diameter + dim(2, "mm"),
-            bolt_spacing=side_length + dim(10, "mm"),
-            bolt_types=["8_32", "M4"],
-            bolt_length=bolt_length,
-            drill_depth=drill_depth,
-            extra_thickness=dim(6, "mm"),
-            slot_length=dim(0, "mm"),
-            fillet_radius=dim(5, "mm"),
-            drill_tolerance=dim(1, "mm"),
-        )
-        self.adapter_parameters |= adapter_parameters
         self.side_length = side_length
         self.ref_polarization = ref_polarization
         self.ref_ratio = ref_ratio
-        self.surface_adapter = surface_adapter
-        self.optical_height = optical_height
         self.rotate_cube = rotate_cube
-        self.rotate_adapter = rotate_adapter
-        self.inset_depth = inset_depth
+        self.mount_definition = mount_definition
+        self.mount_offset = mount_offset
         self.drill_tolerance = drill_tolerance
         self.corner_drill_diameter = corner_drill_diameter
 
@@ -418,19 +398,22 @@ class beamsplitter_cube:
         ]
 
     def subcomponents(self):
-        components = []
-        if self.surface_adapter:
-            components.append(
+        if self.mount_definition != None:
+            mount_offset = self.mount_offset
+            if mount_offset is None:
+                mount_offset = (0, 0, -self.side_length / 2)
+            return [
                 Subcomponent(
                     component=Component(
-                        label="Surface Adapter",
-                        definition=surface_adapter(**self.adapter_parameters),
+                        label="Mount",
+                        definition=self.mount_definition,
                     ),
-                    position=(0, 0, self.inset_depth - self.side_length / 2),
-                    rotation=(0, 0, 90 if self.rotate_adapter else 0),
+                    position=mount_offset,
+                    rotation=(0, 0, 0),
                 )
-            )
-        return components
+            ]
+        else:
+            return []
 
     def shape(self):
         part = box_shape(
@@ -472,3 +455,63 @@ class beamsplitter_cube:
                 )
             )
         return part
+
+
+class beamsplitter_cube_on_surface_adapter(beamsplitter_cube):
+    """
+    Beamsplitter cube on a surface adapter with logical defaults for the adapter sizing
+
+    Args:
+        size (float): The side length of the cube
+        ref_polarization (float): The reflected polarization angle
+        ref_ratio (float): The ratio of reflected to transmitted light
+        adapter_parameters (dict): A dictionary of parameters to override the default surface adapter parameters
+    """
+
+    def __init__(
+        self,
+        side_length: dim,
+        optical_height: dim,
+        ref_polarization: float = 0,
+        ref_ratio: float = None,
+        rotate_cube: bool = False,
+        rotate_adapter: bool = False,
+        inset_depth: dim = dim(1, "mm"),
+        drill_depth: dim = None,
+        bolt_length: dim = None,
+        adapter_parameters: dict = dict(),
+    ):
+        super().__init__(
+            side_length=side_length,
+            ref_polarization=ref_polarization,
+            ref_ratio=ref_ratio,
+            rotate_cube=rotate_cube,
+        )
+        self.adapter_parameters = dict(
+            height=optical_height - side_length / 2 + inset_depth,
+            min_length=side_length + self.corner_drill_diameter + dim(2, "mm"),
+            bolt_spacing=dim(25, "mm"),
+            bolt_types=["8_32", "M4"],
+            bolt_length=bolt_length,
+            drill_depth=drill_depth,
+            extra_thickness=dim(6, "mm"),
+            slot_length=dim(0, "mm"),
+            fillet_radius=dim(5, "mm"),
+            drill_tolerance=dim(1, "mm"),
+        )
+        self.adapter_parameters |= adapter_parameters
+        self.optical_height = optical_height
+        self.rotate_adapter = rotate_adapter
+        self.inset_depth = inset_depth
+
+    def subcomponents(self):
+        return [
+            Subcomponent(
+                component=Component(
+                    label="Surface Adapter",
+                    definition=surface_adapter(**self.adapter_parameters),
+                ),
+                position=(0, 0, self.inset_depth - self.side_length / 2),
+                rotation=(0, 0, 90 if self.rotate_adapter else 0),
+            )
+        ]

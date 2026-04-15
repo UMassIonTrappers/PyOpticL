@@ -35,9 +35,8 @@ beam.add(
 beam.add(
     Component(
         label="Beam Splitter",
-        definition=optics.beamsplitter_cube(
+        definition=optics.beamsplitter_cube_on_surface_adapter(
             side_length=dim(10, "mm"),
-            surface_adapter=True,
             optical_height=dim(0.5, "in"),
         ),
     ),
