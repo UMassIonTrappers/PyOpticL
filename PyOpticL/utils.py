@@ -107,8 +107,8 @@ def box_shape(
         center (tuple): Position of the box origin with respect to its size. For example:
                         (0, 0, 0) origin at center of the box
                         (1, 0, 0) origin at +X face center
-                        (1, 1, 0) origin at +X +Y edge center
-                        (1, 1, 1) origin at +X +Y +Z corner
+                        (1, -1, 0) origin at +X -Y edge center
+                        (1, -1, 1) origin at +X -Y +Z corner
         fillet (float): Radius of fillet to apply to edges in fillet_dir
         fillet_dir (tuple): Direction vector of edges to fillet
 
