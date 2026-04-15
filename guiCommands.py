@@ -184,13 +184,14 @@ class Reload_Modules:
         }
 
     def Activated(self):
+        import sys
         from importlib import reload
 
-        reload(beam_path)
-        reload(icons)
-        reload(layout)
-        reload(optomech)
-        reload(utils)
+        # Reload all PyOpticL modules
+        for module_name in list(sys.modules.keys()):
+            if module_name.startswith("PyOpticL"):
+                reload(sys.modules[module_name])
+
         App.Console.PrintMessage("Freecad Optics Modules Reloaded\n")
         return
 
