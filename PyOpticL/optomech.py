@@ -2,10 +2,10 @@ import FreeCAD as App
 import numpy as np
 import Part
 
-from PyOpticL.beam_path import Lens, Reflection
+from PyOpticL import settings
+from PyOpticL.beam_path import Lens, Reflection, Waveplate
 from PyOpticL.icons import optic_icon, thorlabs_icon
 from PyOpticL.layout import Component
-from PyOpticL import settings
 from PyOpticL.types import Dimension as dim
 from PyOpticL.utils import (
     Subcomponent,
@@ -601,9 +601,80 @@ class spherical_lens:
         return part
 
 
-class polarizing_beam_splitter_cube:
+class circular_waveplate:
     """
-    A polarizing beam splitter cube component
+    A circular waveplate component
+
+    Args:
+        diameter (float): The diameter of the waveplate
+        thickness (float): The thickness of the waveplate
+        retardance (float): The phase delay introduced by the waveplate
+        fast_axis_angle (float): The angle of the fast axis in degrees
+    """
+
+    object_group = "optic"
+    object_icon = optic_icon
+    object_color = (0.5, 0.5, 0.8)
+    object_transparency = 75
+
+    def __init__(
+        self,
+        diameter: dim,
+        thickness: dim,
+        retardance: float,
+        fast_axis_angle: float,
+        mount_definition: object = None,
+        mount_offset: tuple = None,
+    ):
+        self.diameter = diameter
+        self.thickness = thickness
+        self.retardance = retardance
+        self.fast_axis_angle = fast_axis_angle
+        self.mount_definition = mount_definition
+        self.mount_offset = mount_offset
+
+    def interfaces(self):
+        return [
+            Waveplate(
+                position=(0, 0, 0),
+                rotation=(0, 0, 0),
+                diameter=self.diameter,
+                retardance=self.retardance,
+                fast_axis_angle=self.fast_axis_angle,
+            )
+        ]
+
+    def subcomponents(self):
+        if self.mount_definition != None:
+            mount_offset = self.mount_offset
+            if mount_offset is None:
+                mount_offset = (0, 0, 0)
+            return [
+                Subcomponent(
+                    component=Component(
+                        label="Mount",
+                        definition=self.mount_definition,
+                    ),
+                    position=mount_offset,
+                    rotation=(0, 0, 0),
+                )
+            ]
+        else:
+            return []
+
+    def shape(self):
+        part = cylinder_shape(
+            diameter=self.diameter,
+            height=self.thickness,
+            position=(-self.thickness / 2, 0, 0),
+            rotation=(0, 90, 0),
+        )
+        return part
+
+
+class beamsplitter_cube:
+    """
+    A generic beamsplitter cube component
 
     Args:
         size (float): The side length of the cube
@@ -620,15 +691,20 @@ class polarizing_beam_splitter_cube:
 
     def __init__(
         self,
-        size: dim,
-        ref_polarization: float = 0.0,
+        side_length: dim,
+        ref_polarization: float = None,
+        ref_ratio: float = None,
         mount_definition: object = None,
         mount_offset: tuple = None,
         drill_tolerance: dim = dim(0.5, "mm"),
         corner_drill_diameter: dim = dim(3, "mm"),
     ):
-        self.size = size
+        if ref_ratio is None and ref_polarization is None:
+            raise ValueError("Either ref_ratio or ref_polarization must be specified")
+
+        self.side_length = side_length
         self.ref_polarization = ref_polarization
+        self.ref_ratio = ref_ratio
         self.mount_definition = mount_definition
         self.mount_offset = mount_offset
         self.drill_tolerance = drill_tolerance
@@ -639,9 +715,10 @@ class polarizing_beam_splitter_cube:
             Reflection(
                 position=(0, 0, 0),
                 rotation=(0, 0, 45),
-                width=self.size * np.sqrt(2),
-                height=self.size * np.sqrt(2),
+                width=self.side_length * np.sqrt(2),
+                height=self.side_length * np.sqrt(2),
                 ref_polarization=self.ref_polarization,
+                ref_ratio=self.ref_ratio,
             )
         ]
 
@@ -649,7 +726,7 @@ class polarizing_beam_splitter_cube:
         if self.mount_definition != None:
             mount_offset = self.mount_offset
             if mount_offset is None:
-                mount_offset = (0, 0, -self.size / 2)
+                mount_offset = (0, 0, -self.side_length / 2)
             return [
                 Subcomponent(
                     component=Component(
@@ -665,11 +742,11 @@ class polarizing_beam_splitter_cube:
 
     def shape(self):
         part = box_shape(
-            dimensions=(self.size, self.size, self.size),
+            dimensions=(self.side_length, self.side_length, self.side_length),
             position=(0, 0, 0),
             center=(0, 0, 0),
         )
-        diag = self.size * np.sqrt(2)
+        diag = self.side_length * np.sqrt(2)
         part = part.cut(
             box_shape(
                 dimensions=(0.1, diag, diag),
@@ -683,9 +760,9 @@ class polarizing_beam_splitter_cube:
     def drill(self):
         part = box_shape(
             dimensions=(
-                self.size + self.drill_tolerance,
-                self.size + self.drill_tolerance,
-                self.size,
+                self.side_length + self.drill_tolerance,
+                self.side_length + self.drill_tolerance,
+                self.side_length,
             ),
             position=(0, 0, 0),
             center=(0, 0, 0),
@@ -694,8 +771,12 @@ class polarizing_beam_splitter_cube:
             part = part.fuse(
                 cylinder_shape(
                     diameter=self.corner_drill_diameter,
-                    height=self.size,
-                    position=(x * self.size / 2, y * self.size / 2, -self.size / 2),
+                    height=self.side_length,
+                    position=(
+                        x * self.side_length / 2,
+                        y * self.side_length / 2,
+                        -self.side_length / 2,
+                    ),
                 )
             )
         return part
@@ -720,7 +801,7 @@ class surface_adapter:
     """
 
     object_group = "adapter"
-    object_color = (0.25, 0.25, 0.25)
+    object_color = (0.5, 0.7, 0.5)
 
     def __init__(
         self,
@@ -748,42 +829,32 @@ class surface_adapter:
         self.drill_tolerance = drill_tolerance
 
     def subcomponents(self):
-        return [
-            Subcomponent(
-                component=Component(
-                    label="Mounting Bolt 1",
-                    definition=bolt(
-                        types=self.bolt_types,
-                        length=self.bolt_length,
-                        clear_depth=self.height,
-                        drill_depth=self.drill_depth,
-                        slot_length=self.slot_length,
+        components = []
+        for x in [-1, 1]:
+            components.append(
+                Subcomponent(
+                    component=Component(
+                        label="Mounting Bolt",
+                        definition=bolt(
+                            types=self.bolt_types,
+                            length=self.bolt_length,
+                            clear_depth=self.height,
+                            drill_depth=self.drill_depth,
+                            slot_length=self.slot_length,
+                        ),
                     ),
+                    position=(0, x * self.bolt_spacing / 2, 0),
+                    rotation=(0, 0, 0),
                 ),
-                position=(0, -self.bolt_spacing / 2, 0),
-                rotation=(0, 0, 0),
-            ),
-            Subcomponent(
-                component=Component(
-                    label="Mounting Bolt 2",
-                    definition=bolt(
-                        types=self.bolt_types,
-                        length=self.bolt_length,
-                        clear_depth=self.height,
-                        drill_depth=self.drill_depth,
-                        slot_length=self.slot_length,
-                    ),
-                ),
-                position=(0, self.bolt_spacing / 2, 0),
-                rotation=(0, 0, 0),
-            ),
-        ]
+            )
+        return components
 
     def shape(self):
         width = self.bolt_spacing + 2 * self.extra_thickness
         length = max(self.min_length, self.slot_length + 2 * self.extra_thickness)
+        height = self.height
         part = box_shape(
-            dimensions=(length, width, self.height),
+            dimensions=(length, width, height),
             position=(0, 0, 0),
             center=(0, 0, 1),
             fillet=self.fillet_radius,
@@ -796,8 +867,9 @@ class surface_adapter:
             max(self.min_length, self.slot_length + 2 * self.extra_thickness)
             + 2 * self.drill_tolerance
         )
+        height = self.height
         part = box_shape(
-            dimensions=(length, width, self.height),
+            dimensions=(length, width, height),
             position=(0, 0, 0),
             center=(0, 0, 1),
             fillet=self.fillet_radius,
@@ -828,7 +900,7 @@ class mirror_mount_k05s1:
     bolt_position = (-8.017, 0.000, -7.112)
     pin_positions = [(-8.017, 5.000, -10.795), (-8.017, -5.000, -10.795)]
 
-    def __init__(self, drill_depth: dim, bolt_length: dim = None):
+    def __init__(self, drill_depth: dim = None, bolt_length: dim = None):
         self.drill_depth = drill_depth
         self.bolt_length = bolt_length
 
@@ -909,8 +981,220 @@ class rotation_mount_rsp05:
                             from_top=self.bolt_distance_includes_head,
                         ),
                     ),
-                    position=(self.mount_position[0], self.mount_position[1], self.mount_position[2] - self.bolt_distance),
+                    position=(
+                        self.mount_position[0],
+                        self.mount_position[1],
+                        self.mount_position[2] - self.bolt_distance,
+                    ),
                     rotation=(180, 0, 0),
                 )
             )
+        return components
+
+
+class photodetector_pda10a2:
+    """
+    Photodetector, model PDA10A2
+    """
+
+    object_group = "detector"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+
+    mesh = import_model("thorlabs-pda10a2")
+    mount_position = (-10.544, 0.000, -25.000)
+    mount_hole_end = (-10.544, 0.000, -18.142)
+
+    def __init__(
+        self,
+        include_bolt: bool = True,
+        bolt_distance: dim = dim(10, "mm"),
+        bolt_distance_includes_head: bool = True,
+        bolt_length: dim = None,
+    ):
+        self.include_bolt = include_bolt
+        self.bolt_distance = bolt_distance
+        self.bolt_distance_includes_head = bolt_distance_includes_head
+        self.bolt_length = bolt_length
+
+    def subcomponents(self):
+        components = []
+        if self.include_bolt:
+            components.append(
+                Subcomponent(
+                    component=Component(
+                        label="Mounting Bolt",
+                        definition=bolt(
+                            types=["8_32", "M4"],
+                            length=self.bolt_length,
+                            clear_depth=self.bolt_distance,
+                            drill_depth=self.mount_hole_end[2] - self.mount_position[2],
+                            from_top=self.bolt_distance_includes_head,
+                        ),
+                    ),
+                    position=(
+                        self.mount_position[0],
+                        self.mount_position[1],
+                        self.mount_position[2] - self.bolt_distance,
+                    ),
+                    rotation=(180, 0, 0),
+                )
+            )
+        return components
+
+
+#########################
+### Common Assemblies ###
+#########################
+
+
+class rsp05_on_surface_adapter(rotation_mount_rsp05):
+    """
+    Rotation mount, model RSP05, on a surface adapter
+
+    Args:
+    drill_depth (float): The depth of the mounting hole
+    bolt_length (float): The length of the mounting bolt (defaults to minimum required length)
+    adapter_parameters (dict): A dictionary of parameters to override the default surface adapter parameters
+    """
+
+    def __init__(
+        self,
+        drill_depth: dim = None,
+        bolt_length: dim = None,
+        adapter_parameters: dict = dict(),
+    ):
+        self.adapter_parameters = dict(
+            height=dim(10, "mm"),
+            min_length=dim(10, "mm"),
+            bolt_spacing=dim(25, "mm"),
+            bolt_types=["8_32", "M4"],
+            bolt_length=bolt_length,
+            drill_depth=drill_depth,
+            extra_thickness=dim(6, "mm"),
+            slot_length=dim(0, "mm"),
+            fillet_radius=dim(5, "mm"),
+            drill_tolerance=dim(1, "mm"),
+        )
+        self.adapter_parameters |= adapter_parameters
+        super().__init__(
+            include_bolt=True,
+            bolt_distance=self.adapter_parameters["height"],
+        )
+
+    def subcomponents(self):
+        components = super().subcomponents()
+        components.append(
+            Subcomponent(
+                component=Component(
+                    label="Surface Adapter",
+                    definition=surface_adapter(**self.adapter_parameters),
+                ),
+                position=self.mount_position,
+                rotation=(0, 0, 0),
+            )
+        )
+        return components
+
+
+class beamsplitter_cube_on_surface_adapter(beamsplitter_cube):
+    """
+    Beamsplitter cube on a surface adapter
+
+    Args:
+        size (float): The side length of the cube
+        ref_polarization (float): The reflected polarization angle
+        ref_ratio (float): The ratio of reflected to transmitted light
+        adapter_parameters (dict): A dictionary of parameters to override the default surface adapter parameters
+    """
+
+    def __init__(
+        self,
+        side_length: dim,
+        optical_height: dim,
+        ref_polarization: float = None,
+        ref_ratio: float = None,
+        inset_depth: dim = dim(1, "mm"),
+        drill_depth: dim = None,
+        bolt_length: dim = None,
+        adapter_parameters: dict = dict(),
+    ):
+        super().__init__(
+            side_length=side_length,
+            ref_polarization=ref_polarization,
+            ref_ratio=ref_ratio,
+        )
+        self.adapter_parameters = dict(
+            height=optical_height - side_length / 2 + inset_depth,
+            min_length=side_length + self.corner_drill_diameter + dim(2, "mm"),
+            bolt_spacing=dim(25, "mm"),
+            bolt_types=["8_32", "M4"],
+            bolt_length=bolt_length,
+            drill_depth=drill_depth,
+            extra_thickness=dim(6, "mm"),
+            slot_length=dim(0, "mm"),
+            fillet_radius=dim(5, "mm"),
+            drill_tolerance=dim(1, "mm"),
+        )
+        self.adapter_parameters |= adapter_parameters
+        self.optical_height = optical_height
+        self.inset_depth = inset_depth
+
+    def subcomponents(self):
+        return [
+            Subcomponent(
+                component=Component(
+                    label="Surface Adapter",
+                    definition=surface_adapter(**self.adapter_parameters),
+                ),
+                position=(0, 0, self.inset_depth - self.side_length / 2),
+                rotation=(0, 0, 0),
+            )
+        ]
+
+
+class pda10a2_on_surface_adapter(photodetector_pda10a2):
+    """
+    Photodetector, model PDA10A2, on a surface adapter
+
+    Args:
+        adapter_parameters (dict): A dictionary of parameters to override the default surface adapter parameters
+    """
+
+    def __init__(
+        self,
+        drill_depth: dim = None,
+        bolt_length: dim = None,
+        adapter_parameters: dict = dict(),
+    ):
+        self.adapter_parameters = dict(
+            height=dim(10, "mm"),
+            min_length=dim(20, "mm"),
+            bolt_spacing=dim(40, "mm"),
+            bolt_types=["8_32", "M4"],
+            bolt_length=bolt_length,
+            drill_depth=drill_depth,
+            extra_thickness=dim(6, "mm"),
+            slot_length=dim(0, "mm"),
+            fillet_radius=dim(5, "mm"),
+            drill_tolerance=dim(1, "mm"),
+        )
+        self.adapter_parameters |= adapter_parameters
+        super().__init__(
+            include_bolt=True,
+            bolt_distance=self.adapter_parameters["height"],
+        )
+
+    def subcomponents(self):
+        components = super().subcomponents()
+        components.append(
+            Subcomponent(
+                component=Component(
+                    label="Surface Adapter",
+                    definition=surface_adapter(**self.adapter_parameters),
+                ),
+                position=self.mount_position,
+                rotation=(0, 0, 0),
+            )
+        )
         return components
