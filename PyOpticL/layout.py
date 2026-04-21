@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+from collections import namedtuple
+
 import FreeCAD as App
 
 from PyOpticL.settings import get_hidden_object_groups
 from PyOpticL.utils import collect_children
+
+Subcomponent = namedtuple("Subcomponent", ["component", "position", "rotation"])
 
 
 class Layout:
@@ -252,7 +256,7 @@ class Component(Layout):
                 shape = combined
 
             # don't apply drilling to some groups
-            if obj.Proxy.object_group not in ["hardware", "optic"]:
+            if obj.Proxy.object_group not in ["hardware", "optics"]:
 
                 # gather peer objects
                 drill_objs = []

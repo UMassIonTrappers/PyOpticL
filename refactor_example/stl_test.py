@@ -1,8 +1,7 @@
 from PyOpticL import optomech
 from PyOpticL.beam_path import BeamPath
-from PyOpticL.layout import Component
+from PyOpticL.layout import Component, Layout
 from PyOpticL.types import Dimension as dim
-from PyOpticL.layout import Layout
 
 mirror = optomech.circular_mirror(
     diameter=dim(0.5, "in"),
@@ -13,7 +12,7 @@ mirror = optomech.circular_mirror(
 layout = Layout("Example Layout")
 
 layout.add(
-    Component(label="mount", definition=mirror),
+    Component(label="mounts", definition=mirror),
     position=(0, 0, 0),
     rotation=(0, 0, 0),
 )

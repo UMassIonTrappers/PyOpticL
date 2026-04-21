@@ -108,6 +108,7 @@ class bolt:
         if drill_depth is None:
             self.drill_depth = self.length + settings.default_extra_drill_depth
 
+        self.type = types[0]
         for bolt_type in types:
             if bolt_type not in self.available_bolt_types:
                 raise ValueError(f"Bolt type {bolt_type} is not supported")

@@ -14,7 +14,7 @@ import numpy as np
 import Part
 from PySide import QtCore, QtGui
 
-from PyOpticL import beam_path, icons, layout, optomech, utils
+from PyOpticL import layout
 
 
 class Rerun_Macro:

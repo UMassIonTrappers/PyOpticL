@@ -2,10 +2,10 @@ import numpy as np
 
 from PyOpticL.beam_path import Lens, Reflection, Waveplate
 from PyOpticL.icons import optic_icon
-from PyOpticL.layout import Component
+from PyOpticL.layout import Component, Subcomponent
 from PyOpticL.library.adapters import surface_adapter
 from PyOpticL.types import Dimension as dim
-from PyOpticL.utils import Subcomponent, box_shape, cylinder_shape
+from PyOpticL.utils import box_shape, cylinder_shape
 
 
 class circular_reflector:
@@ -25,7 +25,7 @@ class circular_reflector:
         refractive_index (float): refractive index of the substrate
     """
 
-    object_group = "optic"
+    object_group = "optics"
     object_icon = optic_icon
     object_color = (0.5, 0.5, 0.8)
 
@@ -93,7 +93,7 @@ class circular_reflector:
             return [
                 Subcomponent(
                     component=Component(
-                        label="Mount",
+                        label="mounts",
                         definition=self.mount_definition,
                     ),
                     position=mount_offset,
@@ -109,6 +109,114 @@ class circular_reflector:
             height=self.thickness,
             position=(-self.thickness, 0, 0),
             rotation=(0, 90, 0),
+        )
+        return part
+
+
+class rectangular_reflector:
+    """
+    A rectangular reflector component
+
+    Args:
+        width (float): The width of the reflector
+        height (float): The height of the reflector
+        thickness (float): The thickness of the reflector
+        mount_definition (object): The definition of the mount component
+        mount_offset (tuple): The (x, y, z) offset of the mount relative to reflector origin
+                              If None, defaults to (-thickness, 0, 0)
+        ref_ratio (float): The ratio of reflected to transmitted light
+        ref_polarization (float): The reflected polarization angle
+        ref_wavelengths (list): A list of tuples representing the ranges of wavelengths to be reflected
+                                 Use None for open-ended ranges
+        refractive_index (float): refractive index of the substrate
+    """
+
+    object_group = "optics"
+    object_icon = optic_icon
+    object_color = (0.5, 0.5, 0.8)
+
+    def __init__(
+        self,
+        width: dim,
+        height: dim,
+        thickness: dim,
+        mount_definition: object = None,
+        mount_offset: tuple = None,
+        ref_ratio: float = None,
+        ref_polarization: float = None,
+        ref_wavelengths: list = None,
+        refractive_index: float = 1.5,
+    ):
+        self.width = width
+        self.height = height
+        self.thickness = thickness
+        self.mount_definition = mount_definition
+        self.mount_offset = mount_offset
+        self.ref_ratio = ref_ratio
+        self.ref_polarization = ref_polarization
+        self.ref_wavelengths = ref_wavelengths
+        self.refractive_index = refractive_index
+
+        if ref_ratio != None or ref_polarization != None or ref_wavelengths != None:
+            self.bidirectional = True
+            self.max_angle = 180
+        else:
+            self.bidirectional = False
+            self.max_angle = 90
+
+    def interfaces(self):
+        interfaces = [
+            Reflection(
+                position=(0, 0, 0),
+                rotation=(0, 0, 0),
+                width=self.width,
+                height=self.height,
+                ref_ratio=self.ref_ratio,
+                ref_polarization=self.ref_polarization,
+                ref_wavelengths=self.ref_wavelengths,
+                refractive_index_ratio=1 / self.refractive_index,
+                max_angle=self.max_angle,
+                single_sided=not self.bidirectional,
+            ),
+        ]
+
+        if self.bidirectional:
+            interfaces.append(
+                Reflection(
+                    position=(-self.thickness, 0, 0),
+                    rotation=(0, 0, 180),
+                    width=self.width,
+                    height=self.height,
+                    ref_ratio=0,
+                    refractive_index_ratio=1 / self.refractive_index,
+                    max_angle=self.max_angle,
+                )
+            )
+
+        return interfaces
+
+    def subcomponents(self):
+        if self.mount_definition != None:
+            mount_offset = self.mount_offset
+            if mount_offset is None:
+                mount_offset = (-self.thickness, 0, 0)
+            return [
+                Subcomponent(
+                    component=Component(
+                        label="mounts",
+                        definition=self.mount_definition,
+                    ),
+                    position=mount_offset,
+                    rotation=(0, 0, 0),
+                )
+            ]
+        else:
+            return []
+
+    def shape(self):
+        part = box_shape(
+            dimensions=(self.thickness, self.width, self.height),
+            center=(1, 0, 0),
         )
         return part
 
@@ -140,6 +248,36 @@ class circular_mirror(circular_reflector):
         )
 
 
+class rectangular_mirror(rectangular_reflector):
+    """
+    A rectangular mirror component
+
+    Args:
+        width (float): The width of the mirror
+        height (float): The height of the mirror
+        thickness (float): The thickness of the mirror
+        mount_definition (object): The definition of the mount component
+        mount_offset (tuple): The (x, y, z) offset of the mount relative to mirror origin
+                              If None, defaults to (-thickness, 0, 0)
+    """
+
+    def __init__(
+        self,
+        width: dim,
+        height: dim,
+        thickness: dim = dim(6, "mm"),
+        mount_definition: object = None,
+        mount_offset: tuple = None,
+    ):
+        super().__init__(
+            width=width,
+            height=height,
+            thickness=thickness,
+            mount_definition=mount_definition,
+            mount_offset=mount_offset,
+        )
+
+
 class circular_sampler(circular_reflector):
     """
     A circular sampler component
@@ -160,6 +298,7 @@ class circular_sampler(circular_reflector):
         ref_ratio: float = 0.5,
         mount_definition: object = None,
         mount_offset: tuple = None,
+        refractive_index: float = 1.5,
     ):
         super().__init__(
             diameter=diameter,
@@ -167,6 +306,7 @@ class circular_sampler(circular_reflector):
             mount_definition=mount_definition,
             mount_offset=mount_offset,
             ref_ratio=ref_ratio,
+            refractive_index=refractive_index,
         )
 
         self.object_transparency = int(100 * ref_ratio)
@@ -195,6 +335,7 @@ class circular_dichroic_mirror(circular_reflector):
         ref_wavelengths: list = [],
         mount_definition: object = None,
         mount_offset: tuple = None,
+        refractive_index: float = 1.5,
     ):
         super().__init__(
             diameter=diameter,
@@ -202,6 +343,7 @@ class circular_dichroic_mirror(circular_reflector):
             mount_definition=mount_definition,
             mount_offset=mount_offset,
             ref_wavelengths=ref_wavelengths,
+            refractive_index=refractive_index,
         )
 
 
@@ -218,7 +360,7 @@ class spherical_lens:
                               If None, defaults to (0, 0, 0)
     """
 
-    object_group = "optic"
+    object_group = "optics"
     object_icon = optic_icon
     object_color = (0.5, 0.5, 0.8)
     object_transparency = 75
@@ -255,7 +397,7 @@ class spherical_lens:
             return [
                 Subcomponent(
                     component=Component(
-                        label="Mount",
+                        label="mounts",
                         definition=self.mount_definition,
                     ),
                     position=mount_offset,
@@ -286,7 +428,7 @@ class circular_waveplate:
         fast_axis_angle (float): The angle of the fast axis in degrees
     """
 
-    object_group = "optic"
+    object_group = "optics"
     object_icon = optic_icon
     object_color = (0.5, 0.5, 0.8)
     object_transparency = 75
@@ -326,7 +468,7 @@ class circular_waveplate:
             return [
                 Subcomponent(
                     component=Component(
-                        label="Mount",
+                        label="mounts",
                         definition=self.mount_definition,
                     ),
                     position=mount_offset,
@@ -358,7 +500,7 @@ class beamsplitter_cube:
                               If None, defaults to (0, 0, -size/2)
     """
 
-    object_group = "optic"
+    object_group = "optics"
     object_icon = optic_icon
     object_color = (0.5, 0.5, 0.8)
     object_transparency = 75
@@ -406,7 +548,7 @@ class beamsplitter_cube:
             return [
                 Subcomponent(
                     component=Component(
-                        label="Mount",
+                        label="mounts",
                         definition=self.mount_definition,
                     ),
                     position=mount_offset,

@@ -170,16 +170,13 @@ class BeamSegment(Layout):
     def set_polarization_state(self, polarization: JonesState):
         """Store Jones polarization state and derived angle readout."""
 
-        self.polarization_jones = _serialize_jones_vector(polarization)
+        if isinstance(polarization, np.ndarray):
+            polarization = _serialize_jones_vector(polarization)
+        self.polarization_jones = polarization
         ex, ey = _normalize_jones_vector(self.polarization_jones)
         s1 = np.abs(ex) ** 2 - np.abs(ey) ** 2
         s2 = 2 * np.real(ex * np.conjugate(ey))
         self.polarization = float(np.degrees(0.5 * np.arctan2(s2, s1)) % 180)
-
-    def get_jones_vector(self) -> JonesState:
-        """Return the normalized Jones state ((Ex_re, Ex_im), (Ey_re, Ey_im))."""
-
-        return self.polarization_jones
 
     def set_parent(self, parent: Layout):
         """
@@ -1035,6 +1032,34 @@ class Interface:
 
         return intercept
 
+    def get_output_beams(self, incident_beam: BeamSegment) -> list[BeamSegment]:
+        """
+        Get the output beams from an incident beam interacting with the interface
+        By default, the beam is transmitted with ABCD transformation and no change in polarization or power
+
+        Args:
+            incident_beam (Beam_Segment): Incident beam segment
+
+        Returns:
+            output_beams (list): List containing a single transmitted beam segment
+        """
+
+        intercept = self.get_intercept(incident_beam)
+        local_origin = incident_beam.get_relative_position(intercept)
+        waist_position, rayleigh_range = self.apply_abcd(incident_beam)
+
+        output_beam = BeamSegment(
+            index=incident_beam.index,
+            direction=incident_beam.direction,
+            wavelength=incident_beam.wavelength,
+            polarization=incident_beam.polarization_jones,
+            power=incident_beam.power,
+            waist_position=waist_position,
+            rayleigh_range=rayleigh_range,
+        )
+        incident_beam.add(output_beam, origin=local_origin)
+        return [output_beam]
+
 
 class Stop(Interface):
     """
@@ -1142,7 +1167,7 @@ class Reflection(Interface):
         if intercept is None:
             return []
 
-        incident_jones = _normalize_jones_vector(incident_beam.get_jones_vector())
+        incident_jones = _normalize_jones_vector(incident_beam.polarization_jones)
 
         # calculate ratio of transmitted to reflected power for different interface types
         if self.type == "mirror":
@@ -1242,7 +1267,7 @@ class Reflection(Interface):
                     index=index,
                     direction=local_direction,
                     wavelength=incident_beam.wavelength,
-                    polarization=_serialize_jones_vector(transmit_jones),
+                    polarization=transmit_jones,
                     power=incident_beam.power * transmit_ratio,
                     waist_position=waist_position,
                     rayleigh_range=rayleigh_range,
@@ -1267,7 +1292,7 @@ class Reflection(Interface):
                 index=index,
                 direction=local_direction,
                 wavelength=incident_beam.wavelength,
-                polarization=_serialize_jones_vector(reflect_jones),
+                polarization=reflect_jones,
                 power=incident_beam.power * reflect_ratio,
                 waist_position=waist_position,
                 rayleigh_range=rayleigh_range,
@@ -1359,7 +1384,7 @@ class Lens(Interface):
             index=incident_beam.index,
             direction=local_direction,
             wavelength=incident_beam.wavelength,
-            polarization=incident_beam.get_jones_vector(),
+            polarization=incident_beam.polarization_jones,
             power=incident_beam.power,
             waist_position=waist_position,
             rayleigh_range=rayleigh_range,
@@ -1438,7 +1463,7 @@ class Waveplate(Interface):
         phase_delay = np.array([[1, 0], [0, np.exp(1j * delta)]], dtype=complex)
         transform = rotation @ phase_delay @ rotation.T
         output_jones = _normalize_jones_vector(
-            transform @ _normalize_jones_vector(incident_beam.get_jones_vector())
+            transform @ _normalize_jones_vector(incident_beam.polarization_jones)
         )
 
         # generate output beam (no change in direction or other properties)
@@ -1446,7 +1471,7 @@ class Waveplate(Interface):
             index=incident_beam.index,
             direction=incident_beam.get_relative_direction(beam_direction),
             wavelength=incident_beam.wavelength,
-            polarization=_serialize_jones_vector(output_jones),
+            polarization=output_jones,
             power=incident_beam.power,
             waist_position=incident_beam.waist_position,
             rayleigh_range=incident_beam.rayleigh_range,

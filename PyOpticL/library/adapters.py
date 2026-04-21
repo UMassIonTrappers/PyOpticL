@@ -1,7 +1,7 @@
-from PyOpticL.layout import Component
+from PyOpticL.layout import Component, Subcomponent
 from PyOpticL.library.hardware import bolt
 from PyOpticL.types import Dimension as dim
-from PyOpticL.utils import Subcomponent, bounding_box_shape, box_shape
+from PyOpticL.utils import bounding_box_shape, box_shape
 
 
 class surface_adapter:
@@ -17,7 +17,7 @@ class surface_adapter:
         drill_tolerance: (float): The tolerance to add around the drilling
     """
 
-    object_group = "adapter"
+    object_group = "adapters"
     object_color = (0.5, 0.7, 0.5)
 
     def __init__(

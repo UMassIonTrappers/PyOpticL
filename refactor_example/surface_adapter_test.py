@@ -25,21 +25,6 @@ baseplate = Component(
 # )
 
 baseplate.add(
-    Component(
-        label="test",
-        definition=optics.circular_waveplate(
-            diameter=dim(0.5, "in"),
-            thickness=dim(1, "mm"),
-            retardance=0.25,
-            fast_axis_angle=0,
-            mount_definition=thorlabs.rotation_mount_rsp05(),
-        ),
-    ),
-    position=(20, 20, 0),
-    rotation=(0, 0, 0),
-)
-
-baseplate.add(
     Component(label="pd", definition=thorlabs.photodetector_pda10a2()),
     position=(40, 40, 0),
     rotation=(0, 0, 0),
