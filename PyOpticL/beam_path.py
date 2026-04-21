@@ -6,6 +6,7 @@ import Part
 
 from PyOpticL.icons import beam_icon
 from PyOpticL.layout import Layout
+from PyOpticL.settings import enable_beam_transparency
 from PyOpticL.types import Dimension as dim
 from PyOpticL.utils import collect_children, wavelength_to_rgb
 
@@ -432,7 +433,8 @@ class BeamSegment(Layout):
         obj.Shape = shape
         # color and transparency based on wavelength and power
         obj.ViewObject.ShapeColor = wavelength_to_rgb(self.wavelength)
-        obj.ViewObject.Transparency = int(100 * (1 - self.relative_power))
+        if enable_beam_transparency:
+            obj.ViewObject.Transparency = int(100 * (1 - self.relative_power))
 
         # get gaussian beam parameters
         q_param = self.get_q_parameter()
@@ -797,7 +799,7 @@ class BeamPath(Layout):
         for beam_path in beam_paths:
             proxy = beam_path.Proxy
             for beam_obj in beam_path.BeamSegments:
-                if beam_obj == last_beam.get_object():
+                if beam_obj == last_beam.get_object() or beam_obj in deleted_objs:
                     continue
                 beam = beam_obj.Proxy
                 if (
@@ -1032,6 +1034,26 @@ class Interface:
                 return None
 
         return intercept
+
+
+class Stop(Interface):
+    """
+    Class representing a beam termination (ie beam dump, fiber input, or any other element that fully absorbs the beam)
+    Any beam that intersects with this interface is terminated (no output beams)
+    """
+
+    def get_output_beams(self, incident_beam: BeamSegment) -> list[BeamSegment]:
+        """
+        Get the output beams from an incident beam interacting with the stop interface
+        For a stop, there are no output beams
+
+        Args:
+            incident_beam (Beam_Segment): Incident beam segment
+
+        Returns:
+            output_beams (list): Empty list (no output beams)
+        """
+        return []
 
 
 class Reflection(Interface):

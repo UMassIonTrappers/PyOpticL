@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import FreeCAD as App
 
+from PyOpticL.settings import get_hidden_object_groups
 from PyOpticL.utils import collect_children
 
 
@@ -153,11 +154,11 @@ class Layout:
             child_obj.Proxy.recompute()
 
     # link built-in FreeCAD execute to internal recompute
-    def execute(self, obj):
-        """Execute method called by FreeCAD to recompute the object"""
+    # def execute(self, obj):
+    #     """Execute method called by FreeCAD to recompute the object"""
 
-        print(f"Recomputing {obj.Name}...")
-        self.recompute()
+    #     print(f"Recomputing {obj.Name}...")
+    #     self.recompute()
 
 
 class Component(Layout):
@@ -238,9 +239,11 @@ class Component(Layout):
         """Calculate and set the shape of the object"""
 
         obj = self.get_object()
+        if self.object_group in get_hidden_object_groups():
+            pass
 
         # update object shape
-        if self.object_type == "Part" and hasattr(self, "shape"):
+        elif self.object_type == "Part" and hasattr(self, "shape"):
             shape = self.shape()
             if isinstance(shape, list):  # if multiple shapes are returned, fuse
                 combined = shape[0]

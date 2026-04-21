@@ -1,219 +1,167 @@
-# Jacob Myers, Ryland Yurow, Chris Caron - 10/20/23
+"""Rb saturation absorption spectroscopy layout using the refactored API."""
 
-from PyOpticL import layout
 from datetime import datetime
 
-from PyOpticL.old import optomech
+from PyOpticL.beam_path import BeamPath
+from PyOpticL.layout import Component, Layout
+from PyOpticL.library import baseplate, optics, thorlabs
+from PyOpticL.settings import hidden_object_groups, set_hidden_object_groups
+from PyOpticL.types import Dimension as dim
 
-name = "Rb SAS"
-date_time = datetime.now().strftime("%m/%d/%Y")
-label = name + " " + date_time
+set_hidden_object_groups(["hardware"])
 
-base_dx = 16 * layout.inch
-base_dy = 4 * layout.inch
-base_dz = layout.inch
-gap = layout.inch / 8
+mirror_definition = optics.circular_mirror(
+    diameter=dim(0.5, "in"),
+    mount_definition=thorlabs.mirror_mount_k05s1(),
+)
 
-mount_holes = [
-    (0, 0),
-    (3, 2),
-    (0, 3),
-    (3, 3),
-    (4, 0),
-    (8, 0),
-    (4, 3),
-    (8, 3),
-    (9, 0),
-    (13, 0),
-    (10, 3),
-    (15, 3),
-]
+waveplate_definition = optics.circular_waveplate(
+    diameter=dim(0.5, "in"),
+    retardance=0.5,
+    fast_axis_angle=0,
+    mount_definition=thorlabs.rotation_mount_rsp05(),
+)
 
+beamsplitter_definition = optics.beamsplitter_cube_on_surface_adapter(
+    side_length=dim(10, "mm"),
+    optical_height=dim(0.5, "in"),
+)
 
-def Rb_SAS(x=0, y=0, angle=0, mirror=optomech.mirror_mount_km05, thumbscrews=True):
+rb_sas_baseplate = Component(
+    label="Rb SAS",
+    definition=baseplate(
+        dimensions=(dim(15, "in"), dim(5, "in"), dim(1, "in")),
+        optical_height=dim(0.5, "in"),
+    ),
+)
 
-    baseplate = layout.baseplate(
-        base_dx,
-        base_dy,
-        base_dz,
-        x=x,
-        y=y,
-        angle=angle,
-        gap=gap,
-        mount_holes=mount_holes,
-        name=name,
-        label=label,
-        x_splits=[4 * layout.inch, 9 * layout.inch],
-    )
+beam = rb_sas_baseplate.add(
+    BeamPath(label="Beam", wavelength=780, waist=dim(1, "mm")),
+    position=(dim(12.5, "in"), 0, 0),
+    rotation=(0, 0, 90),
+)
 
-    beam = baseplate.add_beam_path(x=base_dx - 2.5 * layout.inch, y=0, angle=90)
+beam.add(
+    Component(label="Input Mirror 1", definition=mirror_definition),
+    beam_index=0b1,
+    distance=dim(1.5, "in"),
+    rotation=(0, 0, -45),
+)
 
-    baseplate.place_element_along_beam(
-        "input mirror 1",
-        optomech.circular_mirror,
-        beam,
-        beam_index=0b1,
-        distance=30,
-        angle=layout.turn["up-right"],
-        mount_type=mirror,
-        mount_args=dict(thumbscrews=thumbscrews),
-    )
-    baseplate.place_element_along_beam(
-        "input mirror 2",
-        optomech.circular_mirror,
-        beam,
-        beam_index=0b1,
-        distance=1 * layout.inch,
-        angle=layout.turn["right-up"],
-        mount_type=mirror,
-        mount_args=dict(thumbscrews=thumbscrews),
-    )
+beam.add(
+    Component(label="Input Mirror 2", definition=mirror_definition),
+    beam_index=0b1,
+    distance=dim(1, "in"),
+    rotation=(0, 0, 135),
+)
 
-    baseplate.place_element_along_beam(
-        "Half waveplate 1",
-        optomech.waveplate,
-        beam,
-        beam_index=0b1,
-        distance=22,
-        angle=layout.cardinal["up"],
-        mount_type=optomech.rotation_stage_rsp05,
-    )
-    baseplate.place_element_along_beam(
-        "Beam Splitter 1",
-        optomech.cube_splitter,
-        beam,
-        beam_index=0b1,
-        distance=30,
-        angle=layout.cardinal["up"],
-        mount_type=optomech.skate_mount,
-    )
+beam.add(
+    Component(label="Half Waveplate 1", definition=waveplate_definition),
+    beam_index=0b1,
+    distance=dim(1.5, "in"),
+    rotation=(0, 0, 90),
+)
 
-    baseplate.place_element_along_beam(
-        "Half waveplate 2",
-        optomech.waveplate,
-        beam,
-        beam_index=0b11,
-        distance=35,
-        angle=layout.cardinal["left"],
-        mount_type=optomech.rotation_stage_rsp05,
-        mount_args=dict(invert=True),
-    )
-    baseplate.place_element_along_beam(
-        "input mirror 3",
-        optomech.circular_mirror,
-        beam,
-        beam_index=0b11,
-        distance=30,
-        angle=layout.turn["left-down"],
-        mount_type=optomech.mirror_mount_c05g,
-    )
-    baseplate.place_element_along_beam(
-        "splitter",
-        optomech.circular_splitter,
-        beam,
-        beam_index=0b11,
-        distance=15,
-        angle=layout.turn["down-left"],
-        mount_type=optomech.splitter_mount_b05g,
-    )
+beam.add(
+    Component(label="Half Waveplate Probe 1", definition=waveplate_definition),
+    beam_index=0b11,
+    distance=dim(3.5, "in"),
+    rotation=(0, 0, 0),
+)
 
-    baseplate.place_element_along_beam(
-        "Half waveplate Probe",
-        optomech.waveplate,
-        beam,
-        beam_index=0b111,
-        distance=20,
-        angle=layout.cardinal["left"],
-        mount_type=optomech.rotation_stage_rsp05,
-    )
-    baseplate.place_element_along_beam(
-        "probe mirror 1",
-        optomech.circular_mirror,
-        beam,
-        beam_index=0b111,
-        distance=30,
-        angle=layout.turn["left-down"],
-        mount_type=mirror,
-        mount_args=dict(thumbscrews=thumbscrews),
-    )
-    baseplate.place_element_along_beam(
-        "probe mirror 2",
-        optomech.circular_mirror,
-        beam,
-        beam_index=0b111,
-        distance=18,
-        angle=layout.turn["down-left"],
-        mount_type=mirror,
-        mount_args=dict(thumbscrews=thumbscrews),
-    )
-    baseplate.place_element_along_beam(
-        "Rb gas cell",
-        optomech.rb_cell,
-        beam,
-        beam_index=0b111,
-        x=6.5 * layout.inch,
-        angle=layout.cardinal["right"],
-    )
+beam.add(
+    Component(
+        label="Beam Splitter 1",
+        definition=beamsplitter_definition,
+    ),
+    beam_index=0b1,
+    distance=dim(2, "in"),
+    rotation=(0, 0, 90),
+)
 
-    baseplate.place_element_along_beam(
-        "pump mirror 1",
-        optomech.circular_mirror,
-        beam,
-        beam_index=0b110,
-        distance=45,
-        angle=layout.turn["down-left"],
-        mount_type=mirror,
-        mount_args=dict(thumbscrews=thumbscrews),
-    )
-    baseplate.place_element_along_beam(
-        "Half_waveplate_pump",
-        optomech.waveplate,
-        beam,
-        beam_index=0b110,
-        x=3.5 * layout.inch,
-        angle=layout.cardinal["left"],
-        mount_type=optomech.rotation_stage_rsp05,
-    )
-    baseplate.place_element_along_beam(
-        "pump mirror 2",
-        optomech.circular_mirror,
-        beam,
-        beam_index=0b110,
-        x=2.5 * layout.inch,
-        angle=layout.turn["left-up"],
-        mount_type=mirror,
-        mount_args=dict(thumbscrews=thumbscrews),
-    )
+beam.add(
+    Component(label="Mirror 1", definition=mirror_definition),
+    beam_index=0b11,
+    distance=dim(1.75, "in"),
+    rotation=(0, 0, -45),
+)
 
-    baseplate.place_element_along_beam(
-        "Beam_Splitter_2",
-        optomech.cube_splitter,
-        beam,
-        beam_index=0b111,
-        x=2.5 * layout.inch,
-        angle=layout.cardinal["left"],
-        mount_type=optomech.skate_mount,
-    )
+beam.add(
+    Component(
+        label="Splitter",
+        definition=optics.circular_sampler(
+            diameter=dim(0.5, "in"),
+            thickness=dim(3, "mm"),
+            ref_ratio=0.5,
+            mount_definition=thorlabs.beamsplitter_mount_b05g(),
+        ),
+    ),
+    beam_index=0b11,
+    distance=dim(0.75, "in"),
+    rotation=(0, 0, 135),
+)
 
-    baseplate.place_element_along_beam(
-        "Photodetector",
-        optomech.photodetector_pda10a2,
-        beam,
-        beam_index=0b1110,
-        distance=30,
-        angle=layout.cardinal["right"],
-    )
+beam.add(
+    Component(label="Half Waveplate Probe 2", definition=waveplate_definition),
+    beam_index=0b111,
+    distance=dim(1.5, "in"),
+    rotation=(0, 0, 0),
+)
 
-    baseplate.place_element_along_beam(
-        "Pump Fiberport",
-        optomech.fiberport_mount_hca3,
-        beam,
-        beam_index=0b11010,
-        x=base_dx - gap,
-        angle=layout.cardinal["left"],
-    )
+beam.add(
+    Component(label="Probe Mirror 1", definition=mirror_definition),
+    beam_index=0b111,
+    distance=dim(1.5, "in"),
+    rotation=(0, 0, -45),
+)
+
+beam.add(
+    Component(label="Probe Mirror 2", definition=mirror_definition),
+    beam_index=0b111,
+    distance=dim(1.5, "in"),
+    rotation=(0, 0, 135),
+)
+
+beam.add(
+    Component(label="Pump Mirror 1", definition=mirror_definition),
+    beam_index=0b110,
+    distance=dim(3, "in"),
+    rotation=(0, 0, 135),
+)
+
+beam.add(
+    Component(label="Half Waveplate Pump", definition=waveplate_definition),
+    beam_index=0b110,
+    distance=dim(4, "in"),
+    rotation=(0, 0, 180),
+)
+
+beam.add(
+    Component(label="Pump Mirror 2", definition=mirror_definition),
+    beam_index=0b110,
+    distance=dim(5.5, "in"),
+    rotation=(0, 0, 45),
+)
+
+beam.add(
+    Component(
+        label="Beam Splitter 2",
+        definition=beamsplitter_definition,
+    ),
+    beam_index=0b110,
+    distance=dim(1.625, "in"),
+    rotation=(0, 0, 180),
+)
+
+beam.add(
+    Component(
+        label="Photodetector",
+        definition=thorlabs.photodetector_pda10a2(),
+    ),
+    beam_index=0b1110,
+    distance=dim(30, "mm"),
+    rotation=(0, 0, 0),
+)
 
 
-if __name__ == "__main__":
-    Rb_SAS()
-    layout.redraw()
+rb_sas_baseplate.recompute()

@@ -194,6 +194,55 @@ def cylinder_shape(
     return part
 
 
+def bounding_box_shape(
+    shape: Part.Shape,
+    padding: dim = dim(0, "mm"),
+    fillet: dim = dim(0, "mm"),
+    fillet_dir: tuple = (0, 0, 1),
+    pad_x: bool = True,
+    pad_y: bool = True,
+    pad_z: bool = False,
+    min_offset: tuple[dim, dim, dim] = (dim(0, "mm"), dim(0, "mm"), dim(0, "mm")),
+    max_offset: tuple[dim, dim, dim] = (dim(0, "mm"), dim(0, "mm"), dim(0, "mm")),
+) -> Part.Shape:
+    """
+    Create a box part based on the bounding box of a given shape
+
+    Args:
+        shape (Part.Shape): The input shape to create a bounding box around
+        padding (dim): Uniform padding to apply to all dimensions of the bounding box
+        fillet (dim): Radius of fillet to apply to edges in fillet_dir
+        fillet_dir (tuple): Direction vector of edges to fillet
+        pad_x (bool): Whether to apply padding in the X dimension
+        pad_y (bool): Whether to apply padding in the Y dimension
+        pad_z (bool): Whether to apply padding in the Z dimension
+        min_offset (tuple[dim, dim, dim]): Minimum offset to apply to the bounding box in each dimension
+        max_offset (tuple[dim, dim, dim]): Maximum offset to apply to the bounding box in each dimension
+
+    Returns:
+        Part.Shape: The created bounding box part
+    """
+
+    # get bounding box dimensions and position
+    bbox = shape.BoundBox
+    dx = bbox.XLength + (padding if pad_x else 0) + min_offset[0] + max_offset[0]
+    dy = bbox.YLength + (padding if pad_y else 0) + min_offset[1] + max_offset[1]
+    dz = bbox.ZLength + (padding if pad_z else 0) + min_offset[2] + max_offset[2]
+    x = bbox.XMin - (padding / 2 if pad_x else 0) - min_offset[0]
+    y = bbox.YMin - (padding / 2 if pad_y else 0) - min_offset[1]
+    z = bbox.ZMin - (padding / 2 if pad_z else 0) - min_offset[2]
+
+    # create box shape
+    part = box_shape(
+        dimensions=(dx, dy, dz),
+        position=(x, y, z),
+        fillet=fillet,
+        fillet_direction=fillet_dir,
+        center=(-1, -1, -1),
+    )
+    return part
+
+
 def bolt_shape(
     clear_diameter: float,
     tap_diameter: float,
@@ -449,14 +498,15 @@ def import_model(
         # validate files
         if not directory.is_dir():
             raise FileNotFoundError(f"Models directory not found")
-        if not model_path.is_dir():
+        elif not model_path.is_dir():
             raise FileNotFoundError(f"Model not found in directory")
-        if not (model_path / (f"{name}.step")).is_file():
-            raise FileNotFoundError(f"Model STEP file not found")
-        if not (model_path / (f"{name}.json")).is_file():
+        elif not (model_path / (f"{name}.json")).is_file():
             raise FileNotFoundError(f"Model info file not found")
 
         if not (model_path / (f"{name}.stl")).is_file():
+            if not (model_path / (f"{name}.step")).is_file():
+                raise FileNotFoundError(f"Model STEP file not found")
+
             shape = Part.read(str(model_path / (f"{name}.step")))
             info = json.load(open(model_path / (f"{name}.json")))
 

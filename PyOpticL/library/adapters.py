@@ -1,7 +1,7 @@
 from PyOpticL.layout import Component
 from PyOpticL.library.hardware import bolt
 from PyOpticL.types import Dimension as dim
-from PyOpticL.utils import Subcomponent, box_shape
+from PyOpticL.utils import Subcomponent, bounding_box_shape, box_shape
 
 
 class surface_adapter:
@@ -31,7 +31,7 @@ class surface_adapter:
         extra_thickness: dim = dim(6, "mm"),
         slot_length: dim = dim(0, "mm"),
         fillet_radius: dim = dim(5, "mm"),
-        drill_tolerance: dim = dim(1, "mm"),
+        drill_tolerance: dim = dim(2, "mm"),
     ):
         self.height = height
         self.min_length = min_length
@@ -79,16 +79,9 @@ class surface_adapter:
         return part
 
     def drill(self):
-        width = self.bolt_spacing + 2 * self.extra_thickness + 2 * self.drill_tolerance
-        length = (
-            max(self.min_length, self.slot_length + 2 * self.extra_thickness)
-            + 2 * self.drill_tolerance
-        )
-        height = self.height
-        part = box_shape(
-            dimensions=(length, width, height),
-            position=(0, 0, 0),
-            center=(0, 0, 1),
-            fillet=self.fillet_radius,
+        part = bounding_box_shape(
+            shape=self.shape(),
+            padding=self.drill_tolerance,
+            fillet=self.fillet_radius + self.drill_tolerance,
         )
         return part

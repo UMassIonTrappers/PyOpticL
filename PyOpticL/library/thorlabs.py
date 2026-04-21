@@ -1,3 +1,4 @@
+from PyOpticL.beam_path import Stop
 from PyOpticL.icons import thorlabs_icon
 from PyOpticL.layout import Component
 from PyOpticL.library.adapters import surface_adapter
@@ -165,10 +166,6 @@ class rotation_mount_rsp05:
             bolt_types=["8_32", "M4"],
             bolt_length=bolt_length,
             drill_depth=drill_depth,
-            extra_thickness=dim(6, "mm"),
-            slot_length=dim(0, "mm"),
-            fillet_radius=dim(5, "mm"),
-            drill_tolerance=dim(1, "mm"),
         )
         self.adapter_parameters |= adapter_parameters
         self.rotate_adapter = rotate_adapter
@@ -234,13 +231,19 @@ class photodetector_pda10a2:
             bolt_types=["8_32", "M4"],
             bolt_length=bolt_length,
             drill_depth=drill_depth,
-            extra_thickness=dim(6, "mm"),
-            slot_length=dim(0, "mm"),
-            fillet_radius=dim(5, "mm"),
-            drill_tolerance=dim(1, "mm"),
         )
         self.adapter_parameters |= adapter_parameters
         self.rotate_adapter = rotate_adapter
+
+    def interfaces(self):
+        return [
+            Stop(
+                position=(0, 0, 0),
+                rotation=(0, 0, 0),
+                diameter=dim(2, "mm"),
+                single_sided=True,
+            )
+        ]
 
     def subcomponents(self):
         return [

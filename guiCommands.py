@@ -27,8 +27,9 @@ class Rerun_Macro:
         }
 
     def Activated(self):
-        for i in App.ActiveDocument.Objects:
-            App.ActiveDocument.removeObject(i.Name)
+        if App.ActiveDocument is not None:
+            for i in App.ActiveDocument.Objects:
+                App.ActiveDocument.removeObject(i.Name)
         Gui.runCommand("Std_RecentMacros", 0)
         return
 

@@ -67,6 +67,7 @@ class circular_reflector:
                 ref_wavelengths=self.ref_wavelengths,
                 refractive_index_ratio=1 / self.refractive_index,
                 max_angle=self.max_angle,
+                single_sided=not self.bidirectional,
             ),
         ]
 
@@ -155,8 +156,8 @@ class circular_sampler(circular_reflector):
     def __init__(
         self,
         diameter: dim,
-        thickness: dim,
-        ref_ratio: float,
+        thickness: dim = dim(6, "mm"),
+        ref_ratio: float = 0.5,
         mount_definition: object = None,
         mount_offset: tuple = None,
     ):
@@ -190,8 +191,8 @@ class circular_dichroic_mirror(circular_reflector):
     def __init__(
         self,
         diameter: dim,
-        thickness: dim,
-        ref_wavelengths: list,
+        thickness: dim = dim(6, "mm"),
+        ref_wavelengths: list = [],
         mount_definition: object = None,
         mount_offset: tuple = None,
     ):
@@ -225,8 +226,8 @@ class spherical_lens:
     def __init__(
         self,
         diameter: dim,
-        thickness: dim,
-        focal_length: dim,
+        thickness: dim = dim(2, "mm"),
+        focal_length: dim = dim(100, "mm"),
         mount_definition: object = None,
         mount_offset: tuple = None,
     ):
@@ -365,7 +366,7 @@ class beamsplitter_cube:
     def __init__(
         self,
         side_length: dim,
-        ref_polarization: float = 0,
+        ref_polarization: float = None,
         ref_ratio: float = None,
         rotate_cube: bool = False,
         mount_definition: object = None,
@@ -373,8 +374,8 @@ class beamsplitter_cube:
         drill_tolerance: dim = dim(0.5, "mm"),
         corner_drill_diameter: dim = dim(3, "mm"),
     ):
-        if ref_ratio is None and ref_polarization is None:
-            raise ValueError("Either ref_ratio or ref_polarization must be specified")
+        if ref_ratio is None:
+            ref_ratio = 0.5  # default to 50/50 beamsplitter if not specified
 
         self.side_length = side_length
         self.ref_polarization = ref_polarization
@@ -426,7 +427,7 @@ class beamsplitter_cube:
             box_shape(
                 dimensions=(0.1, diag, diag),
                 position=(0, 0, 0),
-                rotation=(0, 0, 45),
+                rotation=(0, 0, 45 if self.rotate_cube else -45),
                 center=(0, 0, 0),
             )
         )
@@ -472,7 +473,7 @@ class beamsplitter_cube_on_surface_adapter(beamsplitter_cube):
         self,
         side_length: dim,
         optical_height: dim,
-        ref_polarization: float = 0,
+        ref_polarization: float = None,
         ref_ratio: float = None,
         rotate_cube: bool = False,
         rotate_adapter: bool = False,
@@ -494,10 +495,6 @@ class beamsplitter_cube_on_surface_adapter(beamsplitter_cube):
             bolt_types=["8_32", "M4"],
             bolt_length=bolt_length,
             drill_depth=drill_depth,
-            extra_thickness=dim(6, "mm"),
-            slot_length=dim(0, "mm"),
-            fillet_radius=dim(5, "mm"),
-            drill_tolerance=dim(1, "mm"),
         )
         self.adapter_parameters |= adapter_parameters
         self.optical_height = optical_height

@@ -106,9 +106,7 @@ class bolt:
             self.length = default_bolt_length(clear_depth, drill_depth)
 
         if drill_depth is None:
-            self.drill_depth = (
-                self.length - self.clear_depth + settings.default_extra_drill_depth
-            )
+            self.drill_depth = self.length + settings.default_extra_drill_depth
 
         for bolt_type in types:
             if bolt_type not in self.available_bolt_types:
