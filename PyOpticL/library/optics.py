@@ -5,7 +5,7 @@ from PyOpticL.icons import optic_icon
 from PyOpticL.layout import Component, Subcomponent
 from PyOpticL.library.adapters import surface_adapter
 from PyOpticL.types import Dimension as dim
-from PyOpticL.utils import box_shape, cylinder_shape
+from PyOpticL.utils import bounding_box_shape, box_shape, cylinder_shape
 
 
 class circular_reflector:
@@ -109,6 +109,17 @@ class circular_reflector:
             height=self.thickness,
             position=(-self.thickness, 0, 0),
             rotation=(0, 90, 0),
+        )
+        return part
+
+    def drill(self):
+        part = bounding_box_shape(self.shape(), padding=dim(0.5, "mm"))
+        part = part.fuse(
+            cylinder_shape(
+                diameter=self.diameter - dim(2, "mm"),
+                height=self.diameter,
+                position=(-self.thickness / 2, 0, 0),
+            )
         )
         return part
 
@@ -220,6 +231,10 @@ class rectangular_reflector:
         )
         return part
 
+    def drill(self):
+        part = bounding_box_shape(self.shape(), padding=dim(0.5, "mm"))
+        return part
+
 
 class circular_mirror(circular_reflector):
     """
@@ -294,7 +309,7 @@ class circular_sampler(circular_reflector):
     def __init__(
         self,
         diameter: dim,
-        thickness: dim = dim(6, "mm"),
+        thickness: dim = dim(3, "mm"),
         ref_ratio: float = 0.5,
         mount_definition: object = None,
         mount_offset: tuple = None,
@@ -416,6 +431,17 @@ class spherical_lens:
         )
         return part
 
+    def drill(self):
+        part = bounding_box_shape(self.shape(), padding=dim(0.5, "mm"))
+        part = part.fuse(
+            cylinder_shape(
+                diameter=self.diameter - dim(2, "mm"),
+                height=self.diameter,
+                position=(-self.thickness / 2, 0, 0),
+            )
+        )
+        return part
+
 
 class circular_waveplate:
     """
@@ -484,6 +510,17 @@ class circular_waveplate:
             height=self.thickness,
             position=(-self.thickness / 2, 0, 0),
             rotation=(0, 90, 0),
+        )
+        return part
+
+    def drill(self):
+        part = bounding_box_shape(self.shape(), padding=dim(0.5, "mm"))
+        part = part.fuse(
+            cylinder_shape(
+                diameter=self.diameter - dim(2, "mm"),
+                height=self.diameter,
+                position=(-self.thickness / 2, 0, 0),
+            )
         )
         return part
 

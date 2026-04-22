@@ -121,6 +121,12 @@ class mirror_mount_km100:
             )
         ]
 
+    def drill(self):
+        part = bounding_box_shape(
+            shape=self.mesh, padding=dim(5, "mm"), fillet=dim(5, "mm")
+        )
+        return part
+
 
 #######################
 ### Splitter Mounts ###
@@ -144,6 +150,25 @@ class beamsplitter_mount_b05g(polaris_mount):
     mount_position = (-5.000, -0.000, -12.700)
     bolt_position = (-5.000, -0.000, -8.890)
     pin_positions = [(-5.000, 5.000, -12.700), (-5.000, -5.000, -12.700)]
+
+
+class beamsplitter_mount_b1g(polaris_mount):
+    """
+    Beamsplitter mount, model B1G
+
+    Args:
+        drill_depth (float): The depth of the mounting hole
+        bolt_length (float): The length of the mounting bolt (defaults to minimum required length)
+    """
+
+    object_group = "mounts"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+
+    mesh = import_model("polaris-b1g")
+    mount_position = (-5.000, -0.000, -19.050)
+    bolt_position = (-5.000, -0.000, -15.240)
+    pin_positions = [(-5.000, 5.000, -19.050), (-5.000, -5.000, -19.050)]
 
 
 ###################
@@ -238,6 +263,12 @@ class rotation_mount_rsp05:
             ),
         ]
 
+    def drill(self):
+        part = bounding_box_shape(
+            shape=self.mesh, padding=dim(5, "mm"), fillet=dim(5, "mm")
+        )
+        return part
+
 
 class rotation_mount_rsp1:
     """
@@ -254,8 +285,8 @@ class rotation_mount_rsp1:
     object_color = (0.25, 0.25, 0.25)
 
     mesh = import_model("thorlabs-rsp1")
-    mount_position = (-0.635, -0.000, -13.975)
-    mount_hole_end = (-0.635, -0.000, -7.521)
+    mount_position = (6.350, -0.000, -27.732)
+    mount_hole_end = (7.450, -0.000, -15.853)
 
     def __init__(
         self,
@@ -266,7 +297,7 @@ class rotation_mount_rsp1:
     ):
         self.adapter_parameters = dict(
             height=dim(10, "mm"),
-            bolt_spacing=dim(25, "mm"),
+            bolt_spacing=dim(40, "mm"),
             bolt_types=["8_32", "M4"],
             bolt_length=bolt_length,
             drill_depth=drill_depth,
@@ -301,6 +332,12 @@ class rotation_mount_rsp1:
                 rotation=(0, 0, 90 if self.rotate_adapter else 0),
             ),
         ]
+
+    def drill(self):
+        part = bounding_box_shape(
+            shape=self.mesh, padding=dim(5, "mm"), fillet=dim(5, "mm")
+        )
+        return part
 
 
 ###########################

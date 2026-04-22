@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections import namedtuple
 
 import FreeCAD as App
+import Part
 
 from PyOpticL.settings import get_hidden_object_groups
 from PyOpticL.utils import collect_children
@@ -256,7 +257,7 @@ class Component(Layout):
                 shape = combined
 
             # don't apply drilling to some groups
-            if obj.Proxy.object_group not in ["hardware", "optics"]:
+            if obj.Proxy.object_group not in ["hardware", "optics", "beam_path"]:
 
                 # gather peer objects
                 drill_objs = []
@@ -277,6 +278,12 @@ class Component(Layout):
                         drill_shape.Placement = (
                             obj.Placement.inverse() * drill_obj.Placement
                         )
+
+                        # make sure drill intersects shape
+                        common = shape.common(drill_shape)
+                        if common.Volume < 1e-6 or drill_shape.Volume < 1e-6:
+                            continue
+
                         z_direction = drill_obj.Placement.Rotation.multVec(
                             App.Vector(0, 0, 1)
                         )
@@ -286,7 +293,8 @@ class Component(Layout):
                             normal = face.normalAt(0, 0)
                             intersection = face.common(shape)
                             if (
-                                normal.getAngle(z_direction) < 1e-6
+                                isinstance(face.Surface, Part.Plane)
+                                and normal.getAngle(z_direction) < 1e-6
                                 and intersection.Area > 1e-6
                             ):
                                 max_dimension = shape.BoundBox.DiagonalLength

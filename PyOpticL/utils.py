@@ -1,5 +1,6 @@
 import inspect
 import json
+import sys
 from pathlib import Path
 
 import FreeCAD as App
@@ -12,6 +13,16 @@ from PyOpticL.settings import measurement_system, minimum_thread_engagement
 from PyOpticL.types import Dimension as dim
 
 models_dir = Path(__file__).parent.absolute() / "models"
+
+
+def fix_relative_imports(directory=""):
+    directory = Path(directory)
+
+    if not directory.is_absolute():
+        base_path = Path(inspect.stack()[1].filename).parent
+        directory = base_path / directory
+
+    sys.path.append(str(directory))
 
 
 def collect_children(parent: App.DocumentObject, output_list: list):

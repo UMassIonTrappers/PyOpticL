@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from math import isclose
+
 import FreeCAD as App
 import numpy as np
 import Part
@@ -8,7 +10,7 @@ from PyOpticL.icons import beam_icon
 from PyOpticL.layout import Layout
 from PyOpticL.settings import enable_beam_transparency
 from PyOpticL.types import Dimension as dim
-from PyOpticL.utils import collect_children, wavelength_to_rgb
+from PyOpticL.utils import collect_children, cylinder_shape, wavelength_to_rgb
 
 JonesComponent = tuple[float, float]  # (real, imag)
 JonesState = tuple[JonesComponent, JonesComponent]  # ((Ex_re, Ex_im), (Ey_re, Ey_im))
@@ -231,21 +233,21 @@ class BeamSegment(Layout):
         if type == "distance":
             output = position + value * direction
         if type == "xPosition":
-            if direction[0] == 0:
+            if isclose(direction[0], 0):
                 raise RuntimeError(
                     "Beam is parallel to yz plane, cannot constrain x position"
                 )
             t = (value - position[0]) / direction[0]
             output = position + t * direction
         if type == "yPosition":
-            if direction[1] == 0:
+            if isclose(direction[1], 0):
                 raise RuntimeError(
                     "Beam is parallel to xz plane, cannot constrain y position"
                 )
             t = (value - position[1]) / direction[1]
             output = position + t * direction
         if type == "zPosition":
-            if direction[2] == 0:
+            if isclose(direction[2], 0):
                 raise RuntimeError(
                     "Beam is parallel to xy plane, cannot constrain z position"
                 )
@@ -394,7 +396,8 @@ class BeamSegment(Layout):
             radius1 = self.get_beam_radius(q_param)
             radius2 = self.get_beam_radius(q_param + dz)
             # create conical section
-            if radius1 == radius2:  # freecad does not support cones with equal radii
+            # freecad does not support cones with equal radii
+            if isclose(radius1, radius2):
                 shape = Part.makeCylinder(
                     radius1,
                     dz,
@@ -415,11 +418,11 @@ class BeamSegment(Layout):
             current_position += dz
         # add sphere as cap for smoother beam transitions
         beam_radius = self.get_beam_radius(self.get_q_parameter() + self.distance)
-        sphere = Part.makeSphere(
-            beam_radius,
-            App.Vector(*self.direction) * self.distance,
-        )
-        shapes.append(sphere)
+        # sphere = Part.makeSphere(
+        #     beam_radius,
+        #     App.Vector(*self.direction) * self.distance,
+        # )
+        # shapes.append(sphere)
         # fuse all shapes together
         shape = shapes[0]
         for s in shapes[1:]:
@@ -450,6 +453,24 @@ class BeamSegment(Layout):
         obj.RayleighRange = App.Units.Quantity(f"{self.rayleigh_range} mm")
 
         obj.purgeTouched()  # prevent triggering recompute
+
+    def drill(self):
+        """
+        The drilling the beam applies to other objects
+        """
+        part = Part.makeSphere(
+            dim(1.5, "mm"),
+            App.Vector(0, 0, 0),
+        )
+        part = part.fuse(
+            Part.makeCylinder(
+                dim(1.5, "mm"),
+                self.distance,
+                App.Vector(0, 0, 0),
+                App.Vector(*self.direction),
+            )
+        )
+        return part
 
     def recompute(self):
         """
@@ -832,8 +853,9 @@ class BeamPath(Layout):
         global_distance, child_distance = next_global[2], next_child[2]
 
         if global_distance == np.inf and child_distance == np.inf:
-            # no more interactions, set beam distance to large value
-            input_beam.distance = 50
+            # no more interactions, clip beam to bound parent
+
+            input_beam.distance = 25
             input_beam.recompute()
             return
 
