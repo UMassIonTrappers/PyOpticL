@@ -564,7 +564,7 @@ class BeamPath(Layout):
         self,
         child: Layout,
         beam_index: int,
-        rotation: tuple,
+        rotation: tuple | float,
         distance: dim = None,
         x_position: dim = None,
         y_position: dim = None,
@@ -578,7 +578,7 @@ class BeamPath(Layout):
         Args:
             child (Layout): Child layout to add
             beam_index (int): Index of the beam this child interacts with
-            rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
+            rotation (tuple | float): (angle_x, angle_y, angle_z) rotation in degrees or single angle for rotation around z-axis
             distance (float): Distance along the beam from the last component
             x_position (float): x-coordinate of the beam position
             y_position (float): y-coordinate of the beam position

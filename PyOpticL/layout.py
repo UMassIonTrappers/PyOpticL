@@ -104,14 +104,14 @@ class Layout:
         self,
         child: Layout,
         position: tuple,
-        rotation: tuple,
+        rotation: tuple | float,
     ) -> Layout:
         """Add a child object to this component
 
         Args:
             child (Layout): Child object to add
             position (tuple): (x, y, z) relative coordinates of child
-            rotation (tuple): (angle_x, angle_y, angle_z) relative rotation of child
+            rotation (tuple | float): (angle_x, angle_y, angle_z) relative rotation of child or single angle for rotation around z-axis
 
         Returns:
             child (Layout): The added child layout
@@ -126,6 +126,9 @@ class Layout:
         obj.Children += [child_obj]
         child.set_parent(self)
 
+        # allow single angle for rotation around z-axis
+        if isinstance(rotation, (int, float)):
+            rotation = (0, 0, rotation)
         child_obj.BasePlacement = App.Placement(
             App.Vector(*position), App.Rotation("XYZ", *rotation)
         )

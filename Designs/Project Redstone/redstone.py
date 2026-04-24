@@ -32,12 +32,12 @@ grid = redstone.add(
     rotation=(0, 0, -135),
 )
 
-for obj in grid.get_object().Children:
-    obj.Proxy.add(
-        BeamPath(label="Beam", waist=dim(1, "mm"), bound_parent=redstone),
-        position=(0, 0, 0),
-        rotation=(0, 0, 0),
-    )
+# for obj in grid.get_object().Children:
+#     obj.Proxy.add(
+#         BeamPath(label="Beam", waist=dim(1, "mm"), bound_parent=redstone),
+#         position=(0, 0, 0),
+#         rotation=(0, 0, 0),
+#     )
 
 redstone.add(
     Component(
@@ -68,12 +68,12 @@ grid = redstone.add(
     rotation=(0, 0, -135),
 )
 
-for obj in grid.get_object().Children:
-    obj.Proxy.add(
-        BeamPath(label="Beam", waist=dim(1, "mm"), bound_parent=redstone),
-        position=(0, 0, 0),
-        rotation=(0, 0, 0),
-    )
+# for obj in grid.get_object().Children:
+#     obj.Proxy.add(
+#         BeamPath(label="Beam", waist=dim(1, "mm"), bound_parent=redstone),
+#         position=(0, 0, 0),
+#         rotation=(0, 0, 0),
+#     )
 
 redstone.add(
     Component(

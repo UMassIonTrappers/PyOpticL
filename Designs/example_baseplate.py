@@ -17,7 +17,7 @@ baseplate = Component(
 beam = baseplate.add(
     BeamPath(label="Beam"),
     position=(0, 30, 0),
-    rotation=(0, 0, cardinal_angle["right"]),
+    rotation=cardinal_angle["right"],
 )
 
 # add a waveplate along the beam, 30 mm from the beam start
@@ -30,7 +30,7 @@ beam.add(
     ),
     beam_index=0b1,
     distance=30,
-    rotation=(0, 0, cardinal_angle["right"]),
+    rotation=cardinal_angle["right"],
 )
 
 # add a cube beamsplitter along the beam, 40 mm from the waveplate
@@ -41,7 +41,7 @@ beam.add(
     ),
     beam_index=0b1,
     distance=40,
-    rotation=(0, 0, cardinal_angle["right"]),
+    rotation=cardinal_angle["right"],
 )
 
 # add a mirror along the reflected beam, 30 mm from the beamsplitter
@@ -54,7 +54,7 @@ beam.add(
     ),
     beam_index=0b11,
     distance=30,
-    rotation=(0, 0, turn_angle["up-right"]),
+    rotation=turn_angle["up-right"],
 )
 
 baseplate.recompute()
