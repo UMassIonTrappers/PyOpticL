@@ -4451,7 +4451,7 @@ class d_mirror:
         cutter = _custom_box(
             dx=T, dy=r, dz=2 * r,
             x=-T,
-            y=(-r if keep_pos else 0),
+            y=0.5 + (-r if keep_pos else 0),
             z=-r,
             dir=(1, 1, 1)
         )
