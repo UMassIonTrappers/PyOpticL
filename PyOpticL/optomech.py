@@ -1325,7 +1325,7 @@ class mirror_mount_km05dr:
             dia=bolt_8_32['clear_dia'], dz=inch,
             head_dia=bolt_8_32['head_dia'],
             head_dz=0.92 * inch - obj.BoltLength.Value,
-            x=-4.369 + 0.79, y=-2.159, z=-inch * 3 / 2
+            x=-4.369 + 0.79, y=-2.159, z=-inch * 3 / 2,
             dir=(0, 0, 1)
         ))
 
@@ -4432,7 +4432,7 @@ class d_mirror:
         self.part_numbers = [part_number]
         self.reflection_angle = 0
         self.max_angle = 90
-        self.max_width = diameter / 2.0
+        self.max_width = diameter / 4.0
 
     def execute(self, obj):
         D = obj.Diameter.Value
