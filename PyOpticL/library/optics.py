@@ -31,8 +31,8 @@ class circular_reflector:
 
     def __init__(
         self,
-        diameter: dim,
-        thickness: dim,
+        diameter: dim = dim(0.5, "in"),
+        thickness: dim = dim(6, "mm"),
         mount_definition: object = None,
         mount_offset: tuple = None,
         ref_ratio: float = None,
@@ -148,9 +148,9 @@ class rectangular_reflector:
 
     def __init__(
         self,
-        width: dim,
-        height: dim,
-        thickness: dim,
+        width: dim = dim(0.5, "in"),
+        height: dim = dim(0.5, "in"),
+        thickness: dim = dim(6, "mm"),
         mount_definition: object = None,
         mount_offset: tuple = None,
         ref_ratio: float = None,
@@ -250,7 +250,7 @@ class circular_mirror(circular_reflector):
 
     def __init__(
         self,
-        diameter: dim,
+        diameter: dim = dim(0.5, "in"),
         thickness: dim = dim(6, "mm"),
         mount_definition: object = None,
         mount_offset: tuple = None,
@@ -278,8 +278,8 @@ class rectangular_mirror(rectangular_reflector):
 
     def __init__(
         self,
-        width: dim,
-        height: dim,
+        width: dim = dim(0.5, "in"),
+        height: dim = dim(0.5, "in"),
         thickness: dim = dim(6, "mm"),
         mount_definition: object = None,
         mount_offset: tuple = None,
@@ -308,7 +308,7 @@ class circular_sampler(circular_reflector):
 
     def __init__(
         self,
-        diameter: dim,
+        diameter: dim = dim(0.5, "in"),
         thickness: dim = dim(3, "mm"),
         ref_ratio: float = 0.5,
         mount_definition: object = None,
@@ -345,7 +345,7 @@ class circular_dichroic_mirror(circular_reflector):
 
     def __init__(
         self,
-        diameter: dim,
+        diameter: dim = dim(0.5, "in"),
         thickness: dim = dim(6, "mm"),
         ref_wavelengths: list = [],
         mount_definition: object = None,
@@ -382,7 +382,7 @@ class spherical_lens:
 
     def __init__(
         self,
-        diameter: dim,
+        diameter: dim = dim(0.5, "in"),
         thickness: dim = dim(2, "mm"),
         focal_length: dim = dim(100, "mm"),
         mount_definition: object = None,
@@ -461,7 +461,7 @@ class circular_waveplate:
 
     def __init__(
         self,
-        diameter: dim,
+        diameter: dim = dim(0.5, "in"),
         thickness: dim = dim(1, "mm"),
         retardance: float = 0.5,
         fast_axis_angle: float = 0,
@@ -483,6 +483,7 @@ class circular_waveplate:
                 diameter=self.diameter,
                 retardance=self.retardance,
                 fast_axis_angle=self.fast_axis_angle,
+                max_angle=180,
             )
         ]
 
@@ -544,7 +545,7 @@ class beamsplitter_cube:
 
     def __init__(
         self,
-        side_length: dim,
+        side_length: dim = dim(0.5, "in"),
         ref_polarization: float = None,
         ref_ratio: float = None,
         rotate_cube: bool = False,
@@ -650,8 +651,8 @@ class beamsplitter_cube_on_surface_adapter(beamsplitter_cube):
 
     def __init__(
         self,
-        side_length: dim,
-        optical_height: dim,
+        side_length: dim = dim(0.5, "in"),
+        optical_height: dim = dim(0.5, "in"),
         ref_polarization: float = None,
         ref_ratio: float = None,
         rotate_cube: bool = False,

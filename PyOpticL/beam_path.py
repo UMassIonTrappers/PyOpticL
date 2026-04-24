@@ -523,6 +523,8 @@ class BeamPath(Layout):
 
         # bound parent represents the parent whose children this beam path interacts with
         self.make_property("BoundParent", "App::PropertyLinkHidden")
+        if bound_parent is not None:
+            bound_parent = bound_parent.get_object()
         obj.BoundParent = bound_parent
 
         # separate lists for beam children and beam segments
@@ -541,7 +543,7 @@ class BeamPath(Layout):
         elif waist is not None:
             self.rayleigh_range = np.pi * waist**2 / (wavelength * 1e-6)
         else:
-            raise ValueError("Either waist or rayleigh_range must be specified")
+            self.waist = dim(1, "mm")
 
     def set_parent(self, parent: Layout):
         """

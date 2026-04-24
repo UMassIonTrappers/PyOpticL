@@ -1,8 +1,7 @@
-from PyOpticL import optomech
 from PyOpticL.beam_path import BeamPath
-from PyOpticL.layout import Component
+from PyOpticL.layout import Component, Layout
+from PyOpticL.library import optics
 from PyOpticL.types import Dimension as dim
-from PyOpticL.layout import Layout
 
 layout = Layout("Example Layout")
 
@@ -39,7 +38,7 @@ layout.add(
 layout.add(
     Component(
         label="f=100mm lens",
-        definition=optomech.spherical_lens(
+        definition=optics.spherical_lens(
             diameter=dim(1, "in"),
             thickness=dim(2, "mm"),
             focal_length=dim(100, "mm"),
@@ -52,7 +51,7 @@ layout.add(
 layout.add(
     Component(
         label="f=50mm lens",
-        definition=optomech.spherical_lens(
+        definition=optics.spherical_lens(
             diameter=dim(1, "in"),
             thickness=dim(2, "mm"),
             focal_length=dim(50, "mm"),

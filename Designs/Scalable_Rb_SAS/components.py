@@ -28,7 +28,7 @@ class rb_cell_holder:
                         definition=hardware.bolt(
                             types=["8_32", "M4"],
                             length=self.bolt_length,
-                            clear_depth=dim(1 / 2, "in"),
+                            clear_depth=dim(1, "in"),
                             drill_depth=self.drill_depth,
                         ),
                     ),
@@ -49,7 +49,7 @@ class rb_cell_holder:
         return part
 
 
-class rb_cell:
+class rb_cell_tube:
     """
     A model of a cylindrical Rb cell
     """

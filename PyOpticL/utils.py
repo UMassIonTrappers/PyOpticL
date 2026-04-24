@@ -1,6 +1,7 @@
 import inspect
 import json
 import sys
+from importlib import reload
 from pathlib import Path
 
 import FreeCAD as App
@@ -22,7 +23,27 @@ def fix_relative_imports(directory=""):
         base_path = Path(inspect.stack()[1].filename).parent
         directory = base_path / directory
 
-    sys.path.append(str(directory))
+    directory = directory.resolve()
+
+    if str(directory) not in sys.path:
+        sys.path.append(str(directory))
+
+    # Reload modules whose source files are inside the target directory.
+    for module in list(sys.modules.values()):
+        if module is None:
+            continue
+
+        module_file = getattr(module, "__file__", None)
+        if not module_file:
+            continue
+
+        try:
+            module_path = Path(module_file).resolve()
+        except (OSError, RuntimeError, ValueError):
+            continue
+
+        if module_path.is_relative_to(directory):
+            reload(module)
 
 
 def collect_children(parent: App.DocumentObject, output_list: list):

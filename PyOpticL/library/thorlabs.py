@@ -128,6 +128,54 @@ class mirror_mount_km100:
         return part
 
 
+class mirror_mount_km05:
+    """
+    Mirror mount, model KM05
+
+    Args:
+        bolt_distance (float): The distance from the head of the bolt to the mount threads
+        bolt_length (float): The length of the mounting bolt (defaults to minimum required length)
+    """
+
+    object_group = "mounts"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+
+    mesh = import_model("thorlabs-km05")
+    mount_position = (-7.289, -0.000, -14.732)
+
+    def __init__(self, bolt_distance: dim = dim(0.5, "in"), bolt_length: dim = None):
+        self.bolt_distance = bolt_distance
+        self.bolt_length = bolt_length
+
+    def subcomponents(self):
+        return [
+            Subcomponent(
+                component=Component(
+                    label="Mounting Bolt",
+                    definition=bolt(
+                        types=["8_32", "M4"],
+                        length=self.bolt_length,
+                        clear_depth=self.bolt_distance,
+                        from_top=False,
+                    ),
+                ),
+                position=(
+                    self.mount_position[0],
+                    self.mount_position[1],
+                    self.mount_position[2] - self.bolt_distance,
+                ),
+                rotation=(180, 0, 0),
+            )
+        ]
+
+    def drill(self):
+        part = bounding_box_shape(
+            shape=self.mesh, padding=dim(5, "mm"), fillet=dim(5, "mm")
+        )
+        return part
+
+
 #######################
 ### Splitter Mounts ###
 #######################
@@ -198,6 +246,70 @@ class lens_mount_l05g(polaris_mount):
 ###################
 ### Misc Mounts ###
 ###################
+
+
+class fixed_mount_smr05:
+    """
+    Fixed mount, model SMR05
+    """
+
+    object_group = "mounts"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+
+    mesh = import_model("thorlabs-smr05")
+    mount_position = (0.093, 0.000, -16.002)
+    mount_hole_end = (0.093, 0.000, -9.652)
+
+
+class kinematic_mount_km05t:
+    """
+    Kinematic mount, model KM05t
+
+    Args:
+        bolt_distance (float): The distance from the head of the bolt to the mount threads
+        bolt_length (float): The length of the mounting bolt (defaults to minimum required length)
+    """
+
+    object_group = "mounts"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+
+    mesh = import_model("thorlabs-km05t")
+    mount_position = (-9.067, -0.000, -14.732)
+    threading_end = (-3.556, -0.000, -0.000)
+    threading_start = (3.556, -0.000, -0.000)
+
+    def __init__(self, bolt_distance: dim = dim(0.5, "in"), bolt_length: dim = None):
+        self.bolt_distance = bolt_distance
+        self.bolt_length = bolt_length
+
+    def subcomponents(self):
+        return [
+            Subcomponent(
+                component=Component(
+                    label="Mounting Bolt",
+                    definition=bolt(
+                        types=["8_32", "M4"],
+                        length=self.bolt_length,
+                        clear_depth=self.bolt_distance,
+                        from_top=False,
+                    ),
+                ),
+                position=(
+                    self.mount_position[0],
+                    self.mount_position[1],
+                    self.mount_position[2] - self.bolt_distance,
+                ),
+                rotation=(180, 0, 0),
+            )
+        ]
+
+    def drill(self):
+        part = bounding_box_shape(
+            shape=self.mesh, padding=dim(5, "mm"), fillet=dim(5, "mm")
+        )
+        return part
 
 
 class rotation_mount_rsp05:
@@ -338,6 +450,108 @@ class rotation_mount_rsp1:
             shape=self.mesh, padding=dim(5, "mm"), fillet=dim(5, "mm")
         )
         return part
+
+
+class prism_mount_km100pm_noplatform:
+    """
+    Prism mount, model KM100PM without the platform or bracket
+    Origin is at the center of the inner mounting hole
+
+    Args:
+        drill_depth (float): The depth of the mounting hole
+        bolt_length (float): The length of the mounting bolt (defaults to minimum required length)
+    """
+
+    object_group = "mounts"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+
+    mesh = import_model("thorlabs-km100pm-noplatform")
+    mount_position = (-13.957, -10.160, -6.731)
+    bolt_position = (-13.957, -10.160, -2.413)
+
+    def __init__(self, drill_depth: dim = None, bolt_length: dim = None):
+        self.drill_depth = drill_depth
+        self.bolt_length = bolt_length
+
+    def subcomponents(self):
+        return [
+            Subcomponent(
+                component=Component(
+                    label="Mounting Bolt",
+                    definition=bolt(
+                        types=["8_32", "M4"],
+                        length=self.bolt_length,
+                        clear_depth=self.bolt_position[2] - self.mount_position[2],
+                        drill_depth=self.drill_depth,
+                        from_top=False,
+                    ),
+                ),
+                position=self.bolt_position,
+                rotation=(0, 0, 0),
+            )
+        ]
+
+    def drill(self):
+        part = bounding_box_shape(
+            shape=self.mesh, padding=dim(5, "mm"), fillet=dim(5, "mm")
+        )
+        return part
+
+
+######################
+### Mounted Optics ###
+######################
+
+
+class mounted_lens_c220tmda:
+    """
+    Mounted lens, model C220TMD-A
+    """
+
+    object_group = "optics"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+    mesh = import_model("thorlabs-c220tmd-a")
+
+
+#############################
+### Adapters / Connectors ###
+#############################
+
+
+class diode_adapter_s05lm56:
+    """
+    Diode adapter, model S05LM56
+    """
+
+    object_group = "mounts"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+    mesh = import_model("thorlabs-s05lm56")
+
+
+class lens_tube_sm05l05:
+    """
+    Lens tube, model SM05L05
+    """
+
+    object_group = "mounts"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+    mesh = import_model("thorlabs-sm05l05")
+    mount_position = (-1.143, 0.000, 0.000)
+
+
+class lens_adapter_s05tm09:
+    """
+    Lens adapter, model S05TM09
+    """
+
+    object_group = "mounts"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+    mesh = import_model("thorlabs-s05tm09")
 
 
 ###########################
