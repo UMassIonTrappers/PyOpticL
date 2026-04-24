@@ -4,6 +4,7 @@ from PyOpticL.library import baseplate, hardware, optics, thorlabs
 from PyOpticL.types import Dimension as dim
 from PyOpticL.types import cardinal_angle, turn_angle
 
+# define and place the baseplate object
 baseplate = Component(
     label="Example Baseplate",
     definition=baseplate(
@@ -12,12 +13,14 @@ baseplate = Component(
     ),
 )
 
+# add a beam path to the baseplate
 beam = baseplate.add(
     BeamPath(label="Beam"),
-    position=(0, dim(30, "mm"), 0),
+    position=(0, 30, 0),
     rotation=(0, 0, cardinal_angle["right"]),
 )
 
+# add a waveplate along the beam, 30 mm from the beam start
 beam.add(
     Component(
         label="Waveplate",
@@ -26,20 +29,22 @@ beam.add(
         ),
     ),
     beam_index=0b1,
-    distance=dim(30, "mm"),
+    distance=30,
     rotation=(0, 0, cardinal_angle["right"]),
 )
 
+# add a cube beamsplitter along the beam, 40 mm from the waveplate
 beam.add(
     Component(
         label="Beam Splitter",
         definition=optics.beamsplitter_cube_on_surface_adapter(),
     ),
     beam_index=0b1,
-    distance=dim(40, "mm"),
+    distance=40,
     rotation=(0, 0, cardinal_angle["right"]),
 )
 
+# add a mirror along the reflected beam, 30 mm from the beamsplitter
 beam.add(
     Component(
         label="Mirror",
@@ -48,7 +53,7 @@ beam.add(
         ),
     ),
     beam_index=0b11,
-    distance=dim(30, "mm"),
+    distance=30,
     rotation=(0, 0, turn_angle["up-right"]),
 )
 
