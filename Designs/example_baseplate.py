@@ -3,6 +3,11 @@ from PyOpticL.layout import Component
 from PyOpticL.library import baseplate, hardware, optics, thorlabs
 from PyOpticL.types import Dimension as dim
 from PyOpticL.types import cardinal_angle, turn_angle
+from PyOpticL.utils import fix_relative_imports
+
+fix_relative_imports()
+
+from half_inch_library import beamsplitter_cube, mirror, waveplate
 
 # define and place the baseplate object
 baseplate = Component(
@@ -22,12 +27,7 @@ beam = baseplate.add(
 
 # add a waveplate along the beam, 30 mm from the beam start
 beam.add(
-    Component(
-        label="Waveplate",
-        definition=optics.circular_waveplate(
-            mount_definition=thorlabs.rotation_mount_rsp05(),
-        ),
-    ),
+    waveplate(),
     beam_index=0b1,
     distance=30,
     rotation=cardinal_angle["right"],
@@ -35,10 +35,7 @@ beam.add(
 
 # add a cube beamsplitter along the beam, 40 mm from the waveplate
 beam.add(
-    Component(
-        label="Beam Splitter",
-        definition=optics.beamsplitter_cube_on_surface_adapter(),
-    ),
+    beamsplitter_cube(),
     beam_index=0b1,
     distance=40,
     rotation=cardinal_angle["right"],
@@ -46,12 +43,7 @@ beam.add(
 
 # add a mirror along the reflected beam, 30 mm from the beamsplitter
 beam.add(
-    Component(
-        label="Mirror",
-        definition=optics.circular_mirror(
-            mount_definition=thorlabs.mirror_mount_k05s1(),
-        ),
-    ),
+    mirror(),
     beam_index=0b11,
     distance=30,
     rotation=turn_angle["up-right"],
