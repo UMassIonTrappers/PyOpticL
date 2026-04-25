@@ -8,8 +8,8 @@ import Part
 
 from PyOpticL.icons import beam_icon
 from PyOpticL.layout import Layout
-from PyOpticL.settings import enable_beam_transparency
-from PyOpticL.types import Dimension as dim
+from PyOpticL.settings import get_enable_beam_transparency
+from PyOpticL.utils import Dimension as dim
 from PyOpticL.utils import collect_children, cylinder_shape, wavelength_to_rgb
 
 JonesComponent = tuple[float, float]  # (real, imag)
@@ -445,7 +445,7 @@ class BeamSegment(Layout):
         obj.Shape = shape
         # color and transparency based on wavelength and power
         obj.ViewObject.ShapeColor = wavelength_to_rgb(self.wavelength)
-        if enable_beam_transparency:
+        if get_enable_beam_transparency():
             obj.ViewObject.Transparency = int(100 * (1 - self.relative_power))
 
         # get gaussian beam parameters

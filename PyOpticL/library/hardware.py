@@ -1,5 +1,5 @@
 from PyOpticL import settings
-from PyOpticL.types import Dimension as dim
+from PyOpticL.utils import Dimension as dim
 from PyOpticL.utils import (
     bolt_shape,
     bolt_slot_shape,

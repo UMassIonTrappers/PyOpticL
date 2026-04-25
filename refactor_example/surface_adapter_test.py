@@ -1,7 +1,7 @@
 from PyOpticL.beam_path import BeamPath
 from PyOpticL.layout import Component, Layout
 from PyOpticL.library import baseplate, optics, thorlabs
-from PyOpticL.types import Dimension as dim
+from PyOpticL.utils import Dimension as dim
 
 baseplate = Component(
     label="Baseplate",

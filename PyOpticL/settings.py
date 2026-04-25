@@ -1,15 +1,13 @@
-from PyOpticL.types import Dimension as dim
-
 measurement_system = "imperial"
-minimum_thread_engagement = dim(0.25, "in")
-default_extra_drill_depth = dim(0.25, "in")
+minimum_thread_engagement = 8
+default_extra_drill_depth = 10
 hidden_object_groups = ["hardware"]
 enable_beam_transparency = False
 
 
-def set_hardware_preference(system: str):
+def set_measurement_system(system: str):
     """
-    Set the global hardware preference for the measurement system. This will affect what hardware is used by default in the optomechanical components.
+    Set the global measurement system preference. This will affect hardware sizes and grid spacing..
 
     Args:
         system (str): The measurement system to use, either 'metric' or 'imperial'
@@ -22,9 +20,9 @@ def set_hardware_preference(system: str):
         raise ValueError("Invalid system preference. Use 'metric' or 'imperial'.")
 
 
-def get_hardware_preference():
+def get_measurement_system():
     """
-    Get the current global hardware preference for the measurement system.
+    Get the current global measurement system preference.
 
     Returns:
         str: The current measurement system preference, either 'metric' or 'imperial'
@@ -33,12 +31,12 @@ def get_hardware_preference():
     return measurement_system
 
 
-def set_minimum_thread_engagement(length: dim):
+def set_minimum_thread_engagement(length: float):
     """
     Set the global minimum thread engagement length for all bolts. This is used to calculate default bolt lengths when not specified.
 
     Args:
-        length (dim): The minimum thread engagement length.
+        length (float): The minimum thread engagement length.
     """
 
     global minimum_thread_engagement
@@ -50,18 +48,18 @@ def get_minimum_thread_engagement():
     Get the current global minimum thread engagement length for all bolts.
 
     Returns:
-        dim: The current minimum thread engagement length.
+        float: The current minimum thread engagement length.
     """
 
     return minimum_thread_engagement
 
 
-def set_default_extra_drill_depth(length: dim):
+def set_default_extra_drill_depth(length: float):
     """
     Set the global default for clearance at the bottom of the drill holes. This is used to calculate default drill depths when not specified.
 
     Args:
-        length (dim): The default extra clearance at the bottom of the drill holes.
+        length (float): The default extra clearance at the bottom of the drill holes.
     """
 
     global default_extra_drill_depth
@@ -73,7 +71,7 @@ def get_default_extra_drill_depth():
     Get the current global default for clearance at the bottom of the drill holes.
 
     Returns:
-        dim: The current default extra clearance at the bottom of the drill holes.
+        float: The current default extra clearance at the bottom of the drill holes.
     """
 
     return default_extra_drill_depth

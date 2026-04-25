@@ -1,5 +1,5 @@
 from PyOpticL.library import optics, thorlabs
-from PyOpticL.types import Dimension as dim
+from PyOpticL.utils import Dimension as dim
 from PyOpticL.utils import fix_relative_imports
 
 fix_relative_imports()

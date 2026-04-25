@@ -10,10 +10,68 @@ import MeshPart
 import numpy as np
 import Part
 
-from PyOpticL.settings import measurement_system, minimum_thread_engagement
-from PyOpticL.types import Dimension as dim
+from PyOpticL.settings import get_measurement_system, get_minimum_thread_engagement
 
 models_dir = Path(__file__).parent.absolute() / "models"
+
+
+turn_angle = {
+    "up-right": -45,
+    "right-up": 135,
+    "up-left": -135,
+    "left-up": 45,
+    "down-right": 45,
+    "right-down": -135,
+    "down-left": 135,
+    "left-down": -45,
+}
+cardinal_angle = {
+    "right": 0,
+    "left": 180,
+    "up": 90,
+    "down": -90,
+    "ne": 45,
+    "se": -45,
+    "sw": -135,
+    "nw": 135,
+}
+
+
+class Dimension(float):
+    """
+    Class to handle dimensions with units
+    value is stored internally as mm
+
+    Args:
+        value (float) : numerical value of the dimension
+        unit (str) : unit of the dimension, options are 'um', 'mm', 'cm', 'm', 'in', 'ft'
+    """
+
+    conversion_factors = {
+        "um": 0.001,
+        "mm": 1,
+        "cm": 10,
+        "m": 1000,
+        "in": 25.4,
+        "ft": 304.8,
+        "grid": 25.4 if get_measurement_system() == "imperial" else 25,
+    }
+
+    def __new__(self, value: float, unit: str = "mm"):
+        if unit not in self.conversion_factors:
+            raise ValueError(f"Unsupported unit: {unit}")
+        instance = super().__new__(self, value * self.conversion_factors[unit])
+        instance.unit = unit
+        return instance
+
+    def to_unit(self, unit: str) -> float:
+        if unit in self.conversion_factors:
+            return self.value / self.conversion_factors[unit]
+        else:
+            raise ValueError(f"Unsupported unit: {unit}")
+
+
+dim = Dimension  # alias for convenience
 
 
 def fix_relative_imports(directory=""):
@@ -501,9 +559,9 @@ def default_bolt_length(
         ),
     )
 
-    lengths = default_lengths[measurement_system]
+    lengths = default_lengths[get_measurement_system()]
     if max_thread_engagement is None:
-        minimum_length = through_length + minimum_thread_engagement
+        minimum_length = through_length + get_minimum_thread_engagement()
         for val in lengths["lower_values"]:
             if val >= minimum_length:
                 return val

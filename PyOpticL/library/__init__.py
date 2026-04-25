@@ -1,4 +1,4 @@
-from PyOpticL.types import Dimension as dim
+from PyOpticL.utils import Dimension as dim
 from PyOpticL.utils import box_shape
 
 

@@ -3,7 +3,7 @@ from PyOpticL.icons import thorlabs_icon
 from PyOpticL.layout import Component, Subcomponent
 from PyOpticL.library.adapters import surface_adapter
 from PyOpticL.library.hardware import alignment_pin, bolt
-from PyOpticL.types import Dimension as dim
+from PyOpticL.utils import Dimension as dim
 from PyOpticL.utils import bounding_box_shape, cylinder_shape, import_model
 
 ####################

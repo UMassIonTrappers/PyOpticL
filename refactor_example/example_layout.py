@@ -1,8 +1,7 @@
-from PyOpticL import optomech
-from PyOpticL.layout import Component
-from PyOpticL.types import Dimension as dim
-from PyOpticL.layout import Layout
 import PyOpticL
+from PyOpticL import optomech
+from PyOpticL.layout import Component, Layout
+from PyOpticL.utils import Dimension as dim
 
 PyOpticL.set_minimum_thread_engagement(dim(0.5, "in"))
 

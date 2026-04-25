@@ -1,8 +1,8 @@
 from PyOpticL.beam_path import BeamPath
 from PyOpticL.layout import Component
 from PyOpticL.library import baseplate, hardware, optics, thorlabs
-from PyOpticL.types import Dimension as dim
-from PyOpticL.types import cardinal_angle, turn_angle
+from PyOpticL.utils import Dimension as dim
+from PyOpticL.utils import cardinal_angle, turn_angle
 
 
 def mirror(label: str = "Mirror") -> Component:

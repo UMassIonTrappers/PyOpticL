@@ -1,9 +1,8 @@
 from example_layout import example_layout
 
 from PyOpticL import optomech
-from PyOpticL.layout import Component
-from PyOpticL.types import Dimension as dim
-from PyOpticL.layout import Layout
+from PyOpticL.layout import Component, Layout
+from PyOpticL.utils import Dimension as dim
 
 
 def nesting_example():

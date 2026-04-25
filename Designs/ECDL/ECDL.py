@@ -1,9 +1,8 @@
 from PyOpticL.beam_path import BeamPath
 from PyOpticL.layout import Component
 from PyOpticL.library import baseplate
-from PyOpticL.types import Dimension as dim
-from PyOpticL.types import cardinal_angle, turn_angle
-from PyOpticL.utils import fix_relative_imports
+from PyOpticL.utils import Dimension as dim
+from PyOpticL.utils import cardinal_angle, fix_relative_imports, turn_angle
 
 fix_relative_imports()
 
