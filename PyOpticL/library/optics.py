@@ -554,7 +554,7 @@ class beamsplitter_cube:
         drill_tolerance: dim = dim(0.5, "mm"),
         corner_drill_diameter: dim = dim(3, "mm"),
     ):
-        if ref_ratio is None:
+        if ref_ratio is None and ref_polarization is None:
             ref_ratio = 0.5  # default to 50/50 beamsplitter if not specified
 
         self.side_length = side_length

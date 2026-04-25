@@ -122,14 +122,16 @@ class grid_optics_mount:
         n_grid: int,
         component_definition: Component,
         optical_height: dim,
-        grid_spacing_y: dim = dim(1.5, "in"),
-        grid_spacing_z: dim = dim(1.5, "in"),
+        component_rotation: tuple = (0, 0, 0),
+        grid_spacing_y: dim = dim(2, "in"),
+        grid_spacing_z: dim = dim(2, "in"),
     ):
         self.n_grid = n_grid
         self.component_definition = component_definition
         self.optical_height = optical_height
         self.grid_spacing_y = grid_spacing_y
         self.grid_spacing_z = grid_spacing_z
+        self.component_rotation = component_rotation
 
     def subcomponents(self):
         components = []
@@ -143,10 +145,11 @@ class grid_optics_mount:
                         ),
                         position=(
                             0,
-                            (y + 0.5) * self.grid_spacing_y,
+                            (y + 0.5) * self.grid_spacing_y
+                            - self.n_grid * self.grid_spacing_y / 2,
                             (z + 0.5) * self.grid_spacing_z,
                         ),
-                        rotation=(0, 0, 0),
+                        rotation=self.component_rotation,
                     )
                 )
         return components
@@ -156,10 +159,10 @@ class grid_optics_mount:
             dimensions=(
                 dim(1, "in"),
                 self.grid_spacing_y * self.n_grid,
-                self.grid_spacing_z * self.n_grid + dim(0.25, "in"),
+                self.grid_spacing_z * self.n_grid + dim(0.5, "in"),
             ),
             fillet=dim(5, "mm"),
-            center=(0, -1, -1),
+            center=(0, 0, -1),
         )
         for y in range(self.n_grid):
             for z in range(self.n_grid):
@@ -169,7 +172,8 @@ class grid_optics_mount:
                         center=(0, 0, -1),
                         position=(
                             0,
-                            (y + 0.5) * self.grid_spacing_y,
+                            (y + 0.5) * self.grid_spacing_y
+                            - self.n_grid * self.grid_spacing_y / 2,
                             (z + 0.5) * self.grid_spacing_z - self.optical_height,
                         ),
                     )

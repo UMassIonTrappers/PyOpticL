@@ -221,13 +221,23 @@ class BeamSegment(Layout):
 
         obj = self.get_object()
 
-        # get placement relative to bound parent
+        # work in the bound parent's local frame to evaluate constraints
         bound_placement = obj.BoundParent.Placement
-        placement = obj.Placement * bound_placement.inverse()
+        bound_base = np.array(bound_placement.Base)
+        bound_rotation = bound_placement.Rotation
+        bound_inverse_rotation = bound_rotation.inverted()
 
-        # get origin and direction from object placement
-        position = np.array(placement.Base)
-        direction = np.array(placement.Rotation.multVec(App.Vector(*self.direction)))
+        beam_position = np.array(obj.Placement.Base)
+        beam_direction = np.array(
+            obj.Placement.Rotation.multVec(App.Vector(*self.direction))
+        )
+
+        position = np.array(
+            bound_inverse_rotation.multVec(App.Vector(*(beam_position - bound_base)))
+        )
+        direction = np.array(
+            bound_inverse_rotation.multVec(App.Vector(*beam_direction))
+        )
 
         # calculate position based on specified constraint
         if type == "distance":
@@ -254,8 +264,8 @@ class BeamSegment(Layout):
             t = (value - position[2]) / direction[2]
             output = position + t * direction
 
-        # return global output
-        return output + np.array(bound_placement.Base)
+        # convert constrained point back to global frame
+        return np.array(bound_rotation.multVec(App.Vector(*output))) + bound_base
 
     def get_global_position(self) -> np.ndarray[float]:
         """
@@ -296,8 +306,10 @@ class BeamSegment(Layout):
         """
 
         obj = self.get_object()
-        position = obj.Placement.Base
-        return global_position - np.array(position)
+        placement = obj.Placement
+        delta = np.array(global_position) - np.array(placement.Base)
+        local_position = placement.Rotation.inverted().multVec(App.Vector(*delta))
+        return np.array(local_position)
 
     def get_relative_direction(
         self, global_direction: np.ndarray[float]
@@ -513,6 +525,7 @@ class BeamPath(Layout):
         waist: dim = None,
         rayleigh_range: dim = None,
         bound_parent: Layout = None,
+        final_distance: dim = dim(50, "mm"),
     ):
         super().__init__(
             label=label,
@@ -540,10 +553,13 @@ class BeamPath(Layout):
         self.waist_position = waist_position
         if rayleigh_range is not None:
             self.rayleigh_range = rayleigh_range
-        elif waist is not None:
+        elif waist is None:
+            waist = dim(1, "mm")
+
+        if waist is not None:
             self.rayleigh_range = np.pi * waist**2 / (wavelength * 1e-6)
-        else:
-            self.waist = dim(1, "mm")
+
+        self.final_distance = final_distance
 
     def set_parent(self, parent: Layout):
         """
@@ -749,10 +765,7 @@ class BeamPath(Layout):
 
         # get info for next beam child
         if next_object != None:
-            if not hasattr(next_object.Proxy, "interfaces"):
-                raise RuntimeError(
-                    f"Beam child {next_object.Label} does not have any interfaces"
-                )
+            next_interface = self.get_child_interface(next_object)
 
             # get position from provided constraint
             try:
@@ -768,7 +781,6 @@ class BeamPath(Layout):
             next_distance = np.linalg.norm(
                 next_position - input_beam_obj.Placement.Base
             )
-            next_interface = self.get_child_interface(next_object)
 
         return next_object, next_interface, next_distance
 
@@ -784,13 +796,18 @@ class BeamPath(Layout):
         """
         child = child_object.Proxy
         # gather all interfaces associated with the object
-        object_children = []
+        object_children = [child_object]
         collect_children(child_object, object_children)
-        interfaces = child.interfaces()
+        interfaces = []
         for obj in object_children:
             proxy = obj.Proxy
             if hasattr(proxy, "interfaces"):
                 interfaces.extend(proxy.interfaces())
+
+        if len(interfaces) == 0:
+            raise RuntimeError(
+                f"Child object {child_object.Label} does not have any interfaces"
+            )
         # get specified interface
         return interfaces[child.interface_index]
 
@@ -857,7 +874,7 @@ class BeamPath(Layout):
         if global_distance == np.inf and child_distance == np.inf:
             # no more interactions, clip beam to bound parent
 
-            input_beam.distance = 25
+            input_beam.distance = self.final_distance
             input_beam.recompute()
             return
 
@@ -870,11 +887,18 @@ class BeamPath(Layout):
             intercept = input_beam.get_constraint_position(
                 type="distance", value=next_distance
             )
-            intercept -= obj.Placement.Base  # convert to local coordinates
             next_object.Proxy.compute_placement()  # update placement
             object_rotation = next_object.Placement.Rotation
-            offset = object_rotation.multVec(next_object.Offset)
-            object_position = intercept - next_interface.get_position_offset() + offset
+            offset = np.array(object_rotation.multVec(next_object.Offset))
+            interface_offset = next_interface.get_position_offset()
+            object_position_global = intercept - interface_offset + offset
+
+            # child base placement is stored in the beam path local frame
+            beam_path_rotation = obj.Placement.Rotation
+            delta = object_position_global - np.array(obj.Placement.Base)
+            object_position = np.array(
+                beam_path_rotation.inverted().multVec(App.Vector(*delta))
+            )
             # apply placement
             next_object.BasePlacement.Base = App.Vector(*object_position)
             next_object.Proxy.placed = True
