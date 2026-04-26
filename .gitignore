@@ -3,4 +3,6 @@
 .vscode
 *.pyc
 __pycache__
+
 PyOpticL/models/**/*.stl
+!PyOpticL/models/isomet-1205c/*.stl

@@ -1,7 +1,7 @@
 from PyOpticL.layout import Component, Subcomponent
-from PyOpticL.library.hardware import bolt
+from PyOpticL.library import hardware, thorlabs
 from PyOpticL.utils import Dimension as dim
-from PyOpticL.utils import bounding_box_shape, box_shape
+from PyOpticL.utils import bounding_box_shape, box_shape, translate_shape
 
 
 class surface_adapter:
@@ -52,7 +52,7 @@ class surface_adapter:
                 Subcomponent(
                     component=Component(
                         label="Mounting Bolt",
-                        definition=bolt(
+                        definition=hardware.bolt(
                             types=self.bolt_types,
                             length=self.bolt_length,
                             clear_depth=self.height,

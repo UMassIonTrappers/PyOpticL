@@ -1,10 +1,15 @@
 from PyOpticL.beam_path import Stop
 from PyOpticL.icons import thorlabs_icon
 from PyOpticL.layout import Component, Subcomponent
-from PyOpticL.library.adapters import surface_adapter
-from PyOpticL.library.hardware import alignment_pin, bolt
+from PyOpticL.library import adapters, hardware
 from PyOpticL.utils import Dimension as dim
-from PyOpticL.utils import bounding_box_shape, cylinder_shape, import_model
+from PyOpticL.utils import (
+    bounding_box_shape,
+    box_shape,
+    cylinder_shape,
+    import_model,
+    translate_shape,
+)
 
 ####################
 ### Base Classes ###
@@ -30,7 +35,7 @@ class polaris_mount:
             Subcomponent(
                 component=Component(
                     label="Mounting Bolt",
-                    definition=bolt(
+                    definition=hardware.bolt(
                         types=["8_32", "M4"],
                         length=self.bolt_length,
                         clear_depth=self.bolt_position[2] - self.mount_position[2],
@@ -47,7 +52,7 @@ class polaris_mount:
                 Subcomponent(
                     component=Component(
                         label="Alignment Pin",
-                        definition=alignment_pin(
+                        definition=hardware.alignment_pin(
                             diameter=dim(1.9, "mm"), length=dim(4, "mm")
                         ),
                     ),
@@ -108,7 +113,7 @@ class mirror_mount_km100:
             Subcomponent(
                 component=Component(
                     label="Mounting Bolt",
-                    definition=bolt(
+                    definition=hardware.bolt(
                         types=["8_32", "M4"],
                         length=self.bolt_length,
                         clear_depth=self.bolt_position[2] - self.mount_position[2],
@@ -153,7 +158,7 @@ class mirror_mount_km05:
             Subcomponent(
                 component=Component(
                     label="Mounting Bolt",
-                    definition=bolt(
+                    definition=hardware.bolt(
                         types=["8_32", "M4"],
                         length=self.bolt_length,
                         clear_depth=self.bolt_distance,
@@ -291,7 +296,7 @@ class kinematic_mount_km05t:
             Subcomponent(
                 component=Component(
                     label="Mounting Bolt",
-                    definition=bolt(
+                    definition=hardware.bolt(
                         types=["8_32", "M4"],
                         length=self.bolt_length,
                         clear_depth=self.bolt_distance,
@@ -354,7 +359,7 @@ class rotation_mount_rsp05:
             Subcomponent(
                 component=Component(
                     label="Mounting Bolt",
-                    definition=bolt(
+                    definition=hardware.bolt(
                         types=["8_32", "M4"],
                         clear_depth=self.adapter_parameters["height"],
                         drill_depth=self.mount_hole_end[2] - self.mount_position[2],
@@ -370,7 +375,7 @@ class rotation_mount_rsp05:
             Subcomponent(
                 component=Component(
                     label="Surface Adapter",
-                    definition=surface_adapter(**self.adapter_parameters),
+                    definition=adapters.surface_adapter(**self.adapter_parameters),
                 ),
                 position=self.mount_position,
                 rotation=(0, 0, 90 if self.rotate_adapter else 0),
@@ -424,7 +429,7 @@ class rotation_mount_rsp1:
             Subcomponent(
                 component=Component(
                     label="Mounting Bolt",
-                    definition=bolt(
+                    definition=hardware.bolt(
                         types=["8_32", "M4"],
                         clear_depth=self.adapter_parameters["height"],
                         drill_depth=self.mount_hole_end[2] - self.mount_position[2],
@@ -440,7 +445,7 @@ class rotation_mount_rsp1:
             Subcomponent(
                 component=Component(
                     label="Surface Adapter",
-                    definition=surface_adapter(**self.adapter_parameters),
+                    definition=adapters.surface_adapter(**self.adapter_parameters),
                 ),
                 position=self.mount_position,
                 rotation=(0, 0, 90 if self.rotate_adapter else 0),
@@ -483,7 +488,7 @@ class prism_mount_km100pm_noplatform:
             Subcomponent(
                 component=Component(
                     label="Mounting Bolt",
-                    definition=bolt(
+                    definition=hardware.bolt(
                         types=["8_32", "M4"],
                         length=self.bolt_length,
                         clear_depth=self.bolt_position[2] - self.mount_position[2],
@@ -495,6 +500,83 @@ class prism_mount_km100pm_noplatform:
                 rotation=(0, 0, 0),
             )
         ]
+
+
+class prism_mount_km100pm_custom:
+    """
+    A km100pm prism mount with a custom stage
+    """
+
+    object_group = "adapters"
+    object_color = (0.5, 0.7, 0.5)
+
+    def __init__(
+        self,
+        stage_dimensions: tuple = (21, 47.5, 6),
+        arm_dimensions: tuple = (10, 47.5, 16.92),
+        slot_length: dim = dim(0, "mm"),
+        adapter_offset: tuple[dim, dim] = (dim(0, "mm"), dim(10, "mm")),
+    ):
+        self.stage_dimensions = stage_dimensions
+        self.arm_dimensions = arm_dimensions
+        self.slot_length = slot_length
+        self.adapter_offset = adapter_offset
+
+    def subcomponents(self):
+        components = [
+            Subcomponent(
+                component=Component(
+                    label="Mount",
+                    definition=prism_mount_km100pm_noplatform(),
+                ),
+                position=(
+                    -self.stage_dimensions[0] / 2,
+                    -self.adapter_offset[0],
+                    -self.adapter_offset[1],
+                ),
+                rotation=(0, 0, 0),
+            )
+        ]
+        for position in [
+            (0, 0, 0),
+            prism_mount_km100pm_noplatform.bracket_hole_position,
+        ]:
+            components.append(
+                Subcomponent(
+                    component=Component(
+                        label="Mounting Bolt",
+                        definition=hardware.bolt(
+                            types=["4_40", "M3"],
+                            clear_depth=self.arm_dimensions[1],
+                            drill_depth=dim(5, "mm"),
+                            slot_length=self.slot_length,
+                        ),
+                    ),
+                    position=(
+                        -self.stage_dimensions[0] / 2
+                        + position[0]
+                        + self.arm_dimensions[0],
+                        -self.adapter_offset[0] + position[1],
+                        -self.adapter_offset[1] + position[2],
+                    ),
+                    rotation=(0, 90, 0),
+                ),
+            )
+        return components
+
+    def shape(self):
+        stage = box_shape(
+            dimensions=self.stage_dimensions,
+            position=(0, 0, 0),
+            center=(0, 0, 1),
+        )
+        arm = box_shape(
+            dimensions=self.arm_dimensions,
+            position=(-self.stage_dimensions[0] / 2, 0, -self.stage_dimensions[2]),
+            center=(-1, 0, 1),
+        )
+        part = stage.fuse(arm)
+        return part
 
 
 class brewster_window_mount_bw20m:
@@ -628,7 +710,7 @@ class photodetector_pda10a2:
             Subcomponent(
                 component=Component(
                     label="Mounting Bolt",
-                    definition=bolt(
+                    definition=hardware.bolt(
                         types=["8_32", "M4"],
                         clear_depth=self.adapter_parameters["height"],
                         drill_depth=self.mount_hole_end[2] - self.mount_position[2],
@@ -644,7 +726,7 @@ class photodetector_pda10a2:
             Subcomponent(
                 component=Component(
                     label="Surface Adapter",
-                    definition=surface_adapter(**self.adapter_parameters),
+                    definition=adapters.surface_adapter(**self.adapter_parameters),
                 ),
                 position=self.mount_position,
                 rotation=(0, 0, 90 if self.rotate_adapter else 0),
@@ -699,6 +781,12 @@ class tec_tech8:
     """
     Thermoelectric cooler, model TECH8
     """
+
+    object_group = "misc"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+    mesh = import_model("thorlabs-tech8")
+    thickness = dim(3.5, "mm")
 
     object_group = "misc"
     object_icon = thorlabs_icon
