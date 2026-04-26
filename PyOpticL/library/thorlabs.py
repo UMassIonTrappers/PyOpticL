@@ -260,6 +260,8 @@ class fixed_mount_smr05:
     mesh = import_model("thorlabs-smr05")
     mount_position = (0.093, 0.000, -16.002)
     mount_hole_end = (0.093, 0.000, -9.652)
+    threading_start = (3.903, 0.000, 0.000)
+    threading_end = (-3.903, 0.000, 0.000)
 
 
 class kinematic_mount_km05t:
@@ -469,6 +471,8 @@ class prism_mount_km100pm_noplatform:
     mesh = import_model("thorlabs-km100pm-noplatform")
     mount_position = (-13.957, -10.160, -6.731)
     bolt_position = (-13.957, -10.160, -2.413)
+    side_bolt_position = (-13.957, 10.922, 18.669)
+    bracket_hole_position = (0.000, -22.860, -0.000)
 
     def __init__(self, drill_depth: dim = None, bolt_length: dim = None):
         self.drill_depth = drill_depth
@@ -492,9 +496,28 @@ class prism_mount_km100pm_noplatform:
             )
         ]
 
+
+class brewster_window_mount_bw20m:
+    """
+    Brewster window mount, model BW20M
+
+    Args:
+        drill_depth (float): The depth of the mounting hole
+        bolt_length (float): The length of the mounting bolt (defaults to minimum required length)
+    """
+
+    object_group = "mounts"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+    mesh = import_model("thorlabs-bw20m")
+    mount_position = (-26.047, 0.000, -1.073)
+
     def drill(self):
-        part = bounding_box_shape(
-            shape=self.mesh, padding=dim(5, "mm"), fillet=dim(5, "mm")
+        part = cylinder_shape(
+            diameter=dim(1.25, "in"),
+            height=dim(0.5, "in"),
+            position=self.mount_position,
+            rotation=(0, -90, 0),
         )
         return part
 
@@ -665,3 +688,20 @@ class photodiode_fds010:
             rotation=(0, 90, 0),
         )
         return part
+
+
+#######################
+### Misc Components ###
+#######################
+
+
+class tec_tech8:
+    """
+    Thermoelectric cooler, model TECH8
+    """
+
+    object_group = "misc"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+    mesh = import_model("thorlabs-tech8")
+    thickness = dim(3.5, "mm")

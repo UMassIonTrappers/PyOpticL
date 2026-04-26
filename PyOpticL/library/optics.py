@@ -232,7 +232,7 @@ class rectangular_reflector:
         return part
 
     def drill(self):
-        part = bounding_box_shape(self.shape(), padding=dim(0.5, "mm"))
+        part = bounding_box_shape(self.shape())
         return part
 
 
