@@ -2,23 +2,5 @@
 .venv
 .vscode
 *.pyc
-# PyOpticL/stl/Room Temp Chamber Mechanical.stl
-PyOpticL/stl/Room_temp_chamber_step.stl
-PyOpticL/stl/MT3A_translation_stage.stl
-# PyOpticL/stl/room temperature chamber with chip.stl
-macros/
-redstone/*.stl
-redstone/*.step
-redstone/*.FCStd
-examples/ECDL.py
-examples/Rb_SAS.py
-examples/example_baseplate.py
-examples/modular_doublepass.py
-examples/table_demo.py
-baseplate_design_K/*
-redstone/stl_workflow/*.stl
-redstone/stl_workflow/*.step
-redstone/stl_workflow/*.FCStd
-redstone/stl_workflow/*.FCBak
-redstone/*
+__pycache__
 PyOpticL/models/**/*.stl
