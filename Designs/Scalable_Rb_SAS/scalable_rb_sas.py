@@ -6,11 +6,11 @@ from PyOpticL.utils import cardinal_angle, fix_relative_imports, turn_angle
 
 fix_relative_imports()
 
-from parameters import get_scale_parameters
+from .parameters import get_scale_parameters
 
 scale_params = get_scale_parameters("half_inch_mounted")
 
-rb_sas_baseplate = Component(
+rb_sas = Component(
     label="Rb SAS",
     definition=baseplate(
         dimensions=(
@@ -22,9 +22,9 @@ rb_sas_baseplate = Component(
     ),
 )
 
-beam = rb_sas_baseplate.add(
+beam = rb_sas.add(
     BeamPath(label="Beam", wavelength=780, waist=scale_params["beam_waist"]),
-    position=(dim(15.5, "in") * scale_params["overall_scale"], 0, 0),
+    position=(dim(16, "in") * scale_params["overall_scale"], 0, 0),
     rotation=cardinal_angle["up"],
 )
 
@@ -60,7 +60,7 @@ beam.add(
 beam.add(
     Component(label="Input Mirror 3", definition=scale_params["mirror"]),
     beam_index=0b11,
-    distance=dim(3.5, "in") * scale_params["overall_scale"],
+    distance=dim(4, "in") * scale_params["overall_scale"],
     rotation=turn_angle["left-down"],
 )
 
@@ -135,4 +135,4 @@ beam.add(
 )
 
 if __name__ == "__main__":
-    rb_sas_baseplate.recompute()
+    rb_sas.recompute()

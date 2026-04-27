@@ -4,7 +4,7 @@ from PyOpticL.beam_path import BeamPath
 from PyOpticL.layout import Component
 from PyOpticL.library import baseplate, optics, thorlabs
 from PyOpticL.utils import Dimension as dim
-from PyOpticL.utils import cardinal_angle, fix_relative_imports, turn_angle
+from PyOpticL.utils import fix_relative_imports
 
 fix_relative_imports()
 
@@ -277,4 +277,5 @@ for side in [-1, 1]:
                 rotation=(0, 0, redirect_angle),
             )
 
-redstone.recompute()
+if __name__ == "__main__":
+    redstone.recompute()

@@ -6,7 +6,7 @@ from PyOpticL.beam_path import BeamPath
 from PyOpticL.layout import Component, Layout
 from PyOpticL.library import baseplate, optics, thorlabs
 from PyOpticL.settings import hidden_object_groups, set_hidden_object_groups
-from PyOpticL.types import Dimension as dim
+from PyOpticL.utils import Dimension as dim
 
 set_hidden_object_groups(["hardware"])
 
@@ -27,7 +27,7 @@ beamsplitter_definition = optics.beamsplitter_cube_on_surface_adapter(
     optical_height=dim(0.5, "in"),
 )
 
-rb_sas_baseplate = Component(
+rb_sas = Component(
     label="Rb SAS",
     definition=baseplate(
         dimensions=(dim(15, "in"), dim(5, "in"), dim(1, "in")),
@@ -35,7 +35,7 @@ rb_sas_baseplate = Component(
     ),
 )
 
-beam = rb_sas_baseplate.add(
+beam = rb_sas.add(
     BeamPath(label="Beam", wavelength=780, waist=dim(1, "mm")),
     position=(dim(12.5, "in"), 0, 0),
     rotation=(0, 0, 90),
@@ -163,5 +163,5 @@ beam.add(
     rotation=(0, 0, 0),
 )
 
-
-rb_sas_baseplate.recompute()
+if __name__ == "__main__":
+    rb_sas.recompute()

@@ -1,12 +1,11 @@
-from PyOpticL.beam_path import BeamPath
-from PyOpticL.layout import Component, Layout, Subcomponent
-from PyOpticL.library import baseplate, hardware, thorlabs
+from PyOpticL.layout import Component, Subcomponent
+from PyOpticL.library import hardware, thorlabs
 from PyOpticL.utils import Dimension as dim
-from PyOpticL.utils import cardinal_angle, fix_relative_imports, turn_angle
+from PyOpticL.utils import fix_relative_imports
 
 fix_relative_imports()
 
-from components import ecdl_box, grating_adapter, mount_plate
+from .components import ecdl_box, grating_adapter, mount_plate
 
 
 class km100pm_ecdl:
@@ -41,7 +40,7 @@ class km100pm_ecdl:
             dim(0.5, "in"),
             dim(0.5, "in"),
         ),
-        optic_distance: dim = dim(20, "mm"),
+        optic_distance: dim = dim(1, "in"),
         slot_length: dim = dim(20, "mm"),
         box_dimensions: tuple[dim, dim, dim] = (
             dim(150, "mm"),
@@ -292,3 +291,6 @@ class km100pm_ecdl:
                 )
             )
         return components
+
+
+ecdl = Component(label="ECDL", definition=km100pm_ecdl())

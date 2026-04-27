@@ -1,8 +1,5 @@
-from PyOpticL.beam_path import BeamPath
 from PyOpticL.layout import Component
-from PyOpticL.library import baseplate, hardware, optics, thorlabs
-from PyOpticL.utils import Dimension as dim
-from PyOpticL.utils import cardinal_angle, turn_angle
+from PyOpticL.library import optics, thorlabs
 
 
 def mirror(label: str = "Mirror") -> Component:
@@ -27,4 +24,11 @@ def beamsplitter_cube(label: str = "Beamsplitter Cube") -> Component:
     return Component(
         label=label,
         definition=optics.beamsplitter_cube_on_surface_adapter(),
+    )
+
+
+def iris(label: str = "Iris") -> Component:
+    return Component(
+        label=label,
+        definition=thorlabs.iris_ida12(),
     )

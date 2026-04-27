@@ -85,3 +85,80 @@ class surface_adapter:
             fillet=self.fillet_radius + self.drill_tolerance,
         )
         return part
+
+
+class slide_adapter:
+    """
+    A simple adapter within single point mounting for elements like irises
+    """
+
+    object_group = "adapters"
+    object_color = (0.5, 0.7, 0.5)
+
+    def __init__(
+        self,
+        post_height: dim = dim(20, "mm"),
+        post_thickness: dim = dim(8, "mm"),
+        mount_height: dim = dim(0.5, "in"),
+        rail_height: dim = dim(8, "mm"),
+        slot_length: dim = dim(10, "mm"),
+        extra_thickness: dim = dim(6, "mm"),
+        bolt_types: list = ["8_32", "M4"],
+        bolt_length: dim = None,
+        drill_depth: dim = None,
+    ):
+        self.post_height = post_height
+        self.post_thickness = post_thickness
+        self.mount_height = mount_height
+        self.rail_height = rail_height
+        self.slot_length = slot_length
+        self.extra_thickness = extra_thickness
+        self.bolt_types = bolt_types
+        self.bolt_length = bolt_length
+        self.drill_depth = drill_depth
+
+    def subcomponents(self):
+        return [
+            Subcomponent(
+                component=Component(
+                    label="Mounting Bolt",
+                    definition=hardware.bolt(
+                        types=self.bolt_types,
+                        length=self.bolt_length,
+                        clear_depth=self.mount_height,
+                        drill_depth=self.drill_depth,
+                        slot_length=self.slot_length,
+                    ),
+                ),
+                position=(
+                    -self.post_thickness - self.slot_length / 2 - self.extra_thickness,
+                    0,
+                    self.rail_height - self.mount_height,
+                ),
+                rotation=(0, 0, 0),
+            ),
+        ]
+
+    def shape(self):
+        part = box_shape(
+            dimensions=(
+                self.post_thickness,
+                self.extra_thickness * 2,
+                self.post_height,
+            ),
+            position=(0, 0, -self.mount_height),
+            center=(1, 0, -1),
+        )
+        part = part.fuse(
+            box_shape(
+                dimensions=(
+                    self.slot_length + self.extra_thickness * 2 + self.post_thickness,
+                    self.extra_thickness * 2,
+                    self.rail_height,
+                ),
+                position=(0, 0, -self.mount_height),
+                center=(1, 0, -1),
+                fillet=dim(5, "mm"),
+            )
+        )
+        return part

@@ -276,6 +276,13 @@ class Component(Layout):
                 # apply drilling
                 for drill_obj in drill_objs:
                     if hasattr(drill_obj.Proxy, "drill"):
+                        if (
+                            hasattr(drill_obj.Proxy, "drill_groups")
+                            and obj.Proxy.object_group
+                            not in drill_obj.Proxy.drill_groups
+                        ):
+                            continue
+
                         drill_obj.Proxy.compute_placement()
                         drill_shape = drill_obj.Proxy.drill()
                         drill_shape.Placement = (

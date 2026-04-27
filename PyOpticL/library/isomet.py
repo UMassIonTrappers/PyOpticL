@@ -1,4 +1,4 @@
-from PyOpticL.beam_path import Stop
+from PyOpticL.beam_path import AcoustoOptic
 from PyOpticL.icons import thorlabs_icon
 from PyOpticL.layout import Component, Subcomponent
 from PyOpticL.library import adapters, hardware, thorlabs
@@ -23,6 +23,18 @@ class aom_1205c:
     object_color = (0.25, 0.25, 0.25)
     mesh = import_model("isomet-1205c")
     mount_positions = [(0, -26.65, -6.980), (0.000, 11.42, -6.98)]
+
+    def interfaces(self):
+        return [
+            AcoustoOptic(
+                position=(0, 0, 0),
+                rotation=(0, 0, 0),
+                sound_velocity=3630,
+                rf_frequencies=[100e6],
+                order_powers=[0.2, 0.8],
+                diameter=dim(2, "mm"),
+            ),
+        ]
 
 
 class aom_1205c_on_km100pm:

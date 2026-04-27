@@ -1,6 +1,6 @@
 from PyOpticL.beam_path import BeamPath
 from PyOpticL.layout import Component
-from PyOpticL.library import baseplate, hardware, optics, thorlabs
+from PyOpticL.library import baseplate
 from PyOpticL.utils import Dimension as dim
 from PyOpticL.utils import cardinal_angle, fix_relative_imports, turn_angle
 
@@ -9,7 +9,7 @@ fix_relative_imports()
 from half_inch_library import beamsplitter_cube, mirror, waveplate
 
 # define and place the baseplate object
-baseplate = Component(
+example_baseplate = Component(
     label="Example Baseplate",
     definition=baseplate(
         dimensions=(dim(100, "mm"), dim(100, "mm"), dim(1, "in")),
@@ -17,7 +17,7 @@ baseplate = Component(
     ),
 )
 # add a beam path to the baseplate
-beam = baseplate.add(
+beam = example_baseplate.add(
     BeamPath(label="Beam"),
     position=(0, 30, 0),
     rotation=cardinal_angle["right"],
@@ -44,4 +44,5 @@ beam.add(
     rotation=turn_angle["up-right"],
 )
 
-baseplate.recompute()
+if __name__ == "__main__":
+    example_baseplate.recompute()

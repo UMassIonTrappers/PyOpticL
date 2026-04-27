@@ -408,7 +408,7 @@ class spherical_lens:
         if self.mount_definition != None:
             mount_offset = self.mount_offset
             if mount_offset is None:
-                mount_offset = (0, 0, 0)
+                mount_offset = (-self.thickness / 2, 0, 0)
             return [
                 Subcomponent(
                     component=Component(

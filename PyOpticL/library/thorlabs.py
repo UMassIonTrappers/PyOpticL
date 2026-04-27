@@ -472,6 +472,7 @@ class prism_mount_km100pm_noplatform:
     object_group = "mounts"
     object_icon = thorlabs_icon
     object_color = (0.25, 0.25, 0.25)
+    drill_groups = ["baseplate"]
 
     mesh = import_model("thorlabs-km100pm-noplatform")
     mount_position = (-13.957, -10.160, -6.731)
@@ -500,6 +501,24 @@ class prism_mount_km100pm_noplatform:
                 rotation=(0, 0, 0),
             )
         ]
+
+    def drill(self):
+        part = bounding_box_shape(
+            self.mesh,
+            padding=dim(4, "mm"),
+            fillet=dim(4, "mm"),
+            pad_z=True,
+            max_offset=(dim(-18, "mm"), dim(-38, "mm"), 0),
+        )
+        part = part.fuse(
+            bounding_box_shape(
+                self.mesh,
+                padding=dim(4, "mm"),
+                fillet=dim(4, "mm"),
+                min_offset=(dim(-17, "mm"), 0, 0),
+            )
+        )
+        return part
 
 
 class prism_mount_km100pm_custom:
@@ -576,6 +595,12 @@ class prism_mount_km100pm_custom:
             center=(-1, 0, 1),
         )
         part = stage.fuse(arm)
+        return part
+
+    def drill(self):
+        part = bounding_box_shape(
+            self.shape(), padding=dim(5, "mm"), fillet=dim(5, "mm")
+        )
         return part
 
 
@@ -775,6 +800,82 @@ class photodiode_fds010:
 #######################
 ### Misc Components ###
 #######################
+
+
+class iris_ida12:
+    """
+    Iris, model IDA12 on a slide adapter
+    """
+
+    object_group = "misc"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+    mesh = import_model("thorlabs-ida12")
+    mount_position = (1.828, -12.827, -0.000)
+
+    def __init__(
+        self,
+        pinhole_diameter: dim = dim(1, "mm"),
+        drill_depth: dim = None,
+        bolt_length: dim = None,
+        adapter_parameters: dict = dict(),
+    ):
+        self.drill_depth = drill_depth
+        self.bolt_length = bolt_length
+        self.pinhole_diameter = pinhole_diameter
+        self.adapter_parameters = dict(
+            post_thickness=dim(8, "mm"),
+        )
+        self.adapter_parameters |= adapter_parameters
+
+    def interfaces(self):
+        return [
+            Stop(
+                position=(0, 0, 0),
+                rotation=(0, 0, 0),
+                diameter=dim(0.5, "in"),
+                pinhole_diameter=self.pinhole_diameter,
+            )
+        ]
+
+    def subcomponents(self):
+        return [
+            Subcomponent(
+                component=Component(
+                    label="Slide Adapter",
+                    definition=adapters.slide_adapter(**self.adapter_parameters),
+                ),
+                position=self.mount_position,
+                rotation=(0, 0, 90),
+            ),
+            Subcomponent(
+                component=Component(
+                    label="Mounting Bolt",
+                    definition=hardware.bolt(
+                        types=["8_32", "M4"],
+                        clear_depth=self.adapter_parameters["post_thickness"],
+                        drill_depth=dim(5, "mm"),
+                    ),
+                ),
+                position=(
+                    self.mount_position[0],
+                    self.mount_position[1] - self.adapter_parameters["post_thickness"],
+                    0,
+                ),
+                rotation=(90, 0, 0),
+            ),
+        ]
+
+    def drill(self):
+        part = bounding_box_shape(
+            shape=self.mesh,
+            padding=dim(5, "mm"),
+            fillet=dim(2, "mm"),
+            pad_z=True,
+            max_offset=(0, dim(-12, "mm"), 0),
+            min_offset=(0, dim(-8, "mm"), 0),
+        )
+        return part
 
 
 class tec_tech8:

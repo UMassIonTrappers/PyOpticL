@@ -74,34 +74,41 @@ class Dimension(float):
 dim = Dimension  # alias for convenience
 
 
-def fix_relative_imports(directory=""):
-    directory = Path(directory)
+def fix_relative_imports(directory: str | list = ""):
 
-    if not directory.is_absolute():
-        base_path = Path(inspect.stack()[1].filename).parent
-        directory = base_path / directory
+    if isinstance(directory, str):
+        directories = [directory]
+    else:
+        directories = directory
 
-    directory = directory.resolve()
+    for directory in directories:
+        directory = Path(directory)
 
-    if str(directory) not in sys.path:
-        sys.path.append(str(directory))
+        if not directory.is_absolute():
+            base_path = Path(inspect.stack()[1].filename).parent
+            directory = base_path / directory
 
-    # Reload modules whose source files are inside the target directory.
-    for module in list(sys.modules.values()):
-        if module is None:
-            continue
+        directory = directory.resolve()
 
-        module_file = getattr(module, "__file__", None)
-        if not module_file:
-            continue
+        if str(directory) not in sys.path:
+            sys.path.append(str(directory))
 
-        try:
-            module_path = Path(module_file).resolve()
-        except (OSError, RuntimeError, ValueError):
-            continue
+        # Reload modules whose source files are inside the target directory.
+        for module in list(sys.modules.values()):
+            if module is None:
+                continue
 
-        if module_path.is_relative_to(directory):
-            reload(module)
+            module_file = getattr(module, "__file__", None)
+            if not module_file:
+                continue
+
+            try:
+                module_path = Path(module_file).resolve()
+            except (OSError, RuntimeError, ValueError):
+                continue
+
+            if module_path.is_relative_to(directory):
+                reload(module)
 
 
 def collect_children(parent: App.DocumentObject, output_list: list):

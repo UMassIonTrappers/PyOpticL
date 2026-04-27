@@ -947,6 +947,7 @@ class Interface:
         # calculate normal vector from rotation
         rotation_obj = App.Rotation("XYZ", *rotation)
         self.normal = np.array(rotation_obj.multVec(App.Vector(1, 0, 0)))
+        self.transverse = np.array(rotation_obj.multVec(App.Vector(0, 1, 0)))
 
         self.abcd_matrix = [1, 0, 0, 1]  # identity matrix by default
 
@@ -1002,6 +1003,19 @@ class Interface:
         rotation = parent_obj.Placement.Rotation
         global_normal = np.array(rotation.multVec(App.Vector(*self.normal)))
         return global_normal
+
+    def get_global_transverse(self) -> np.ndarray[float]:
+        """
+        Get a horizontal transverse vector of the interface
+
+        Returns:
+            normal (np.ndarray): (x, y, z) normalized transverse vector
+        """
+
+        parent_obj = self.parent.get_object()
+        rotation = parent_obj.Placement.Rotation
+        global_transverse = np.array(rotation.multVec(App.Vector(*self.transverse)))
+        return global_transverse
 
     def apply_abcd(self, incident_beam: BeamSegment) -> tuple[float, float]:
         """
@@ -1111,14 +1125,36 @@ class Interface:
 
 class Stop(Interface):
     """
-    Class representing a beam termination (ie beam dump, fiber input, or any other element that fully absorbs the beam)
+    Class representing a beam termination (ie beam dump, fiber input, pinholes, or any other element that fully absorbs the beam)
     Any beam that intersects with this interface is terminated (no output beams)
     """
+
+    def __init__(
+        self,
+        position: tuple,
+        rotation: tuple,
+        pinhole_diameter: dim = None,
+        diameter: dim = None,
+        width: dim = None,
+        height: dim = None,
+        max_angle: float = 90,
+        single_sided: bool = False,
+    ):
+        super().__init__(
+            position=position,
+            rotation=rotation,
+            diameter=diameter,
+            width=width,
+            height=height,
+            max_angle=max_angle,
+            single_sided=single_sided,
+        )
+        self.pinhole_diameter = pinhole_diameter
 
     def get_output_beams(self, incident_beam: BeamSegment) -> list[BeamSegment]:
         """
         Get the output beams from an incident beam interacting with the stop interface
-        For a stop, there are no output beams
+        For a stop, there are no output beams unless a pinhole diameter is specified, in which case the beam is clipped to the pinhole size
 
         Args:
             incident_beam (Beam_Segment): Incident beam segment
@@ -1126,6 +1162,15 @@ class Stop(Interface):
         Returns:
             output_beams (list): Empty list (no output beams)
         """
+
+        if self.pinhole_diameter is not None:
+
+            intercept = self.get_intercept(incident_beam)
+            radial_vector = intercept - self.get_global_position()
+            radius = np.linalg.norm(radial_vector)  # distance from center in y-z plane
+            if radius < self.pinhole_diameter / 2:
+                return super().get_output_beams(incident_beam)
+
         return []
 
 
@@ -1418,7 +1463,11 @@ class Lens(Interface):
             tangent_component = np.dot(beam_direction, tangent_direction)
             tangent_slope = tangent_component / normal_component
             radial_slope = np.dot(beam_direction, radial_direction) / normal_component
-            radial_slope -= np.linalg.norm(radial_vector) / self.focal_length
+            radial_slope -= (
+                np.linalg.norm(radial_vector)
+                / self.focal_length
+                * np.sign(normal_component)
+            )
             # construct new direction vector
             direction = global_normal * normal_component
             direction += tangent_direction * tangent_slope * normal_component
@@ -1596,7 +1645,7 @@ class AcoustoOptic(Interface):
         sound_velocity: float = 4200,  # TeO2
         orders: list[int] = [0, 1],
         order_powers: list[float] = None,
-        radius: dim = None,
+        diameter: dim = None,
         width: dim = None,
         height: dim = None,
         max_angle: float = 90,
@@ -1605,6 +1654,7 @@ class AcoustoOptic(Interface):
         super().__init__(
             position=position,
             rotation=rotation,
+            diameter=diameter,
             width=width,
             height=height,
             max_angle=max_angle,
@@ -1648,7 +1698,7 @@ class AcoustoOptic(Interface):
             for k, order in enumerate(self.orders):
 
                 photon_k = 2 * np.pi / (incident_beam.wavelength * 1e-9)
-                phonon_k = 2 * np.pi * freq * 1e6 / self.sound_velocity
+                phonon_k = 2 * np.pi * freq / self.sound_velocity
 
                 direction = (
                     beam_direction * photon_k
@@ -1671,11 +1721,10 @@ class AcoustoOptic(Interface):
                     index=(incident_beam.index << num_bits) + i,
                     direction=local_direction,
                     wavelength=incident_beam.wavelength,
-                    polarization=incident_beam.polarization,
+                    polarization=incident_beam.polarization_jones,
                     power=power,
                     waist_position=waist_position,
                     rayleigh_range=rayleigh_range,
-                    tag=f"diffracted_{order:d}_{freq:.1f}MHz",
                 )
                 incident_beam.add(output_beam, origin=local_origin)
                 output_beams.append(output_beam)

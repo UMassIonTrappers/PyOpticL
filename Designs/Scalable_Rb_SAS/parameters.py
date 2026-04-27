@@ -4,7 +4,7 @@ from PyOpticL.utils import fix_relative_imports
 
 fix_relative_imports()
 
-from components import rb_cell_cube, rb_cell_tube
+from .components import rb_cell_cube, rb_cell_tube
 
 
 def get_scale_parameters(scale: str):

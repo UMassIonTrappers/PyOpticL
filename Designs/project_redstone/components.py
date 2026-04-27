@@ -1,8 +1,7 @@
-from PyOpticL.beam_path import Interface
 from PyOpticL.layout import Component, Subcomponent
-from PyOpticL.library import hardware, thorlabs
+from PyOpticL.library import thorlabs
 from PyOpticL.utils import Dimension as dim
-from PyOpticL.utils import bounding_box_shape, box_shape, cylinder_shape, import_model
+from PyOpticL.utils import box_shape
 
 
 class km05t_laser:

@@ -1,17 +1,11 @@
 import numpy as np
 
-from PyOpticL.beam_path import Interface
 from PyOpticL.layout import Component, Subcomponent
 from PyOpticL.library import hardware, optics, thorlabs
 from PyOpticL.utils import Dimension as dim
 from PyOpticL.utils import (
-    bolt_slot_shape,
-    bounding_box_shape,
     box_shape,
-    cylinder_shape,
-    import_model,
     rotate_shape,
-    translate_shape,
 )
 
 
