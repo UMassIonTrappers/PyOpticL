@@ -4,7 +4,7 @@ The main branch of this project has been updated to PyOpticL v2.0! **This is a b
 If you need to install v1:
 * Use _Branch:_ v1-legacy when following the install instructions
 
-To update to v2.0 version:
+To update to v2.0:
 * Backup all locally changed files (optomech.py, stls, etc.)
 * Uninstall PyOpticL from addon manager (This will delete all PyOpticL source files, **backup your changes**)
 * Restart FreeCAD
