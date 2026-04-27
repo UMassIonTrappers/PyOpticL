@@ -1,6 +1,23 @@
+##  !!! Important !!!
+The main branch of this project has been updated to PyOpticL v2.0! **This is a breaking change for existing designs.** Unless you manually update PyOpticL within FreeCAD, existing installs should be unaffected.
+
+If you need to install v1:
+* Use _Branch:_ v1-legacy when following the install instructions
+
+To update to v2.0 version:
+* Backup all locally changed files (optomech.py, stls, etc.)
+* Uninstall PyOpticL from addon manager (This will delete all PyOpticL source files, **backup your changes**)
+* Restart FreeCAD
+* Re-install PyOpticL
+
+---
+
 <img height="100" alt="PyOpticL_logo" src="https://github.com/user-attachments/assets/6abdeee1-0d27-4417-b13f-469ae00388c7" />
 
 ## PyOpticL - Code-to-CAD optical system engineering
+
+<img width="2483" height="1172" alt="image" src="https://github.com/user-attachments/assets/2b61827e-5624-4590-b8a4-2e94640a9535" />
+
 
 <img width="3341" height="1411" alt="image" src="https://github.com/user-attachments/assets/1b857ff6-a425-4261-a6f4-b00795de6f05" />
 
