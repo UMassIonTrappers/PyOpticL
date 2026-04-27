@@ -510,6 +510,7 @@ class BeamPath(Layout):
         waist (float): Beam waist radius in mm
         rayleigh_range (float): Rayleigh range in mm
         bound_parent (Layout): parent whose children this beam path should interact with
+        final_distance (float): Propagation distance for beam segments that do not hit another interface
     """
 
     object_group = "beam_path"
@@ -926,8 +927,8 @@ class Interface:
         position (tuple): (x, y, z) coordinates (relative to parent)
         rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees (relative to parent)
         diameter (float): Diameter for circular interface
-        dx (float): x-dimension for rectangular interface
-        dy (float): y-dimension for rectangular interface
+        width (float): Width for rectangular interface
+        height (float): Height for rectangular interface
         max_angle (float): Maximum angle between incident beam and interface normal in degrees
         single_sided (bool): Whether the interface only interacts with beams from one side
     """
@@ -1588,10 +1589,11 @@ class Diffraction(Interface):
     Args:
         position (tuple): (x, y, z) coordinates
         rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
-        diff_angle (float): Diffraction angle
-        diameter (float): Diameter for circular interface
-        dx (float): x-distance for rectangular interface
-        dy (float): y-distance for rectangular interface
+        diffracted_angle (float): Diffraction angle for the generated order
+        diffracted_ratio (float): Relative power in the diffracted order
+        radius (float): Radius for circular interface
+        width (float): Width for rectangular interface
+        height (float): Height for rectangular interface
         max_angle (float): Maximum angle between incident beam and interface normal in degrees
     """
 
@@ -1626,14 +1628,13 @@ class AcoustoOptic(Interface):
     Args:
         position (tuple): (x, y, z) coordinates
         rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
-        diff_angle (float): Diffraction angle
-        diameter (float): Diameter for circular interface
-        sound_velocity (float): velocity of sound in the AO material in m/s - defaults to longitudinal TeO2
         rf_frequencies (list[float]): list of rf tones to apply
+        sound_velocity (float): velocity of sound in the AO material in m/s - defaults to longitudinal TeO2
         orders (list[int]): list of orders to generate - defaults to 0th and +1st
         order_powers (list[float]): relative power in each of the above orders
-        dx (float): x-distance for rectangular interface
-        dy (float): y-distance for rectangular interface
+        diameter (float): Diameter for circular interface
+        width (float): Width for rectangular interface
+        height (float): Height for rectangular interface
         max_angle (float): Maximum angle between incident beam and interface normal in degrees
     """
 

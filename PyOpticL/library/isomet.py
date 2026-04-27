@@ -42,7 +42,11 @@ class aom_1205c_on_km100pm:
     AOM, model 1205C
 
     Args:
-        dimensions (tuple): The (x, y, z) dimensions of the baseplate
+        stage_dimensions (tuple): Stage (x, y, z) dimensions for the custom KM100PM mount
+        arm_dimensions (tuple): Arm (x, y, z) dimensions for the custom KM100PM mount
+        slot_length (float): Slot length used for adapter mounting
+        adapter_offset (tuple): (x, y) offset applied to the custom adapter
+        aom_offset (tuple): (x, y) offset applied to position the AOM body
     """
 
     object_group = "misc"

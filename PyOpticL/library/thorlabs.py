@@ -327,6 +327,7 @@ class rotation_mount_rsp05:
         drill_depth (float): The depth of the mounting hole
         bolt_length (float): The length of the mounting bolt (defaults to minimum required length)
         adapter_parameters (dict): A dictionary of parameters to override the default surface adapter parameters
+        rotate_adapter (bool): Whether to rotate the adapter footprint by 90 degrees
     """
 
     object_group = "mounts"
@@ -397,6 +398,7 @@ class rotation_mount_rsp1:
         drill_depth (float): The depth of the mounting hole
         bolt_length (float): The length of the mounting bolt (defaults to minimum required length)
         adapter_parameters (dict): A dictionary of parameters to override the default surface adapter parameters
+        rotate_adapter (bool): Whether to rotate the adapter footprint by 90 degrees
     """
 
     object_group = "mounts"

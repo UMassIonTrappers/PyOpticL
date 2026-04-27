@@ -10,11 +10,15 @@ class surface_adapter:
 
     Args:
         height (float): The height of the mount
-        min_width (float): The minimum width of the mount
         bolt_spacing (float): The spacing between the two mount holes of the adapter
-        bolt_walls (float): The minimum thickness of the walls around the bolt holes
+        bolt_types (list): Supported bolt types used by the mount holes
+        bolt_length (float): Length of the mounting bolts
+        drill_depth (float): Drill depth for the mounting bolts
+        min_length (float): The minimum length of the mount
+        extra_thickness (float): Extra wall thickness around bolt spacing
         slot_length (float): The length of the slot for the bolts, 0 for no slot
-        drill_tolerance: (float): The tolerance to add around the drilling
+        fillet_radius (float): Fillet radius for adapter corners
+        drill_tolerance (float): The tolerance to add around the drilling
     """
 
     object_group = "adapters"

@@ -304,6 +304,7 @@ class circular_sampler(circular_reflector):
         mount_definition (object): The definition of the mount component
         mount_offset (tuple): The (x, y, z) offset of the mount relative to sampler origin
                               If None, defaults to (-thickness, 0, 0)
+        refractive_index (float): Refractive index used for Fresnel splitting
     """
 
     def __init__(
@@ -339,6 +340,7 @@ class circular_dichroic_mirror(circular_reflector):
         mount_definition (object): The definition of the mount component
         mount_offset (tuple): The (x, y, z) offset of the mount relative to the mirror origin
                               If None, defaults to (-thickness, 0, 0)
+        refractive_index (float): Refractive index used for transmission/reflection modeling
     """
 
     object_transparency = 25
@@ -452,6 +454,8 @@ class circular_waveplate:
         thickness (float): The thickness of the waveplate
         retardance (float): The phase delay in waves (0.25 quarter-wave, 0.5 half-wave)
         fast_axis_angle (float): The angle of the fast axis in degrees
+        mount_definition (object): The definition of the mount component
+        mount_offset (tuple): The (x, y, z) offset of the mount relative to the waveplate origin
     """
 
     object_group = "optics"
@@ -531,11 +535,15 @@ class beamsplitter_cube:
     A generic beamsplitter cube component
 
     Args:
-        size (float): The side length of the cube
-        thickness (float): The thickness of the beam splitter interface
+        side_length (float): The side length of the cube
+        ref_polarization (float): Reflected polarization angle in degrees
+        ref_ratio (float): Reflected power ratio
+        rotate_cube (bool): Whether to rotate the internal splitting plane orientation
         mount_definition (object): The definition of the mount component
         mount_offset (tuple): The (x, y, z) offset of the mount relative to the cube origin
-                              If None, defaults to (0, 0, -size/2)
+                              If None, defaults to (0, 0, -side_length/2)
+        drill_tolerance (float): Tolerance to add around the cube for drilling operations
+        corner_drill_diameter (float): Diameter of corner relief drill holes
     """
 
     object_group = "optics"
@@ -643,9 +651,15 @@ class beamsplitter_cube_on_surface_adapter(beamsplitter_cube):
     Beamsplitter cube on a surface adapter with logical defaults for the adapter sizing
 
     Args:
-        size (float): The side length of the cube
+        side_length (float): The side length of the cube
+        optical_height (float): Target optical height of the cube centerline
         ref_polarization (float): The reflected polarization angle
         ref_ratio (float): The ratio of reflected to transmitted light
+        rotate_cube (bool): Whether to rotate the internal splitting plane orientation
+        rotate_adapter (bool): Whether to rotate the adapter footprint by 90 degrees
+        inset_depth (float): Depth the cube is inset into the adapter
+        drill_depth (float): Drill depth for adapter mounting holes
+        bolt_length (float): Length of adapter mounting bolts
         adapter_parameters (dict): A dictionary of parameters to override the default surface adapter parameters
     """
 

@@ -91,6 +91,7 @@ class baseplate:
 
     Args:
         dimensions (tuple): The (x, y, z) dimensions of the baseplate
+        optical_height (float): Offset from the top surface to the optical plane
     """
 
     object_group = "baseplate"
@@ -121,7 +122,6 @@ class bolt:
     Standard bolt
 
     Args:
-        label (str): The label for the component
         types (list): List of all supported bolt types (for example, one metric and one imperial)
         length (float): Length of the bolt including the head
         clear_depth (float): The depth at which the hole threading should start
@@ -610,6 +610,8 @@ class circular_waveplate:
         thickness (float): The thickness of the waveplate
         retardance (float): The phase delay in waves (0.25 quarter-wave, 0.5 half-wave)
         fast_axis_angle (float): The angle of the fast axis in degrees
+        mount_definition (object): The definition of the mount component
+        mount_offset (tuple): The (x, y, z) offset of the mount relative to the waveplate origin
     """
 
     object_group = "optics"
@@ -677,11 +679,14 @@ class beamsplitter_cube:
     A generic beamsplitter cube component
 
     Args:
-        size (float): The side length of the cube
-        thickness (float): The thickness of the beam splitter interface
+        side_length (float): The side length of the cube
+        ref_polarization (float): Reflected polarization angle in degrees
+        ref_ratio (float): Reflected power ratio
         mount_definition (object): The definition of the mount component
         mount_offset (tuple): The (x, y, z) offset of the mount relative to the cube origin
-                              If None, defaults to (0, 0, -size/2)
+                              If None, defaults to (0, 0, -side_length/2)
+        drill_tolerance (float): Tolerance to add around the cube for drilling operations
+        corner_drill_diameter (float): Diameter of corner relief drill holes
     """
 
     object_group = "optics"
@@ -793,11 +798,15 @@ class surface_adapter:
 
     Args:
         height (float): The height of the mount
-        min_width (float): The minimum width of the mount
+        min_length (float): The minimum length of the mount
         bolt_spacing (float): The spacing between the two mount holes of the adapter
-        bolt_walls (float): The minimum thickness of the walls around the bolt holes
+        bolt_types (list): Supported bolt types used by the mount holes
+        bolt_length (float): Length of the mounting bolts
+        drill_depth (float): Drill depth for the mounting bolts
+        extra_thickness (float): Extra wall thickness around bolt spacing
         slot_length (float): The length of the slot for the bolts, 0 for no slot
-        drill_tolerance: (float): The tolerance to add around the drilling
+        fillet_radius (float): Fillet radius for adapter corners
+        drill_tolerance (float): The tolerance to add around the drilling
     """
 
     object_group = "adapters"
@@ -942,7 +951,9 @@ class rotation_mount_rsp05:
     Rotation mount, model RSP05
 
     Args:
-        drill_depth (float): The depth of the mounting hole
+        include_bolt (bool): Whether to include the mounting bolt as a subcomponent
+        bolt_distance (float): Distance from mount origin to bolt head reference
+        bolt_distance_includes_head (bool): Whether bolt_distance is measured to the top of the head
         bolt_length (float): The length of the mounting bolt (defaults to minimum required length)
     """
 
@@ -1102,9 +1113,13 @@ class beamsplitter_cube_on_surface_adapter(beamsplitter_cube):
     Beamsplitter cube on a surface adapter
 
     Args:
-        size (float): The side length of the cube
+        side_length (float): The side length of the cube
+        optical_height (float): Target optical height of the cube centerline
         ref_polarization (float): The reflected polarization angle
         ref_ratio (float): The ratio of reflected to transmitted light
+        inset_depth (float): Depth the cube is inset into the adapter
+        drill_depth (float): Drill depth for adapter mounting holes
+        bolt_length (float): Length of adapter mounting bolts
         adapter_parameters (dict): A dictionary of parameters to override the default surface adapter parameters
     """
 
@@ -1158,6 +1173,8 @@ class pda10a2_on_surface_adapter(photodetector_pda10a2):
     Photodetector, model PDA10A2, on a surface adapter
 
     Args:
+        drill_depth (float): Drill depth for adapter mounting holes
+        bolt_length (float): Length of adapter mounting bolts
         adapter_parameters (dict): A dictionary of parameters to override the default surface adapter parameters
     """
 

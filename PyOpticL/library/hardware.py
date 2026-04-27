@@ -13,7 +13,6 @@ class bolt:
     Standard bolt
 
     Args:
-        label (str): The label for the component
         types (list): List of all supported bolt types (for example, one metric and one imperial)
         length (float): Length of the bolt including the head
         clear_depth (float): The depth at which the hole threading should start

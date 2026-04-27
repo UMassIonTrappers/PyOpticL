@@ -10,6 +10,8 @@ class baseplate:
 
     Args:
         dimensions (tuple): The (x, y, z) dimensions of the baseplate
+        optical_height (float): Offset from the top surface to the optical plane
+        mount_holes (list): List of (x, y) mount-hole positions in grid units
     """
 
     object_group = "baseplate"
