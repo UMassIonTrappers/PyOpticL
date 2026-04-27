@@ -1277,6 +1277,61 @@ class mirror_mount_km100:
         part.Placement = obj.Placement
         obj.DrillPart = part
         
+class mirror_mount_km05dr:
+    '''
+    Mirror mount, model KM05DR
+    '''
+    type = 'Mesh::FeaturePython'
+
+    def __init__(self, obj, drill=True, thumbscrews=False, bolt_length=15):
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'BoltLength').BoltLength = bolt_length
+        obj.addProperty('Part::PropertyPartShape', 'DrillPart')
+        obj.addProperty('App::PropertyBool', 'ThumbScrews').ThumbScrews = thumbscrews
+
+        obj.ViewObject.ShapeColor = mount_color
+        self.part_numbers = ['KM05DR']
+        self.max_angle = 90
+        self.max_width = inch / 2
+
+        if thumbscrews:
+            _add_linked_object(
+                obj, "Upper Thumbscrew", thumbscrew_hkts_5_64,
+                pos_offset=(-7.62 + 0.79, -12.06, 7.112)
+            )
+            _add_linked_object(
+                obj, "Lower Thumbscrew", thumbscrew_hkts_5_64,
+                pos_offset=(-7.62 + 0.79, 7.747, -12.7)
+            )
+
+    def execute(self, obj):
+        # Visual mesh
+        mesh = _import_stl(
+            "KM05DR-Step.stl",
+            rotate=(360, 90, 0),
+            translate=(-8.306 + 0.79, -16.89, -17.53)
+        )
+        mesh.Placement = obj.Mesh.Placement
+        obj.Mesh = mesh
+
+        # Pocket and mounting hole
+        part = _bounding_box(obj, tol=2, fillet=3)
+        part = _fillet_all(part, 3)
+
+        part = part.fuse(_custom_cylinder(
+            dia=bolt_8_32['clear_dia'], dz=inch,
+            head_dia=bolt_8_32['head_dia'],
+            head_dz=0.92 * inch - obj.BoltLength.Value,
+            x=-4.369 + 0.79, y=-2.159, z=-inch * 3 / 2,
+            dir=(0, 0, 1)
+        ))
+
+        part.Placement = obj.Placement
+        obj.DrillPart = part
+
 class mirror_mount_km05:
     '''
     Mirror mount, model KM05
@@ -4327,6 +4382,81 @@ class circular_mirror:
         part = _custom_cylinder(dia=obj.Diameter.Value, dz=obj.Thickness.Value,
                            x=0, y=0, z=0, dir=(-1, 0, 0))
         obj.Shape = part
+
+class d_mirror:
+    '''
+    D-shaped mirror created by bisecting a circular mirror.
+
+    Args:
+        drill (bool) : Whether baseplate mounting for this part should be drilled
+        thickness (float) : Mirror thickness
+        diameter (float) : Mirror diameter
+        flip (bool) : Whether to keep the opposite half of the mirror
+        part_number (str) : Manufacturer part number
+        mount_type : Optional mount class
+        mount_args (dict) : Arguments passed to the mount
+
+    Sub-Parts:
+        mount_type (mount_args)
+    '''
+    type = 'Part::FeaturePython'
+
+    def __init__(self, obj,
+                 drill=True,
+                 thickness=3.0,
+                 diameter=12.7,
+                 flip=False,
+                 part_number='BBD05-E02',
+                 mount_type=None,
+                 mount_args=None):
+
+        if mount_args is None:
+            mount_args = {}
+
+        obj.Proxy = self
+        ViewProvider(obj.ViewObject)
+
+        obj.addProperty('App::PropertyBool', 'Drill').Drill = drill
+        obj.addProperty('App::PropertyLength', 'Thickness').Thickness = thickness
+        obj.addProperty('App::PropertyLength', 'Diameter').Diameter = diameter
+        obj.addProperty('App::PropertyBool', 'Flip').Flip = flip
+
+        if mount_type is not None:
+            _add_linked_object(
+                obj, "Mount", mount_type,
+                pos_offset=(-thickness, 0, 0),
+                **mount_args
+            )
+
+        obj.ViewObject.ShapeColor = glass_color
+        self.part_numbers = [part_number]
+        self.reflection_angle = 0
+        self.max_angle = 90
+        self.max_width = diameter / 4.0
+
+    def execute(self, obj):
+        D = obj.Diameter.Value
+        r = D / 2.0
+        T = obj.Thickness.Value
+
+        # Full round mirror, axis along -X
+        disk = _custom_cylinder(
+            dia=D, dz=T,
+            x=0, y=0, z=0,
+            dir=(-1, 0, 0)
+        )
+
+        # Remove unwanted half
+        keep_pos = not obj.Flip
+        cutter = _custom_box(
+            dx=T, dy=r, dz=2 * r,
+            x=-T,
+            y=0.5 + (-r if keep_pos else 0),
+            z=-r,
+            dir=(1, 1, 1)
+        )
+
+        obj.Shape = disk.cut(cutter)
 
 class moon_mirror:
     '''
