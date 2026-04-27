@@ -340,6 +340,10 @@
     Sub-Parts:  
         circular_mirror (mirror_args)  
     
+### mirror_mount_km05dr
+  
+    Mirror mount, model KM05DR  
+    
 ### mirror_mount_km05
   
     Mirror mount, model KM05  
@@ -966,6 +970,22 @@
         thickness (float) : The thickness of the mirror  
         diameter (float) : The width of the mirror  
         part_number (string) : The part number of the mirror being used  
+    
+### d_mirror
+  
+    D-shaped mirror created by bisecting a circular mirror.  
+  
+    Args:  
+        drill (bool) : Whether baseplate mounting for this part should be drilled  
+        thickness (float) : Mirror thickness  
+        diameter (float) : Mirror diameter  
+        flip (bool) : Whether to keep the opposite half of the mirror  
+        part_number (str) : Manufacturer part number  
+        mount_type : Optional mount class  
+        mount_args (dict) : Arguments passed to the mount  
+  
+    Sub-Parts:  
+        mount_type (mount_args)  
     
 ### moon_mirror
   
