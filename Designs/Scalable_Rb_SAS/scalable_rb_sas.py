@@ -24,7 +24,7 @@ rb_sas = Component(
 
 beam = rb_sas.add(
     BeamPath(label="Beam", wavelength=780, waist=scale_params["beam_waist"]),
-    position=(dim(16, "in") * scale_params["overall_scale"], 0, 0),
+    position=(dim(16, "grid") * scale_params["overall_scale"], 0, 0),
     rotation=cardinal_angle["up"],
 )
 
@@ -38,7 +38,7 @@ beam.add(
 beam.add(
     Component(label="Input Mirror 2", definition=scale_params["mirror"]),
     beam_index=0b1,
-    distance=dim(1, "in") * scale_params["overall_scale"],
+    distance=dim(1, "grid") * scale_params["overall_scale"],
     rotation=turn_angle["right-up"],
 )
 
