@@ -130,6 +130,7 @@ class beam_path:
         obj.addProperty('Part::PropertyPartShape', 'DrillPart')
         obj.addProperty('App::PropertyLength', 'Width').Width = width
         obj.addProperty('App::PropertyLength', 'DrillWidth').DrillWidth = drill_width
+        obj.addProperty('App::PropertyIntegerList', 'BlockedBeams').BlockedBeams = []
         self.components = [[]]
 
     def __getstate__(self):
@@ -177,6 +178,9 @@ class beam_path:
     # compute full beam path given start point and angle
     def calculate_beam_path(self, selfobj, x1, y1, a1, beam_index=1):
         if beam_index > max_beam_index:
+            return
+
+        if hasattr(selfobj, "BlockedBeams") and beam_index in selfobj.BlockedBeams:
             return
         
         count = 0 # number of interactions per beam
@@ -323,17 +327,30 @@ class beam_path:
             
             # compute next beam and handle recursion for beam splits
             if af_arr[0] != None and af_arr[1] != None:
-                self.calculate_beam_path(selfobj, xf, yf, af_arr[0], (beam_index<<1))
-                beam_index = (beam_index<<1)+1
+                child0 = (beam_index << 1)
+                child1 = (beam_index << 1) + 1
+
+                # trace first child normally
+                self.calculate_beam_path(selfobj, xf, yf, af_arr[0], child0)
+
+                # if second child is blocked, stop here
+                if hasattr(selfobj, "BlockedBeams") and child1 in selfobj.BlockedBeams:
+                    return
+
+                beam_index = child1
                 inline_comps = []
                 for obj in selfobj.PathObjects:
                     if obj.BeamIndex == beam_index:
                         inline_comps.append(obj)
                 comp_index = 0
+
             if af_arr[1] != None:
                 x1, y1, a1 = xf, yf, af_arr[1]
                 count += 1
             elif af_arr[0] != None:
+                # if transmitted-only child is blocked, stop
+                if hasattr(selfobj, "BlockedBeams") and beam_index in selfobj.BlockedBeams:
+                    return
                 x1, y1, a1 = xf, yf, af_arr[0]
                 count += 1
             else:
