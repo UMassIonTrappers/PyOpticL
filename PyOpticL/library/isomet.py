@@ -13,9 +13,6 @@ from PyOpticL.utils import bounding_box_shape, cylinder_shape, import_model
 class aom_1205c:
     """
     AOM, model 1205C
-
-    Args:
-        dimensions (tuple): The (x, y, z) dimensions of the baseplate
     """
 
     object_group = "misc"

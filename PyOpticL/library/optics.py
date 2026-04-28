@@ -22,7 +22,8 @@ class circular_reflector:
         ref_polarization (float): The reflected polarization angle
         ref_wavelengths (list): A list of tuples representing the ranges of wavelengths to be reflected
                                  Use None for open-ended ranges
-        refractive_index (float): refractive index of the substrate
+        refractive_index (float): Refractive index of the substrate
+        part_number (str): The part number for the reflector
     """
 
     object_group = "optics"
@@ -141,7 +142,8 @@ class rectangular_reflector:
         ref_polarization (float): The reflected polarization angle
         ref_wavelengths (list): A list of tuples representing the ranges of wavelengths to be reflected
                                  Use None for open-ended ranges
-        refractive_index (float): refractive index of the substrate
+        refractive_index (float): Refractive index of the substrate
+        part_number (str): The part number for the reflector
     """
 
     object_group = "optics"
@@ -250,6 +252,7 @@ class circular_mirror(circular_reflector):
         mount_definition (object): The definition of the mount component
         mount_offset (tuple): The (x, y, z) offset of the mount relative to mirror origin
                               If None, defaults to (-thickness, 0, 0)
+        part_number (str): The part number for the mirror
     """
 
     def __init__(
@@ -280,6 +283,7 @@ class rectangular_mirror(rectangular_reflector):
         mount_definition (object): The definition of the mount component
         mount_offset (tuple): The (x, y, z) offset of the mount relative to mirror origin
                               If None, defaults to (-thickness, 0, 0)
+        part_number (str): The part number for the mirror
     """
 
     def __init__(
@@ -313,6 +317,7 @@ class circular_sampler(circular_reflector):
         mount_offset (tuple): The (x, y, z) offset of the mount relative to sampler origin
                               If None, defaults to (-thickness, 0, 0)
         refractive_index (float): Refractive index used for Fresnel splitting
+        part_number (str): The part number for the sampler
     """
 
     def __init__(
@@ -351,6 +356,7 @@ class circular_dichroic_mirror(circular_reflector):
         mount_offset (tuple): The (x, y, z) offset of the mount relative to the mirror origin
                               If None, defaults to (-thickness, 0, 0)
         refractive_index (float): Refractive index used for transmission/reflection modeling
+        part_number (str): The part number for the dichroic mirror
     """
 
     object_transparency = 25
@@ -387,6 +393,7 @@ class spherical_lens:
         mount_definition (object): The definition of the mount component
         mount_offset (tuple): The (x, y, z) offset of the mount relative to lens origin
                               If None, defaults to (0, 0, 0)
+        part_number (str): The part number for the lens
     """
 
     object_group = "optics"
@@ -470,6 +477,7 @@ class circular_waveplate:
         fast_axis_angle (float): The angle of the fast axis in degrees
         mount_definition (object): The definition of the mount component
         mount_offset (tuple): The (x, y, z) offset of the mount relative to the waveplate origin
+        part_number (str): The part number for the waveplate
     """
 
     object_group = "optics"
@@ -560,6 +568,7 @@ class beamsplitter_cube:
                               If None, defaults to (0, 0, -side_length/2)
         drill_tolerance (float): Tolerance to add around the cube for drilling operations
         corner_drill_diameter (float): Diameter of corner relief drill holes
+        part_number (str): The part number for the cube
     """
 
     object_group = "optics"
@@ -679,6 +688,7 @@ class beamsplitter_cube_on_surface_adapter(beamsplitter_cube):
         drill_depth (float): Drill depth for adapter mounting holes
         bolt_length (float): Length of adapter mounting bolts
         adapter_parameters (dict): A dictionary of parameters to override the default surface adapter parameters
+        part_number (str): The part number for the cube
     """
 
     def __init__(

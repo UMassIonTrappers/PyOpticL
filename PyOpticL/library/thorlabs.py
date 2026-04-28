@@ -540,6 +540,12 @@ class prism_mount_km100pm_noplatform:
 class prism_mount_km100pm_custom:
     """
     A km100pm prism mount with a custom stage
+
+    Args:
+        stage_dimensions (tuple): Stage (x, y, z) dimensions
+        arm_dimensions (tuple): Arm (x, y, z) dimensions
+        slot_length (float): Slot length used for adapter mounting
+        adapter_offset (tuple): (x, y) offset applied to the custom adapter
     """
 
     object_group = "adapters"
@@ -623,10 +629,6 @@ class prism_mount_km100pm_custom:
 class brewster_window_mount_bw20m:
     """
     Brewster window mount, model BW20M
-
-    Args:
-        drill_depth (float): The depth of the mounting hole
-        bolt_length (float): The length of the mounting bolt (defaults to minimum required length)
     """
 
     object_group = "mounts"
@@ -712,6 +714,12 @@ class lens_adapter_s05tm09:
 class photodetector_pda10a2:
     """
     Photodetector, model PDA10A2
+
+    Args:
+        drill_depth (float): The depth of the mounting hole
+        bolt_length (float): The length of the mounting bolt (defaults to minimum required length)
+        adapter_parameters (dict): A dictionary of parameters to override the default surface adapter parameters
+        rotate_adapter (bool): Whether to rotate the adapter footprint by 90 degrees
     """
 
     object_group = "misc"
@@ -827,6 +835,13 @@ class photodiode_fds010:
 class iris_ida12:
     """
     Iris, model IDA12 on a slide adapter
+
+    Args:
+        pinhole_diameter (float): Diameter of the pinhole opening
+        drill_depth (float): The depth of the mounting hole
+        bolt_length (float): The length of the mounting bolt (defaults to minimum required length)
+        adapter_parameters (dict): A dictionary of parameters to override the default slide adapter parameters
+        bore_depth (float): Depth of the counterbore for the mounting bolt
     """
 
     object_group = "misc"

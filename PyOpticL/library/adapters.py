@@ -94,6 +94,17 @@ class surface_adapter:
 class slide_adapter:
     """
     A simple adapter within single point mounting for elements like irises
+
+    Args:
+        post_height (float): Height of the vertical post
+        post_thickness (float): Thickness of the vertical post
+        mount_height (float): Height of the mounted component above the rail
+        rail_height (float): Height of the rail portion
+        slot_length (float): Length of the mounting slot
+        extra_thickness (float): Extra wall thickness around the slot
+        bolt_types (list): Supported bolt types for mounting
+        bolt_length (float): Length of the mounting bolt
+        drill_depth (float): Drill depth for the mounting bolt
     """
 
     object_group = "adapters"
