@@ -844,6 +844,7 @@ class iris_ida12:
         drill_depth: dim = None,
         bolt_length: dim = None,
         adapter_parameters: dict = dict(),
+        bore_depth: dim = dim(3, "mm"),
     ):
         self.drill_depth = drill_depth
         self.bolt_length = bolt_length
@@ -852,6 +853,7 @@ class iris_ida12:
             post_thickness=dim(8, "mm"),
         )
         self.adapter_parameters |= adapter_parameters
+        self.bore_depth = bore_depth
 
     def interfaces(self):
         return [
@@ -880,11 +882,14 @@ class iris_ida12:
                         types=["8_32", "M4"],
                         clear_depth=self.adapter_parameters["post_thickness"],
                         drill_depth=dim(5, "mm"),
+                        from_top=False,
                     ),
                 ),
                 position=(
                     self.mount_position[0],
-                    self.mount_position[1] - self.adapter_parameters["post_thickness"],
+                    self.mount_position[1]
+                    - self.adapter_parameters["post_thickness"]
+                    + self.bore_depth,
                     0,
                 ),
                 rotation=(90, 0, 0),
