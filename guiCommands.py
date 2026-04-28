@@ -54,7 +54,6 @@ class Toggle_Draw_Style:
         return
 
 
-### TODO update to work with refactored code
 class Export_STLs:
 
     def GetResources(self):
@@ -74,23 +73,21 @@ class Export_STLs:
         path.mkdir()
         doc = App.activeDocument()
         for obj in doc.Objects:
-            if isinstance(obj.Proxy, layout.baseplate) or all(
-                np.isclose(obj.ViewObject.ShapeColor[:3], optomech.adapter_color)
-            ):
-                if hasattr(obj, "Shape"):
-                    exploded = obj.Shape.Solids
-                    for i, shape in enumerate(exploded):
-                        name = str(path / obj.Name)
-                        if len(exploded) > 1:
-                            name += "_" + str(i)
-                        shape.exportStl(name + ".stl")
-                else:
-                    Mesh.export([obj], str(path / obj.Name) + ".stl")
+            if hasattr(obj, "Proxy") and hasattr(obj.Proxy, "object_group"):
+                if obj.Proxy.object_group in ["baseplate", "adapters"]:
+                    if hasattr(obj, "Shape"):
+                        exploded = obj.Shape.Solids
+                        for i, shape in enumerate(exploded):
+                            name = str(path / obj.Name)
+                            if len(exploded) > 1:
+                                name += "_" + str(i)
+                            shape.exportStl(name + ".stl")
+                    else:
+                        Mesh.export([obj], str(path / obj.Name) + ".stl")
         App.Console.PrintMessage("STLs Exported to '%s'\n" % (str(path)))
         return
 
 
-### TODO update to work with refactored code
 class Export_Cart:
 
     def GetResources(self):

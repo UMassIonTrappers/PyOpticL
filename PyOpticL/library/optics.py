@@ -39,6 +39,7 @@ class circular_reflector:
         ref_polarization: float = None,
         ref_wavelengths: list = None,
         refractive_index: float = 1.5,
+        part_number: str = "",
     ):
         self.diameter = diameter
         self.thickness = thickness
@@ -48,6 +49,7 @@ class circular_reflector:
         self.ref_polarization = ref_polarization
         self.ref_wavelengths = ref_wavelengths
         self.refractive_index = refractive_index
+        self.part_numbers = [part_number]
 
         if ref_ratio != None or ref_polarization != None or ref_wavelengths != None:
             self.bidirectional = True
@@ -157,6 +159,7 @@ class rectangular_reflector:
         ref_polarization: float = None,
         ref_wavelengths: list = None,
         refractive_index: float = 1.5,
+        part_number: str = "",
     ):
         self.width = width
         self.height = height
@@ -167,6 +170,7 @@ class rectangular_reflector:
         self.ref_polarization = ref_polarization
         self.ref_wavelengths = ref_wavelengths
         self.refractive_index = refractive_index
+        self.part_numbers = [part_number]
 
         if ref_ratio != None or ref_polarization != None or ref_wavelengths != None:
             self.bidirectional = True
@@ -254,12 +258,14 @@ class circular_mirror(circular_reflector):
         thickness: dim = dim(6, "mm"),
         mount_definition: object = None,
         mount_offset: tuple = None,
+        part_number: str = "",
     ):
         super().__init__(
             diameter=diameter,
             thickness=thickness,
             mount_definition=mount_definition,
             mount_offset=mount_offset,
+            part_number=part_number,
         )
 
 
@@ -283,6 +289,7 @@ class rectangular_mirror(rectangular_reflector):
         thickness: dim = dim(6, "mm"),
         mount_definition: object = None,
         mount_offset: tuple = None,
+        part_number: str = "",
     ):
         super().__init__(
             width=width,
@@ -290,6 +297,7 @@ class rectangular_mirror(rectangular_reflector):
             thickness=thickness,
             mount_definition=mount_definition,
             mount_offset=mount_offset,
+            part_number=part_number,
         )
 
 
@@ -315,6 +323,7 @@ class circular_sampler(circular_reflector):
         mount_definition: object = None,
         mount_offset: tuple = None,
         refractive_index: float = 1.5,
+        part_number: str = "",
     ):
         super().__init__(
             diameter=diameter,
@@ -323,6 +332,7 @@ class circular_sampler(circular_reflector):
             mount_offset=mount_offset,
             ref_ratio=ref_ratio,
             refractive_index=refractive_index,
+            part_number=part_number,
         )
 
         self.object_transparency = int(100 * ref_ratio)
@@ -353,6 +363,7 @@ class circular_dichroic_mirror(circular_reflector):
         mount_definition: object = None,
         mount_offset: tuple = None,
         refractive_index: float = 1.5,
+        part_number: str = "",
     ):
         super().__init__(
             diameter=diameter,
@@ -361,6 +372,7 @@ class circular_dichroic_mirror(circular_reflector):
             mount_offset=mount_offset,
             ref_wavelengths=ref_wavelengths,
             refractive_index=refractive_index,
+            part_number=part_number,
         )
 
 
@@ -389,12 +401,14 @@ class spherical_lens:
         focal_length: dim = dim(100, "mm"),
         mount_definition: object = None,
         mount_offset: tuple = None,
+        part_number: str = "",
     ):
         self.diameter = diameter
         self.thickness = thickness
         self.focal_length = focal_length
         self.mount_definition = mount_definition
         self.mount_offset = mount_offset
+        self.part_numbers = [part_number]
 
     def interfaces(self):
         return [
@@ -471,6 +485,7 @@ class circular_waveplate:
         fast_axis_angle: float = 0,
         mount_definition: object = None,
         mount_offset: tuple = None,
+        part_number: str = "",
     ):
         self.diameter = diameter
         self.thickness = thickness
@@ -478,6 +493,7 @@ class circular_waveplate:
         self.fast_axis_angle = fast_axis_angle
         self.mount_definition = mount_definition
         self.mount_offset = mount_offset
+        self.part_numbers = [part_number]
 
     def interfaces(self):
         return [
@@ -561,6 +577,7 @@ class beamsplitter_cube:
         mount_offset: tuple = None,
         drill_tolerance: dim = dim(0.5, "mm"),
         corner_drill_diameter: dim = dim(3, "mm"),
+        part_number: str = "",
     ):
         if ref_ratio is None and ref_polarization is None:
             ref_ratio = 0.5  # default to 50/50 beamsplitter if not specified
@@ -573,6 +590,7 @@ class beamsplitter_cube:
         self.mount_offset = mount_offset
         self.drill_tolerance = drill_tolerance
         self.corner_drill_diameter = corner_drill_diameter
+        self.part_numbers = [part_number]
 
     def interfaces(self):
         return [
@@ -675,12 +693,14 @@ class beamsplitter_cube_on_surface_adapter(beamsplitter_cube):
         drill_depth: dim = None,
         bolt_length: dim = None,
         adapter_parameters: dict = dict(),
+        part_number: str = "",
     ):
         super().__init__(
             side_length=side_length,
             ref_polarization=ref_polarization,
             ref_ratio=ref_ratio,
             rotate_cube=rotate_cube,
+            part_number=part_number,
         )
         self.adapter_parameters = dict(
             height=optical_height - side_length / 2 + inset_depth,

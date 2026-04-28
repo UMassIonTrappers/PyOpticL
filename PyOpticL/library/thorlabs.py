@@ -2,6 +2,7 @@ from PyOpticL.beam_path import Stop
 from PyOpticL.icons import thorlabs_icon
 from PyOpticL.layout import Component, Subcomponent
 from PyOpticL.library import adapters, hardware
+from PyOpticL.settings import get_measurement_system
 from PyOpticL.utils import Dimension as dim
 from PyOpticL.utils import (
     bounding_box_shape,
@@ -82,6 +83,7 @@ class mirror_mount_k05s1(polaris_mount):
     object_color = (0.25, 0.25, 0.25)
 
     mesh = import_model("polaris-k05s1")
+    part_numbers = ["K05S1"]
     mount_position = (-8.017, 0.000, -12.700)
     bolt_position = (-8.017, 0.000, -7.112)
     pin_positions = [(-8.017, 5.000, -10.795), (-8.017, -5.000, -10.795)]
@@ -103,6 +105,7 @@ class mirror_mount_km100:
     mesh = import_model("thorlabs-km100")
     mount_position = (-8.496, -0.000, -25.400)
     bolt_position = (-8.496, -0.000, -21.082)
+    part_numbers = ["KM100"] if get_measurement_system() == "imperial" else ["KM100/M"]
 
     def __init__(self, drill_depth: dim = None, bolt_length: dim = None):
         self.drill_depth = drill_depth
@@ -147,6 +150,7 @@ class mirror_mount_km05:
     object_color = (0.25, 0.25, 0.25)
 
     mesh = import_model("thorlabs-km05")
+    part_numbers = ["KM05"] if get_measurement_system() == "imperial" else ["KM05/M"]
     mount_position = (-7.289, -0.000, -14.732)
 
     def __init__(self, bolt_distance: dim = dim(0.5, "in"), bolt_length: dim = None):
@@ -200,6 +204,7 @@ class beamsplitter_mount_b05g(polaris_mount):
     object_color = (0.25, 0.25, 0.25)
 
     mesh = import_model("polaris-b05g")
+    part_numbers = ["B05G"]
     mount_position = (-5.000, -0.000, -12.700)
     bolt_position = (-5.000, -0.000, -8.890)
     pin_positions = [(-5.000, 5.000, -12.700), (-5.000, -5.000, -12.700)]
@@ -219,6 +224,7 @@ class beamsplitter_mount_b1g(polaris_mount):
     object_color = (0.25, 0.25, 0.25)
 
     mesh = import_model("polaris-b1g")
+    part_numbers = ["B1G"]
     mount_position = (-5.000, -0.000, -19.050)
     bolt_position = (-5.000, -0.000, -15.240)
     pin_positions = [(-5.000, 5.000, -19.050), (-5.000, -5.000, -19.050)]
@@ -243,6 +249,7 @@ class lens_mount_l05g(polaris_mount):
     object_color = (0.25, 0.25, 0.25)
 
     mesh = import_model("polaris-l05g")
+    part_numbers = ["L05G"]
     mount_position = (-8.000, -0.000, -12.536)
     bolt_position = (-8.000, -0.000, -9.839)
     pin_positions = [(-8.000, 5.000, -12.700), (-8.000, -5.000, -12.700)]
@@ -263,6 +270,7 @@ class fixed_mount_smr05:
     object_color = (0.25, 0.25, 0.25)
 
     mesh = import_model("thorlabs-smr05")
+    part_numbers = ["SMR05"] if get_measurement_system() == "imperial" else ["SMR05/M"]
     mount_position = (0.093, 0.000, -16.002)
     mount_hole_end = (0.093, 0.000, -9.652)
     threading_start = (3.903, 0.000, 0.000)
@@ -283,6 +291,7 @@ class kinematic_mount_km05t:
     object_color = (0.25, 0.25, 0.25)
 
     mesh = import_model("thorlabs-km05t")
+    part_numbers = ["KM05T"] if get_measurement_system() == "imperial" else ["KM05T/M"]
     mount_position = (-9.067, -0.000, -14.732)
     threading_end = (-3.556, -0.000, -0.000)
     threading_start = (3.556, -0.000, -0.000)
@@ -335,6 +344,7 @@ class rotation_mount_rsp05:
     object_color = (0.25, 0.25, 0.25)
 
     mesh = import_model("thorlabs-rsp05")
+    part_numbers = ["RSP05"] if get_measurement_system() == "imperial" else ["RSP05/M"]
     mount_position = (-0.635, -0.000, -13.975)
     mount_hole_end = (-0.635, -0.000, -7.521)
 
@@ -406,6 +416,7 @@ class rotation_mount_rsp1:
     object_color = (0.25, 0.25, 0.25)
 
     mesh = import_model("thorlabs-rsp1")
+    part_numbers = ["RSP1"] if get_measurement_system() == "imperial" else ["RSP1/M"]
     mount_position = (6.350, -0.000, -27.732)
     mount_hole_end = (7.450, -0.000, -15.853)
 
@@ -477,6 +488,9 @@ class prism_mount_km100pm_noplatform:
     drill_groups = ["baseplate"]
 
     mesh = import_model("thorlabs-km100pm-noplatform")
+    part_numbers = (
+        ["KM100PM"] if get_measurement_system() == "imperial" else ["KM100PM/M"]
+    )
     mount_position = (-13.957, -10.160, -6.731)
     bolt_position = (-13.957, -10.160, -2.413)
     side_bolt_position = (-13.957, 10.922, 18.669)
@@ -619,6 +633,7 @@ class brewster_window_mount_bw20m:
     object_icon = thorlabs_icon
     object_color = (0.25, 0.25, 0.25)
     mesh = import_model("thorlabs-bw20m")
+    part_numbers = ["BW20M"]
     mount_position = (-26.047, 0.000, -1.073)
 
     def drill(self):
@@ -645,6 +660,7 @@ class mounted_lens_c220tmda:
     object_icon = thorlabs_icon
     object_color = (0.25, 0.25, 0.25)
     mesh = import_model("thorlabs-c220tmd-a")
+    part_numbers = ["C220TMD-A"]
 
 
 #############################
@@ -672,6 +688,7 @@ class lens_tube_sm05l05:
     object_icon = thorlabs_icon
     object_color = (0.25, 0.25, 0.25)
     mesh = import_model("thorlabs-sm05l05")
+    part_numbers = ["SM05L05"]
     mount_position = (-1.143, 0.000, 0.000)
 
 
@@ -684,6 +701,7 @@ class lens_adapter_s05tm09:
     object_icon = thorlabs_icon
     object_color = (0.25, 0.25, 0.25)
     mesh = import_model("thorlabs-s05tm09")
+    part_numbers = ["S05TM09"]
 
 
 ###########################
@@ -701,6 +719,7 @@ class photodetector_pda10a2:
     object_color = (0.25, 0.25, 0.25)
 
     mesh = import_model("thorlabs-pda10a2")
+    part_numbers = ["PDA10A2"]
     mount_position = (-10.544, 0.000, -25.000)
     mount_hole_end = (-10.544, 0.000, -18.142)
 
@@ -777,6 +796,7 @@ class photodiode_fds010:
     object_color = (0.25, 0.25, 0.25)
 
     mesh = import_model("thorlabs-fds010")
+    part_numbers = ["FDS010"]
     mount_position = (-2.300, -0.007, -0.004)
 
     def interfaces(self):
@@ -813,6 +833,9 @@ class iris_ida12:
     object_icon = thorlabs_icon
     object_color = (0.25, 0.25, 0.25)
     mesh = import_model("thorlabs-ida12")
+    part_numbers = (
+        ["IDA12-P5"] if get_measurement_system() == "imperial" else ["IDA12/M-P5"]
+    )
     mount_position = (1.828, -12.827, -0.000)
 
     def __init__(
@@ -889,6 +912,7 @@ class tec_tech8:
     object_icon = thorlabs_icon
     object_color = (0.25, 0.25, 0.25)
     mesh = import_model("thorlabs-tech8")
+    part_numbers = ["TECH8"]
     thickness = dim(3.5, "mm")
 
     object_group = "misc"
