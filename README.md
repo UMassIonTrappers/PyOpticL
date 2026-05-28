@@ -1,15 +1,4 @@
-##  !!! Important !!!
-The main branch of this project has been updated to PyOpticL v2.0! **This is a breaking change for existing designs.** Unless you manually update PyOpticL within FreeCAD, existing installs should be unaffected.
-
-If you need to install v1:
-* Use _Branch:_ v1-legacy when following the install instructions
-
-To update to v2.0:
-* Backup all locally changed files (optomech.py, stls, etc.)
-* Uninstall PyOpticL from addon manager (This will delete all PyOpticL source files, **backup your changes**)
-* Restart FreeCAD
-* Re-install PyOpticL
-
+###  PyOpticL has been updated to v2.0! Existing users, see the [migration guide](https://github.com/UMassIonTrappers/PyOpticL/edit/main/README.md#pyopticl-v1v2-migration) for more info on switching
 ---
 
 <img height="100" alt="PyOpticL_logo" src="https://github.com/user-attachments/assets/6abdeee1-0d27-4417-b13f-469ae00388c7" />
@@ -77,6 +66,19 @@ Macro files for pre-made layouts can be found in the PyOpticL directory. This ca
 ```<FreeCAD User Data Directory>/Mod/PyOpticL/Design``` \
 On windows this is: \
 ```%APPDATA%\FreeCAD\Mod\PyOpticL\Design```
+
+## PyOpticL v1/v2 Migration
+
+The main branch of this project has been updated to PyOpticL v2.0! **This is a breaking change for existing designs.** Unless you manually update PyOpticL within FreeCAD, existing installs should be unaffected.
+
+If you need to install v1:
+* Use _Branch:_ v1-legacy when following the install instructions
+
+To update to v2.0:
+* Backup all locally changed files (optomech.py, stls, etc.)
+* Uninstall PyOpticL from addon manager (This will delete all PyOpticL source files, **backup your changes**)
+* Restart FreeCAD
+* Re-install PyOpticL
 ___
 
 ## PyOpticL Community Members:
