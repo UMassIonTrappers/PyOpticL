@@ -1,4 +1,4 @@
-###  PyOpticL has been updated to v2.0! Existing users, see the [migration guide](https://github.com/UMassIonTrappers/PyOpticL/edit/main/README.md#pyopticl-v1v2-migration) for more info on switching
+###  PyOpticL has been updated to v2.0! Existing users, see the [migration guide](https://github.com/UMassIonTrappers/PyOpticL/tree/main#pyopticl-v1v2-migration) for more info on switching
 ---
 
 <img height="100" alt="PyOpticL_logo" src="https://github.com/user-attachments/assets/6abdeee1-0d27-4417-b13f-469ae00388c7" />
