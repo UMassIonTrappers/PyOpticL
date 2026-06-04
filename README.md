@@ -20,7 +20,7 @@
 * [Installation Guide](https://github.com/UMassIonTrappers/PyOpticL#getting-setup)
 
 ### Wiki
-* [Home]([https://github.com/UMassIonTrappers/PyOpticL/wiki/Home-%E2%80%90-v2.0](https://github.com/UMassIonTrappers/PyOpticL/wiki))
+* [Home](https://github.com/UMassIonTrappers/PyOpticL/wiki)
 * [Quick Start Guide](https://github.com/UMassIonTrappers/PyOpticL/wiki/Quick-Start)
 
 ### Baseplate Examples and Designs
