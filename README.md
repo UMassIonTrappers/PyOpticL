@@ -1,9 +1,12 @@
 ###  PyOpticL v2.0 released! See [migration guide](https://github.com/UMassIonTrappers/PyOpticL/tree/main#pyopticl-v1v2-migration) for details
 ---
 
-<img height="100" alt="PyOpticL_logo" src="https://github.com/user-attachments/assets/6abdeee1-0d27-4417-b13f-469ae00388c7" />
+<!-- <img height="100" alt="PyOpticL_logo" src="https://github.com/user-attachments/assets/6abdeee1-0d27-4417-b13f-469ae00388c7" /> -->
 
-## PyOpticL - Code-to-CAD optical system engineering
+# PyOpticL - Code-to-CAD optical system engineering
+
+<img width="4160" height="2080" alt="banner" src="https://github.com/user-attachments/assets/725264e8-112d-42e8-a89b-91602258fd7d" />
+
 
 <img width="2483" height="1172" alt="image" src="https://github.com/user-attachments/assets/2b61827e-5624-4590-b8a4-2e94640a9535" />
 
