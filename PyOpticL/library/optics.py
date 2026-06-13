@@ -693,7 +693,7 @@ class beamsplitter_cube_on_surface_adapter(beamsplitter_cube):
 
     def __init__(
         self,
-        side_length: dim = dim(0.5, "in"),
+        side_length: dim = dim(10, "mm"),
         optical_height: dim = dim(0.5, "in"),
         ref_polarization: float = None,
         ref_ratio: float = None,

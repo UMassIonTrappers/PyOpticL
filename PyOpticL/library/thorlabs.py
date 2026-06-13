@@ -9,7 +9,6 @@ from PyOpticL.utils import (
     box_shape,
     cylinder_shape,
     import_model,
-    translate_shape,
 )
 
 ####################
@@ -472,6 +471,54 @@ class rotation_mount_rsp1:
         return part
 
 
+class fiberport_mount_hca3:
+    """
+    Fiberport mount, model hca3
+
+    Args:
+        drill_depth (float): The depth of the mounting hole
+        bolt_length (float): The length of the mounting bolt (defaults to minimum required length)
+    """
+
+    object_group = "mounts"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+
+    mesh = import_model("thorlabs-hca3")
+    part_numbers = ["HCA3"]
+    mount_offset_x = -6.350
+    bolt_positions = [
+        (-4.115, -12.700, -20.650),
+        (-4.115, 0.000, -20.650),
+        (-4.115, 12.700, -20.650),
+    ]
+
+    def __init__(self, drill_depth: dim = None, bolt_length: dim = None):
+        self.drill_depth = drill_depth
+        self.bolt_length = bolt_length
+
+    def subcomponents(self):
+        components = []
+        for position in self.bolt_positions:
+            components.append(
+                Subcomponent(
+                    component=Component(
+                        label="Mounting Bolt",
+                        definition=hardware.bolt(
+                            types=["8_32", "M4"],
+                            length=self.bolt_length,
+                            clear_depth=position[2] - self.mount_offset_x,
+                            drill_depth=self.drill_depth,
+                            from_top=False,
+                        ),
+                    ),
+                    position=position,
+                    rotation=(0, 90, 0),
+                )
+            )
+        return components
+
+
 class prism_mount_km100pm_noplatform:
     """
     Prism mount, model KM100PM without the platform or bracket
@@ -663,6 +710,49 @@ class mounted_lens_c220tmda:
     object_color = (0.25, 0.25, 0.25)
     mesh = import_model("thorlabs-c220tmd-a")
     part_numbers = ["C220TMD-A"]
+
+
+class fiberport_paf2a4a:
+    """
+    Fiberport, model PAF2-A4A
+
+    Args:
+        drill_depth (float): The depth of the mounting hole
+        bolt_length (float): The length of the mounting bolt (defaults to minimum required length)
+    """
+
+    object_group = "mounts"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+
+    mesh = import_model("thorlabs-paf2-a4a")
+    part_numbers = ["PAF2-A4A"]
+    mount_offset_x = 5.477
+
+    def __init__(self, mount_parameters: dict = dict()):
+        self.mount_parameters = mount_parameters
+
+    def interfaces(self):
+        return [
+            Stop(
+                position=(0, 0, 0),
+                rotation=(0, 0, 0),
+                diameter=dim(25, "mm"),
+                single_sided=True,
+            )
+        ]
+
+    def subcomponents(self):
+        return [
+            Subcomponent(
+                component=Component(
+                    label="Mount",
+                    definition=fiberport_mount_hca3(**self.mount_parameters),
+                ),
+                position=(self.mount_offset_x, 0, 0),
+                rotation=(0, 0, 180),
+            )
+        ]
 
 
 #############################
