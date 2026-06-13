@@ -32,3 +32,16 @@ def iris(label: str = "Iris") -> Component:
         label=label,
         definition=thorlabs.iris_ida12(),
     )
+
+
+def fiberport(label: str = "Fiberport") -> Component:
+    return Component(
+        label=label,
+        definition=thorlabs.fiberport_paf2a4a(),
+    )
+
+
+fiberport_offset = (
+    thorlabs.fiberport_paf2a4a.mount_offset_x
+    - thorlabs.fiberport_mount_hca3.mount_offset_x
+)

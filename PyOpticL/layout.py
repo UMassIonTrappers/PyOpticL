@@ -261,7 +261,6 @@ class Component(Layout):
 
             # don't apply drilling to some groups
             if obj.Proxy.object_group not in ["hardware", "optics", "beam_path"]:
-
                 # gather peer objects
                 drill_objs = []
                 if obj.Parent != None:
