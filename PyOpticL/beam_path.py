@@ -10,7 +10,7 @@ from PyOpticL.icons import beam_icon
 from PyOpticL.layout import Layout
 from PyOpticL.settings import get_enable_beam_transparency
 from PyOpticL.utils import Dimension as dim
-from PyOpticL.utils import collect_children, cylinder_shape, wavelength_to_rgb
+from PyOpticL.utils import collect_children, wavelength_to_rgb
 
 JonesComponent = tuple[float, float]  # (real, imag)
 JonesState = tuple[JonesComponent, JonesComponent]  # ((Ex_re, Ex_im), (Ey_re, Ey_im))
@@ -166,7 +166,8 @@ class BeamSegment(Layout):
         self.make_property("Distance", "App::PropertyLength", visible=True)
 
         # additional object links
-        self.make_property("ChildObject", "App::PropertyLinkHidden")
+        self.make_property("StartObject", "App::PropertyLinkHidden")
+        self.make_property("EndObject", "App::PropertyLinkHidden")
         self.make_property("BoundParent", "App::PropertyLinkHidden")
 
     def set_polarization_state(self, polarization: JonesState):
@@ -555,7 +556,7 @@ class BeamPath(Layout):
         if rayleigh_range is not None:
             self.rayleigh_range = rayleigh_range
         elif waist is None:
-            waist = dim(1, "mm")
+            waist = dim(0.5, "mm")
 
         if waist is not None:
             self.rayleigh_range = np.pi * waist**2 / (wavelength * 1e-6)
@@ -586,6 +587,7 @@ class BeamPath(Layout):
         x_position: dim = None,
         y_position: dim = None,
         z_position: dim = None,
+        after_object: Layout = None,
         offset: tuple[dim] = (0, 0),
         interface_index: int = 0,
     ) -> Layout:
@@ -600,6 +602,7 @@ class BeamPath(Layout):
             x_position (float): x-coordinate of the beam position
             y_position (float): y-coordinate of the beam position
             z_position (float): z-coordinate of the beam position
+            after_object (Layout): Only apply contraint after beam interacts with this object
             offset (tuple): (y, z) offset from the center of the interface
             interface_index (int): Index of the interface on the child object to interact with
 
@@ -638,6 +641,9 @@ class BeamPath(Layout):
         if z_position is not None:
             child_obj.ConstraintType = "zPosition"
             child_obj.ConstraintValue = z_position
+        child.make_property("AfterObject", "App::PropertyLinkHidden")
+        if after_object is not None:
+            child_obj.AfterObject = after_object.get_object()
         child.make_property("Offset", "App::PropertyVector", editable=True)
         child_obj.Offset = App.Vector(0, offset[0], offset[1])
 
@@ -761,7 +767,11 @@ class BeamPath(Layout):
         for child in obj.BeamChildren:
             proxy = child.Proxy
             if not proxy.placed and proxy.beam_index == input_beam.index:
-                next_object = child
+                if (
+                    child.AfterObject is None
+                    or child.AfterObject == input_beam_obj.StartObject
+                ):
+                    next_object = child
                 break
 
         # get info for next beam child
@@ -910,10 +920,11 @@ class BeamPath(Layout):
         # get output beams from interaction
         input_beam.distance = next_distance
         output_beams = next_interface.get_output_beams(input_beam)
-        beam_obj.ChildObject = next_object
+        beam_obj.EndObject = next_object
         input_beam.recompute()
         for beam in output_beams:
             new_beam_obj = beam.get_object()
+            new_beam_obj.StartObject = next_object
             obj.BeamSegments += [new_beam_obj]
             beam.compute_placement()
             self.step(beam)
@@ -1076,7 +1087,7 @@ class Interface:
             return None
         # check if intercept is within beam distance (if defined)
         beam_obj = incident_beam.get_object()
-        if beam_obj.ChildObject != None and distance > incident_beam.distance:
+        if beam_obj.EndObject is not None and distance > incident_beam.distance:
             return None
 
         intercept = beam_position + distance * beam_direction
@@ -1165,7 +1176,6 @@ class Stop(Interface):
         """
 
         if self.pinhole_diameter is not None:
-
             intercept = self.get_intercept(incident_beam)
             radial_vector = intercept - self.get_global_position()
             radius = np.linalg.norm(radial_vector)  # distance from center in y-z plane
@@ -1551,6 +1561,8 @@ class Waveplate(Interface):
             return []
 
         local_origin = incident_beam.get_relative_position(intercept)
+        waist_position, rayleigh_range = self.apply_abcd(incident_beam)
+
         # Apply ideal waveplate Jones transform (retardance is specified in waves).
         theta = np.radians(self.fast_axis_angle)
         delta = 2 * np.pi * self.retardance
@@ -1571,8 +1583,8 @@ class Waveplate(Interface):
             wavelength=incident_beam.wavelength,
             polarization=output_jones,
             power=incident_beam.power,
-            waist_position=incident_beam.waist_position,
-            rayleigh_range=incident_beam.rayleigh_range,
+            waist_position=waist_position,
+            rayleigh_range=rayleigh_range,
         )
         incident_beam.add(output_beam, origin=local_origin)
 
@@ -1697,7 +1709,6 @@ class AcoustoOptic(Interface):
         # loop over all generated beams
         for freq in self.rf_frequencies:
             for k, order in enumerate(self.orders):
-
                 photon_k = 2 * np.pi / (incident_beam.wavelength * 1e-9)
                 phonon_k = 2 * np.pi * freq / self.sound_velocity
 
