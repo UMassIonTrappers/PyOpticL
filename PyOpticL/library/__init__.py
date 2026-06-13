@@ -11,6 +11,7 @@ class baseplate:
     Args:
         dimensions (tuple): The (x, y, z) dimensions of the baseplate
         optical_height (float): Offset from the top surface to the optical plane
+        grid_offset (tuple[dim]): Offset between the corner of the baseplate and the optical grid in grid units,
         mount_holes (list): List of (x, y) mount-hole positions in grid units
     """
 
@@ -18,10 +19,17 @@ class baseplate:
     object_icon = ""
     object_color = (0.5, 0.5, 0.5)
 
-    def __init__(self, dimensions: tuple, optical_height: dim, mount_holes=[]):
+    def __init__(
+        self,
+        dimensions: tuple,
+        optical_height: dim = dim(0.5, "in"),
+        grid_offset: tuple[dim] = (dim(0.5, "grid"), dim(0.5, "grid")),
+        mount_holes: list[tuple] = [],
+    ):
         """Initialize adjustable parameters"""
         self.dimensions = dimensions
         self.optical_height = optical_height
+        self.grid_offset = grid_offset
         self.mount_holes = mount_holes
 
     def subcomponents(self):
@@ -45,7 +53,7 @@ class baseplate:
     def shape(self):
         part = box_shape(
             dimensions=self.dimensions,
-            position=(0, 0, -self.optical_height),
+            position=(self.grid_offset[0], self.grid_offset[1], -self.optical_height),
             center=(-1, -1, 1),
         )
         return part
