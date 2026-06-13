@@ -1,4 +1,6 @@
-###  PyOpticL v2.0 released! See [migration guide](https://github.com/UMassIonTrappers/PyOpticL/tree/main#pyopticl-v1v2-migration) for details
+###  PyOpticL v2.0 🚀 released! It is a complete rewrite of the PyOpticL library!
+* [Migrate from 1.0 to 2.0](https://github.com/UMassIonTrappers/PyOpticL/tree/main#pyopticl-v1v2-migration) 
+* [v2.0-Highlights](https://github.com/UMassIonTrappers/PyOpticL/wiki/v2.0-Highlights)
 ---
 
 <!-- <img height="100" alt="PyOpticL_logo" src="https://github.com/user-attachments/assets/6abdeee1-0d27-4417-b13f-469ae00388c7" /> -->
