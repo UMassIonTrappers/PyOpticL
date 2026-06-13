@@ -17,7 +17,7 @@ Our paper in the journal [*Quantum*](https://quantum-journal.org/?s=Qubit%20oper
 
 <a href="https://arxiv.org/abs/2501.14957"> arXiv:2501.14957 - Qubit operations using a modular optical system engineered with PyOpticL: a code-to-CAD optical layout tool</a>
 
-### UMass Amherst Trapped Ion system built with PyOpticL:
+### [UMass Amherst Trapped Ion system built with PyOpticL](https://websites.umass.edu/rniffenegger/pyopticl-code-to-cad-optical-layout/):
 <img width="600" alt="UMass Amherst Trapped Ions" src="https://github.com/user-attachments/assets/2b61827e-5624-4590-b8a4-2e94640a9535" />
 
 ### Modular abstraction: Optics → Baseplates → Subsystems → Apparutus:
