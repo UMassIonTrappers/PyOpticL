@@ -31,14 +31,14 @@ doublepass.add(
 
 beam = doublepass.add(
     BeamPath(label="Beam"),
-    position=(input_x, dim(0.5, "in"), 0),
+    position=(input_x, dim(0.5, "in") - fiberport_offset, 0),
     rotation=cardinal_angle["up"],
 )
 
 beam.add(
     mirror(),
     beam_index=0b1,
-    distance=dim(22, "mm"),
+    distance=dim(35, "mm"),
     rotation=turn_angle["up-right"],
 )
 

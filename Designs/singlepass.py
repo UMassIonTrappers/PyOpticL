@@ -6,33 +6,39 @@ from PyOpticL.utils import cardinal_angle, fix_relative_imports, turn_angle
 
 fix_relative_imports()
 
-from half_inch_library import iris, mirror, waveplate
+from half_inch_library import fiberport, fiberport_offset, iris, mirror, waveplate
 
-base_dx = dim(8.5, "in")
+base_dx = dim(7.75, "in")
 base_dy = dim(4.5, "in")
 base_dz = dim(1, "in")
 
-input_x = dim(2.5, "in")
+input_x = dim(6, "grid")
 
 singlepass = Component(
     label="Singlepass",
     definition=baseplate(
         dimensions=(base_dx, base_dy, base_dz),
         optical_height=dim(0.5, "in"),
-        mount_holes=[(3, 2), (2, 4), (4, 1), (4, 2), (8, 4), (8, 3)],
+        mount_holes=[(4, 1), (3, 2), (4, 2), (8, 3), (3, 4), (8, 4)],
     ),
+)
+
+singlepass.add(
+    fiberport(),
+    position=(input_x, dim(0.5, "in") - fiberport_offset, 0),
+    rotation=cardinal_angle["up"],
 )
 
 beam = singlepass.add(
     BeamPath(label="Beam"),
-    position=(base_dx - input_x, 0, 0),
+    position=(input_x, dim(0.5, "in") - fiberport_offset, 0),
     rotation=cardinal_angle["up"],
 )
 
 beam.add(
     mirror(),
     beam_index=0b1,
-    distance=dim(1, "in"),
+    distance=dim(35, "mm"),
     rotation=turn_angle["up-right"],
 )
 
@@ -50,7 +56,7 @@ beam.add(
     rotation=cardinal_angle["up"],
 )
 
-beam.add(
+cube = beam.add(
     Component(
         label="beamsplitter cube",
         definition=optics.beamsplitter_cube_on_surface_adapter(rotate_adapter=True),
@@ -80,7 +86,7 @@ beam.add(
     rotation=cardinal_angle["left"],
 )
 
-beam.add(
+lens = beam.add(
     Component(
         label="f50mm Lens",
         definition=optics.spherical_lens(
@@ -93,12 +99,14 @@ beam.add(
     rotation=cardinal_angle["left"],
 )
 
-# TODO: this angle needs to be adjusted based on diffraction angle
+beam_props = beam.measure_properties(after_object=lens, beam_index=0b111)
+beam_angle_offset = 180 + beam_props["rotation"][2]
+
 beam.add(
     mirror(),
     beam_index=0b111,
     distance=dim(15, "mm"),
-    rotation=turn_angle["left-down"],
+    rotation=turn_angle["left-down"] + beam_angle_offset / 2,
 )
 
 beam.add(
@@ -113,6 +121,13 @@ beam.add(
     beam_index=0b111,
     distance=dim(21.5, "mm"),
     rotation=turn_angle["down-left"],
+)
+
+beam.add(
+    fiberport(),
+    beam_index=0b111,
+    x_position=dim(0.5, "in") - fiberport_offset,
+    rotation=cardinal_angle["right"],
 )
 
 if __name__ == "__main__":
