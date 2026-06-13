@@ -25,6 +25,7 @@
 ### Wiki
 * [Home](https://github.com/UMassIonTrappers/PyOpticL/wiki)
 * [Quick Start Guide](https://github.com/UMassIonTrappers/PyOpticL/wiki/Quick-Start)
+* [Contributing to PyOpticL](https://github.com/UMassIonTrappers/PyOpticL/wiki/Contributing-to-PyOpticL)
 
 ### Modular baseplate examples:
 * [Laser - Extended Cavity Diode Laser (with optical isolator)](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-ECDL-with-Isolation-Baseplate)
@@ -47,6 +48,7 @@
 
 ### Baseplate Examples and Designs
 * [Designs](https://github.com/UMassIonTrappers/PyOpticL/tree/main/Designs)
+* [3D Models and Technical Drawings](https://github.com/UMassIonTrappers/PyOpticL/tree/v1-legacy/Design/Module/3DModel)
 
 ---
 
