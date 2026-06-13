@@ -649,6 +649,27 @@ class BeamPath(Layout):
 
         return child
 
+    def measure_properties(self, after_object: Layout, beam_index: int = None):
+        self.recompute()
+        for beam in self.get_object().BeamSegments:
+            if beam.EndObject == after_object.get_object():
+                if beam_index is None or beam_index == beam.Proxy.index:
+                    direction = App.Vector(beam.Proxy.direction)
+                    rotation = App.Rotation(App.Vector(1, 0, 0), direction)
+                    return dict(
+                        beam_obj=beam,
+                        beam_waist=beam.BeamWaist.Value,
+                        waist_position=beam.WaistPosition.Value,
+                        rayleigh_range=beam.RayleighRange.Value,
+                        wavelength=beam.Wavelength.Value,
+                        polarization_angle=beam.PolarizationAngle.Value,
+                        power=beam.Power.Value,
+                        initial_radius=beam.InitialRadius.Value,
+                        final_radius=beam.FinalRadius.Value,
+                        segment_length=beam.Distance.Value,
+                        rotation=rotation.getYawPitchRoll()[::-1],
+                    )
+
     def compute_path(self):
         """
         Calculate the beam path through the layout
@@ -663,24 +684,20 @@ class BeamPath(Layout):
             obj.Placement.Rotation = App.Rotation("XYZ", 0, 0, 0)
 
         # clear previous beam segments
-        if len(obj.BeamSegments) > 0:
-            to_delete = [beam.Name for beam in obj.BeamSegments]
-            App.addDocumentObserver(DeleteObserver(to_delete))
-            obj.BeamSegments = []
-
-        # add initial input beam
-        direction = obj.BasePlacement.Rotation.multVec(App.Vector(1, 0, 0))
-        input_beam = BeamSegment(
-            index=1,
-            direction=direction,
-            wavelength=self.wavelength,
-            polarization=self.polarization,
-            power=self.power,
-            waist_position=self.waist_position,
-            rayleigh_range=self.rayleigh_range,
-        )
-        super().add(input_beam, position=(0, 0, 0), rotation=(0, 0, 0))
-        obj.BeamSegments += [input_beam.get_object()]
+        if len(obj.BeamSegments) == 0:
+            # add initial input beam
+            direction = obj.BasePlacement.Rotation.multVec(App.Vector(1, 0, 0))
+            input_beam = BeamSegment(
+                index=1,
+                direction=direction,
+                wavelength=self.wavelength,
+                polarization=self.polarization,
+                power=self.power,
+                waist_position=self.waist_position,
+                rayleigh_range=self.rayleigh_range,
+            )
+            super().add(input_beam, position=(0, 0, 0), rotation=(0, 0, 0))
+            obj.BeamSegments += [input_beam.get_object()]
 
         # check for loose ends and start simulation from there
         for beam in obj.BeamSegments:
