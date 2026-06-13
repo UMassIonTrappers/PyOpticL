@@ -1,21 +1,39 @@
-###  PyOpticL v2.0 🚀 released! It is a complete rewrite of the PyOpticL library!
-* [Migrate from 1.0 to 2.0](https://github.com/UMassIonTrappers/PyOpticL/tree/main#pyopticl-v1v2-migration) 
-* [v2.0-Highlights](https://github.com/UMassIonTrappers/PyOpticL/wiki/v2.0-Highlights)
----
+
 
 <!-- <img height="100" alt="PyOpticL_logo" src="https://github.com/user-attachments/assets/6abdeee1-0d27-4417-b13f-469ae00388c7" /> -->
 
 # PyOpticL - Code-to-CAD optical system engineering
 
-<img width="4160" height="2080" alt="banner" src="https://github.com/user-attachments/assets/725264e8-112d-42e8-a89b-91602258fd7d" />
+<img width="700" alt="banner" src="https://github.com/user-attachments/assets/725264e8-112d-42e8-a89b-91602258fd7d" />
+ 
+## About PyOpticL (Python Optics Layout)
+PyOpticL is a Python library for optics layout which uses beam-path simulation and dynamic beam-path routing for quick and easy optical layout by placing optical elements along the beam path without a priori specification, enabling dynamic layouts with automatic routing and connectivity.
+The beam paths are automatically calculated as components are placed in the layout. Component placement can be defined "along beam" to remove the need for hard-coded coordinates. Beam calculations include reflection, transmission, refraction, and diffraction. This library enables a new paradigm of optical engineering using modular sub-systems of modular baseplates with commerical optical elements (see abstraction layers below).
 
+<img src="https://github.com/user-attachments/assets/b24b1d63-7b17-4de1-95dd-dcf176b8d9d6" width=400>
 
-<img width="2483" height="1172" alt="image" src="https://github.com/user-attachments/assets/2b61827e-5624-4590-b8a4-2e94640a9535" />
+## PyOpticL Demonstration with Trapped Ion Qubits:
+Our paper in the journal [*Quantum*](https://quantum-journal.org/?s=Qubit%20operations%20using%20a%20modular%20optical%20system%20engineered%20with%20PyOpticL:%20a%20code-to-CAD%20optical%20layout%20tool&reason=title-click) shows how we use PyOpticL in our lab for trapped ion cooling, detection and single qubit gates.</br>
 
+<a href="https://arxiv.org/abs/2501.14957"> arXiv:2501.14957 - Qubit operations using a modular optical system engineered with PyOpticL: a code-to-CAD optical layout tool</a>
 
-<img width="3341" height="1411" alt="image" src="https://github.com/user-attachments/assets/1b857ff6-a425-4261-a6f4-b00795de6f05" />
+### UMass Amherst Trapped Ion system built with PyOpticL:
+<img width="600" alt="UMass Amherst Trapped Ions" src="https://github.com/user-attachments/assets/2b61827e-5624-4590-b8a4-2e94640a9535" />
 
-#### Discord Server: https://discord.gg/vV4NP6rXmp
+### Modular abstraction: Optics → Baseplates → Subsystems → Apparutus:
+<img width="600" alt="Abstraction" src="https://github.com/user-attachments/assets/1b857ff6-a425-4261-a6f4-b00795de6f05" />
+
+---
+
+###  PyOpticL v2.0 🚀 released! It is a complete rewrite of the PyOpticL library!
+* [Migrate from 1.0 to 2.0](https://github.com/UMassIonTrappers/PyOpticL/tree/main#pyopticl-v1v2-migration) 
+* [v2.0-Highlights](https://github.com/UMassIonTrappers/PyOpticL/wiki/v2.0-Highlights)
+   * Including Improved Optics Simulation (Gaussian beam simulation)
+
+<img width="300" alt="image" src="https://github.com/user-attachments/assets/6ebfe1a3-06ec-457c-a59f-b1aafaa17a6a" />
+
+### Discord Server: https://discord.gg/vV4NP6rXmp
+
 
 <!-- Trapped Ion quantum computer at UMass Amherst engineered with PyOpticL: -->
 <!-- <img src="https://github.com/user-attachments/assets/1dbe2986-20e2-4f4e-9b4c-00dd31a4b656" width=50%> -->
@@ -24,8 +42,7 @@
 * [Library Features and Information](https://github.com/UMassIonTrappers/PyOpticL#about-pyopticl-python-optics-layout)
 * [Installation Guide](https://github.com/UMassIonTrappers/PyOpticL#getting-setup)
 
-### Wiki
-* [Home](https://github.com/UMassIonTrappers/PyOpticL/wiki)
+### [Wiki](https://github.com/UMassIonTrappers/PyOpticL/wiki)
 * [Quick Start Guide](https://github.com/UMassIonTrappers/PyOpticL/wiki/Quick-Start)
 * [Contributing to PyOpticL](https://github.com/UMassIonTrappers/PyOpticL/wiki/Contributing-to-PyOpticL)
 
@@ -53,16 +70,6 @@
 * [3D Models and Technical Drawings](https://github.com/UMassIonTrappers/PyOpticL/tree/v1-legacy/Design/Module/3DModel)
 
 ---
-
-<img src="https://github.com/user-attachments/assets/b24b1d63-7b17-4de1-95dd-dcf176b8d9d6" width=500>
-
-## About PyOpticL (Python Optics Layout)
-PyOpticL is a Python library for optics layout which uses beam-path simulation and dynamic beam-path routing for quick and easy optical layout by placing optical elements along the beam path without a priori specification, enabling dynamic layouts with automatic routing and connectivity.
-The beam paths are automatically calculated as components are placed in the layout. Component placement can be defined "along beam" to remove the need for hard-coded coordinates. Beam calculations include reflection, transmission, refraction, and diffraction (limited). This library enables a new paradigm of optical engineering using modular sub-systems of modular baseplates with commerical optical elements (see abstraction layers below).
-
-## Demonstration with Trapped Ion Qubits:
-See our paper published in the journal Quantum for more details about our results using these laser sources and baseplates in our lab: </br>
-<a href="https://arxiv.org/abs/2501.14957"> arXiv:2501.14957 - Qubit operations using a modular optical system engineered with PyOpticL: a code-to-CAD optical layout tool</a>
 
 
 ## Getting Setup
