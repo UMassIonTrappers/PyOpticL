@@ -19,7 +19,7 @@ beam_path = layout.add(
 beam_path.add(
     Component(
         label="PBS 1",
-        definition=optics.beamsplitter_cube(
+        definition=optics.Beamsplitter_Cube(
             side_length=dim(10, "mm"), optical_height=dim(0.5, "in")
         ),
     ),

@@ -716,7 +716,6 @@ class BeamPath(Layout):
         self.compute_path()
         obj = self.get_object()
         for child in obj.BeamChildren:
-            print("Recomputing child")
             if child.Proxy.placed:
                 child.Proxy.recompute()
 

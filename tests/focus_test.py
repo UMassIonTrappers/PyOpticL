@@ -38,7 +38,7 @@ layout.add(
 layout.add(
     Component(
         label="f=100mm lens",
-        definition=optics.spherical_lens(
+        definition=optics.Spherical_Lens(
             diameter=dim(1, "in"),
             thickness=dim(2, "mm"),
             focal_length=dim(100, "mm"),
@@ -51,7 +51,7 @@ layout.add(
 layout.add(
     Component(
         label="f=50mm lens",
-        definition=optics.spherical_lens(
+        definition=optics.Spherical_Lens(
             diameter=dim(1, "in"),
             thickness=dim(2, "mm"),
             focal_length=dim(50, "mm"),

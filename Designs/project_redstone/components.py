@@ -18,8 +18,8 @@ class km05t_laser:
 
     def subcomponents(self):
         lens_tube_dx = (
-            thorlabs.lens_tube_sm05l05.mount_position[0]
-            - thorlabs.kinematic_mount_km05t.threading_start[0]
+            thorlabs.Lens_Tube_SM05L05.mount_position[0]
+            - thorlabs.Kinematic_Mount_KM05T.threading_start[0]
         )
         diode_dx = 5
         lens_dx = 12
@@ -27,7 +27,7 @@ class km05t_laser:
             Subcomponent(
                 component=Component(
                     label="Thorlabs KM05T",
-                    definition=thorlabs.kinematic_mount_km05t(),
+                    definition=thorlabs.Kinematic_Mount_KM05T(),
                 ),
                 position=(lens_tube_dx + diode_dx, 0, 0),
                 rotation=(0, 0, 0),
@@ -35,7 +35,7 @@ class km05t_laser:
             Subcomponent(
                 component=Component(
                     label="Lens Tube",
-                    definition=thorlabs.lens_tube_sm05l05(),
+                    definition=thorlabs.Lens_Tube_SM05L05(),
                 ),
                 position=(diode_dx, 0, 0),
                 rotation=(0, 0, 0),
@@ -43,7 +43,7 @@ class km05t_laser:
             Subcomponent(
                 component=Component(
                     label="Diode Adapter",
-                    definition=thorlabs.diode_adapter_s05lm56(),
+                    definition=thorlabs.Diode_Adapter_S05LM56(),
                 ),
                 position=(0, 0, 0),
                 rotation=(0, 0, 0),
@@ -51,7 +51,7 @@ class km05t_laser:
             Subcomponent(
                 component=Component(
                     label="Lens Adapter",
-                    definition=thorlabs.lens_adapter_s05tm09(),
+                    definition=thorlabs.Lens_Adapter_S05TM09(),
                 ),
                 position=(lens_dx, 0, 0),
                 rotation=(0, 0, 0),
@@ -59,7 +59,7 @@ class km05t_laser:
             Subcomponent(
                 component=Component(
                     label="Lens",
-                    definition=thorlabs.mounted_lens_c220tmda(),
+                    definition=thorlabs.Mounted_Lens_C220TMDA(),
                 ),
                 position=(lens_dx, 0, 0),
                 rotation=(0, 0, 0),
@@ -72,14 +72,14 @@ class km05t_laser:
                         label="Post",
                         definition=simple_post(
                             height=self.optical_height
-                            + thorlabs.mirror_mount_k05s1.mount_position[2],
+                            + thorlabs.Mirror_Mount_K05S1.mount_position[2],
                             width=self.post_width,
                         ),
                     ),
                     position=(
                         lens_tube_dx + diode_dx,
                         0,
-                        thorlabs.mirror_mount_k05s1.mount_position[2],
+                        thorlabs.Mirror_Mount_K05S1.mount_position[2],
                     ),
                     rotation=(0, 0, 0),
                 )

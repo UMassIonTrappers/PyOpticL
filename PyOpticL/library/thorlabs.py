@@ -392,11 +392,12 @@ class Rotation_Mount_RSP05:
             ),
         ]
 
-    def drill(self):
-        part = bounding_box_shape(
-            shape=self.mesh, padding=dim(5, "mm"), fillet=dim(5, "mm")
-        )
-        return part
+    # TODO find a better way of handling this when using surface adapter
+    # def drill(self):
+    #     part = bounding_box_shape(
+    #         shape=self.mesh, padding=dim(5, "mm"), fillet=dim(5, "mm")
+    #     )
+    #     return part
 
 
 class Rotation_Mount_RSP1:

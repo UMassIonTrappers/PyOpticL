@@ -25,7 +25,7 @@ class rb_cell_holder:
                 Subcomponent(
                     component=Component(
                         label="Mounting Bolt",
-                        definition=hardware.bolt(
+                        definition=hardware.Bolt(
                             types=["8_32", "M4"],
                             length=self.bolt_length,
                             clear_depth=dim(1, "in"),

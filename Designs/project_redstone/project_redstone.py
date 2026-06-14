@@ -2,7 +2,7 @@ import math
 
 from PyOpticL.beam_path import BeamPath
 from PyOpticL.layout import Component
-from PyOpticL.library import baseplate, optics, thorlabs
+from PyOpticL.library import Baseplate, optics, thorlabs
 from PyOpticL.utils import Dimension as dim
 from PyOpticL.utils import fix_relative_imports
 
@@ -12,7 +12,7 @@ from components import grid_optics_mount, km05t_laser, simple_post
 
 redstone = Component(
     label="Baseplate",
-    definition=baseplate(
+    definition=Baseplate(
         dimensions=(dim(120, "in"), dim(65, "in"), dim(1, "in")),
         optical_height=0,
     ),
@@ -29,7 +29,7 @@ for side in [-1, 1]:
             definition=grid_optics_mount(
                 n_grid=6,
                 component_definition=km05t_laser(),
-                optical_height=abs(thorlabs.kinematic_mount_km05t.mount_position[2]),
+                optical_height=abs(thorlabs.Kinematic_Mount_KM05T.mount_position[2]),
             ),
             recompute_priority=-1,
         ),
@@ -53,10 +53,10 @@ for side in [-1, 1]:
             label="Grid Optics Mount",
             definition=grid_optics_mount(
                 n_grid=6,
-                component_definition=optics.circular_waveplate(
+                component_definition=optics.Circular_Waveplate(
                     diameter=dim(0.5, "in"),
                     fast_axis_angle=45,
-                    mount_definition=thorlabs.rotation_mount_rsp05(),
+                    mount_definition=thorlabs.Rotation_Mount_RSP05(),
                 ),
                 optical_height=dim(1, "in"),
             ),
@@ -71,7 +71,7 @@ for side in [-1, 1]:
             definition=grid_optics_mount(
                 n_grid=6,
                 component_definition=km05t_laser(),
-                optical_height=abs(thorlabs.kinematic_mount_km05t.mount_position[2]),
+                optical_height=abs(thorlabs.Kinematic_Mount_KM05T.mount_position[2]),
             ),
             recompute_priority=-1,
         ),
@@ -95,9 +95,9 @@ for side in [-1, 1]:
             label="Grid Optics Mount",
             definition=grid_optics_mount(
                 n_grid=6,
-                component_definition=optics.circular_waveplate(
+                component_definition=optics.Circular_Waveplate(
                     diameter=dim(0.5, "in"),
-                    mount_definition=thorlabs.rotation_mount_rsp05(),
+                    mount_definition=thorlabs.Rotation_Mount_RSP05(),
                 ),
                 optical_height=dim(1, "in"),
             ),
@@ -111,9 +111,9 @@ for side in [-1, 1]:
             label="Grid Optics Mount",
             definition=grid_optics_mount(
                 n_grid=6,
-                component_definition=optics.circular_mirror(
+                component_definition=optics.Circular_Mirror(
                     diameter=dim(0.5, "in"),
-                    mount_definition=thorlabs.mirror_mount_k05s1(),
+                    mount_definition=thorlabs.Mirror_Mount_K05S1(),
                 ),
                 optical_height=dim(0.5, "in"),
                 grid_spacing_y=dim(2, "in") * math.sqrt(2),
@@ -128,7 +128,7 @@ for side in [-1, 1]:
             label="Grid Optics Mount",
             definition=grid_optics_mount(
                 n_grid=6,
-                component_definition=optics.beamsplitter_cube(
+                component_definition=optics.Beamsplitter_Cube(
                     side_length=dim(0.5, "in"), ref_polarization=0
                 ),
                 optical_height=dim(0.25, "in"),
@@ -145,9 +145,9 @@ for side in [-1, 1]:
             label="Grid Optics Mount",
             definition=grid_optics_mount(
                 n_grid=6,
-                component_definition=optics.circular_mirror(
+                component_definition=optics.Circular_Mirror(
                     diameter=dim(0.5, "in"),
-                    mount_definition=thorlabs.mirror_mount_k05s1(),
+                    mount_definition=thorlabs.Mirror_Mount_K05S1(),
                 ),
                 optical_height=dim(0.5, "in"),
                 grid_spacing_y=dim(2, "in") * math.sqrt(2),
@@ -162,9 +162,9 @@ for side in [-1, 1]:
             label="Grid Optics Mount",
             definition=grid_optics_mount(
                 n_grid=6,
-                component_definition=optics.circular_waveplate(
+                component_definition=optics.Circular_Waveplate(
                     diameter=dim(0.5, "in"),
-                    mount_definition=thorlabs.rotation_mount_rsp05(),
+                    mount_definition=thorlabs.Rotation_Mount_RSP05(),
                 ),
                 optical_height=dim(1, "in"),
             ),
@@ -179,7 +179,7 @@ for side in [-1, 1]:
             definition=grid_optics_mount(
                 n_grid=6,
                 component_definition=km05t_laser(),
-                optical_height=abs(thorlabs.kinematic_mount_km05t.mount_position[2]),
+                optical_height=abs(thorlabs.Kinematic_Mount_KM05T.mount_position[2]),
             ),
         ),
         position=(x + side * dim(15, "in"), y - dim(35, "in"), 0),
@@ -242,22 +242,22 @@ for side in [-1, 1]:
             mirror = beam.add(
                 Component(
                     label="Mirror",
-                    definition=optics.circular_mirror(
+                    definition=optics.Circular_Mirror(
                         diameter=dim(0.5, "in"),
-                        mount_definition=thorlabs.mirror_mount_k05s1(),
+                        mount_definition=thorlabs.Mirror_Mount_K05S1(),
                     ),
                 ),
                 beam_index=0b1,
                 **mirror_args,
             )
 
-            post_height = position[2] - thorlabs.mirror_mount_k05s1.mount_position[2]
+            post_height = position[2] - thorlabs.Mirror_Mount_K05S1.mount_position[2]
             mirror.add(
                 Component(
                     label="Post",
                     definition=simple_post(height=post_height, width=dim(1, "in")),
                 ),
-                position=thorlabs.mirror_mount_k05s1.mount_position,
+                position=thorlabs.Mirror_Mount_K05S1.mount_position,
                 rotation=(0, 0, 0 if side == 1 else 180),
             )
 
@@ -268,7 +268,7 @@ for side in [-1, 1]:
             beam.add(
                 Component(
                     label="Redirect",
-                    definition=optics.rectangular_mirror(
+                    definition=optics.Rectangular_Mirror(
                         width=dim(5, "mm"), height=dim(5, "mm")
                     ),
                 ),

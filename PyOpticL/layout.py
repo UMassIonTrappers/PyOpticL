@@ -315,10 +315,12 @@ class Component(Layout):
 
             # apply placement and set final shape
             shape = shape.removeSplitter()
+            shape.Placement = obj.Placement
             obj.Shape = shape
 
         elif self.object_type == "Mesh" and hasattr(self, "mesh"):
             mesh = self.mesh
+            mesh.Placement = obj.Placement
             obj.Mesh = mesh
 
         obj.purgeTouched()  # prevent triggering recompute
@@ -326,10 +328,10 @@ class Component(Layout):
     def recompute(self):
         """Recursively recompute all children of this object"""
 
+        super().recompute()
         if not self.computed_shape:
             self.compute_shape()
             self.computed_shape = True
-        super().recompute()
 
 
 # ViewProvider handles how the object is handled in the FreeCAD GUI

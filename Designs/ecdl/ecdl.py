@@ -5,7 +5,7 @@ from PyOpticL.utils import fix_relative_imports
 
 fix_relative_imports()
 
-from .components import ecdl_box, grating_adapter, mount_plate
+from ecdl.components import ecdl_box, grating_adapter, mount_plate
 
 
 class km100pm_ecdl:
@@ -63,11 +63,11 @@ class km100pm_ecdl:
     def subcomponents(self):
         km_100pm_bore_depth = 7.874  # depth of bore in mounting holes
         lens_tube_dx = (
-            thorlabs.lens_tube_sm05l05.mount_position[0]
-            - thorlabs.fixed_mount_smr05.threading_start[0]
+            thorlabs.Lens_Tube_SM05L05.mount_position[0]
+            - thorlabs.Fixed_Mount_SMR05.threading_start[0]
         )
-        side_mount_position = thorlabs.prism_mount_km100pm_noplatform.side_bolt_position
-        fixed_mount_position = thorlabs.fixed_mount_smr05.mount_position
+        side_mount_position = thorlabs.Prism_Mount_KM100PM_NoPlatform.side_bolt_position
+        fixed_mount_position = thorlabs.Fixed_Mount_SMR05.mount_position
         diode_dx = 5
         lens_dx = 12
         mount_position = (
@@ -75,7 +75,7 @@ class km100pm_ecdl:
             -fixed_mount_position[2] - side_mount_position[1] + km_100pm_bore_depth,
             -side_mount_position[2],
         )
-        km100pm_mount_position = thorlabs.prism_mount_km100pm_noplatform.mount_position
+        km100pm_mount_position = thorlabs.Prism_Mount_KM100PM_NoPlatform.mount_position
         mount_plate_thickness = dim(0.25, "in")
         mount_plate_position = (
             mount_position[0] + km100pm_mount_position[0],
@@ -86,7 +86,7 @@ class km100pm_ecdl:
             Subcomponent(
                 component=Component(
                     label="Thorlabs KM100PM",
-                    definition=thorlabs.prism_mount_km100pm_noplatform(
+                    definition=thorlabs.Prism_Mount_KM100PM_NoPlatform(
                         drill_depth=mount_plate_thickness
                     ),
                 ),
@@ -95,7 +95,7 @@ class km100pm_ecdl:
             ),
             Subcomponent(
                 component=Component(
-                    label="Fixed Mount", definition=thorlabs.fixed_mount_smr05()
+                    label="Fixed Mount", definition=thorlabs.Fixed_Mount_SMR05()
                 ),
                 position=(lens_tube_dx + diode_dx, 0, 0),
                 rotation=(90, 0, 0),
@@ -103,7 +103,7 @@ class km100pm_ecdl:
             Subcomponent(
                 component=Component(
                     label="Lens Tube",
-                    definition=thorlabs.lens_tube_sm05l05(),
+                    definition=thorlabs.Lens_Tube_SM05L05(),
                 ),
                 position=(diode_dx, 0, 0),
                 rotation=(0, 0, 0),
@@ -111,7 +111,7 @@ class km100pm_ecdl:
             Subcomponent(
                 component=Component(
                     label="Diode Adapter",
-                    definition=thorlabs.diode_adapter_s05lm56(),
+                    definition=thorlabs.Diode_Adapter_S05LM56(),
                 ),
                 position=(0, 0, 0),
                 rotation=(0, 0, 0),
@@ -119,7 +119,7 @@ class km100pm_ecdl:
             Subcomponent(
                 component=Component(
                     label="Lens Adapter",
-                    definition=thorlabs.lens_adapter_s05tm09(),
+                    definition=thorlabs.Lens_Adapter_S05TM09(),
                 ),
                 position=(lens_dx, 0, 0),
                 rotation=(0, 0, 0),
@@ -127,7 +127,7 @@ class km100pm_ecdl:
             Subcomponent(
                 component=Component(
                     label="Lens",
-                    definition=thorlabs.mounted_lens_c220tmda(),
+                    definition=thorlabs.Mounted_Lens_C220TMDA(),
                 ),
                 position=(lens_dx, 0, 0),
                 rotation=(0, 0, 0),
@@ -158,7 +158,7 @@ class km100pm_ecdl:
             Subcomponent(
                 component=Component(
                     label="Bracket Bolt",
-                    definition=hardware.bolt(
+                    definition=hardware.Bolt(
                         types=["4_40", "M3"],
                         clear_depth=self.adapter_dimensions[0],
                         drill_depth=dim(5, "mm"),
@@ -174,7 +174,7 @@ class km100pm_ecdl:
             Subcomponent(
                 component=Component(
                     label="Bracket Bolt",
-                    definition=hardware.bolt(
+                    definition=hardware.Bolt(
                         types=["4_40", "M3"],
                         clear_depth=self.adapter_dimensions[0],
                         drill_depth=dim(5, "mm"),
@@ -182,12 +182,12 @@ class km100pm_ecdl:
                 ),
                 position=(
                     mount_position[0]
-                    + thorlabs.prism_mount_km100pm_noplatform.bracket_hole_position[0]
+                    + thorlabs.Prism_Mount_KM100PM_NoPlatform.bracket_hole_position[0]
                     + self.adapter_dimensions[0],
                     mount_position[1]
-                    + thorlabs.prism_mount_km100pm_noplatform.bracket_hole_position[1],
+                    + thorlabs.Prism_Mount_KM100PM_NoPlatform.bracket_hole_position[1],
                     mount_position[2]
-                    + thorlabs.prism_mount_km100pm_noplatform.bracket_hole_position[2],
+                    + thorlabs.Prism_Mount_KM100PM_NoPlatform.bracket_hole_position[2],
                 ),
                 rotation=(0, 90, 0),
             ),
@@ -208,7 +208,7 @@ class km100pm_ecdl:
             Subcomponent(
                 component=Component(
                     label="TEC",
-                    definition=thorlabs.tec_tech8(),
+                    definition=thorlabs.TEC_TECH8(),
                 ),
                 position=(
                     mount_plate_position[0],
@@ -233,7 +233,7 @@ class km100pm_ecdl:
                     mount_plate_position[1],
                     mount_plate_position[2]
                     - mount_plate_thickness
-                    - thorlabs.tec_tech8().thickness,
+                    - thorlabs.TEC_TECH8().thickness,
                 ),
                 rotation=(0, 0, 0),
             ),
@@ -250,19 +250,19 @@ class km100pm_ecdl:
                     mount_plate_position[1],
                     mount_plate_position[2]
                     - 2 * mount_plate_thickness
-                    - thorlabs.tec_tech8().thickness,
+                    - thorlabs.TEC_TECH8().thickness,
                 ),
                 rotation=(0, 0, 0),
             ),
             Subcomponent(
                 component=Component(
                     label="Brewster Window",
-                    definition=thorlabs.brewster_window_mount_bw20m(),
+                    definition=thorlabs.Brewster_Window_Mount_BW20M(),
                 ),
                 position=(
                     mount_plate_position[0]
                     + self.box_dimensions[0] / 2
-                    - thorlabs.brewster_window_mount_bw20m.mount_position[0],
+                    - thorlabs.Brewster_Window_Mount_BW20M.mount_position[0],
                     self.optic_distance,
                     0,
                 ),
@@ -274,7 +274,7 @@ class km100pm_ecdl:
                 Subcomponent(
                     component=Component(
                         label="Mounting Bolt",
-                        definition=hardware.bolt(
+                        definition=hardware.Bolt(
                             types=["8_32", "M4"],
                             clear_depth=dim(10, "mm"),
                             drill_depth=dim(5, "mm"),
@@ -285,7 +285,7 @@ class km100pm_ecdl:
                         mount_plate_position[1] + y * dim(1, "in"),
                         mount_plate_position[2]
                         - mount_plate_thickness
-                        - thorlabs.tec_tech8().thickness,
+                        - thorlabs.TEC_TECH8().thickness,
                     ),
                     rotation=(0, 0, 0),
                 )
@@ -293,4 +293,10 @@ class km100pm_ecdl:
         return components
 
 
-ecdl = Component(label="ECDL", definition=km100pm_ecdl())
+def ecdl():
+    return Component(label="ECDL", definition=km100pm_ecdl())
+
+
+if __name__ == "__main__":
+    component = ecdl()
+    component.recompute()

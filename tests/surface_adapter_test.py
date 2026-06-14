@@ -1,11 +1,10 @@
-from PyOpticL.beam_path import BeamPath
-from PyOpticL.layout import Component, Layout
-from PyOpticL.library import baseplate, optics, thorlabs
+from PyOpticL.layout import Component
+from PyOpticL.library import Baseplate, thorlabs
 from PyOpticL.utils import Dimension as dim
 
 baseplate = Component(
     label="Baseplate",
-    definition=baseplate(
+    definition=Baseplate(
         dimensions=(dim(100, "mm"), dim(100, "mm"), dim(1, "in")),
         optical_height=dim(0.5, "in"),
     ),
@@ -25,7 +24,7 @@ baseplate = Component(
 # )
 
 baseplate.add(
-    Component(label="pd", definition=thorlabs.photodetector_pda10a2()),
+    Component(label="pd", definition=thorlabs.Photodetector_PDA10A2()),
     position=(40, 40, 0),
     rotation=(0, 0, 0),
 )

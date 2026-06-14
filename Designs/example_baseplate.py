@@ -1,6 +1,6 @@
 from PyOpticL.beam_path import BeamPath
 from PyOpticL.layout import Component
-from PyOpticL.library import baseplate
+from PyOpticL.library import Baseplate
 from PyOpticL.utils import Dimension as dim
 from PyOpticL.utils import cardinal_angle, fix_relative_imports, turn_angle
 
@@ -11,7 +11,7 @@ from half_inch_library import beamsplitter_cube, mirror, waveplate
 # define and place the baseplate object
 example_baseplate = Component(
     label="Example Baseplate",
-    definition=baseplate(
+    definition=Baseplate(
         dimensions=(dim(100, "mm"), dim(100, "mm"), dim(1, "in")),
         optical_height=dim(0.5, "in"),
     ),
@@ -19,14 +19,14 @@ example_baseplate = Component(
 # add a beam path to the baseplate
 beam = example_baseplate.add(
     BeamPath(label="Beam"),
-    position=(0, 30, 0),
+    position=(0, 50, 0),
     rotation=cardinal_angle["right"],
 )
 # add a waveplate along the beam, 30 mm from the beam start
 beam.add(
     waveplate(),
     beam_index=0b1,
-    distance=30,
+    distance=40,
     rotation=cardinal_angle["right"],
 )
 # add a cube beamsplitter along the beam, 40 mm from the waveplate
