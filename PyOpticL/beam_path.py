@@ -714,6 +714,11 @@ class BeamPath(Layout):
 
         super().compute_placement()
         self.compute_path()
+        obj = self.get_object()
+        for child in obj.BeamChildren:
+            print("Recomputing child")
+            if child.Proxy.placed:
+                child.Proxy.recompute()
 
     def get_next_global(self, input_beam: BeamSegment) -> tuple:
         """
