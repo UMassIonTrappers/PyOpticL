@@ -8,7 +8,7 @@ from PyOpticL.utils import (
 )
 
 
-class bolt:
+class Bolt:
     """
     Standard bolt
 

@@ -16,7 +16,7 @@ from PyOpticL.utils import (
 ####################
 
 
-class polaris_mount:
+class Polaris_Mount:
     """
     A generic class for Thorlabs Polaris components
     Subclasses should define the mesh, mount_position, bolt_position, and pin_positions attributes
@@ -35,7 +35,7 @@ class polaris_mount:
             Subcomponent(
                 component=Component(
                     label="Mounting Bolt",
-                    definition=hardware.bolt(
+                    definition=hardware.Bolt(
                         types=["8_32", "M4"],
                         length=self.bolt_length,
                         clear_depth=self.bolt_position[2] - self.mount_position[2],
@@ -68,7 +68,7 @@ class polaris_mount:
 #####################
 
 
-class mirror_mount_k05s1(polaris_mount):
+class Mirror_Mount_K05S1(Polaris_Mount):
     """
     Mirror mount, model K05S1
 
@@ -88,7 +88,7 @@ class mirror_mount_k05s1(polaris_mount):
     pin_positions = [(-8.017, 5.000, -10.795), (-8.017, -5.000, -10.795)]
 
 
-class mirror_mount_km100:
+class Mirror_Mount_KM100:
     """
     Mirror mount, model KM100
 
@@ -115,7 +115,7 @@ class mirror_mount_km100:
             Subcomponent(
                 component=Component(
                     label="Mounting Bolt",
-                    definition=hardware.bolt(
+                    definition=hardware.Bolt(
                         types=["8_32", "M4"],
                         length=self.bolt_length,
                         clear_depth=self.bolt_position[2] - self.mount_position[2],
@@ -135,7 +135,7 @@ class mirror_mount_km100:
         return part
 
 
-class mirror_mount_km05:
+class Mirror_Mount_KM05:
     """
     Mirror mount, model KM05
 
@@ -161,7 +161,7 @@ class mirror_mount_km05:
             Subcomponent(
                 component=Component(
                     label="Mounting Bolt",
-                    definition=hardware.bolt(
+                    definition=hardware.Bolt(
                         types=["8_32", "M4"],
                         length=self.bolt_length,
                         clear_depth=self.bolt_distance,
@@ -189,7 +189,7 @@ class mirror_mount_km05:
 #######################
 
 
-class beamsplitter_mount_b05g(polaris_mount):
+class Beamsplitter_Mount_B05G(Polaris_Mount):
     """
     Beamsplitter mount, model B05G
 
@@ -209,7 +209,7 @@ class beamsplitter_mount_b05g(polaris_mount):
     pin_positions = [(-5.000, 5.000, -12.700), (-5.000, -5.000, -12.700)]
 
 
-class beamsplitter_mount_b1g(polaris_mount):
+class Beamsplitter_Mount_B1G(Polaris_Mount):
     """
     Beamsplitter mount, model B1G
 
@@ -234,7 +234,7 @@ class beamsplitter_mount_b1g(polaris_mount):
 ###################
 
 
-class lens_mount_l05g(polaris_mount):
+class Lens_Mount_L05G(Polaris_Mount):
     """
     Lens mount, model L05G
 
@@ -259,7 +259,7 @@ class lens_mount_l05g(polaris_mount):
 ###################
 
 
-class fixed_mount_smr05:
+class Fixed_Mount_SMR05:
     """
     Fixed mount, model SMR05
     """
@@ -276,7 +276,7 @@ class fixed_mount_smr05:
     threading_end = (-3.903, 0.000, 0.000)
 
 
-class kinematic_mount_km05t:
+class Kinematic_Mount_KM05T:
     """
     Kinematic mount, model KM05t
 
@@ -304,7 +304,7 @@ class kinematic_mount_km05t:
             Subcomponent(
                 component=Component(
                     label="Mounting Bolt",
-                    definition=hardware.bolt(
+                    definition=hardware.Bolt(
                         types=["8_32", "M4"],
                         length=self.bolt_length,
                         clear_depth=self.bolt_distance,
@@ -327,7 +327,7 @@ class kinematic_mount_km05t:
         return part
 
 
-class rotation_mount_rsp05:
+class Rotation_Mount_RSP05:
     """
     Rotation mount, model RSP05
 
@@ -369,7 +369,7 @@ class rotation_mount_rsp05:
             Subcomponent(
                 component=Component(
                     label="Mounting Bolt",
-                    definition=hardware.bolt(
+                    definition=hardware.Bolt(
                         types=["8_32", "M4"],
                         clear_depth=self.adapter_parameters["height"],
                         drill_depth=self.mount_hole_end[2] - self.mount_position[2],
@@ -385,7 +385,7 @@ class rotation_mount_rsp05:
             Subcomponent(
                 component=Component(
                     label="Surface Adapter",
-                    definition=adapters.surface_adapter(**self.adapter_parameters),
+                    definition=adapters.Surface_Adapter(**self.adapter_parameters),
                 ),
                 position=self.mount_position,
                 rotation=(0, 0, 90 if self.rotate_adapter else 0),
@@ -399,7 +399,7 @@ class rotation_mount_rsp05:
         return part
 
 
-class rotation_mount_rsp1:
+class Rotation_Mount_RSP1:
     """
     Rotation mount, model RSP1
 
@@ -441,7 +441,7 @@ class rotation_mount_rsp1:
             Subcomponent(
                 component=Component(
                     label="Mounting Bolt",
-                    definition=hardware.bolt(
+                    definition=hardware.Bolt(
                         types=["8_32", "M4"],
                         clear_depth=self.adapter_parameters["height"],
                         drill_depth=self.mount_hole_end[2] - self.mount_position[2],
@@ -457,7 +457,7 @@ class rotation_mount_rsp1:
             Subcomponent(
                 component=Component(
                     label="Surface Adapter",
-                    definition=adapters.surface_adapter(**self.adapter_parameters),
+                    definition=adapters.Surface_Adapter(**self.adapter_parameters),
                 ),
                 position=self.mount_position,
                 rotation=(0, 0, 90 if self.rotate_adapter else 0),
@@ -471,7 +471,7 @@ class rotation_mount_rsp1:
         return part
 
 
-class fiberport_mount_hca3:
+class Fiberport_Mount_HCA3:
     """
     Fiberport mount, model hca3
 
@@ -504,7 +504,7 @@ class fiberport_mount_hca3:
                 Subcomponent(
                     component=Component(
                         label="Mounting Bolt",
-                        definition=hardware.bolt(
+                        definition=hardware.Bolt(
                             types=["8_32", "M4"],
                             length=self.bolt_length,
                             clear_depth=position[2] - self.mount_offset_x,
@@ -519,7 +519,7 @@ class fiberport_mount_hca3:
         return components
 
 
-class prism_mount_km100pm_noplatform:
+class Prism_Mount_KM100PM_NoPlatform:
     """
     Prism mount, model KM100PM without the platform or bracket
     Origin is at the center of the inner mounting hole
@@ -552,7 +552,7 @@ class prism_mount_km100pm_noplatform:
             Subcomponent(
                 component=Component(
                     label="Mounting Bolt",
-                    definition=hardware.bolt(
+                    definition=hardware.Bolt(
                         types=["8_32", "M4"],
                         length=self.bolt_length,
                         clear_depth=self.bolt_position[2] - self.mount_position[2],
@@ -584,7 +584,7 @@ class prism_mount_km100pm_noplatform:
         return part
 
 
-class prism_mount_km100pm_custom:
+class Prism_Mount_KM100PM_Custom:
     """
     A km100pm prism mount with a custom stage
 
@@ -615,7 +615,7 @@ class prism_mount_km100pm_custom:
             Subcomponent(
                 component=Component(
                     label="Mount",
-                    definition=prism_mount_km100pm_noplatform(),
+                    definition=Prism_Mount_KM100PM_NoPlatform(),
                 ),
                 position=(
                     -self.stage_dimensions[0] / 2,
@@ -627,13 +627,13 @@ class prism_mount_km100pm_custom:
         ]
         for position in [
             (0, 0, 0),
-            prism_mount_km100pm_noplatform.bracket_hole_position,
+            Prism_Mount_KM100PM_NoPlatform.bracket_hole_position,
         ]:
             components.append(
                 Subcomponent(
                     component=Component(
                         label="Mounting Bolt",
-                        definition=hardware.bolt(
+                        definition=hardware.Bolt(
                             types=["4_40", "M3"],
                             clear_depth=self.arm_dimensions[1],
                             drill_depth=dim(5, "mm"),
@@ -673,7 +673,7 @@ class prism_mount_km100pm_custom:
         return part
 
 
-class brewster_window_mount_bw20m:
+class Brewster_Window_Mount_BW20M:
     """
     Brewster window mount, model BW20M
     """
@@ -700,7 +700,7 @@ class brewster_window_mount_bw20m:
 ######################
 
 
-class mounted_lens_c220tmda:
+class Mounted_Lens_C220TMDA:
     """
     Mounted lens, model C220TMD-A
     """
@@ -712,7 +712,7 @@ class mounted_lens_c220tmda:
     part_numbers = ["C220TMD-A"]
 
 
-class fiberport_paf2a4a:
+class Fiberport_PAF2A4A:
     """
     Fiberport, model PAF2-A4A
 
@@ -747,7 +747,7 @@ class fiberport_paf2a4a:
             Subcomponent(
                 component=Component(
                     label="Mount",
-                    definition=fiberport_mount_hca3(**self.mount_parameters),
+                    definition=Fiberport_Mount_HCA3(**self.mount_parameters),
                 ),
                 position=(self.mount_offset_x, 0, 0),
                 rotation=(0, 0, 180),
@@ -760,7 +760,7 @@ class fiberport_paf2a4a:
 #############################
 
 
-class diode_adapter_s05lm56:
+class Diode_Adapter_S05LM56:
     """
     Diode adapter, model S05LM56
     """
@@ -771,7 +771,7 @@ class diode_adapter_s05lm56:
     mesh = import_model("thorlabs-s05lm56")
 
 
-class lens_tube_sm05l05:
+class Lens_Tube_SM05L05:
     """
     Lens tube, model SM05L05
     """
@@ -784,7 +784,7 @@ class lens_tube_sm05l05:
     mount_position = (-1.143, 0.000, 0.000)
 
 
-class lens_adapter_s05tm09:
+class Lens_Adapter_S05TM09:
     """
     Lens adapter, model S05TM09
     """
@@ -801,7 +801,7 @@ class lens_adapter_s05tm09:
 ###########################
 
 
-class photodetector_pda10a2:
+class Photodetector_PDA10A2:
     """
     Photodetector, model PDA10A2
 
@@ -854,7 +854,7 @@ class photodetector_pda10a2:
             Subcomponent(
                 component=Component(
                     label="Mounting Bolt",
-                    definition=hardware.bolt(
+                    definition=hardware.Bolt(
                         types=["8_32", "M4"],
                         clear_depth=self.adapter_parameters["height"],
                         drill_depth=self.mount_hole_end[2] - self.mount_position[2],
@@ -870,7 +870,7 @@ class photodetector_pda10a2:
             Subcomponent(
                 component=Component(
                     label="Surface Adapter",
-                    definition=adapters.surface_adapter(**self.adapter_parameters),
+                    definition=adapters.Surface_Adapter(**self.adapter_parameters),
                 ),
                 position=self.mount_position,
                 rotation=(0, 0, 90 if self.rotate_adapter else 0),
@@ -884,7 +884,7 @@ class photodetector_pda10a2:
         return part
 
 
-class photodiode_fds010:
+class Photodiode_FDS010:
     """
     Photodiode, model FDS010
     """
@@ -922,7 +922,7 @@ class photodiode_fds010:
 #######################
 
 
-class iris_ida12:
+class Iris_IDA12:
     """
     Iris, model IDA12 on a slide adapter
 
@@ -975,7 +975,7 @@ class iris_ida12:
             Subcomponent(
                 component=Component(
                     label="Slide Adapter",
-                    definition=adapters.slide_adapter(**self.adapter_parameters),
+                    definition=adapters.Slide_Adapter(**self.adapter_parameters),
                 ),
                 position=self.mount_position,
                 rotation=(0, 0, 90),
@@ -983,7 +983,7 @@ class iris_ida12:
             Subcomponent(
                 component=Component(
                     label="Mounting Bolt",
-                    definition=hardware.bolt(
+                    definition=hardware.Bolt(
                         types=["8_32", "M4"],
                         clear_depth=self.adapter_parameters["post_thickness"],
                         drill_depth=dim(5, "mm"),
@@ -1013,7 +1013,7 @@ class iris_ida12:
         return part
 
 
-class tec_tech8:
+class TEC_TECH8:
     """
     Thermoelectric cooler, model TECH8
     """
@@ -1024,7 +1024,6 @@ class tec_tech8:
     mesh = import_model("thorlabs-tech8")
     part_numbers = ["TECH8"]
     thickness = dim(3.5, "mm")
-
     object_group = "misc"
     object_icon = thorlabs_icon
     object_color = (0.25, 0.25, 0.25)

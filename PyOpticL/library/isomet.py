@@ -1,16 +1,16 @@
 from PyOpticL.beam_path import AcoustoOptic
 from PyOpticL.icons import thorlabs_icon
 from PyOpticL.layout import Component, Subcomponent
-from PyOpticL.library import adapters, hardware, thorlabs
+from PyOpticL.library import hardware, thorlabs
 from PyOpticL.utils import Dimension as dim
-from PyOpticL.utils import bounding_box_shape, cylinder_shape, import_model
+from PyOpticL.utils import import_model
 
 ############
 ### AOMs ###
 ############
 
 
-class aom_1205c:
+class AOM_1205C:
     """
     AOM, model 1205C
     """
@@ -34,7 +34,7 @@ class aom_1205c:
         ]
 
 
-class aom_1205c_on_km100pm:
+class AOM_1205C_on_KM100PM:
     """
     AOM, model 1205C
 
@@ -68,7 +68,7 @@ class aom_1205c_on_km100pm:
             Subcomponent(
                 component=Component(
                     label="Mount",
-                    definition=thorlabs.prism_mount_km100pm_custom(
+                    definition=thorlabs.Prism_Mount_KM100PM_Custom(
                         stage_dimensions=self.stage_dimensions,
                         arm_dimensions=self.arm_dimensions,
                         slot_length=self.slot_length,
@@ -78,25 +78,25 @@ class aom_1205c_on_km100pm:
                 position=(
                     -self.aom_offset[0],
                     -self.aom_offset[1],
-                    aom_1205c.mount_positions[0][2],
+                    AOM_1205C.mount_positions[0][2],
                 ),
                 rotation=(0, 0, 0),
             ),
             Subcomponent(
                 component=Component(
                     label="AOM",
-                    definition=aom_1205c(),
+                    definition=AOM_1205C(),
                 ),
                 position=(0, 0, 0),
                 rotation=(0, 0, 0),
             ),
         ]
-        for position in aom_1205c.mount_positions:
+        for position in AOM_1205C.mount_positions:
             components.append(
                 Subcomponent(
                     component=Component(
                         label="Mounting Bolt",
-                        definition=hardware.bolt(
+                        definition=hardware.Bolt(
                             types=["4_40"],
                             clear_depth=self.stage_dimensions[2],
                             drill_depth=dim(5, "mm"),

@@ -3,12 +3,12 @@ import numpy as np
 from PyOpticL.beam_path import Lens, Reflection, Waveplate
 from PyOpticL.icons import optic_icon
 from PyOpticL.layout import Component, Subcomponent
-from PyOpticL.library.adapters import surface_adapter
+from PyOpticL.library.adapters import Surface_Adapter
 from PyOpticL.utils import Dimension as dim
 from PyOpticL.utils import bounding_box_shape, box_shape, cylinder_shape
 
 
-class circular_reflector:
+class Circular_Reflector:
     """
     A circular reflector component
 
@@ -127,7 +127,7 @@ class circular_reflector:
         return part
 
 
-class rectangular_reflector:
+class Rectangular_Reflector:
     """
     A rectangular reflector component
 
@@ -242,7 +242,7 @@ class rectangular_reflector:
         return part
 
 
-class circular_mirror(circular_reflector):
+class Circular_Mirror(Circular_Reflector):
     """
     A circular mirror component
 
@@ -272,7 +272,7 @@ class circular_mirror(circular_reflector):
         )
 
 
-class rectangular_mirror(rectangular_reflector):
+class Rectangular_Mirror(Rectangular_Reflector):
     """
     A rectangular mirror component
 
@@ -305,7 +305,7 @@ class rectangular_mirror(rectangular_reflector):
         )
 
 
-class circular_sampler(circular_reflector):
+class Circular_Sampler(Circular_Reflector):
     """
     A circular sampler component
 
@@ -343,7 +343,7 @@ class circular_sampler(circular_reflector):
         self.object_transparency = int(100 * ref_ratio)
 
 
-class circular_dichroic_mirror(circular_reflector):
+class Circular_Dichroic_Mirror(Circular_Reflector):
     """
     A circular dichroic mirror component
 
@@ -382,7 +382,7 @@ class circular_dichroic_mirror(circular_reflector):
         )
 
 
-class spherical_lens:
+class Spherical_Lens:
     """
     A spherical lens component
 
@@ -466,7 +466,7 @@ class spherical_lens:
         return part
 
 
-class circular_waveplate:
+class Circular_Waveplate:
     """
     A circular waveplate component
 
@@ -554,7 +554,7 @@ class circular_waveplate:
         return part
 
 
-class beamsplitter_cube:
+class Beamsplitter_Cube:
     """
     A generic beamsplitter cube component
 
@@ -673,7 +673,7 @@ class beamsplitter_cube:
         return part
 
 
-class beamsplitter_cube_on_surface_adapter(beamsplitter_cube):
+class Beamsplitter_Cube_on_Surface_Adapter(Beamsplitter_Cube):
     """
     Beamsplitter cube on a surface adapter with logical defaults for the adapter sizing
 
@@ -730,7 +730,7 @@ class beamsplitter_cube_on_surface_adapter(beamsplitter_cube):
             Subcomponent(
                 component=Component(
                     label="Surface Adapter",
-                    definition=surface_adapter(**self.adapter_parameters),
+                    definition=Surface_Adapter(**self.adapter_parameters),
                 ),
                 position=(0, 0, self.inset_depth - self.side_length / 2),
                 rotation=(0, 0, 90 if self.rotate_adapter else 0),

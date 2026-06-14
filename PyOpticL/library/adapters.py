@@ -1,10 +1,10 @@
 from PyOpticL.layout import Component, Subcomponent
-from PyOpticL.library import hardware, thorlabs
+from PyOpticL.library import hardware
 from PyOpticL.utils import Dimension as dim
-from PyOpticL.utils import bounding_box_shape, box_shape, translate_shape
+from PyOpticL.utils import bounding_box_shape, box_shape
 
 
-class surface_adapter:
+class Surface_Adapter:
     """
     A generic surface mount adapter
 
@@ -56,7 +56,7 @@ class surface_adapter:
                 Subcomponent(
                     component=Component(
                         label="Mounting Bolt",
-                        definition=hardware.bolt(
+                        definition=hardware.Bolt(
                             types=self.bolt_types,
                             length=self.bolt_length,
                             clear_depth=self.height,
@@ -91,7 +91,7 @@ class surface_adapter:
         return part
 
 
-class slide_adapter:
+class Slide_Adapter:
     """
     A simple adapter within single point mounting for elements like irises
 
@@ -137,7 +137,7 @@ class slide_adapter:
             Subcomponent(
                 component=Component(
                     label="Mounting Bolt",
-                    definition=hardware.bolt(
+                    definition=hardware.Bolt(
                         types=self.bolt_types,
                         length=self.bolt_length,
                         clear_depth=self.mount_height,

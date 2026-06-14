@@ -4,7 +4,7 @@ from PyOpticL.utils import Dimension as dim
 from PyOpticL.utils import box_shape
 
 
-class baseplate:
+class Baseplate:
     """
     Standard optical baseplate
 
@@ -39,7 +39,7 @@ class baseplate:
                 Subcomponent(
                     component=Component(
                         label="Mount Hole",
-                        definition=hardware.bolt(
+                        definition=hardware.Bolt(
                             types=["1/4_20", "M6"],
                             clear_depth=self.dimensions[2],
                         ),
