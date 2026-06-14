@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from math import isclose
+from types import SimpleNamespace
 
 import FreeCAD as App
 import numpy as np
@@ -650,24 +651,48 @@ class BeamPath(Layout):
         return child
 
     def measure_properties(self, after_object: Layout, beam_index: int = None):
+        """
+        Measures the properties of a beam mid-layout
+
+        Args:
+            after_object (Layout): The object after which to measure the beam
+            beam_index (int): The index of the beam to measure (defaults to the lowest index beam after object)
+
+        Returns: A beam properties object containing the following attributes
+            beam_obj: The BeamSegment object representing the beam
+            beam_waist: The beam waist
+            waist_position: The position of the waist (relative to after_object)
+            rayleigh_range: The beam's rayleigh range
+            wavelength: The beam's wavelength
+            polarization_angle: The beam's polarization angle
+            power: The beam's power
+            initial_radius: The beam's radius at the object
+            final_radius: The beam's final radius (at the time of measurement)
+            segment_length: The beam's segment length
+            position: The position of the beam (relative to the beam path object)
+            rotation: The beam's rotation (relative to the beam path object)
+        """
         self.recompute()
         for beam in self.get_object().BeamSegments:
             if beam.EndObject == after_object.get_object():
                 if beam_index is None or beam_index == beam.Proxy.index:
                     direction = App.Vector(beam.Proxy.direction)
                     rotation = App.Rotation(App.Vector(1, 0, 0), direction)
-                    return dict(
-                        beam_obj=beam,
-                        beam_waist=beam.BeamWaist.Value,
-                        waist_position=beam.WaistPosition.Value,
-                        rayleigh_range=beam.RayleighRange.Value,
-                        wavelength=beam.Wavelength.Value,
-                        polarization_angle=beam.PolarizationAngle.Value,
-                        power=beam.Power.Value,
-                        initial_radius=beam.InitialRadius.Value,
-                        final_radius=beam.FinalRadius.Value,
-                        segment_length=beam.Distance.Value,
-                        rotation=rotation.getYawPitchRoll()[::-1],
+                    return SimpleNamespace(
+                        dict(
+                            beam_obj=beam.Proxy,
+                            beam_waist=beam.BeamWaist.Value,
+                            waist_position=beam.WaistPosition.Value,
+                            rayleigh_range=beam.RayleighRange.Value,
+                            wavelength=beam.Wavelength.Value,
+                            polarization_angle=beam.PolarizationAngle.Value,
+                            power=beam.Power.Value,
+                            initial_radius=beam.InitialRadius.Value,
+                            final_radius=beam.FinalRadius.Value,
+                            segment_length=beam.Distance.Value,
+                            position=beam.BasePlacement.Base,
+                            rotation=rotation.getYawPitchRoll()[::-1],
+                        )
                     )
 
     def compute_path(self):

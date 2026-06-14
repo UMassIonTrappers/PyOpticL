@@ -102,13 +102,13 @@ def singlepass():
     )
 
     beam_props = beam.measure_properties(after_object=lens, beam_index=0b111)
-    beam_angle_offset = 180 + beam_props["rotation"][2]
+    beam_angle_offset = 180 + beam_props.rotation[2]
 
     beam.add(
         mirror(),
         beam_index=0b111,
         distance=dim(15, "mm"),
-        rotation=turn_angle["left-down"] - beam_angle_offset / 2,
+        rotation=turn_angle["left-down"] + beam_angle_offset / 2,
     )
 
     beam.add(
