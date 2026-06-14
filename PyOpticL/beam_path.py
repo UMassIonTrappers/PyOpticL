@@ -679,20 +679,18 @@ class BeamPath(Layout):
                     direction = App.Vector(beam.Proxy.direction)
                     rotation = App.Rotation(App.Vector(1, 0, 0), direction)
                     return SimpleNamespace(
-                        dict(
-                            beam_obj=beam.Proxy,
-                            beam_waist=beam.BeamWaist.Value,
-                            waist_position=beam.WaistPosition.Value,
-                            rayleigh_range=beam.RayleighRange.Value,
-                            wavelength=beam.Wavelength.Value,
-                            polarization_angle=beam.PolarizationAngle.Value,
-                            power=beam.Power.Value,
-                            initial_radius=beam.InitialRadius.Value,
-                            final_radius=beam.FinalRadius.Value,
-                            segment_length=beam.Distance.Value,
-                            position=beam.BasePlacement.Base,
-                            rotation=rotation.getYawPitchRoll()[::-1],
-                        )
+                        beam_obj=beam.Proxy,
+                        beam_waist=beam.BeamWaist.Value,
+                        waist_position=beam.WaistPosition.Value,
+                        rayleigh_range=beam.RayleighRange.Value,
+                        wavelength=beam.Wavelength.Value,
+                        polarization_angle=beam.PolarizationAngle.Value,
+                        power=beam.Power.Value,
+                        initial_radius=beam.InitialRadius.Value,
+                        final_radius=beam.FinalRadius.Value,
+                        segment_length=beam.Distance.Value,
+                        position=beam.BasePlacement.Base,
+                        rotation=rotation.getYawPitchRoll()[::-1],
                     )
 
     def compute_path(self):
