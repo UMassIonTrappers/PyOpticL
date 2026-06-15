@@ -60,6 +60,8 @@ Our paper in the journal [*Quantum*](https://quantum-journal.org/?s=Qubit%20oper
 * [Photoionization](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Photoionization-Laser)
 * [State Preparation and Measurement](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-SPAM)
 
+<img width="300" alt="image" src="https://github.com/user-attachments/assets/d0d951dc-ae7c-4db3-a713-b24ece516477" />
+
 ### Apparatus based on modular subsystems:
 * [Trapped Ions - Strontium](https://github.com/UMassIonTrappers/PyOpticL/wiki/Apparatus-%E2%80%90-Trapped-Ions-%E2%80%90-Strontium)
 * [Trapped Ions - Calcium](https://github.com/UMassIonTrappers/PyOpticL/wiki/Apparatus-%E2%80%90-Trapped-Ions-%E2%80%90-Calcium)
