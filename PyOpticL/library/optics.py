@@ -736,3 +736,84 @@ class Beamsplitter_Cube_on_Surface_Adapter(Beamsplitter_Cube):
                 rotation=(0, 0, 90 if self.rotate_adapter else 0),
             )
         ]
+
+
+class Cylindrical_Lens:
+    """
+    Cylindrical lens — parametric box along +X axis.
+
+    Beam model: pass-through (like a waveplate with zero retardance), no focusing.
+
+    Args:
+        thickness (float): Edge thickness of the lens
+        width (float): Width of the lens
+        height (float): Height of the lens
+        slots (bool): Whether the mount uses slotted holes
+        part_number (str): Part number for the lens
+        mount_definition (object): Optional override for mount definition
+    """
+
+    object_group = "optics"
+    object_icon = optic_icon
+    object_color = (0.5, 0.5, 0.8)
+    object_transparency = 75
+
+    def __init__(
+        self,
+        thickness: dim = dim(4, "mm"),
+        width: dim = dim(20, "mm"),
+        height: dim = dim(22, "mm"),
+        slots: bool = False,
+        part_number: str = "",
+        mount_definition: object = None,
+    ):
+        self.thickness = thickness
+        self.width = width
+        self.height = height
+        self.slots = slots
+        self.part_numbers = [part_number]
+        self.mount_definition = mount_definition
+
+    # keep it as a pass-through for now. return a lens if in need of focusing
+    def interfaces(self):
+        return [
+            Waveplate(
+                position=(0, 0, 0),
+                rotation=(0, 0, 0),
+                width=self.width,
+                height=self.height,
+                retardance=0,
+                fast_axis_angle=0,
+                max_angle=90,
+            )
+        ]
+
+    def subcomponents(self):
+        if self.mount_definition is not None:
+            mount = self.mount_definition
+        else:
+            mount = Surface_Adapter(
+                height=dim(8, "mm"),
+                bolt_spacing=self.width + dim(10, "mm"),
+                slot_length=dim(5, "mm") if self.slots else dim(0, "mm"),
+            )
+        return [
+            Subcomponent(
+                component=Component(
+                    label="Mount",
+                    definition=mount,
+                ),
+                position=(self.thickness / 2, 0, -self.height / 2),
+                rotation=(0, 0, 0),
+            )
+        ]
+
+    def shape(self):
+        return box_shape(
+            dimensions=(self.thickness, self.width, self.height),
+            position=(self.thickness, 0, -0.2),
+            center=(1, 0, 0),
+        )
+
+    def drill(self):
+        return bounding_box_shape(self.shape(), padding=dim(0.5, "mm"))

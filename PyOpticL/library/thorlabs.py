@@ -1,4 +1,4 @@
-from PyOpticL.beam_path import Stop
+from PyOpticL.beam_path import Interface, Stop
 from PyOpticL.icons import thorlabs_icon
 from PyOpticL.layout import Component, Subcomponent
 from PyOpticL.library import adapters, hardware
@@ -1030,3 +1030,239 @@ class TEC_TECH8:
     object_color = (0.25, 0.25, 0.25)
     mesh = import_model("thorlabs-tech8")
     thickness = dim(3.5, "mm")
+
+
+class Isolator_405:
+    """
+    Optical isolator optimized for 405 nm, model IO-3D-405-PBS
+
+    Args:
+        adapter_parameters (dict): Parameters to override the default surface adapter settings
+    """
+
+    object_group = "optics"
+    object_icon = thorlabs_icon
+    object_color = (0.2, 0.2, 0.2)
+    mesh = import_model("io-3d-405-pbs")
+    part_numbers = ["IO-3D-405-PBS"]
+    mount_position = (-0.635, -0.000, -13.975)
+    mount_hole_end = (-0.635, -0.000, -7.521)
+
+    def __init__(self, adapter_parameters: dict = dict()):
+        self.adapter_parameters = dict(
+            height=dim(8, "mm"),
+            bolt_spacing=dim(36, "mm"),
+            bolt_types=["8_32", "M4"],
+        )
+        self.adapter_parameters |= adapter_parameters
+
+    def interfaces(self):
+        return [
+            Interface(
+                position=(0, 0, 0),
+                rotation=(0, 0, 0),
+                width=dim(5, "mm"),
+                height=dim(15, "mm"),
+                max_angle=10,
+                single_sided=True,
+            )
+        ]
+
+    def subcomponents(self):
+        return [
+            Subcomponent(
+                component=Component(
+                    label="Mounting Bolt",
+                    definition=hardware.Bolt(
+                        types=["8_32", "M4"],
+                        clear_depth=self.adapter_parameters["height"],
+                        drill_depth=self.mount_hole_end[2] - self.mount_position[2],
+                    ),
+                ),
+                position=(
+                    self.mount_position[0],
+                    self.mount_position[1],
+                    self.mount_position[2] - self.adapter_parameters["height"], 
+                ),
+                rotation=(180, 0, 0),
+            ),
+            Subcomponent(
+                component=Component(
+                    label="Surface Adapter",
+                    definition=adapters.Surface_Adapter(**self.adapter_parameters),
+                ),
+                position=(0, 0, -17.15),
+                rotation=(0, 0, 0),
+            ),
+        ]
+
+    def drill(self):
+        part = box_shape(
+            dimensions=(dim(25, "mm"), dim(15, "mm"), dim(10, "mm")),
+            position=(0, 0, 0),#-dim(0.5, "in")),
+            center=(0, 0, 1),
+            fillet=dim(5, "mm"),
+        )
+        return part
+
+
+class Mirror_Mount_KS1T:
+    """
+    Kinematic mount, model KS1T
+    """
+
+    object_group = "mounts"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+    mesh = import_model("thorlabs-ks1t")
+    part_numbers = ["KS1T"]
+
+    def drill(self):
+        part = bounding_box_shape(
+            shape=self.mesh,
+            padding=dim(3, "mm"),
+            fillet=dim(3, "mm"),
+            min_offset=(0, 0, dim(-0.5, "mm")),
+        )
+        part = part.fuse(
+            bounding_box_shape(
+                shape=self.mesh,
+                padding=dim(3, "mm"),
+                fillet=dim(3, "mm"),
+                pad_z=True,
+                max_offset=(dim(-28, "mm"), 0, 0),
+            )
+        )
+        part = part.fuse(
+            cylinder_shape(
+                diameter=dim(4.4, "mm"),
+                height=dim(100, "mm"),
+                position=(-16.94, 0, -dim(0.5, "in")),
+                rotation=(180, 0, 0),
+            )
+        )
+        return part
+
+
+class Fiber_Adapter_SM1FCA2:
+    """
+    Fiber adapter plate, model SM1FCA2
+    """
+
+    object_group = "mounts"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+    mesh = import_model("thorlabs-sm1fca2")
+    part_numbers = ["SM1FCA2"]
+
+
+class Lens_Tube_SM1L05:
+    """
+    Lens tube, model SM1L05
+
+    Uses a parametric placeholder until an SM1L05 STEP model is added.
+    """
+
+    object_group = "mounts"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+    part_numbers = ["SM1L05"]
+
+    def shape(self):
+        return cylinder_shape(
+            diameter=dim(1.2, "in"),
+            height=dim(0.5, "in"),
+            position=(0, 0, 0),
+            rotation=(0, 90, 0),
+            center=0,
+        )
+
+    def drill(self):
+        return bounding_box_shape(
+            shape=self.shape(),
+            padding=dim(2, "mm"),
+            pad_z=True,
+        )
+
+
+class Lens_Adapter_S1TM09:
+    """
+    SM1 to M9x0.5 lens cell adapter, model S1TM09
+    """
+
+    object_group = "mounts"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+    mesh = import_model("thorlabs-s1tm09")
+    part_numbers = ["S1TM09"]
+
+
+class Fiberport_Mount_KS1T:
+    """
+    One-inch fiberport on a KS1T mount.
+
+    Subcomponents match v1 fiberport_mount_ks1t layout:
+    KS1T mount, SM1FCA2 adapter, SM1L05 tube, S1TM09 adapter, C220TMD-A lens.
+    """
+
+    object_group = "mounts"
+    object_icon = thorlabs_icon
+    object_color = (0.25, 0.25, 0.25)
+
+    def interfaces(self):
+        return [
+            Stop(
+                position=(0, 0, 0),
+                rotation=(0, 0, 0),
+                diameter=dim(25, "mm"),
+                single_sided=True,
+            )
+        ]
+
+    def subcomponents(self):
+        inch_offset = 1.524
+        return [
+            Subcomponent(
+                component=Component(
+                    label="Mount",
+                    definition=Mirror_Mount_KS1T(),
+                ),
+                position=(-10, 35.5, -44),
+                rotation=(0, 0, 0),
+            ),
+            # Subcomponent(
+            #     component=Component(
+            #         label="Fiber Adapter",
+            #         definition=Fiber_Adapter_SM1FCA2(),
+            #     ),
+            #     position=(-3, 0, 0),
+            #     rotation=(0, 0, 0),
+            # ),
+            Subcomponent(
+                component=Component(
+                    label="Lens Tube",
+                    definition=Lens_Tube_SM1L05(),
+                ),
+                position=(0, 0, 0),
+                rotation=(0, 0, 0),
+            ),
+            # Subcomponent(
+            #     component=Component(
+            #         label="Lens Adapter",
+            #         definition=Lens_Adapter_S1TM09(),
+            #     ),
+            #     position=(inch_offset + 6, 0, 0),
+            #     rotation=(0, 0, 0),
+            # ),
+            Subcomponent(
+                component=Component(
+                    label="Lens",
+                    definition=Mounted_Lens_C220TMDA(),
+                ),
+                position=(inch_offset + 2, 0, 0),
+                rotation=(0, 0, 0),
+            ),
+        ]
+
+    def drill(self):
+        return Mirror_Mount_KS1T().drill()
