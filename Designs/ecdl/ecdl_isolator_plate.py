@@ -7,7 +7,7 @@ from PyOpticL.utils import cardinal_angle, fix_relative_imports, turn_angle
 fix_relative_imports()
 
 base_dx = dim(6, "in")
-base_dy = dim(4, "in")
+base_dy = dim(4.5, "in")
 base_dz = dim(1, "in")
 
 input_x = dim(0, "in")
@@ -29,7 +29,7 @@ def ecdl_isolator_plate():
         definition=Baseplate(
             dimensions=(base_dx, base_dy, base_dz),
             optical_height=dim(0.5, "in"),
-            mount_holes=[(1, 2)]#, (5, 3), (0, 3), (4, 3), (4, 2)],
+            mount_holes=[(1, 1), (6, 4), (1, 4),(6, 1)]#, (1, 3), (4, 3), (4, 2)],
         ),
     )
 
