@@ -1,9 +1,7 @@
 from PyOpticL.layout import Component, Layout, Subcomponent
 from PyOpticL.library import optics, thorlabs
 from PyOpticL.utils import Dimension as dim
-from PyOpticL.utils import box_shape, cardinal_angle, cylinder_shape, fix_relative_imports, translate_shape
-
-fix_relative_imports()
+from PyOpticL.utils import box_shape, cardinal_angle, cylinder_shape, translate_shape
 
 
 class Periscope:
@@ -46,7 +44,7 @@ class Periscope:
                     label="Lower Mirror",
                     definition=self.mirror_definition,
                 ),
-                position=(0, 6.35, self.lower_dz + self.z_off),
+                position=(0, 0, self.lower_dz + self.z_off),
                 rotation=(sign * 90, -45, 0),
             ),
             Subcomponent(
@@ -54,7 +52,7 @@ class Periscope:
                     label="Upper Mirror",
                     definition=self.mirror_definition,
                 ),
-                position=(0, 6.35, self.upper_dz + self.z_off),
+                position=(0, 0, self.upper_dz + self.z_off),
                 rotation=(sign * 90, 135, 0),
             ),
         ]
@@ -91,7 +89,7 @@ class Periscope:
                 part = part.cut(hole)
 
         y_shift = (-1 if self.invert else 1) * (width / 2 + dim(0.5, "in") / 2)
-        part = translate_shape(part, (0, y_shift, self.z_off))
+        part = translate_shape(part, (0, y_shift - 6.35, self.z_off))
         return part
 
 
