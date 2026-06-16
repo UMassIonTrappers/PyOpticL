@@ -8,7 +8,11 @@ from PyOpticL.utils import fix_relative_imports
 
 fix_relative_imports()
 
-from components import grid_optics_mount, km05t_laser, simple_post
+try:
+    from redstone.components import grid_optics_mount, km05t_laser, simple_post
+except ImportError as e:
+    from components import grid_optics_mount, km05t_laser, simple_post
+
 
 redstone = Component(
     label="Baseplate",
@@ -18,6 +22,8 @@ redstone = Component(
     ),
 )
 
+n_grid = 3 # 6
+n_lasers = 3 # 13
 
 for side in [-1, 1]:
     x = dim(60, "in") + side * dim(25, "in")
@@ -27,7 +33,7 @@ for side in [-1, 1]:
         Component(
             label="Grid Optics Mount",
             definition=grid_optics_mount(
-                n_grid=6,
+                n_grid = n_grid,
                 component_definition=km05t_laser(),
                 optical_height=abs(thorlabs.Kinematic_Mount_KM05T.mount_position[2]),
             ),
@@ -52,7 +58,7 @@ for side in [-1, 1]:
         Component(
             label="Grid Optics Mount",
             definition=grid_optics_mount(
-                n_grid=6,
+                n_grid = n_grid,
                 component_definition=optics.Circular_Waveplate(
                     diameter=dim(0.5, "in"),
                     fast_axis_angle=45,
@@ -69,7 +75,7 @@ for side in [-1, 1]:
         Component(
             label="Grid Optics Mount",
             definition=grid_optics_mount(
-                n_grid=6,
+                n_grid = n_grid,
                 component_definition=km05t_laser(),
                 optical_height=abs(thorlabs.Kinematic_Mount_KM05T.mount_position[2]),
             ),
@@ -94,7 +100,7 @@ for side in [-1, 1]:
         Component(
             label="Grid Optics Mount",
             definition=grid_optics_mount(
-                n_grid=6,
+                n_grid = n_grid,
                 component_definition=optics.Circular_Waveplate(
                     diameter=dim(0.5, "in"),
                     mount_definition=thorlabs.Rotation_Mount_RSP05(),
@@ -110,7 +116,7 @@ for side in [-1, 1]:
         Component(
             label="Grid Optics Mount",
             definition=grid_optics_mount(
-                n_grid=6,
+                n_grid = n_grid,
                 component_definition=optics.Circular_Mirror(
                     diameter=dim(0.5, "in"),
                     mount_definition=thorlabs.Mirror_Mount_K05S1(),
@@ -127,7 +133,7 @@ for side in [-1, 1]:
         Component(
             label="Grid Optics Mount",
             definition=grid_optics_mount(
-                n_grid=6,
+                n_grid = n_grid,
                 component_definition=optics.Beamsplitter_Cube(
                     side_length=dim(0.5, "in"), ref_polarization=0
                 ),
@@ -144,7 +150,7 @@ for side in [-1, 1]:
         Component(
             label="Grid Optics Mount",
             definition=grid_optics_mount(
-                n_grid=6,
+                n_grid = n_grid,
                 component_definition=optics.Circular_Mirror(
                     diameter=dim(0.5, "in"),
                     mount_definition=thorlabs.Mirror_Mount_K05S1(),
@@ -161,7 +167,7 @@ for side in [-1, 1]:
         Component(
             label="Grid Optics Mount",
             definition=grid_optics_mount(
-                n_grid=6,
+                n_grid = n_grid,
                 component_definition=optics.Circular_Waveplate(
                     diameter=dim(0.5, "in"),
                     mount_definition=thorlabs.Rotation_Mount_RSP05(),
@@ -177,7 +183,7 @@ for side in [-1, 1]:
         Component(
             label="Grid Optics Mount",
             definition=grid_optics_mount(
-                n_grid=6,
+                n_grid = n_grid,
                 component_definition=km05t_laser(),
                 optical_height=abs(thorlabs.Kinematic_Mount_KM05T.mount_position[2]),
             ),
@@ -186,7 +192,6 @@ for side in [-1, 1]:
         rotation=(0, 0, 135 if side == -1 else 45),
     )
 
-n_lasers = 13
 laser_spacing = dim(1.5, "in")
 height_step = dim(5, "mm")
 
