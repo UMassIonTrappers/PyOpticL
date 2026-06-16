@@ -1,9 +1,7 @@
 from PyOpticL.layout import Component, Layout, Subcomponent
 from PyOpticL.library import optics, thorlabs
 from PyOpticL.utils import Dimension as dim
-from PyOpticL.utils import box_shape, cardinal_angle, cylinder_shape, fix_relative_imports, translate_shape
-
-fix_relative_imports()
+from PyOpticL.utils import box_shape, cardinal_angle, cylinder_shape, translate_shape
 
 
 class Periscope:
