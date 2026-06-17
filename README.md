@@ -12,16 +12,24 @@ The beam paths are automatically calculated as components are placed in the layo
 
 <img src="https://github.com/user-attachments/assets/b24b1d63-7b17-4de1-95dd-dcf176b8d9d6" width=400>
 
-## PyOpticL Demonstration with Trapped Ion Qubits:
-Our paper in the journal [*Quantum*](https://quantum-journal.org/?s=Qubit%20operations%20using%20a%20modular%20optical%20system%20engineered%20with%20PyOpticL:%20a%20code-to-CAD%20optical%20layout%20tool&reason=title-click) shows how we use PyOpticL in our lab for trapped ion cooling, detection and single qubit gates.</br>
+## Published Paper Demonstrating PyOpticL Trapped Ion Qubits:
 
-<a href="https://arxiv.org/abs/2501.14957"> arXiv:2501.14957 - Qubit operations using a modular optical system engineered with PyOpticL: a code-to-CAD optical layout tool</a>
+<a href="https://quantum-journal.org/papers/q-2026-06-15-2135/">
+    <img width="500" src="https://github.com/user-attachments/assets/4f8e2af5-2d51-4a9c-bdf8-13fc257014b8" />
+</a>
+
+* [Our paper in the journal *Quantum*](https://quantum-journal.org/papers/q-2026-06-15-2135/) shows how we use PyOpticL in our lab for trapped ion cooling, detection and single qubit gates.
+* [Qubit operations using a modular optical system engineered with PyOpticL: a code-to-CAD optical layout tool](https://quantum-journal.org/papers/q-2026-06-15-2135/) 
+* https://quantum-journal.org/papers/q-2026-06-15-2135/
+* <a href="https://arxiv.org/abs/2501.14957"> arXiv:2501.14957 - Qubit operations using a modular optical system engineered with PyOpticL: a code-to-CAD optical layout tool</a>
 
 ### [UMass Amherst Trapped Ion system built with PyOpticL](https://websites.umass.edu/rniffenegger/pyopticl-code-to-cad-optical-layout/):
-<img width="600" alt="UMass Amherst Trapped Ions" src="https://github.com/user-attachments/assets/2b61827e-5624-4590-b8a4-2e94640a9535" />
+<a href="https://github.com/UMassIonTrappers/PyOpticL/wiki/Apparatus-%E2%80%90-Trapped-Ions-%E2%80%90-Strontium">
+	<img width="700" alt="UMass Amherst Trapped Ions" src="https://github.com/user-attachments/assets/2b61827e-5624-4590-b8a4-2e94640a9535" />
+</a>
 
 ### Modular abstraction: Optics → Baseplates → Subsystems → Apparutus:
-<img width="600" alt="Abstraction" src="https://github.com/user-attachments/assets/1b857ff6-a425-4261-a6f4-b00795de6f05" />
+<img width="700" alt="Abstraction" src="https://github.com/user-attachments/assets/1b857ff6-a425-4261-a6f4-b00795de6f05" />
 
 ---
 
