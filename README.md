@@ -1,34 +1,53 @@
-
+[![Quantum Paper](https://img.shields.io/badge/Quantum-2026-blue)](https://quantum-journal.org/papers/q-2026-06-15-2135/)
+[![arXiv](https://img.shields.io/badge/arXiv-2501.14957-b31b1b)](https://arxiv.org/abs/2501.14957)
+[![Citations](https://img.shields.io/badge/Cite%20PyOpticL-Quantum%202026-blue)](https://quantum-journal.org/papers/q-2026-06-15-2135/)
+[![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/vV4NP6rXmp)
+[![FreeCAD](https://img.shields.io/badge/FreeCAD-1.0+-orange)](https://www.freecad.org/)
+![Version](https://img.shields.io/badge/version-v2.0-success)
 
 <!-- <img height="100" alt="PyOpticL_logo" src="https://github.com/user-attachments/assets/6abdeee1-0d27-4417-b13f-469ae00388c7" /> -->
 
-# PyOpticL - Code-to-CAD optical system engineering
+# PyOpticL - Code-to-CAD Optical Engineering
+
+Design optical systems in Python and automatically generate manufacturable CAD models with integrated beam-path simulation, automatic routing, and modular subsystem design.
 
 <img width="700" alt="banner" src="https://github.com/user-attachments/assets/725264e8-112d-42e8-a89b-91602258fd7d" />
  
-## About PyOpticL (Python Optics Layout)
-PyOpticL is a Python library for optics layout which uses beam-path simulation and dynamic beam-path routing for quick and easy optical layout by placing optical elements along the beam path without a priori specification, enabling dynamic layouts with automatic routing and connectivity.
-The beam paths are automatically calculated as components are placed in the layout. Component placement can be defined "along beam" to remove the need for hard-coded coordinates. Beam calculations include reflection, transmission, refraction, and diffraction. This library enables a new paradigm of optical engineering using modular sub-systems of modular baseplates with commerical optical elements (see abstraction layers below).
-
-<img src="https://github.com/user-attachments/assets/b24b1d63-7b17-4de1-95dd-dcf176b8d9d6" width=400>
-
-## Published Paper Demonstrating PyOpticL Trapped Ion Qubits:
+## Publication – High-Fidelity Trapped-Ion Qubit Operations with PyOpticL
 
 <a href="https://quantum-journal.org/papers/q-2026-06-15-2135/">
     <img width="500" src="https://github.com/user-attachments/assets/4f8e2af5-2d51-4a9c-bdf8-13fc257014b8" />
 </a>
 
-* [Our paper in the journal *Quantum*](https://quantum-journal.org/papers/q-2026-06-15-2135/) shows how we use PyOpticL in our lab for trapped ion cooling, detection and single qubit gates.
-* [Qubit operations using a modular optical system engineered with PyOpticL: a code-to-CAD optical layout tool](https://quantum-journal.org/papers/q-2026-06-15-2135/) 
-* https://quantum-journal.org/papers/q-2026-06-15-2135/
-* <a href="https://arxiv.org/abs/2501.14957"> arXiv:2501.14957 - Qubit operations using a modular optical system engineered with PyOpticL: a code-to-CAD optical layout tool</a>
+PyOpticL is used in our trapped ion laboratory at UMass Amherst to design and deploy modular optical systems for trapped-ion quantum computing. We demonstrate laser cooling, state detection, and >99% fidelity single-qubit gates in our trapped-ion system using PyOpticL baseplates and lasers.
+
+### Read the paper
+
+- **Quantum (2026):**  
+  [Qubit operations using a modular optical system engineered with PyOpticL: a code-to-CAD optical layout tool](https://quantum-journal.org/papers/q-2026-06-15-2135/)
+
+- **arXiv preprint:**  
+  [arXiv:2501.14957](https://arxiv.org/abs/2501.14957)
+
+### Citation
+
+> Myers, J., Caron, C., Helaly, N., Wei, Z., Oh, J., Gotobed, Z., Yabe, K., & Niffenegger, R. J.  
+> *Qubit operations using a modular optical system engineered with PyOpticL: a code-to-CAD optical layout tool*.  
+> Quantum **10**, 2135 (2026).
+
+## About PyOpticL (Python Optics Layout)
+
+PyOpticL (Python Optical Layout) is a code-to-CAD tool for optical design that combines automatic beam-path routing with CAD generation. Optical components are placed directly along simulated beam paths, enabling automatic routing, dynamic layouts, and modular optical system design without hard-coded coordinates. This enables modular optical engineering from baseplates to subsystems to a full apparatus.
+
+<img src="https://github.com/user-attachments/assets/b24b1d63-7b17-4de1-95dd-dcf176b8d9d6" width=400>
+
 
 ### [UMass Amherst Trapped Ion system built with PyOpticL](https://websites.umass.edu/rniffenegger/pyopticl-code-to-cad-optical-layout/):
 <a href="https://github.com/UMassIonTrappers/PyOpticL/wiki/Apparatus-%E2%80%90-Trapped-Ions-%E2%80%90-Strontium">
 	<img width="700" alt="UMass Amherst Trapped Ions" src="https://github.com/user-attachments/assets/2b61827e-5624-4590-b8a4-2e94640a9535" />
 </a>
 
-### Modular abstraction: Optics → Baseplates → Subsystems → Apparutus:
+### Modular abstraction: Optics → Baseplates → Subsystems → Apparatus:
 <img width="700" alt="Abstraction" src="https://github.com/user-attachments/assets/1b857ff6-a425-4261-a6f4-b00795de6f05" />
 
 ---
@@ -62,6 +81,8 @@ The beam paths are automatically calculated as components are placed in the layo
 * [Periscope](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-Periscope)
 * [CoverBox](https://github.com/UMassIonTrappers/PyOpticL/wiki/CoverBox)
 
+<img width="300" src="https://github.com/user-attachments/assets/b3237dba-d979-49b2-821d-6eaf26edf847" />
+
 ### Modular Subsystems based on baseplates:
 * [Laser Cooling and Detection](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-‐-Laser-Cooling-and-Detection)
 * [Raman Zeeman qubit](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Raman)
@@ -73,7 +94,9 @@ The beam paths are automatically calculated as components are placed in the layo
 ### Apparatus based on modular subsystems:
 * [Trapped Ions - Strontium](https://github.com/UMassIonTrappers/PyOpticL/wiki/Apparatus-%E2%80%90-Trapped-Ions-%E2%80%90-Strontium)
 * [Trapped Ions - Calcium](https://github.com/UMassIonTrappers/PyOpticL/wiki/Apparatus-%E2%80%90-Trapped-Ions-%E2%80%90-Calcium)
-* [Project - Redstone](https://github.com/UMassIonTrappers/PyOpticL/wiki/Apparatus-%E2%80%90-Quantum-Optics-%E2%80%90-Project-Redstone)
+* [Project Redstone](https://github.com/UMassIonTrappers/PyOpticL/wiki/Apparatus-%E2%80%90-Quantum-Optics-%E2%80%90-Project-Redstone)
+
+<img width="300" src="https://github.com/user-attachments/assets/1fd957f5-4196-419c-a6ce-1ff5015ce9ec" />
 
 ### Baseplate Examples and Designs
 * [Designs](https://github.com/UMassIonTrappers/PyOpticL/tree/main/Designs)
