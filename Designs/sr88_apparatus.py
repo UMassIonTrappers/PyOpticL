@@ -4,14 +4,14 @@ from PyOpticL.utils import fix_relative_imports
 
 fix_relative_imports("../subsystems")
 
-from laser_cooling_subsystem import laser_cooling_subsystem
-from photoionization_subsystem import (
+from subsystems.laser_cooling_subsystem import laser_cooling_subsystem
+from subsystems.photoionization_subsystem import (
     photoionization_subsystem_commercial,
     photoionization_subsystem_ecdl,
 )
-from raman_subsystem import raman_subsystem
-from repump_subsystem import repump_subsystem, repump_subsystem_mirrored
-from spam_subsystem import spam_subsystem
+from subsystems.raman_subsystem import raman_subsystem
+from subsystems.repump_subsystem import repump_subsystem, repump_subsystem_mirrored
+from subsystems.spam_subsystem import spam_subsystem
 
 ### NOT YET ARRANGED
 
@@ -21,8 +21,8 @@ def sr88_apparatus():
 
     apparatus.add(
         laser_cooling_subsystem(),
-        position=(dim(-60, "grid"), dim(40, "grid"), dim(0, "grid")),
-        rotation=180,
+        position=(dim(0, "grid"), dim(0, "grid"), dim(0, "grid")),
+        rotation=0,
     )
     apparatus.add(
         raman_subsystem(),
@@ -31,7 +31,7 @@ def sr88_apparatus():
     )
     apparatus.add(
         photoionization_subsystem_ecdl(),
-        position=(dim(0, "grid"), dim(0, "grid"), dim(0, "grid")),
+        position=(dim(-40, "grid"), dim(30, "grid"), dim(0, "grid")),
         rotation=0,
     )
     apparatus.add(
@@ -41,17 +41,17 @@ def sr88_apparatus():
     )
     apparatus.add(
         spam_subsystem(),
-        position=(dim(0, "grid"), dim(0, "grid"), dim(0, "grid")),
+        position=(dim(-40, "grid"), dim(40, "grid"), dim(0, "grid")),
         rotation=0,
     )
     apparatus.add(
         repump_subsystem(),
-        position=(dim(0, "grid"), dim(0, "grid"), dim(0, "grid")),
+        position=(dim(0, "grid"), dim(20, "grid"), dim(0, "grid")),
         rotation=0,
     )
     apparatus.add(
         repump_subsystem_mirrored(),
-        position=(dim(0, "grid"), dim(0, "grid"), dim(0, "grid")),
+        position=(dim(0, "grid"), dim(30, "grid"), dim(0, "grid")),
         rotation=0,
     )
 
