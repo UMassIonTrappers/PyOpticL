@@ -1,12 +1,13 @@
 from PyOpticL.layout import Component, Layout
 from PyOpticL.utils import Dimension as dim
-from PyOpticL.utils import box_shape, cardinal_angle, fix_relative_imports
+from PyOpticL.utils import box_shape, fix_relative_imports
 
 fix_relative_imports("../modules")
 
 from beam_pickoff import beam_pickoff
 from ecdl.ecdl import ecdl
 from periscope import periscope
+from singlepass import singlepass, singlepass_mirrored
 
 
 class Source_Box:
@@ -14,7 +15,7 @@ class Source_Box:
     object_icon = ""
     object_color = (0.5, 0.5, 0.5)
 
-    def __init__(self, dimensions: tuple, optical_height: dim = dim(1.5, "in")):
+    def __init__(self, dimensions: tuple, optical_height: dim = dim(1.5, "grid")):
         """Initialize adjustable parameters"""
         self.dimensions = dimensions
         self.optical_height = optical_height
@@ -39,25 +40,32 @@ def photoionization_subsystem_commercial():
         Component(
             label="Source Box",
             definition=Source_Box(
-                dimensions=(dim(8, "in"), dim(4, "in"), dim(4, "in"))
+                dimensions=(dim(8, "grid"), dim(4, "grid"), dim(4, "grid"))
             ),
         ),
         position=(dim(-x, "grid"), 0, 0),
-        rotation=cardinal_angle["left"],
+        rotation=180,
     )
 
     x += 3
     subsystem.add(
         periscope(),
         position=(dim(-x, "grid"), 0, 0),
-        rotation=cardinal_angle["left"],
+        rotation=180,
     )
 
-    x += 2
+    x += 3
+    subsystem.add(
+        singlepass_mirrored(),
+        position=(dim(-x, "grid"), dim(-6, "grid"), 0),
+        rotation=90,
+    )
+
+    x += 6
     subsystem.add(
         beam_pickoff(),
-        position=(dim(-x, "grid"), dim(1, "in"), 0),
-        rotation=cardinal_angle["left"],
+        position=(dim(-x, "grid"), dim(2, "grid"), 0),
+        rotation=180,
     )
 
     return subsystem
@@ -69,22 +77,29 @@ def photoionization_subsystem_ecdl():
     x = -4
     subsystem.add(
         ecdl(),
-        position=(dim(-x, "grid"), dim(1, "in"), 0),
-        rotation=cardinal_angle["left"],
+        position=(dim(-x, "grid"), dim(1, "grid"), 0),
+        rotation=180,
     )
 
     x += 7
     subsystem.add(
         periscope(),
         position=(dim(-x, "grid"), 0, 0),
-        rotation=cardinal_angle["left"],
+        rotation=180,
     )
 
-    x += 2
+    x += 3
+    subsystem.add(
+        singlepass(),
+        position=(dim(-x, "grid"), dim(-6, "grid"), 0),
+        rotation=90,
+    )
+
+    x += 6
     subsystem.add(
         beam_pickoff(),
-        position=(dim(-x, "grid"), dim(1, "in"), 0),
-        rotation=cardinal_angle["left"],
+        position=(dim(-x, "grid"), dim(2, "grid"), 0),
+        rotation=180,
     )
 
     return subsystem

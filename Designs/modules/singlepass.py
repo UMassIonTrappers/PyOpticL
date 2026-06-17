@@ -148,7 +148,7 @@ def singlepass_mirrored():
     baseplate.add(
         fiberport(),
         position=(
-            base_dx - input_x + dim(1, "in"),
+            base_dx - input_x + dim(1.25, "in"),
             dim(0.5, "in") - fiberport_offset,
             0,
         ),
@@ -158,7 +158,7 @@ def singlepass_mirrored():
     beam = baseplate.add(
         BeamPath(label="Beam"),
         position=(
-            base_dx - input_x + dim(1, "in"),
+            base_dx - input_x + dim(1.25, "in"),
             dim(0.5, "in") - fiberport_offset,
             0,
         ),
