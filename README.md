@@ -4,7 +4,7 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2501.14957-b31b1b)](https://arxiv.org/abs/2501.14957)
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/vV4NP6rXmp)
 [![FreeCAD](https://img.shields.io/badge/FreeCAD-1.0+-orange)](https://www.freecad.org/)
-![Version](https://img.shields.io/badge/version-v2.0-success)
+[![Version](https://img.shields.io/badge/version-v2.0-success)](https://github.com/UMassIonTrappers/PyOpticL/releases/tag/v2.0.0)
 [![GitHub stars](https://img.shields.io/github/stars/UMassIonTrappers/PyOpticL?style=social)](https://github.com/UMassIonTrappers/PyOpticL)
 ![Optical Engineering](https://img.shields.io/badge/Optical-Engineering-green)
 ![Quantum Computing](https://img.shields.io/badge/Quantum-Computing-purple)
