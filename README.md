@@ -1,3 +1,5 @@
+# PyOpticL 2.0 - Code-to-CAD Optical Engineering
+
 [![Quantum Paper](https://img.shields.io/badge/Quantum-2026-blue)](https://quantum-journal.org/papers/q-2026-06-15-2135/)
 [![arXiv](https://img.shields.io/badge/arXiv-2501.14957-b31b1b)](https://arxiv.org/abs/2501.14957)
 [![Citations](https://img.shields.io/badge/Cite%20PyOpticL-Quantum%202026-blue)](https://quantum-journal.org/papers/q-2026-06-15-2135/)
@@ -7,12 +9,22 @@
 
 <!-- <img height="100" alt="PyOpticL_logo" src="https://github.com/user-attachments/assets/6abdeee1-0d27-4417-b13f-469ae00388c7" /> -->
 
-# PyOpticL - Code-to-CAD Optical Engineering
-
-Design optical systems in Python and automatically generate manufacturable CAD models with integrated beam-path simulation, automatic routing, and modular subsystem design.
+PyOpticL (Python Optics Layout) is a python library for code-to-CAD design of optical baseplates. Optics layout is along the beam path, so routing is automatic and dynamic as the layout changes. Baseplates are modular, enabling reuse in multiple subsystems which are also modular and can be combined into a full apparatus.
+We have demonstrated PyOpticL baseplates and lasers performing high fidelity trapped ion qubit gates (see our publication in the Journal [*Quantum*](https://quantum-journal.org/papers/q-2026-06-15-2135/))
 
 <img width="700" alt="banner" src="https://github.com/user-attachments/assets/725264e8-112d-42e8-a89b-91602258fd7d" />
  
+* [Getting Setup](#getting-setup)
+* [Quick start](https://github.com/UMassIonTrappers/PyOpticL/wiki/Quick-Start)
+* [Publication](#publication--high-fidelity-trapped-ion-qubit-operations-with-pyopticl)
+* [Wiki](#wiki)
+* [Baseplate Examples](#modular-baseplate-examples)
+* [Subsystem Examples](#modular-subsystems-based-on-baseplates)
+* [Apparatus Examples](#apparatus-based-on-modular-subsystems)
+
+---
+
+
 ## Publication – High-Fidelity Trapped-Ion Qubit Operations with PyOpticL
 
 <a href="https://quantum-journal.org/papers/q-2026-06-15-2135/">
@@ -35,7 +47,7 @@ PyOpticL is used in our trapped ion laboratory at UMass Amherst to design and de
 > *Qubit operations using a modular optical system engineered with PyOpticL: a code-to-CAD optical layout tool*.  
 > Quantum **10**, 2135 (2026).
 
-## About PyOpticL (Python Optics Layout)
+## About 
 
 PyOpticL (Python Optical Layout) is a code-to-CAD tool for optical design that combines automatic beam-path routing with CAD generation. Optical components are placed directly along simulated beam paths, enabling automatic routing, dynamic layouts, and modular optical system design without hard-coded coordinates. This enables modular optical engineering from baseplates to subsystems to a full apparatus.
 
@@ -146,7 +158,7 @@ To update to v2.0:
 * Re-install PyOpticL
 ___
 
-## PyOpticL Community Members:
+## PyOpticL Community:
 
  * MIT QUANTA LAB (Prof. Isaac Chuang created the initial C4PO library which inspired this project)
  * MIT Quantum Photonics & AI Group (Prof. Dirk Englund)
