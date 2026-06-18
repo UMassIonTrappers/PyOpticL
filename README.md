@@ -1,11 +1,13 @@
 # PyOpticL 2.0 - Code-to-CAD Optical Engineering
 
-[![Quantum Paper](https://img.shields.io/badge/Quantum-2026-blue)](https://quantum-journal.org/papers/q-2026-06-15-2135/)
-[![arXiv](https://img.shields.io/badge/arXiv-2501.14957-b31b1b)](https://arxiv.org/abs/2501.14957)
 [![Citations](https://img.shields.io/badge/Cite%20PyOpticL-Quantum%202026-blue)](https://quantum-journal.org/papers/q-2026-06-15-2135/)
+[![arXiv](https://img.shields.io/badge/arXiv-2501.14957-b31b1b)](https://arxiv.org/abs/2501.14957)
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/vV4NP6rXmp)
 [![FreeCAD](https://img.shields.io/badge/FreeCAD-1.0+-orange)](https://www.freecad.org/)
 ![Version](https://img.shields.io/badge/version-v2.0-success)
+[![GitHub stars](https://img.shields.io/github/stars/UMassIonTrappers/PyOpticL?style=social)](https://github.com/UMassIonTrappers/PyOpticL)
+![Optical Engineering](https://img.shields.io/badge/Optical-Engineering-green)
+![Quantum Computing](https://img.shields.io/badge/Quantum-Computing-purple)
 
 <!-- <img height="100" alt="PyOpticL_logo" src="https://github.com/user-attachments/assets/6abdeee1-0d27-4417-b13f-469ae00388c7" /> -->
 
@@ -13,6 +15,29 @@ PyOpticL (Python Optics Layout) is a Python library for code-to-CAD design of op
 
 <img width="700" alt="banner" src="https://github.com/user-attachments/assets/725264e8-112d-42e8-a89b-91602258fd7d" />
 
+## Key Features
+
+- Automatic beam-path routing
+- Dynamic optical layouts
+- Code-to-CAD workflow
+- Modular baseplates and subsystems
+- Gaussian beam simulation
+- Manufacturable mechanical designs (CNC)
+- FreeCAD integration
+- Demonstrated in trapped-ion quantum computing experiments
+
+## Code Structure
+
+```python
+baseplate = Component(...)
+beam = baseplate.add(BeamPath(...))
+
+beam.add(mirror())
+beam.add(waveplate())
+beam.add(beamsplitter_cube())
+```
+
+## Readme contents:
  
 * [Installation](#getting-setup)
 * [Quick start](https://github.com/UMassIonTrappers/PyOpticL/wiki/Quick-Start)
@@ -87,7 +112,7 @@ Please cite our paper if you use PyOpticL. Thank you!
 * [Laser - Extended Cavity Diode Laser (with optical isolator)](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-ECDL-with-Isolation-Baseplate)
 * [Doublepass AOM Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-Doublepass-Baseplate)
 * [Singlepass AOM Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-Singlepass-Baseplate)
-* [Saturation Absorption Spectroscopy Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-%E2%80%90-Saturation-Absorption-Spectroscopy-Baseplate))
+* [Saturation Absorption Spectroscopy Baseplate](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-%E2%80%90-Saturation-Absorption-Spectroscopy-Baseplate)
 * [Periscope](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-Periscope)
 * [CoverBox](https://github.com/UMassIonTrappers/PyOpticL/wiki/CoverBox)
 
