@@ -11,7 +11,10 @@
 
 <!-- <img height="100" alt="PyOpticL_logo" src="https://github.com/user-attachments/assets/6abdeee1-0d27-4417-b13f-469ae00388c7" /> -->
 
-PyOpticL (Python Optics Layout) is a Python library for code-to-CAD design of optical systems using modular baseplates. It places optics along simulated beam paths, including branched beam paths, so routing is automatic and dynamic as optics are added or modified. Baseplates are designed to be easily machined or 3D printed and mounted on an optical table. Baseplates are easy to set up as aligning optics on the baseplate is like 'paint by numbers', with each optic having a pre-aligned mount. Baseplates are reusable building blocks that can be combined into modular subsystems. Subsystems are also reusable at various wavelengths such that they can be easily combined into many different experimental apparatuses. We have demonstrated PyOpticL baseplates and lasers performing high-fidelity trapped ion qubit operations (see our publication in the Journal Quantum).
+PyOpticL (Python Optics Layout) is a Python library for code-to-CAD design of optical systems using modular baseplates. It places optics along simulated beam paths, including branched beam paths, so routing is automatic and dynamic as optics are added or modified. Baseplates are designed to be easily machined or 3D printed and mounted on an optical table. Baseplates are easy to set up as aligning optics on the baseplate is like 'paint by numbers', with each optic having a pre-aligned mount. Baseplates are reusable building blocks that can be combined into modular subsystems. Subsystems are also reusable at various wavelengths such that they can be easily combined into many different experimental apparatuses. 
+
+If you use PyOpticL in your research, please cite our paper published in Quantum. The paper introduces PyOpticL and demonstrates its use in a trapped-ion quantum computing experiment, including laser cooling, state detection, and high-fidelity qubit operations.
+
 
 <img width="700" alt="banner" src="https://github.com/user-attachments/assets/725264e8-112d-42e8-a89b-91602258fd7d" />
 
