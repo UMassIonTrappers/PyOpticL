@@ -14,7 +14,7 @@ PyOpticL (Python Optics Layout) is a Python library for code-to-CAD design of op
 <img width="700" alt="banner" src="https://github.com/user-attachments/assets/725264e8-112d-42e8-a89b-91602258fd7d" />
 
  
-* [Getting Setup](#getting-setup)
+* [Installation](#getting-setup)
 * [Quick start](https://github.com/UMassIonTrappers/PyOpticL/wiki/Quick-Start)
 * [Publication](#publication--high-fidelity-trapped-ion-qubit-operations-with-pyopticl)
 * [Wiki](#wiki)
@@ -49,17 +49,15 @@ Please cite our paper if you use PyOpticL. Thank you!
 > *Qubit operations using a modular optical system engineered with PyOpticL: a code-to-CAD optical layout tool*.  
 > Quantum **10**, 2135 (2026).
 
-## About 
-
-PyOpticL (Python Optical Layout) is a code-to-CAD tool for optical design that combines automatic beam-path routing with CAD generation. Optical components are placed directly along simulated beam paths, enabling automatic routing, dynamic layouts, and modular optical system design without hard-coded coordinates. This enables modular optical engineering from baseplates to subsystems to a full apparatus.
-
-<img src="https://github.com/user-attachments/assets/b24b1d63-7b17-4de1-95dd-dcf176b8d9d6" width=400>
-
 
 ### [UMass Amherst Trapped Ion system built with PyOpticL](https://websites.umass.edu/rniffenegger/pyopticl-code-to-cad-optical-layout/):
+
 <a href="https://github.com/UMassIonTrappers/PyOpticL/wiki/Apparatus-%E2%80%90-Trapped-Ions-%E2%80%90-Strontium">
 	<img width="700" alt="UMass Amherst Trapped Ions" src="https://github.com/user-attachments/assets/2b61827e-5624-4590-b8a4-2e94640a9535" />
 </a>
+
+<img width="700" src="https://github.com/user-attachments/assets/b24b1d63-7b17-4de1-95dd-dcf176b8d9d6" width=400>
+
 
 ### Modular abstraction: Optics → Baseplates → Subsystems → Apparatus:
 <img width="700" alt="Abstraction" src="https://github.com/user-attachments/assets/1b857ff6-a425-4261-a6f4-b00795de6f05" />
@@ -79,11 +77,9 @@ PyOpticL (Python Optical Layout) is a code-to-CAD tool for optical design that c
 <!-- Trapped Ion quantum computer at UMass Amherst engineered with PyOpticL: -->
 <!-- <img src="https://github.com/user-attachments/assets/1dbe2986-20e2-4f4e-9b4c-00dd31a4b656" width=50%> -->
 
-### ReadMe
-* [Library Features and Information](https://github.com/UMassIonTrappers/PyOpticL#about-pyopticl-python-optics-layout)
-* [Installation Guide](https://github.com/UMassIonTrappers/PyOpticL#getting-setup)
 
 ### [Wiki](https://github.com/UMassIonTrappers/PyOpticL/wiki)
+* [Installation Guide](https://github.com/UMassIonTrappers/PyOpticL#getting-setup)
 * [Quick Start Guide](https://github.com/UMassIonTrappers/PyOpticL/wiki/Quick-Start)
 * [Contributing to PyOpticL](https://github.com/UMassIonTrappers/PyOpticL/wiki/Contributing-to-PyOpticL)
 
