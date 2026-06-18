@@ -9,10 +9,10 @@
 
 <!-- <img height="100" alt="PyOpticL_logo" src="https://github.com/user-attachments/assets/6abdeee1-0d27-4417-b13f-469ae00388c7" /> -->
 
-PyOpticL (Python Optics Layout) is a python library for code-to-CAD design of optical baseplates. Optics layout is along the beam path, so routing is automatic and dynamic as the layout changes. Baseplates are modular, enabling reuse in multiple subsystems which are also modular and can be combined into a full apparatus.
-We have demonstrated PyOpticL baseplates and lasers performing high fidelity trapped ion qubit gates (see our publication in the Journal [*Quantum*](https://quantum-journal.org/papers/q-2026-06-15-2135/))
+PyOpticL (Python Optics Layout) is a Python library for code-to-CAD design of optical systems using modular baseplates. It places optics along simulated beam paths, including branched beam paths, so routing is automatic and dynamic as optics are added or modified. Baseplates are designed to be easily machined or 3D printed and mounted on an optical table. Baseplates are easy to set up as aligning optics on the baseplate is like 'paint by numbers', with each optic having a pre-aligned mount. Baseplates are reusable building blocks that can be combined into modular subsystems. Subsystems are also reusable at various wavelengths such that they can be easily combined into many different experimental apparatuses. We have demonstrated PyOpticL baseplates and lasers performing high-fidelity trapped ion qubit operations (see our publication in the Journal Quantum).
 
 <img width="700" alt="banner" src="https://github.com/user-attachments/assets/725264e8-112d-42e8-a89b-91602258fd7d" />
+
  
 * [Getting Setup](#getting-setup)
 * [Quick start](https://github.com/UMassIonTrappers/PyOpticL/wiki/Quick-Start)
@@ -31,7 +31,7 @@ We have demonstrated PyOpticL baseplates and lasers performing high fidelity tra
     <img width="500" src="https://github.com/user-attachments/assets/4f8e2af5-2d51-4a9c-bdf8-13fc257014b8" />
 </a>
 
-PyOpticL is used in our trapped ion laboratory at UMass Amherst to design and deploy modular optical systems for trapped-ion quantum computing. We demonstrate laser cooling, state detection, and >99% fidelity single-qubit gates in our trapped-ion system using PyOpticL baseplates and lasers.
+We use PyOpticL in our trapped ion laboratory at UMass Amherst to design modular optical systems for trapped-ion quantum computing. In this paper we demonstrate laser cooling, state detection, and >99% fidelity single-qubit gates in our trapped-ion system using PyOpticL baseplates and lasers.
 
 ### Read the paper
 
@@ -42,6 +42,8 @@ PyOpticL is used in our trapped ion laboratory at UMass Amherst to design and de
   [arXiv:2501.14957](https://arxiv.org/abs/2501.14957)
 
 ### Citation
+
+Please cite our paper if you use PyOpticL. Thank you! 
 
 > Myers, J., Caron, C., Helaly, N., Wei, Z., Oh, J., Gotobed, Z., Yabe, K., & Niffenegger, R. J.  
 > *Qubit operations using a modular optical system engineered with PyOpticL: a code-to-CAD optical layout tool*.  
