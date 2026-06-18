@@ -118,7 +118,7 @@ Please cite our paper if you use PyOpticL. Thank you!
 * [v2.0-Highlights](https://github.com/UMassIonTrappers/PyOpticL/wiki/v2.0-Highlights)
    * Including Improved Optics Simulation (Gaussian beam simulation)
 
-<img width="300" alt="image" src="https://github.com/user-attachments/assets/6ebfe1a3-06ec-457c-a59f-b1aafaa17a6a" />
+<img width="400" src="https://github.com/user-attachments/assets/d80692a0-0d9f-4cb5-82f1-bce2f79c20ee" />
 
 
 <!-- Trapped Ion quantum computer at UMass Amherst engineered with PyOpticL: -->
