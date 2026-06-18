@@ -89,14 +89,33 @@ Please cite our paper if you use PyOpticL. Thank you!
 
 ---
 
+## Getting Setup
+
+1. **Install FreeCAD, Python, and Git**
+
+2. **Add PyOpticL as a custom addon repository in FreeCAD**  
+	Under _Edit>Preferences>Addon Manager>Custom Repositories,_ click the plus icon and enter the following information: \
+    _Repository URL:_ https://github.com/UMassIonTrappers/PyOpticL.git \
+    _Branch:_ main \
+   Press _OK_ to save settings
+
+4. **Install the PyOpticL library**
+    In the Addon Manager _(Tools>Addon Manager),_ search for "PyOpticL" and click install. \
+   _Note: if you get an error related to git, try disabling it - Edit>Preferences>Addon Manager>Disable git_
+		
+6. **Check everything is setup correctly**  
+   You should now be able to re-launch FreeCAD and see the "PyOpticL" workbench in the workbench dropdown
+   <!-- <img width="250" alt="Screenshot 2023-10-27 225345" src="https://github.com/user-attachments/assets/7a43cac3-7d3b-4a3b-8e5f-189f39729251"> -->
+
+7. **Check out the [wiki](https://github.com/UMassIonTrappers/PyOpticL/wiki) for guides on how to [get started](https://github.com/UMassIonTrappers/PyOpticL/wiki/Quick-Start) and examples**
+
+
 ###  PyOpticL v2.0 🚀 released! It is a complete rewrite of the PyOpticL library!
 * [Migrate from 1.0 to 2.0](https://github.com/UMassIonTrappers/PyOpticL/tree/main#pyopticl-v1v2-migration) 
 * [v2.0-Highlights](https://github.com/UMassIonTrappers/PyOpticL/wiki/v2.0-Highlights)
    * Including Improved Optics Simulation (Gaussian beam simulation)
 
 <img width="300" alt="image" src="https://github.com/user-attachments/assets/6ebfe1a3-06ec-457c-a59f-b1aafaa17a6a" />
-
-### Discord Server: https://discord.gg/vV4NP6rXmp
 
 
 <!-- Trapped Ion quantum computer at UMass Amherst engineered with PyOpticL: -->
@@ -137,29 +156,6 @@ Please cite our paper if you use PyOpticL. Thank you!
 * [Designs](https://github.com/UMassIonTrappers/PyOpticL/tree/main/Designs)
 * [3D Models and Technical Drawings](https://github.com/UMassIonTrappers/PyOpticL/tree/v1-legacy/Design/Module/3DModel)
 
----
-
-
-## Getting Setup
-
-1. **Install FreeCAD, Python, and Git**
-
-2. **Add PyOpticL as a custom addon repository in FreeCAD**  
-	Under _Edit>Preferences>Addon Manager>Custom Repositories,_ click the plus icon and enter the following information: \
-    _Repository URL:_ https://github.com/UMassIonTrappers/PyOpticL.git \
-    _Branch:_ main \
-   Press _OK_ to save settings
-
-4. **Install the PyOpticL library**
-    In the Addon Manager _(Tools>Addon Manager),_ search for "PyOpticL" and click install. \
-   _Note: if you get an error related to git, try disabling it - Edit>Preferences>Addon Manager>Disable git_
-		
-6. **Check everything is setup correctly**  
-   You should now be able to re-launch FreeCAD and see the "PyOpticL" workbench in the workbench dropdown
-   <!-- <img width="250" alt="Screenshot 2023-10-27 225345" src="https://github.com/user-attachments/assets/7a43cac3-7d3b-4a3b-8e5f-189f39729251"> -->
-
-7. **Check out the [wiki](https://github.com/UMassIonTrappers/PyOpticL/wiki) for guides on how to [get started](https://github.com/UMassIonTrappers/PyOpticL/wiki/Quick-Start) and examples**
-
 ### Pre-made Layouts
 
 Macro files for pre-made layouts can be found in the PyOpticL directory. This can be found in: \
@@ -182,6 +178,8 @@ To update to v2.0:
 ___
 
 ## PyOpticL Community:
+
+### Discord Server: https://discord.gg/vV4NP6rXmp
 
  * MIT QUANTA LAB (Prof. Isaac Chuang created the initial C4PO library which inspired this project)
  * MIT Quantum Photonics & AI Group (Prof. Dirk Englund)
