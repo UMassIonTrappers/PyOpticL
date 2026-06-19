@@ -2,9 +2,7 @@ from PyOpticL.beam_path import BeamPath
 from PyOpticL.layout import Component
 from PyOpticL.library import Baseplate, optics, thorlabs
 from PyOpticL.utils import Dimension as dim
-from PyOpticL.utils import cardinal_angle, fix_relative_imports
-
-fix_relative_imports()
+from PyOpticL.utils import cardinal_angle
 
 base_dx = dim(4, "in")
 base_dy = dim(4, "in")

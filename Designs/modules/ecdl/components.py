@@ -301,6 +301,7 @@ class ecdl_box:
 
     object_group = "enclosures"
     object_color = (0.5, 0.5, 0.5)
+    object_transparency = 85
 
     def __init__(
         self,
