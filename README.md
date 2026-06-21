@@ -49,6 +49,7 @@ beam.add(beamsplitter_cube())
 * [Baseplate Examples](#modular-baseplate-examples)
 * [Subsystem Examples](#modular-subsystems-based-on-baseplates)
 * [Apparatus Examples](#apparatus-based-on-modular-subsystems)
+* [PyOpticL Community](https://github.com/UMassIonTrappers/PyOpticL/tree/main#pyopticl-community)
 
 ---
 
@@ -182,8 +183,9 @@ ___
 
 ## PyOpticL Community:
 
-### Discord Server: https://discord.gg/vV4NP6rXmp
+### Join the discussion on our Discord server: https://discord.gg/vV4NP6rXmp
 
+### Experimental Labs using PyOpticL:
  * MIT QUANTA LAB (Prof. Isaac Chuang created the initial C4PO library which inspired this project)
  * MIT Quantum Photonics & AI Group (Prof. Dirk Englund)
  * UCONN - Prof. Simone Colombo
@@ -198,4 +200,4 @@ ___
 <img width="800" src="https://github.com/user-attachments/assets/da1f5e60-a97e-493c-a372-581fa3e241eb" />
 
 
-#### Again we thank the MIT QUANTA LAB for sharing their C4PO ('CAD for Precision Optics') based on OpenSCAD which inspired this library.
+> We thank Ike and the MIT QUANTA LAB for sharing their C4PO ('CAD for Precision Optics') based on OpenSCAD which inspired this library.
