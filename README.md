@@ -1,13 +1,35 @@
-# PyOpticL 2.0 - Code-to-CAD Optical Engineering
+<div align="center">
 
-[![Citations](https://img.shields.io/badge/Cite%20PyOpticL-Quantum%202026-blue)](https://quantum-journal.org/papers/q-2026-06-15-2135/)
-[![arXiv](https://img.shields.io/badge/arXiv-2501.14957-b31b1b)](https://arxiv.org/abs/2501.14957)
-[![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/vV4NP6rXmp)
-[![FreeCAD](https://img.shields.io/badge/FreeCAD-1.0+-orange)](https://www.freecad.org/)
-[![Version](https://img.shields.io/badge/version-v2.0-success)](https://github.com/UMassIonTrappers/PyOpticL/releases/tag/v2.0.0)
-[![GitHub stars](https://img.shields.io/github/stars/UMassIonTrappers/PyOpticL?style=social)](https://github.com/UMassIonTrappers/PyOpticL)
-![Optical Engineering](https://img.shields.io/badge/Optical-Engineering-green)
-![Quantum Computing](https://img.shields.io/badge/Quantum-Computing-purple)
+<img width="300" src="https://github.com/user-attachments/assets/6abdeee1-0d27-4417-b13f-469ae00388c7">
+
+### Code-to-CAD Optical Engineering
+
+Design optical systems in Python and automatically generate modular CAD models of optical hardware.
+
+<p>
+  <a href="https://quantum-journal.org/papers/q-2026-06-15-2135/">
+    <img src="https://img.shields.io/badge/Quantum-2026-blue" alt="Quantum Paper">
+  </a>
+  <a href="https://github.com/UMassIonTrappers/PyOpticL/releases">
+    <img src="https://img.shields.io/github/v/release/UMassIonTrappers/PyOpticL" alt="Release">
+  </a>
+	<a href="https://discord.gg/vV4NP6rXmp">
+	  <img src="https://img.shields.io/badge/Discord-Join%20Discord-5865F2?logo=discord&logoColor=white" alt="Discord">
+	</a>
+	<a href="https://github.com/UMassIonTrappers/PyOpticL/wiki/Quick-Start">
+  <img src="https://img.shields.io/badge/Get%20Started-Quick%20Start-success" alt="Quick Start">
+</a>
+	  <a href="https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-%E2%80%90-ECDL-with-Isolation-Baseplate">
+    <img src="https://img.shields.io/badge/DIY-LASER-red" alt="ECDL Baseplate">
+  </a>
+</p>
+
+[Publication](https://quantum-journal.org/papers/q-2026-06-15-2135/) •
+[Examples](#modular-baseplate-examples) •
+[Quick Start](https://github.com/UMassIonTrappers/PyOpticL/wiki/Quick-Start) •
+[Discord](https://discord.gg/vV4NP6rXmp)
+
+</div>
 
 <!-- <img height="100" alt="PyOpticL_logo" src="https://github.com/user-attachments/assets/6abdeee1-0d27-4417-b13f-469ae00388c7" /> -->
 
@@ -18,10 +40,30 @@ If you use PyOpticL in your research, please cite our paper published in Quantum
 
 <img width="700" alt="banner" src="https://github.com/user-attachments/assets/725264e8-112d-42e8-a89b-91602258fd7d" />
 
+## What can I build with PyOpticL?
+
+- [Extended-Cavity Diode Lasers (ECDLs)](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-%E2%80%90-ECDL-with-Isolation-Baseplate)
+- [Double-Pass AOM Systems](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-Doublepass-Baseplate)
+- [Saturation Absorption Spectroscopy](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-%E2%80%90-Saturation-Absorption-Spectroscopy-Baseplate)
+- [Qubit Laser Systems](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Raman)
+- [Trapped Ion Quantum Computer](https://github.com/UMassIonTrappers/PyOpticL/wiki/Apparatus-%E2%80%90-Trapped-Ions-%E2%80%90-Strontium)
+
+## Why PyOpticL?
+
+Traditional optical design:
+- Draw optics manually in CAD
+- Update CAD manually
+- Re-align hardware manually during development
+
+PyOpticL:
+- Define layouts in Python
+- Automatic beam routing during development
+- Automatic CAD generation
+- Modular reusable subsystems
+
 ## Key Features
 
-- Automatic beam-path routing
-- Dynamic optical layouts
+- Automatic beam-path routing and dynamic optical layouts
 - Code-to-CAD workflow
 - Modular baseplates and subsystems
 - Gaussian beam simulation
@@ -39,6 +81,10 @@ beam.add(mirror())
 beam.add(waveplate())
 beam.add(beamsplitter_cube())
 ```
+
+### Used by researchers at
+
+MIT • Stanford • UC Berkeley • UW Madison • UConn • NUS • Quera 
 
 ## Readme contents:
  
