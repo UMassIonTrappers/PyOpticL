@@ -209,16 +209,19 @@ ___
 ### Join the discussion on our Discord server: https://discord.gg/vV4NP6rXmp
 
 ### Experimental Labs using PyOpticL:
- * MIT QUANTA LAB (Prof. Isaac Chuang created the initial C4PO library which inspired this project)
- * MIT Quantum Photonics & AI Group (Prof. Dirk Englund)
- * UCONN - Prof. Simone Colombo
- * Montana St. - Prof. Matt Jaffe
- * UC Berkeley - Prof. Aziza Suleymanzade
- * UW Madison - Prof. Josiah Sinclair
- * NUS - Prof. Dzmitry Matsukevich
- * Stanford - Prof. Jonathan Simon
- * Quera
- * Durham University
+ * MIT QUANTA LAB - Prof. Isaac Chuang (Ba⁺ & Sr⁺)
+ * MIT Quantum Photonics & AI Group - Prof. Dirk Englund (Rb)
+ * [UC Berkeley - Prof. Aziza Suleymanzade (Rb)](https://github.com/hybrid-lab/PyOpticL_Rubidium_System)
+ * [UW Madison - Prof. Josiah Sinclair (Rb)](https://github.com/hybrid-lab/PyOpticL_Rubidium_System/tree/sinclairlab-pyopticl)
+ * UCONN - Prof. Simone Colombo (Rb, Sr)
+ * Montana State University - Prof. Matt Jaffe (Rb)
+ * National University of Singapore - Prof. Dzmitry Matsukevich (Yb⁺)
+ * Stanford - Prof. Jonathan Simon (Rb)
+ * Durham University (Rb)
+ * Quera (Rb)
+ * Harvard University (Rb)
+ * Calvin Q (Rb)
+
 
 <img width="800" src="https://github.com/user-attachments/assets/da1f5e60-a97e-493c-a372-581fa3e241eb" />
 
