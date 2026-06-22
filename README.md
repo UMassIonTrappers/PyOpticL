@@ -2,6 +2,10 @@
 
 <img width="300" src="https://github.com/user-attachments/assets/6abdeee1-0d27-4417-b13f-469ae00388c7">
 
+<br>
+
+<img width="300" alt="PyOpticL" src="https://github.com/user-attachments/assets/385d672c-ae25-4efd-be92-cdcde1c0254b" />
+
 ### Code-to-CAD Optical Engineering
 
 Design optical systems in Python and automatically generate modular CAD models of optical hardware.
