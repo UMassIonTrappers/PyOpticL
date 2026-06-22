@@ -37,39 +37,16 @@ PyOpticL (Python Optics Layout) is a Python library for code-to-CAD design of op
 
 If you use PyOpticL in your research, please cite our paper published in Quantum. The paper introduces PyOpticL and demonstrates its use in a trapped-ion quantum computing experiment, including laser cooling, state detection, and high-fidelity qubit operations.
 
-
 <img width="700" alt="banner" src="https://github.com/user-attachments/assets/725264e8-112d-42e8-a89b-91602258fd7d" />
 
-## What can I build with PyOpticL?
+## What can I design and build with PyOpticL?
 
+- [Laser Pulse Control Systems](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-Doublepass-Baseplate)
 - [Extended-Cavity Diode Lasers (ECDLs)](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-%E2%80%90-ECDL-with-Isolation-Baseplate)
-- [Double-Pass AOM Systems](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-‐-Doublepass-Baseplate)
 - [Saturation Absorption Spectroscopy](https://github.com/UMassIonTrappers/PyOpticL/wiki/Module-%E2%80%90-Saturation-Absorption-Spectroscopy-Baseplate)
 - [Qubit Laser Systems](https://github.com/UMassIonTrappers/PyOpticL/wiki/Subsystem-%E2%80%90-Raman)
+- [Neutral Atom Quantum Computer](https://github.com/hybrid-lab/PyOpticL_Rubidium_System)
 - [Trapped Ion Quantum Computer](https://github.com/UMassIonTrappers/PyOpticL/wiki/Apparatus-%E2%80%90-Trapped-Ions-%E2%80%90-Strontium)
-
-## Why PyOpticL?
-
-Traditional optical design:
-- Draw optics manually in CAD
-- Update CAD manually
-- Re-align hardware manually during development
-
-PyOpticL:
-- Define layouts in Python
-- Automatic beam routing during development
-- Automatic CAD generation
-- Modular reusable subsystems
-
-## Key Features
-
-- Automatic beam-path routing and dynamic optical layouts
-- Code-to-CAD workflow
-- Modular baseplates and subsystems
-- Gaussian beam simulation
-- Manufacturable mechanical designs (CNC)
-- FreeCAD integration
-- Demonstrated in trapped-ion quantum computing experiments
 
 ## Code Structure
 
@@ -82,9 +59,9 @@ beam.add(waveplate())
 beam.add(beamsplitter_cube())
 ```
 
-### Used by researchers at
+### Used by researchers at:
 
-MIT • Stanford • UC Berkeley • UW Madison • UConn • NUS • Quera 
+MIT • Stanford • [UC Berkeley](https://github.com/hybrid-lab/PyOpticL_Rubidium_System) • [UMass Amherst](https://websites.umass.edu/rniffenegger/pyopticl-code-to-cad-optical-layout/) • [UW Madison](https://github.com/hybrid-lab/PyOpticL_Rubidium_System) • UConn • NUS • Quera • [Harvard](https://github.com/hybrid-lab/PyOpticL_Rubidium_System) • [CalvinQ](https://github.com/hybrid-lab/PyOpticL_Rubidium_System)
 
 ## Readme contents:
  
