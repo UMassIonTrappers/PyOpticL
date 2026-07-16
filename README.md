@@ -221,7 +221,7 @@ ___
  * Montana State University - Prof. Matt Jaffe (Rb)
  * National University of Singapore - Prof. Dzmitry Matsukevich (Yb⁺)
  * Stanford - Prof. Jonathan Simon (Rb)
- * Durham University (Rb)
+ * Durham University Quantum Light and Matter - Tobias Franzen (Yb), Dani Pizzey (Rb)
  * Quera (Rb)
  * Harvard University (Rb)
  * Calvin Q (Rb)
