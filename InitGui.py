@@ -51,6 +51,7 @@ class OpticsWorkbench(Workbench):
             "ConvertModel",
             "OpenModel",
             "GetPosition",
+            "GenerateDrawings",
         ]  # A list of command names created in the line above
         # self.toolbar = ["ReloadModules"]
         self.appendToolbar(

@@ -14,7 +14,7 @@ import numpy as np
 import Part
 from PySide import QtCore, QtGui
 
-from PyOpticL import layout
+from PyOpticL import layout, drawings
 
 
 class Rerun_Macro:
@@ -60,7 +60,7 @@ class Export_STLs:
         return {
             "Pixmap": ":/icons/LinkSelect.svg",
             "Accel": "Shift+E",
-            "MenuText": "Export Baselplate and Adapter STLs to Downloads Folder",
+            "MenuText": "Export Baseplate and Adapter STLs to Downloads Folder",
         }
 
     def Activated(self):
@@ -111,7 +111,7 @@ class Export_Cart:
         types = []
         objs = []
         for obj in doc.Objects:
-            if hasattr(obj.Proxy, "part_numbers"):
+            if hasattr(obj, "Proxy") and hasattr(obj.Proxy, "part_numbers"):
                 if "" in obj.Proxy.part_numbers:
                     name = obj.Label
                     temp = obj
@@ -573,6 +573,18 @@ class Get_Position:
         print(f"Position: ({position[0]:.3f}, {position[1]:.3f}, {position[2]:.3f})")
         return
 
+class Generate_Drawings:
+
+    def GetResources(self):
+        return {
+            "Pixmap": ":/icons/Draft_Layer.svg",
+            "Accel": "",
+            "MenuText": "Generate drawings",
+        }
+
+    def Activated(self):
+        drawings.generate_drawings()
+
 
 Gui.addCommand("RerunMacro", Rerun_Macro())
 Gui.addCommand("ToggleDrawStyle", Toggle_Draw_Style())
@@ -582,3 +594,4 @@ Gui.addCommand("ReloadModules", Reload_Modules())
 Gui.addCommand("ConvertModel", Convert_Model())
 Gui.addCommand("OpenModel", Open_Model())
 Gui.addCommand("GetPosition", Get_Position())
+Gui.addCommand("GenerateDrawings", Generate_Drawings())
