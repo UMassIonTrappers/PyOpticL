@@ -3,6 +3,7 @@ minimum_thread_engagement = 8
 default_extra_drill_depth = 10
 hidden_object_groups = ["hardware"]
 enable_beam_transparency = False
+render_mode = "STL"
 
 
 def set_measurement_system(system: str):
@@ -121,3 +122,29 @@ def get_enable_beam_transparency():
     """
 
     return enable_beam_transparency
+
+
+def set_render_mode(mode: str):
+    """
+    Set the rendering mode preference.
+
+    Args:
+        mode (str): The rendering mode to use
+    """
+
+    global render_mode
+    if mode.upper() in ["STL", "STEP", "NONE"]:
+        render_mode = mode.upper()
+    else:
+        raise ValueError("Render mode {mode} not defined")
+
+
+def get_render_mode():
+    """
+    Get the current rendering mode.
+
+    Returns:
+        mode: The current rendering mode
+    """
+
+    return render_mode

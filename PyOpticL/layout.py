@@ -4,8 +4,9 @@ from collections import namedtuple
 
 import FreeCAD as App
 import Part
+import Mesh
 
-from PyOpticL.settings import get_hidden_object_groups
+from PyOpticL.settings import get_hidden_object_groups, get_render_mode
 from PyOpticL.utils import collect_children
 
 Subcomponent = namedtuple("Subcomponent", ["component", "position", "rotation"])
@@ -211,7 +212,11 @@ class Component(Layout):
                     setattr(self, attr, getattr(definition, attr))
 
             if hasattr(definition, "mesh"):
-                object_type = "Mesh"
+                 match get_render_mode():
+                     case "STL":
+                         object_type = "Mesh"
+                     case "STEP":
+                         object_type = "Part"
 
             # wrap interfaces to set parent
             if hasattr(definition, "interfaces"):
@@ -249,12 +254,14 @@ class Component(Layout):
         """Calculate and set the shape of the object"""
 
         obj = self.get_object()
-        if self.object_group in get_hidden_object_groups():
+        if self.object_group in get_hidden_object_groups() or (hasattr(self, "mesh") and self.mesh is None) or get_render_mode() == "NONE":
             pass
-
         # update object shape
-        elif self.object_type == "Part" and hasattr(self, "shape"):
-            shape = self.shape()
+        elif self.object_type == "Part" and (hasattr(self, "shape") or hasattr(self, "mesh")):
+            if hasattr(self, "mesh"):
+                shape = self.mesh
+            else:
+                shape = self.shape()
             if isinstance(shape, list):  # if multiple shapes are returned, fuse
                 combined = shape[0]
                 for part in shape[1:]:
@@ -289,32 +296,33 @@ class Component(Layout):
                         drill_shape.Placement = (
                             obj.Placement.inverse() * drill_obj.Placement
                         )
+                        if hasattr(self, "shape"):
+                            # make sure drill intersects shape
+                            common = shape.common(drill_shape)
+                            if common.Volume < 1e-6 or drill_shape.Volume < 1e-6:
+                                continue
 
-                        # make sure drill intersects shape
-                        common = shape.common(drill_shape)
-                        if common.Volume < 1e-6 or drill_shape.Volume < 1e-6:
-                            continue
+                            rotation = drill_shape.Placement.Rotation.inverted()
+                            z_direction = rotation.multVec(App.Vector(0, 0, 1))
 
-                        rotation = drill_shape.Placement.Rotation.inverted()
-                        z_direction = rotation.multVec(App.Vector(0, 0, 1))
+                            # find and extrude +z-facing faces from drill_obj
+                            for face in drill_shape.Faces:
+                                normal = face.normalAt(0, 0)
+                                intersection = face.common(shape)
+                                if (
+                                    isinstance(face.Surface, Part.Plane)
+                                    and normal.getAngle(z_direction) < 1e-6
+                                    and intersection.Area > 1e-6
+                                ):
+                                    max_dimension = shape.BoundBox.DiagonalLength
+                                    extrusion = face.extrude(max_dimension * z_direction)
+                                    drill_shape = drill_shape.fuse(extrusion)
 
-                        # find and extrude +z-facing faces from drill_obj
-                        for face in drill_shape.Faces:
-                            normal = face.normalAt(0, 0)
-                            intersection = face.common(shape)
-                            if (
-                                isinstance(face.Surface, Part.Plane)
-                                and normal.getAngle(z_direction) < 1e-6
-                                and intersection.Area > 1e-6
-                            ):
-                                max_dimension = shape.BoundBox.DiagonalLength
-                                extrusion = face.extrude(max_dimension * z_direction)
-                                drill_shape = drill_shape.fuse(extrusion)
-
-                        shape = shape.cut(drill_shape)
+                            shape = shape.cut(drill_shape)
 
             # apply placement and set final shape
-            shape = shape.removeSplitter()
+            if hasattr(self, "shape"):
+                shape = shape.removeSplitter()
             shape.Placement = obj.Placement
             obj.Shape = shape
 

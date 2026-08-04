@@ -10,7 +10,7 @@ import MeshPart
 import numpy as np
 import Part
 
-from PyOpticL.settings import get_measurement_system, get_minimum_thread_engagement
+from PyOpticL.settings import get_measurement_system, get_minimum_thread_engagement, get_render_mode
 
 models_dir = Path(__file__).parent.absolute() / "models"
 
@@ -586,16 +586,16 @@ def default_bolt_length(
 def import_model(
     name: str,
     directory: Path | str = models_dir,
-) -> Mesh.Mesh:
+) -> Mesh.Mesh | Part.Shape:
     """
-    Import a mesh model from a PyOpticL specific models directory
+    Import a model from a PyOpticL specific models directory
 
     Args:
         name (str): Name of the model to import
         directory (Path | str): Path to the models directory (defaults to internal models directory)
 
     Returns:
-        Mesh.Mesh: The imported mesh object
+        model: The imported mesh or shape object depending on the render_mode setting
     """
 
     directory = Path(directory)
@@ -605,7 +605,7 @@ def import_model(
         directory = base_path / directory
 
     model_path = directory / name
-
+    model = None
     try:
         # validate files
         if not directory.is_dir():
@@ -615,25 +615,30 @@ def import_model(
         elif not (model_path / (f"{name}.json")).is_file():
             raise FileNotFoundError(f"Model info file not found")
 
-        if not (model_path / (f"{name}.stl")).is_file():
+        if not (model_path / (f"{name}.stl")).is_file() or get_render_mode() == "STEP":
             if not (model_path / (f"{name}.step")).is_file():
-                raise FileNotFoundError(f"Model STEP file not found")
+                    raise FileNotFoundError(f"Model STEP file not found")
 
             shape = Part.read(str(model_path / (f"{name}.step")))
+            if get_render_mode() == "STL":
+                mesh = MeshPart.meshFromShape(
+                    Shape=shape, LinearDeflection=0.1, AngularDeflection=0.5
+                )
+                mesh.write(str(model_path / (f"{name}.stl")))
+            if get_render_mode() == "STEP":
+                model = shape
 
-            mesh = MeshPart.meshFromShape(
-                Shape=shape, LinearDeflection=0.1, AngularDeflection=0.5
-            )
-            mesh.write(str(model_path / (f"{name}.stl")))
-
-        # read mesh from file
-        mesh = Mesh.read(str(model_path / (f"{name}.stl")))
+        if get_render_mode() == "STL":
+            # read mesh from file
+            model = Mesh.read(str(model_path / (f"{name}.stl")))
+            
 
         # apply transformations from json
         info = json.load(open(model_path / (f"{name}.json")))
 
         rot = App.Rotation("XYZ", *info["rotation"])
         trans = App.Vector(*info["translation"])
+
         # Build matrices
         rot_mat = rot.toMatrix()
         trans_mat = App.Matrix()
@@ -641,10 +646,16 @@ def import_model(
         # Compose: translate first, then rotate
         final_mat = rot_mat.multiply(trans_mat)
         # Apply transform directly to mesh geometry
-        mesh.transform(final_mat)
+        if get_render_mode() == "STL":
+            model.transform(final_mat)
+        if get_render_mode() == "STEP":
+            if not np.all(np.isclose(final_mat.A, App.Placement().toMatrix().A)):
+                # transformGeometry is slow, so only call when there actually is something to transform
+                model = model.transformGeometry(final_mat)
+            model.Placement = App.Placement()
 
     except FileNotFoundError as e:
         print(f"Error importing model '{name}': {e}")
-        mesh = Mesh.Mesh()  # return empty mesh on error
+        model = None
 
-    return mesh
+    return model
