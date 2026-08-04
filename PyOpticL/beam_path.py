@@ -674,7 +674,7 @@ class BeamPath(Layout):
         """
         self.recompute()
         for beam in self.get_object().BeamSegments:
-            if beam.EndObject == after_object.get_object():
+            if beam.StartObject == after_object.get_object():
                 if beam_index is None or beam_index == beam.Proxy.index:
                     direction = App.Vector(beam.Proxy.direction)
                     rotation = App.Rotation(App.Vector(1, 0, 0), direction)
@@ -692,6 +692,24 @@ class BeamPath(Layout):
                         position=beam.BasePlacement.Base,
                         rotation=rotation.getYawPitchRoll()[::-1],
                     )
+                
+    def get_output_indices(self, after_object: Layout):
+        """
+        Returns the output beam indices for an object
+
+        Args:
+            after_object (Layout): The object after which to measure the beam
+
+        Returns: 
+            beam_indices (list of int): Beam indices of all beams exiting the specified object
+        """
+        self.recompute()
+        beam_indices = []
+        for beam in self.get_object().BeamSegments:
+            if beam.StartObject == after_object.get_object():
+                beam_indices.append(beam.Proxy.index)
+        return beam_indices
+    
 
     def compute_path(self):
         """
