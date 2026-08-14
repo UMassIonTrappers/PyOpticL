@@ -6,10 +6,6 @@ from PyOpticL.utils import cardinal_angle, fix_relative_imports, turn_angle
 
 fix_relative_imports()
 
-# For the example baseplate in the quick start page on the wiki, 
-# instead of importing from modules.half_inch_library it needs to 
-# be from Designs.modules.half_inch_library.
-
 from half_inch_library import beamsplitter_cube, mirror, waveplate
 
 # define and place the baseplate object
