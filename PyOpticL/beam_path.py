@@ -1161,8 +1161,8 @@ class Interface:
                 return None
         elif self.shape == "rectangular":
             if (
-                abs(offset_vec[0]) > self.width / 2
-                or abs(offset_vec[1]) > self.height / 2
+                abs(np.dot(self.get_global_transverse(), offset_vec)) > self.width / 2
+                or abs(np.dot(np.cross(self.get_global_normal(), self.get_global_transverse()), offset_vec)) > self.height / 2
             ):
                 return None
 
@@ -1805,3 +1805,4 @@ class AcoustoOptic(Interface):
                 i += 1
 
         return output_beams
+
