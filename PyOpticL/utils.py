@@ -44,7 +44,8 @@ class Dimension(float):
 
     Args:
         value (float) : numerical value of the dimension
-        unit (str) : unit of the dimension, options are 'um', 'mm', 'cm', 'm', 'in', 'ft'
+        unit (str) : unit of the dimension, options are 'um', 'mm', 'cm', 'm', 'in', 'ft', 'grid'
+                     ('grid' uses the measurement system set at the time the dimension is created)
     """
 
     conversion_factors = {
@@ -54,21 +55,33 @@ class Dimension(float):
         "m": 1000,
         "in": 25.4,
         "ft": 304.8,
-        "grid": 25.4 if get_measurement_system() == "imperial" else 25,
     }
 
+    @classmethod
+    def conversion_factor(cls, unit: str) -> float:
+        """
+        Get the conversion factor from a unit to mm
+
+        Args:
+            unit (str): unit to convert from
+
+        Returns:
+            float: Conversion factor to mm
+        """
+
+        if unit == "grid":
+            return 25.4 if get_measurement_system() == "imperial" else 25
+        if unit in cls.conversion_factors:
+            return cls.conversion_factors[unit]
+        raise ValueError(f"Unsupported unit: {unit}")
+
     def __new__(self, value: float, unit: str = "mm"):
-        if unit not in self.conversion_factors:
-            raise ValueError(f"Unsupported unit: {unit}")
-        instance = super().__new__(self, value * self.conversion_factors[unit])
+        instance = super().__new__(self, value * self.conversion_factor(unit))
         instance.unit = unit
         return instance
 
     def to_unit(self, unit: str) -> float:
-        if unit in self.conversion_factors:
-            return self.value / self.conversion_factors[unit]
-        else:
-            raise ValueError(f"Unsupported unit: {unit}")
+        return float(self) / self.conversion_factor(unit)
 
 
 dim = Dimension  # alias for convenience

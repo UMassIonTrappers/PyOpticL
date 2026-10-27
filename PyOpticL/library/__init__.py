@@ -11,7 +11,8 @@ class Baseplate:
     Args:
         dimensions (tuple): The (x, y, z) dimensions of the baseplate
         optical_height (float): Offset from the top surface to the optical plane
-        grid_offset (tuple[dim]): Offset between the corner of the baseplate and the optical grid in grid units,
+        grid_offset (tuple[dim]): Offset between the corner of the baseplate and the optical grid
+                                  (defaults to half a grid unit in x and y)
         mount_holes (list): List of (x, y) mount-hole positions in grid units
     """
 
@@ -23,12 +24,16 @@ class Baseplate:
         self,
         dimensions: tuple,
         optical_height: dim = dim(0.5, "in"),
-        grid_offset: tuple[dim] = (dim(0.5, "grid"), dim(0.5, "grid")),
+        grid_offset: tuple[dim] = None,
         mount_holes: list[tuple] = [],
     ):
         """Initialize adjustable parameters"""
         self.dimensions = dimensions
         self.optical_height = optical_height
+        # resolved here rather than as a default argument, so the grid uses the
+        # measurement system at construction time instead of at import time
+        if grid_offset is None:
+            grid_offset = (dim(0.5, "grid"), dim(0.5, "grid"))
         self.grid_offset = grid_offset
         self.mount_holes = mount_holes
 
