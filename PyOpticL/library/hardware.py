@@ -1,3 +1,5 @@
+import Part
+
 from PyOpticL import settings
 from PyOpticL.utils import Dimension as dim
 from PyOpticL.utils import (
@@ -5,6 +7,7 @@ from PyOpticL.utils import (
     bolt_slot_shape,
     cylinder_shape,
     default_bolt_length,
+    hex_prism_shape,
 )
 
 
@@ -22,6 +25,12 @@ class Bolt:
         head_tolerance (float): Tolerance of the bolt head / washer diameter
         from_top (bool): Whether the origin is at the top or bottom of the bolt head
         slot_length (float): Length of slot drilling a slot, None for no slot
+
+    The threaded part of the drilled hole follows settings.set_thread_mode():
+        'tapped'      tap drill hole (default)
+        'heat_insert' hole for a heat-set threaded insert
+        'nut'         clearance hole and a hex nut pocket at the bolt tip, open to the
+                      back of the drilled part
     """
 
     available_bolt_types = {
@@ -67,6 +76,29 @@ class Bolt:
             head_height=dim(4.0, "mm"),
             tags=["metric"],
         ),
+    }
+
+    # hex nuts (ISO 4032 / ASME B18.2.2): width across flats and height
+    nut_dimensions = {
+        "4_40": dict(width=dim(1 / 4, "in"), height=dim(3 / 32, "in")),
+        "8_32": dict(width=dim(11 / 32, "in"), height=dim(1 / 8, "in")),
+        "1/4_20": dict(width=dim(7 / 16, "in"), height=dim(7 / 32, "in")),
+        "M3": dict(width=dim(5.5, "mm"), height=dim(2.4, "mm")),
+        "M4": dict(width=dim(7, "mm"), height=dim(3.2, "mm")),
+        "M6": dict(width=dim(10, "mm"), height=dim(5.2, "mm")),
+    }
+    nut_tolerance = dim(0.3, "mm")  # added to the pocket width and height
+
+    # heat-set inserts for 3D printed parts: hole diameter and minimum hole depth
+    # (CNC Kitchen standard-length inserts; the imperial sizes are taken from the
+    # manufacturer's table but have not been test-printed - check before relying on them)
+    insert_dimensions = {
+        "4_40": dict(diameter=dim(4.0, "mm"), length=dim(5.7, "mm")),
+        "8_32": dict(diameter=dim(5.7, "mm"), length=dim(8.2, "mm")),
+        "1/4_20": dict(diameter=dim(8.1, "mm"), length=dim(12.7, "mm")),
+        "M3": dict(diameter=dim(4.0, "mm"), length=dim(5.7, "mm")),
+        "M4": dict(diameter=dim(5.6, "mm"), length=dim(8.1, "mm")),
+        "M6": dict(diameter=dim(8.0, "mm"), length=dim(12.7, "mm")),
     }
 
     object_group = "hardware"
@@ -136,6 +168,50 @@ class Bolt:
         )
         return part
 
+    def back_pocket(self) -> Part.Shape | None:
+        """
+        Pocket at the bolt tip that a drilled part opens to its back face; only applied
+        to the part containing the bolt tip (see Component.compute_shape)
+
+        Returns:
+            Part.Shape | None: The nut pocket in 'nut' thread mode, otherwise None
+        """
+
+        if settings.get_thread_mode() == "nut":
+            return self.nut_pocket()
+        return None
+
+    def _thread_dimensions(self, table: dict, kind: str) -> dict:
+        if self.type not in table:
+            raise ValueError(f"No {kind} dimensions defined for bolt type {self.type}")
+        return table[self.type]
+
+    def tip_depth(self) -> float:
+        """Distance from the bolt origin to its tip, along -z"""
+
+        if self.from_top:
+            return self.length - self.available_bolt_types[self.type]["head_height"]
+        return self.length
+
+    def nut_pocket(self, extend: float = 0) -> Part.Shape:
+        """
+        Hex pocket for a nut threaded fully onto the bolt tip
+
+        Args:
+            extend (float): Extra length of the pocket beyond the bolt tip
+
+        Returns:
+            Part.Shape: The pocket, in the bolt frame
+        """
+
+        nut = self._thread_dimensions(self.nut_dimensions, "nut")
+        height = nut["height"] + self.nut_tolerance
+        return hex_prism_shape(
+            across_flats=nut["width"] + self.nut_tolerance,
+            height=height + extend,
+            position=(0, 0, -self.tip_depth() - extend),
+        )
+
     def drill(self):
         dims = self.available_bolt_types[self.type]
 
@@ -145,11 +221,23 @@ class Bolt:
             head_diameter = dims["head_diameter"]
         head_diameter += self.head_tolerance
 
+        thread_mode = settings.get_thread_mode()
+        tap_diameter = dims["tap_diameter"]
+        drill_depth = self.drill_depth
+        if thread_mode == "nut":
+            # clearance down to the nut, see back_pocket()
+            tap_diameter = dims["clear_diameter"]
+            drill_depth = self.tip_depth()
+        elif thread_mode == "heat_insert":
+            tap_diameter = self._thread_dimensions(
+                self.insert_dimensions, "heat insert"
+            )["diameter"]
+
         if not self.slot_length:
             part = bolt_shape(
                 clear_diameter=dims["clear_diameter"],
-                tap_diameter=dims["tap_diameter"],
-                length=self.drill_depth,
+                tap_diameter=tap_diameter,
+                length=drill_depth,
                 clear_depth=self.clear_depth,
                 head_diameter=head_diameter,
                 head_height=dims["head_height"],
@@ -161,8 +249,8 @@ class Bolt:
         else:
             part = bolt_slot_shape(
                 clear_diameter=dims["clear_diameter"],
-                tap_diameter=dims["tap_diameter"],
-                length=self.drill_depth,
+                tap_diameter=tap_diameter,
+                length=drill_depth,
                 clear_depth=self.clear_depth,
                 head_diameter=head_diameter,
                 head_height=dims["head_height"],

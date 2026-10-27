@@ -3,6 +3,7 @@ minimum_thread_engagement = 8
 default_extra_drill_depth = 10
 hidden_object_groups = ["hardware"]
 enable_beam_transparency = False
+thread_mode = "tapped"
 
 
 def set_measurement_system(system: str):
@@ -121,3 +122,31 @@ def get_enable_beam_transparency():
     """
 
     return enable_beam_transparency
+
+
+def set_thread_mode(mode: str):
+    """
+    Set how drilled bolt holes are threaded, e.g. for 3D printed parts.
+
+    Args:
+        mode (str): 'tapped' (tap drill hole, default), 'heat_insert' (hole for a
+                    heat-set threaded insert) or 'nut' (clearance hole with a hex nut
+                    pocket open to the back of the drilled part)
+    """
+
+    global thread_mode
+    if mode.lower() in ["tapped", "heat_insert", "nut"]:
+        thread_mode = mode.lower()
+    else:
+        raise ValueError(f"Thread mode {mode} not defined")
+
+
+def get_thread_mode():
+    """
+    Get the current thread mode for drilled bolt holes.
+
+    Returns:
+        str: 'tapped', 'heat_insert' or 'nut'
+    """
+
+    return thread_mode

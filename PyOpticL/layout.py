@@ -295,7 +295,8 @@ class Component(Layout):
                         if common.Volume < 1e-6 or drill_shape.Volume < 1e-6:
                             continue
 
-                        rotation = drill_shape.Placement.Rotation.inverted()
+                        # drill axis in this object's frame (face normals are reported in it)
+                        rotation = drill_shape.Placement.Rotation
                         z_direction = rotation.multVec(App.Vector(0, 0, 1))
 
                         # find and extrude +z-facing faces from drill_obj
@@ -310,6 +311,33 @@ class Component(Layout):
                                 max_dimension = shape.BoundBox.DiagonalLength
                                 extrusion = face.extrude(max_dimension * z_direction)
                                 drill_shape = drill_shape.fuse(extrusion)
+
+                        # pocket at the far end of the hole (e.g. a nut), only in the part
+                        # containing it, opened by extruding its lowest -z faces to the back
+                        back_pocket = getattr(drill_obj.Proxy, "back_pocket", None)
+                        pocket = back_pocket() if callable(back_pocket) else None
+                        if pocket is not None:
+                            # (drill_shape may have been re-fused above, losing its placement)
+                            pocket.Placement = (
+                                obj.Placement.inverse() * drill_obj.Placement
+                            )
+                            down_faces = [
+                                face
+                                for face in pocket.Faces
+                                if isinstance(face.Surface, Part.Plane)
+                                and face.normalAt(0, 0).getAngle(-z_direction) < 1e-6
+                            ]
+                            lowest = min(
+                                face.CenterOfMass.dot(z_direction) for face in down_faces
+                            )
+                            for face in down_faces:
+                                if (
+                                    abs(face.CenterOfMass.dot(z_direction) - lowest) < 1e-6
+                                    and face.common(shape).Area > 1e-6
+                                ):
+                                    max_dimension = shape.BoundBox.DiagonalLength
+                                    extrusion = face.extrude(-max_dimension * z_direction)
+                                    drill_shape = drill_shape.fuse([pocket, extrusion])
 
                         shape = shape.cut(drill_shape)
 

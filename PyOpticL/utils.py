@@ -284,6 +284,38 @@ def box_shape(
     return part
 
 
+def hex_prism_shape(
+    across_flats: float,
+    height: float,
+    position: tuple = (0, 0, 0),
+    rotation: tuple = (0, 0, 0),
+) -> Part.Shape:
+    """
+    Create a hexagonal prism (e.g. a nut pocket) pointing in +Z with origin at the base center
+
+    Args:
+        across_flats (float): Distance between opposite flats of the hexagon
+        height (float): Height of the prism
+        position (tuple): Position of the base center (x, y, z)
+        rotation (tuple): (angle_x, angle_y, angle_z) rotation in degrees
+
+    Returns:
+        Part.Shape: The created prism
+    """
+
+    radius = across_flats / np.sqrt(3)  # circumradius
+    corners = [
+        App.Vector(radius * np.cos(a), radius * np.sin(a), 0)
+        for a in np.radians(np.arange(0, 360, 60))
+    ]
+    part = Part.Face(Part.makePolygon(corners + corners[:1])).extrude(
+        App.Vector(0, 0, height)
+    )
+    part = rotate_shape(part, rotation)
+    part = translate_shape(part, position)
+    return part
+
+
 def cylinder_shape(
     diameter: float,
     height: float,
