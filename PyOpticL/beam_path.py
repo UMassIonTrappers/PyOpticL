@@ -437,10 +437,10 @@ class BeamSegment(Layout):
         #     App.Vector(*self.direction) * self.distance,
         # )
         # shapes.append(sphere)
-        # fuse all shapes together
+        # fuse all shapes together (single multi-fuse is much faster than sequential)
         shape = shapes[0]
-        for s in shapes[1:]:
-            shape = shape.fuse(s)
+        if len(shapes) > 1:
+            shape = shape.fuse(shapes[1:])
 
         # apply placement and set shape
         shape.Placement = obj.Placement

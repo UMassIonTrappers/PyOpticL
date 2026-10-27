@@ -1,7 +1,6 @@
-import inspect
 import json
+import os
 import sys
-from importlib import reload
 from pathlib import Path
 
 import FreeCAD as App
@@ -13,6 +12,23 @@ import Part
 from PyOpticL.settings import get_measurement_system, get_minimum_thread_engagement
 
 models_dir = Path(__file__).parent.absolute() / "models"
+
+# imported models, kept across module reloads (reload re-executes in the same namespace)
+_model_cache = globals().get("_model_cache", {})
+
+
+def _caller_filename(depth: int = 2) -> str:
+    """
+    Get the filename of a calling frame (much cheaper than inspect.stack())
+
+    Args:
+        depth (int): Number of frames above this function's caller (2 = caller's caller)
+
+    Returns:
+        str: Filename of the calling frame
+    """
+
+    return sys._getframe(depth).f_code.co_filename
 
 
 turn_angle = {
@@ -74,18 +90,64 @@ class Dimension(float):
 dim = Dimension  # alias for convenience
 
 
+# modules loaded before the current macro run, kept across module reloads
+_import_run = globals().get("_import_run", {"root": None, "stale": {}})
+
+
+def _is_initializing(module) -> bool:
+    """Whether a module is part way through being imported"""
+
+    return getattr(getattr(module, "__spec__", None), "_initializing", False)
+
+
 def fix_relative_imports(directory: str | list = ""):
+    """
+    Add directories to the import path and make sure modules from them are
+    imported afresh once per macro run, so that changes to them are applied
+
+    The first call in a macro run (identified by the outermost frame on the stack)
+    marks every module loaded so far as stale. Stale modules inside the target
+    directories are unloaded, so the following imports load them again exactly once.
+    Modules imported during the current run are never unloaded, which avoids
+    repeatedly reloading modules that themselves call this function.
+
+    Args:
+        directory (str | list): Directory or list of directories, relative to the
+                                calling file (defaults to the calling file's directory)
+    """
 
     if isinstance(directory, str):
         directories = [directory]
     else:
         directories = directory
 
+    caller_filename = _caller_filename()
+
+    # find the outermost frame and the namespaces of all code currently running
+    active_namespaces = set()
+    frame = sys._getframe(1)
+    while frame is not None:
+        active_namespaces.add(id(frame.f_globals))
+        root_frame = frame
+        frame = frame.f_back
+
+    # a new macro run starts a new outermost frame
+    if _import_run["root"] is not root_frame:
+        _import_run["root"] = root_frame
+        _import_run["stale"] = {
+            name: module
+            for name, module in sys.modules.items()
+            if module is not None
+            and id(module.__dict__) not in active_namespaces
+            and not _is_initializing(module)
+        }
+    stale = _import_run["stale"]
+
     for directory in directories:
         directory = Path(directory)
 
         if not directory.is_absolute():
-            base_path = Path(inspect.stack()[1].filename).parent
+            base_path = Path(caller_filename).parent
             directory = base_path / directory
 
         directory = directory.resolve()
@@ -93,22 +155,31 @@ def fix_relative_imports(directory: str | list = ""):
         if str(directory) not in sys.path:
             sys.path.append(str(directory))
 
-        # Reload modules whose source files are inside the target directory.
-        for module in list(sys.modules.values()):
-            if module is None:
-                continue
-
+        # Unload stale modules whose source files are inside the target directory.
+        # (string comparison, as Path.resolve() per module is very slow on Windows)
+        directory_prefix = os.path.normcase(str(directory)) + os.sep
+        for name, module in list(stale.items()):
             module_file = getattr(module, "__file__", None)
             if not module_file:
                 continue
 
             try:
-                module_path = Path(module_file).resolve()
-            except (OSError, RuntimeError, ValueError):
+                module_path = os.path.normcase(os.path.abspath(module_file))
+            except (OSError, ValueError):
                 continue
 
-            if module_path.is_relative_to(directory):
-                reload(module)
+            if not module_path.startswith(directory_prefix):
+                continue
+
+            del stale[name]
+            if sys.modules.get(name) is module:
+                del sys.modules[name]
+                # also detach from the parent package, otherwise
+                # "from package import module" returns the stale module
+                parent_name, _, child_name = name.rpartition(".")
+                parent = sys.modules.get(parent_name)
+                if parent is not None and getattr(parent, child_name, None) is module:
+                    delattr(parent, child_name)
 
 
 def collect_children(parent: App.DocumentObject, output_list: list):
@@ -197,7 +268,25 @@ def translate_shape(shape: Part.Shape, translation: tuple):
     """
 
     shape.translate(App.Vector(*translation))
-    shape = shape.fuse(shape)
+    return bake_placement(shape)
+
+
+def bake_placement(shape: Part.Shape) -> Part.Shape:
+    """
+    Apply a shape's placement to its geometry so that its placement is the identity
+    (cheaper than the equivalent self-fuse)
+
+    Args:
+        shape (Part.Shape): The input shape
+
+    Returns:
+        Part.Shape: The shape with its placement applied to its geometry
+    """
+
+    matrix = shape.Placement.toMatrix()
+    shape = shape.copy()
+    shape.Placement = App.Placement()
+    shape.transformShape(matrix, True)
     return shape
 
 
@@ -228,8 +317,7 @@ def rotate_shape(shape: Part.Shape, rotation: tuple):
         App.Vector(0, 0, 1),
         rotation[2],
     )
-    shape = shape.fuse(shape)
-    return shape
+    return bake_placement(shape)
 
 
 def box_shape(
@@ -601,10 +689,23 @@ def import_model(
     directory = Path(directory)
 
     if not directory.is_absolute():
-        base_path = Path(inspect.stack()[1].filename).parent
+        base_path = Path(_caller_filename()).parent
         directory = base_path / directory
 
     model_path = directory / name
+
+    # reuse a previously imported mesh if none of its files have changed
+    cache_key = str(model_path)
+    stamp = []
+    for ext in ("json", "stl", "step"):
+        try:
+            stamp.append(os.stat(os.path.join(model_path, f"{name}.{ext}")).st_mtime_ns)
+        except OSError:
+            stamp.append(None)
+    stamp = tuple(stamp)
+    cached = _model_cache.get(cache_key)
+    if cached is not None and cached[0] == stamp:
+        return cached[1].copy()
 
     try:
         # validate files
@@ -645,6 +746,7 @@ def import_model(
 
     except FileNotFoundError as e:
         print(f"Error importing model '{name}': {e}")
-        mesh = Mesh.Mesh()  # return empty mesh on error
+        return Mesh.Mesh()  # return empty mesh on error (not cached)
 
+    _model_cache[cache_key] = (stamp, mesh.copy())
     return mesh
